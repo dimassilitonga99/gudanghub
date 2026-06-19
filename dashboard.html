@@ -1,0 +1,1965 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GudangHub — Dashboard Admin</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --orange: #ff6b00;
+      --orange-light: #ff8c38;
+      --orange-dim: rgba(255,107,0,0.12);
+      --dark: #0d0d1a;
+      --dark2: #12122a;
+      --dark3: #1a1a35;
+      --card: #1e1e3a;
+      --card2: #22223f;
+      --border: rgba(255,107,0,0.15);
+      --border2: rgba(255,255,255,0.06);
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+      --blue: #3b82f6;
+      --sidebar-w: 260px;
+    }
+
+    body {
+      background: var(--dark);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── SIDEBAR ───────────────────────────────────── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--dark2);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 100;
+      transition: transform 0.3s;
+    }
+
+    .sidebar-logo {
+      padding: 24px 20px;
+      border-bottom: 1px solid var(--border2);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .sidebar-logo-icon {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--orange), var(--orange-light));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+      box-shadow: 0 0 20px rgba(255,107,0,0.3);
+    }
+    .sidebar-logo-text { line-height: 1.2; }
+    .sidebar-logo-title {
+      font-size: 16px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #fff, var(--orange-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .sidebar-logo-sub { font-size: 10px; color: var(--muted); }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 16px 12px;
+      overflow-y: auto;
+    }
+    .nav-section {
+      margin-bottom: 24px;
+    }
+    .nav-section-title {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      padding: 0 10px;
+      margin-bottom: 8px;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 500;
+      border: 1px solid transparent;
+      margin-bottom: 2px;
+    }
+    .nav-item:hover {
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+    }
+    .nav-item.active {
+      background: var(--orange-dim);
+      border-color: var(--border);
+      color: var(--orange);
+    }
+    .nav-item .nav-icon { font-size: 17px; }
+    .nav-badge {
+      margin-left: auto;
+      background: var(--orange);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 20px;
+      min-width: 20px;
+      text-align: center;
+    }
+
+    .sidebar-user {
+      padding: 16px;
+      border-top: 1px solid var(--border2);
+    }
+    .user-card {
+      background: var(--dark3);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .user-avatar {
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, var(--orange), var(--orange-light));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .user-info { flex: 1; min-width: 0; }
+    .user-name {
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .user-role {
+      font-size: 11px;
+      color: var(--orange);
+    }
+    .btn-logout {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 18px;
+      padding: 4px;
+      transition: color 0.2s;
+    }
+    .btn-logout:hover { color: var(--red); }
+
+    /* ── MAIN CONTENT ──────────────────────────────── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Topbar */
+    .topbar {
+      background: var(--dark2);
+      border-bottom: 1px solid var(--border2);
+      padding: 16px 28px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .topbar-menu {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 22px;
+      cursor: pointer;
+    }
+    .topbar-title {
+      font-size: 18px;
+      font-weight: 700;
+      flex: 1;
+    }
+    .topbar-time {
+      font-size: 12px;
+      color: var(--muted);
+      background: var(--dark3);
+      padding: 6px 14px;
+      border-radius: 20px;
+    }
+    .btn-refresh {
+      background: var(--orange-dim);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 16px;
+      color: var(--orange);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-refresh:hover {
+      background: rgba(255,107,0,0.2);
+    }
+    .btn-refresh.spinning .refresh-icon {
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .refresh-icon { display: inline-block; }
+
+    /* Content area */
+    .content {
+      flex: 1;
+      padding: 28px;
+    }
+
+    /* Pages */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ── STAT CARDS ────────────────────────────────── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border2);
+      border-radius: 16px;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .stat-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+    }
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      opacity: 0.06;
+      transform: translate(20px, -20px);
+    }
+    .stat-card.orange::before { background: var(--orange); }
+    .stat-card.green::before { background: var(--green); }
+    .stat-card.red::before { background: var(--red); }
+    .stat-card.blue::before { background: var(--blue); }
+
+    .stat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .stat-icon {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+    .stat-icon.orange { background: rgba(255,107,0,0.15); }
+    .stat-icon.green { background: rgba(34,197,94,0.15); }
+    .stat-icon.red { background: rgba(239,68,68,0.15); }
+    .stat-icon.blue { background: rgba(59,130,246,0.15); }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .stat-value.orange { color: var(--orange); }
+    .stat-value.green { color: var(--green); }
+    .stat-value.red { color: var(--red); }
+    .stat-value.blue { color: var(--blue); }
+
+    .stat-change {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .stat-change.up { color: var(--green); }
+
+    /* ── GRID LAYOUT ───────────────────────────────── */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .grid-3-1 {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    /* ── PANEL ─────────────────────────────────────── */
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border2);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .panel-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .panel-title {
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .panel-body {
+      padding: 20px;
+    }
+    .panel-action {
+      background: var(--orange-dim);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 14px;
+      color: var(--orange);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .panel-action:hover { background: rgba(255,107,0,0.2); }
+
+    /* ── ORDER TABLE ───────────────────────────────── */
+    .order-table-wrap { overflow-x: auto; }
+    .order-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .order-table th {
+      padding: 10px 14px;
+      text-align: left;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border2);
+      white-space: nowrap;
+    }
+    .order-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      vertical-align: middle;
+    }
+    .order-table tr:last-child td { border-bottom: none; }
+    .order-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .order-id {
+      font-family: monospace;
+      font-size: 11px;
+      color: var(--orange);
+      font-weight: 700;
+    }
+    .cabang-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--dark3);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* Status badges */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .status-badge.pending {
+      background: rgba(245,158,11,0.15);
+      color: var(--yellow);
+      border: 1px solid rgba(245,158,11,0.3);
+    }
+    .status-badge.approved {
+      background: rgba(34,197,94,0.15);
+      color: var(--green);
+      border: 1px solid rgba(34,197,94,0.3);
+    }
+    .status-badge.rejected {
+      background: rgba(239,68,68,0.15);
+      color: var(--red);
+      border: 1px solid rgba(239,68,68,0.3);
+    }
+
+    /* Action buttons */
+    .action-btns {
+      display: flex;
+      gap: 6px;
+    }
+    .btn-approve {
+      background: rgba(34,197,94,0.15);
+      border: 1px solid rgba(34,197,94,0.3);
+      border-radius: 7px;
+      padding: 5px 12px;
+      color: var(--green);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-approve:hover { background: rgba(34,197,94,0.25); }
+    .btn-reject {
+      background: rgba(239,68,68,0.15);
+      border: 1px solid rgba(239,68,68,0.3);
+      border-radius: 7px;
+      padding: 5px 12px;
+      color: var(--red);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-reject:hover { background: rgba(239,68,68,0.25); }
+    .btn-detail {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border2);
+      border-radius: 7px;
+      padding: 5px 10px;
+      color: var(--muted);
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-detail:hover { color: var(--text); background: rgba(255,255,255,0.1); }
+
+    /* ── CABANG STATUS CARDS ────────────────────────── */
+    .cabang-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .cabang-card {
+      background: var(--dark3);
+      border: 1px solid var(--border2);
+      border-radius: 12px;
+      padding: 14px;
+      transition: all 0.2s;
+    }
+    .cabang-card:hover {
+      border-color: rgba(255,107,0,0.3);
+    }
+    .cabang-card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .cabang-avatar {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      background: linear-gradient(135deg, var(--orange), var(--orange-light));
+      flex-shrink: 0;
+    }
+    .cabang-name { font-size: 12px; font-weight: 700; }
+    .cabang-id { font-size: 10px; color: var(--orange); }
+    .cabang-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 6px;
+    }
+    .cabang-stat {
+      background: var(--card);
+      border-radius: 8px;
+      padding: 8px;
+      text-align: center;
+    }
+    .cabang-stat-val {
+      font-size: 18px;
+      font-weight: 800;
+    }
+    .cabang-stat-lbl {
+      font-size: 9px;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    /* ── DONUT CHART ────────────────────────────────── */
+    .donut-wrap {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 10px 0;
+    }
+    .donut-svg { flex-shrink: 0; }
+    .donut-legend { flex: 1; }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .legend-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .legend-label { font-size: 12px; color: var(--muted); }
+    .legend-val { margin-left: auto; font-size: 13px; font-weight: 700; }
+
+    /* ── BAR CHART ──────────────────────────────────── */
+    .bar-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      height: 120px;
+      padding-top: 10px;
+    }
+    .bar-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      height: 100%;
+      justify-content: flex-end;
+    }
+    .bar-fill {
+      width: 100%;
+      background: linear-gradient(to top, var(--orange), var(--orange-light));
+      border-radius: 6px 6px 0 0;
+      transition: height 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+      min-height: 4px;
+      position: relative;
+    }
+    .bar-fill:hover::after {
+      content: attr(data-val);
+      position: absolute;
+      top: -24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--orange);
+      color: #fff;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+    .bar-label { font-size: 10px; color: var(--muted); text-align: center; }
+
+    /* ── ACTIVITY FEED ──────────────────────────────── */
+    .activity-list { }
+    .activity-item {
+      display: flex;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border2);
+    }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+    .activity-dot.orange { background: var(--orange); }
+    .activity-dot.green { background: var(--green); }
+    .activity-dot.red { background: var(--red); }
+    .activity-dot.blue { background: var(--blue); }
+    .activity-content { flex: 1; }
+    .activity-text { font-size: 13px; line-height: 1.4; }
+    .activity-text strong { color: var(--orange); }
+    .activity-time { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+    /* ── MODAL ──────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      backdrop-filter: blur(4px);
+    }
+    .modal-overlay.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .modal {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 560px;
+      max-height: 85vh;
+      overflow-y: auto;
+      transform: translateY(20px);
+      transition: transform 0.3s;
+    }
+    .modal-overlay.show .modal { transform: translateY(0); }
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      background: var(--card);
+      z-index: 1;
+    }
+    .modal-title { font-size: 16px; font-weight: 700; }
+    .modal-close {
+      background: rgba(255,255,255,0.08);
+      border: none;
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      color: var(--muted);
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .modal-close:hover { background: var(--red); color: #fff; }
+    .modal-body { padding: 24px; }
+
+    /* Info rows in modal */
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border2);
+      font-size: 13px;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { color: var(--muted); }
+    .info-value { font-weight: 600; text-align: right; }
+
+    /* ── FILTER BAR ─────────────────────────────────── */
+    .filter-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      background: var(--dark3);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 7px 16px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .filter-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.15); }
+    .filter-btn.active {
+      background: var(--orange-dim);
+      border-color: var(--orange);
+      color: var(--orange);
+    }
+    .search-input-wrap {
+      flex: 1;
+      min-width: 200px;
+      position: relative;
+    }
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      opacity: 0.5;
+    }
+    .search-input {
+      width: 100%;
+      background: var(--dark3);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 8px 12px 8px 36px;
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-input:focus { border-color: var(--orange); }
+    .search-input::placeholder { color: var(--muted); }
+
+    /* ── EMPTY STATE ────────────────────────────────── */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+    }
+    .empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
+    .empty-state p { font-size: 13px; }
+
+    /* ── LOADING SKELETON ───────────────────────────── */
+    .skeleton {
+      background: linear-gradient(90deg, var(--dark3) 25%, var(--card2) 50%, var(--dark3) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 6px;
+    }
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* ── TOAST ──────────────────────────────────────── */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .toast {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+      transform: translateX(120%);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      min-width: 240px;
+    }
+    .toast.show { transform: translateX(0); }
+    .toast.success { border-color: rgba(34,197,94,0.4); }
+    .toast.error { border-color: rgba(239,68,68,0.4); }
+    .toast.info { border-color: rgba(59,130,246,0.4); }
+
+    /* ── RESPONSIVE ─────────────────────────────────── */
+    @media (max-width: 900px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .grid-2 { grid-template-columns: 1fr; }
+      .grid-3-1 { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      :root { --sidebar-w: 0px; }
+      .sidebar {
+        transform: translateX(-260px);
+        width: 260px;
+      }
+      .sidebar.open { transform: translateX(0); }
+      .main { margin-left: 0; }
+      .topbar-menu { display: block; }
+      .content { padding: 16px; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .cabang-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Overlay for mobile sidebar */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 99;
+    }
+    .sidebar-overlay.show { display: block; }
+
+    /* ── PAGE TITLES ────────────────────────────────── */
+    .page-header {
+      margin-bottom: 24px;
+    }
+    .page-header h1 {
+      font-size: 22px;
+      font-weight: 800;
+    }
+    .page-header p {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* ── TOTAL ROW ──────────────────────────────────── */
+    .total-row td {
+      font-weight: 700;
+      color: var(--orange);
+      border-top: 1px solid var(--border) !important;
+      border-bottom: none !important;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,107,0,0.3); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--orange); }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar overlay (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-icon">🏪</div>
+    <div class="sidebar-logo-text">
+      <div class="sidebar-logo-title">GudangHub</div>
+      <div class="sidebar-logo-sub">Admin Panel</div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section">
+      <div class="nav-section-title">Menu Utama</div>
+      <div class="nav-item active" onclick="showPage('dashboard')" data-page="dashboard">
+        <span class="nav-icon">📊</span> Dashboard
+      </div>
+      <div class="nav-item" onclick="showPage('orders')" data-page="orders">
+        <span class="nav-icon">📦</span> Semua Order
+        <span class="nav-badge" id="pendingBadge">0</span>
+      </div>
+      <div class="nav-item" onclick="showPage('katalog')" data-page="katalog">
+        <span class="nav-icon">🗂️</span> Katalog Barang
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-title">Monitoring</div>
+      <div class="nav-item" onclick="showPage('cabang')" data-page="cabang">
+        <span class="nav-icon">🏬</span> Status Cabang
+      </div>
+      <div class="nav-item" onclick="showPage('laporan')" data-page="laporan">
+        <span class="nav-icon">📈</span> Laporan
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-title">Sistem</div>
+      <div class="nav-item" onclick="window.open('https://docs.google.com/spreadsheets', '_blank')">
+        <span class="nav-icon">📋</span> Google Sheets
+      </div>
+      <div class="nav-item" onclick="window.location.href='index.html'">
+        <span class="nav-icon">🛒</span> Buka Toko
+      </div>
+    </div>
+  </nav>
+
+  <div class="sidebar-user">
+    <div class="user-card">
+      <div class="user-avatar">👨‍💼</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebarUserName">Admin</div>
+        <div class="user-role">Admin Gudang Pusat</div>
+      </div>
+      <button class="btn-logout" onclick="doLogout()" title="Logout">🚪</button>
+    </div>
+  </div>
+</aside>
+
+<!-- ── MAIN ── -->
+<main class="main">
+  <!-- Topbar -->
+  <div class="topbar">
+    <button class="topbar-menu" onclick="toggleSidebar()">☰</button>
+    <div class="topbar-title" id="topbarTitle">📊 Dashboard</div>
+    <div class="topbar-time" id="topbarTime">--:-- WITA</div>
+    <button class="btn-refresh" onclick="loadAllData()" id="btnRefresh">
+      <span class="refresh-icon" id="refreshIcon">🔄</span>
+      <span>Refresh</span>
+    </button>
+  </div>
+
+  <div class="content">
+
+    <!-- ════════════════════════════════════════════
+         PAGE: DASHBOARD
+    ════════════════════════════════════════════ -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <h1>Selamat datang, <span id="adminNama">Admin</span>! 👋</h1>
+        <p>Ringkasan operasional PT Central Perabot Utama hari ini</p>
+      </div>
+
+      <!-- Stat Cards -->
+      <div class="stats-grid">
+        <div class="stat-card orange">
+          <div class="stat-header">
+            <div class="stat-label">Total Order</div>
+            <div class="stat-icon orange">📦</div>
+          </div>
+          <div class="stat-value orange" id="statTotal">—</div>
+          <div class="stat-change">Semua order masuk</div>
+        </div>
+        <div class="stat-card yellow">
+          <div class="stat-header">
+            <div class="stat-label">Menunggu</div>
+            <div class="stat-icon" style="background:rgba(245,158,11,0.15)">⏳</div>
+          </div>
+          <div class="stat-value" style="color:var(--yellow)" id="statPending">—</div>
+          <div class="stat-change">Perlu persetujuan</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-header">
+            <div class="stat-label">Disetujui</div>
+            <div class="stat-icon green">✅</div>
+          </div>
+          <div class="stat-value green" id="statApproved">—</div>
+          <div class="stat-change up">Order berhasil</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-header">
+            <div class="stat-label">Ditolak</div>
+            <div class="stat-icon red">❌</div>
+          </div>
+          <div class="stat-value red" id="statRejected">—</div>
+          <div class="stat-change">Order ditolak</div>
+        </div>
+      </div>
+
+      <!-- Row 2 -->
+      <div class="grid-3-1">
+        <!-- Pending Orders -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">⏳ Order Menunggu Persetujuan</div>
+            <button class="panel-action" onclick="showPage('orders')">Lihat Semua →</button>
+          </div>
+          <div class="panel-body" style="padding:0;">
+            <div class="order-table-wrap">
+              <table class="order-table">
+                <thead>
+                  <tr>
+                    <th>Order ID</th>
+                    <th>Cabang</th>
+                    <th>Tgl Order</th>
+                    <th>Items</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="pendingOrdersBody">
+                  <tr><td colspan="5" class="empty-state">
+                    <div class="empty-icon">⏳</div>
+                    <p>Memuat data...</p>
+                  </td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Donut chart status -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">📊 Status Order</div>
+          </div>
+          <div class="panel-body">
+            <div class="donut-wrap">
+              <svg class="donut-svg" width="110" height="110" viewBox="0 0 110 110">
+                <circle cx="55" cy="55" r="40" fill="none"
+                  stroke="#1e1e3a" stroke-width="18"/>
+                <circle cx="55" cy="55" r="40" fill="none"
+                  stroke="#22c55e" stroke-width="18"
+                  stroke-dasharray="0 251.2"
+                  stroke-dashoffset="0"
+                  id="donutApproved"
+                  style="transition:stroke-dasharray 1s ease;transform:rotate(-90deg);transform-origin:center"/>
+                <circle cx="55" cy="55" r="40" fill="none"
+                  stroke="#ef4444" stroke-width="18"
+                  stroke-dasharray="0 251.2"
+                  stroke-dashoffset="0"
+                  id="donutRejected"
+                  style="transition:stroke-dasharray 1s ease 0.2s;transform:rotate(-90deg);transform-origin:center"/>
+                <circle cx="55" cy="55" r="40" fill="none"
+                  stroke="#f59e0b" stroke-width="18"
+                  stroke-dasharray="0 251.2"
+                  stroke-dashoffset="0"
+                  id="donutPending"
+                  style="transition:stroke-dasharray 1s ease 0.4s;transform:rotate(-90deg);transform-origin:center"/>
+                <text x="55" y="50" text-anchor="middle"
+                  fill="#fff" font-size="16" font-weight="800" id="donutTotal">0</text>
+                <text x="55" y="64" text-anchor="middle"
+                  fill="#94a3b8" font-size="9">Total</text>
+              </svg>
+              <div class="donut-legend">
+                <div class="legend-item">
+                  <div class="legend-dot" style="background:#22c55e"></div>
+                  <span class="legend-label">Approved</span>
+                  <span class="legend-val" style="color:#22c55e" id="legendApproved">0</span>
+                </div>
+                <div class="legend-item">
+                  <div class="legend-dot" style="background:#f59e0b"></div>
+                  <span class="legend-label">Pending</span>
+                  <span class="legend-val" style="color:#f59e0b" id="legendPending">0</span>
+                </div>
+                <div class="legend-item">
+                  <div class="legend-dot" style="background:#ef4444"></div>
+                  <span class="legend-label">Rejected</span>
+                  <span class="legend-val" style="color:#ef4444" id="legendRejected">0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 3 -->
+      <div class="grid-2">
+        <!-- Bar chart per cabang -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">🏬 Order per Cabang</div>
+          </div>
+          <div class="panel-body">
+            <div class="bar-chart" id="barChart">
+              <div class="bar-item">
+                <div class="bar-fill skeleton" style="height:60%" data-val="..."></div>
+                <div class="bar-label">CB001</div>
+              </div>
+              <div class="bar-item">
+                <div class="bar-fill skeleton" style="height:40%" data-val="..."></div>
+                <div class="bar-label">CB002</div>
+              </div>
+              <div class="bar-item">
+                <div class="bar-fill skeleton" style="height:70%" data-val="..."></div>
+                <div class="bar-label">CB003</div>
+              </div>
+              <div class="bar-item">
+                <div class="bar-fill skeleton" style="height:30%" data-val="..."></div>
+                <div class="bar-label">CB004</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Activity feed -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">⚡ Aktivitas Terbaru</div>
+          </div>
+          <div class="panel-body" style="padding:10px 20px;">
+            <div class="activity-list" id="activityFeed">
+              <div class="empty-state">
+                <div class="empty-icon">⚡</div>
+                <p>Memuat aktivitas...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /page-dashboard -->
+
+
+    <!-- ════════════════════════════════════════════
+         PAGE: SEMUA ORDER
+    ════════════════════════════════════════════ -->
+    <div class="page" id="page-orders">
+      <div class="page-header">
+        <h1>📦 Semua Order</h1>
+        <p>Kelola dan monitor seluruh order dari 4 cabang</p>
+      </div>
+
+      <div class="filter-bar">
+        <button class="filter-btn active" onclick="filterOrders('ALL', this)">Semua</button>
+        <button class="filter-btn" onclick="filterOrders('PENDING', this)">⏳ Pending</button>
+        <button class="filter-btn" onclick="filterOrders('APPROVED', this)">✅ Approved</button>
+        <button class="filter-btn" onclick="filterOrders('REJECTED', this)">❌ Rejected</button>
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="search-input" id="orderSearch"
+                 placeholder="Cari Order ID atau nama cabang..."
+                 oninput="searchOrders(this.value)">
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-body" style="padding:0;">
+          <div class="order-table-wrap">
+            <table class="order-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Order ID</th>
+                  <th>Cabang</th>
+                  <th>Tanggal Order</th>
+                  <th>Catatan</th>
+                  <th>Status</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="allOrdersBody">
+                <tr><td colspan="7">
+                  <div class="empty-state">
+                    <div class="empty-icon">📦</div>
+                    <p>Memuat data order...</p>
+                  </div>
+                </td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════════════
+         PAGE: KATALOG BARANG
+    ════════════════════════════════════════════ -->
+    <div class="page" id="page-katalog">
+      <div class="page-header">
+        <h1>🗂️ Katalog Barang</h1>
+        <p>Daftar master barang di gudang pusat</p>
+      </div>
+
+      <div class="filter-bar">
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="search-input" id="katalogSearch"
+                 placeholder="Cari kode atau nama barang..."
+                 oninput="searchKatalog(this.value)">
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-body" style="padding:0;">
+          <div class="order-table-wrap">
+            <table class="order-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Kode</th>
+                  <th>Nama Barang</th>
+                  <th>Kategori</th>
+                  <th>Satuan</th>
+                  <th>Harga</th>
+                  <th>Stok</th>
+                </tr>
+              </thead>
+              <tbody id="katalogBody">
+                <tr><td colspan="7">
+                  <div class="empty-state">
+                    <div class="empty-icon">🗂️</div>
+                    <p>Memuat katalog...</p>
+                  </div>
+                </td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════════════
+         PAGE: STATUS CABANG
+    ════════════════════════════════════════════ -->
+    <div class="page" id="page-cabang">
+      <div class="page-header">
+        <h1>🏬 Status Cabang</h1>
+        <p>Monitor aktivitas order dari setiap cabang</p>
+      </div>
+      <div class="cabang-grid" id="cabangGrid">
+        <!-- Diisi oleh JS -->
+      </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════════════
+         PAGE: LAPORAN
+    ════════════════════════════════════════════ -->
+    <div class="page" id="page-laporan">
+      <div class="page-header">
+        <h1>📈 Laporan</h1>
+        <p>Ringkasan performa order per cabang</p>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">📊 Rekap Order per Cabang</div>
+        </div>
+        <div class="panel-body" style="padding:0;">
+          <div class="order-table-wrap">
+            <table class="order-table">
+              <thead>
+                <tr>
+                  <th>Cabang</th>
+                  <th>Nama Toko</th>
+                  <th>PIC</th>
+                  <th>Total Order</th>
+                  <th>Pending</th>
+                  <th>Approved</th>
+                  <th>Rejected</th>
+                  <th>Rate ✅</th>
+                </tr>
+              </thead>
+              <tbody id="laporanBody">
+                <tr><td colspan="8">
+                  <div class="empty-state">
+                    <div class="empty-icon">📈</div>
+                    <p>Memuat laporan...</p>
+                  </div>
+                </td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</main>
+
+<!-- ── MODAL DETAIL ORDER ── -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modalContent">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Detail Order</div>
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════
+//  CONFIG — GANTI DENGAN URL WEB APP APPS SCRIPT KAMU
+// ════════════════════════════════════════════════════════════
+const API_URL = 'https://script.google.com/macros/s/AKfycbzk8A4xuXOVGqbK6a4zffpG6u2s4jVROZwIitmCDat2fYU7qyU3VkxQJmtxtEtjQxji/exec';
+
+// ── Data state ───────────────────────────────────────────────
+let allOrders = [];
+let allKatalog = [];
+let allCabang = [];
+let filteredOrders = [];
+let currentFilter = 'ALL';
+
+const CABANG_INFO = {
+  CB001: { nama: 'Toko Nasional Eltari', pic: 'Arfa',   icon: '🏪' },
+  CB002: { nama: 'Toko Perabot Mama Oesapa', pic: 'Akmal',  icon: '🏬' },
+  CB003: { nama: 'Toko Perabot Mama TDM',   pic: 'Shally', icon: '🏬' },
+  CB004: { nama: 'Toko Perabot Mama Kefamenanu', pic: 'Fajar',  icon: '🏪' }
+};
+
+// ── Session check ────────────────────────────────────────────
+function checkSession() {
+  const sess = sessionStorage.getItem('gudanghub_session');
+  if (!sess) {
+    window.location.href = 'login.html';
+    return null;
+  }
+  try {
+    const s = JSON.parse(sess);
+    if (new Date(s.expires) < new Date()) {
+      sessionStorage.removeItem('gudanghub_session');
+      window.location.href = 'login.html';
+      return null;
+    }
+    if (s.role !== 'admin') {
+      window.location.href = 'index.html';
+      return null;
+    }
+    return s;
+  } catch(e) {
+    window.location.href = 'login.html';
+    return null;
+  }
+}
+
+function doLogout() {
+  if (confirm('Yakin ingin keluar dari dashboard?')) {
+    sessionStorage.removeItem('gudanghub_session');
+    window.location.href = 'login.html';
+  }
+}
+
+// ── Clock ────────────────────────────────────────────────────
+function updateClock() {
+  const now = new Date();
+  const wita = new Date(now.getTime() + (8 * 60 * 60 * 1000));
+  const pad = n => String(n).padStart(2,'0');
+  document.getElementById('topbarTime').textContent =
+    `${pad(wita.getUTCHours())}:${pad(wita.getUTCMinutes())}:${pad(wita.getUTCSeconds())} WITA`;
+}
+
+// ── Toast ────────────────────────────────────────────────────
+function showToast(msg, type = 'info', duration = 3000) {
+  const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<span>${icons[type]}</span><span>${msg}</span>`;
+  container.appendChild(toast);
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => toast.classList.add('show'));
+  });
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 300);
+  }, duration);
+}
+
+// ── Sidebar ──────────────────────────────────────────────────
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('show');
+}
+
+// ── Page navigation ──────────────────────────────────────────
+const pageTitles = {
+  dashboard: '📊 Dashboard',
+  orders:    '📦 Semua Order',
+  katalog:   '🗂️ Katalog Barang',
+  cabang:    '🏬 Status Cabang',
+  laporan:   '📈 Laporan'
+};
+
+function showPage(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + pageId).classList.add('active');
+  document.querySelector(`[data-page="${pageId}"]`)?.classList.add('active');
+  document.getElementById('topbarTitle').textContent = pageTitles[pageId] || pageId;
+  closeSidebar();
+
+  // Render page-specific content
+  if (pageId === 'orders') renderAllOrders();
+  if (pageId === 'katalog') renderKatalog();
+  if (pageId === 'cabang') renderCabang();
+  if (pageId === 'laporan') renderLaporan();
+}
+
+// ── Load all data ────────────────────────────────────────────
+async function loadAllData() {
+  const btn = document.getElementById('btnRefresh');
+  const icon = document.getElementById('refreshIcon');
+  btn.classList.add('spinning');
+
+  try {
+    const [ordersRes, katalogRes] = await Promise.all([
+      fetch(`${API_URL}?action=getOrders`),
+      fetch(`${API_URL}?action=getBarang`)
+    ]);
+
+    const ordersData = await ordersRes.json();
+    const katalogData = await katalogRes.json();
+
+    if (ordersData.status === 'ok') {
+      allOrders = ordersData.data || [];
+      filteredOrders = [...allOrders];
+    }
+    if (katalogData.status === 'ok') {
+      allKatalog = katalogData.data || [];
+    }
+
+    updateStats();
+    renderPendingOrders();
+    updateDonut();
+    updateBarChart();
+    updateActivity();
+    updatePendingBadge();
+
+    // Re-render active page
+    const activePage = document.querySelector('.page.active')?.id?.replace('page-','');
+    if (activePage && activePage !== 'dashboard') showPage(activePage);
+
+    showToast('Data berhasil diperbarui', 'success');
+  } catch(err) {
+    console.error('Load error:', err);
+    showToast('Gagal memuat data. Cek API URL.', 'error');
+    loadDemoData();
+  } finally {
+    btn.classList.remove('spinning');
+  }
+}
+
+// Demo data jika API belum siap
+function loadDemoData() {
+  allOrders = [
+    { ORDER_ID:'ORD-20260619-090000-CB001', ID_CABANG:'CB001', TANGGAL_ORDER:'19-06-2026 09:00:00', STATUS:'PENDING', CATATAN:'', DETAIL:[] },
+    { ORDER_ID:'ORD-20260619-100000-CB002', ID_CABANG:'CB002', TANGGAL_ORDER:'19-06-2026 10:00:00', STATUS:'APPROVED', CATATAN:'', DETAIL:[] },
+    { ORDER_ID:'ORD-20260619-110000-CB003', ID_CABANG:'CB003', TANGGAL_ORDER:'19-06-2026 11:00:00', STATUS:'PENDING', CATATAN:'', DETAIL:[] },
+    { ORDER_ID:'ORD-20260619-120000-CB001', ID_CABANG:'CB001', TANGGAL_ORDER:'19-06-2026 12:00:00', STATUS:'REJECTED', CATATAN:'', DETAIL:[] },
+    { ORDER_ID:'ORD-20260619-130000-CB004', ID_CABANG:'CB004', TANGGAL_ORDER:'19-06-2026 13:00:00', STATUS:'APPROVED', CATATAN:'', DETAIL:[] },
+  ];
+  filteredOrders = [...allOrders];
+  allKatalog = [
+    { KODE_BARANG:'KRS001', NAMA_BARANG:'Kursi Kayu Jati', KATEGORI:'Kursi', SATUAN:'PCS', HARGA:850000, STOK:20 },
+    { KODE_BARANG:'MJA001', NAMA_BARANG:'Meja Makan 4 Kursi', KATEGORI:'Meja', SATUAN:'SET', HARGA:2500000, STOK:8 },
+  ];
+  updateStats();
+  renderPendingOrders();
+  updateDonut();
+  updateBarChart();
+  updateActivity();
+  updatePendingBadge();
+}
+
+// ── Stats ────────────────────────────────────────────────────
+function updateStats() {
+  const total = allOrders.length;
+  const pending = allOrders.filter(o => o.STATUS === 'PENDING').length;
+  const approved = allOrders.filter(o => o.STATUS === 'APPROVED').length;
+  const rejected = allOrders.filter(o => o.STATUS === 'REJECTED').length;
+
+  animateNumber('statTotal', total);
+  animateNumber('statPending', pending);
+  animateNumber('statApproved', approved);
+  animateNumber('statRejected', rejected);
+}
+
+function animateNumber(id, target) {
+  const el = document.getElementById(id);
+  const start = parseInt(el.textContent) || 0;
+  const step = Math.ceil(Math.abs(target - start) / 20) || 1;
+  let curr = start;
+  const timer = setInterval(() => {
+    curr += (target > curr ? 1 : -1) * step;
+    if ((target > start && curr >= target) || (target < start && curr <= target)) {
+      curr = target;
+      clearInterval(timer);
+    }
+    el.textContent = curr;
+  }, 30);
+}
+
+function updatePendingBadge() {
+  const count = allOrders.filter(o => o.STATUS === 'PENDING').length;
+  document.getElementById('pendingBadge').textContent = count;
+}
+
+// ── Donut chart ──────────────────────────────────────────────
+function updateDonut() {
+  const total = allOrders.length || 1;
+  const approved = allOrders.filter(o => o.STATUS === 'APPROVED').length;
+  const pending  = allOrders.filter(o => o.STATUS === 'PENDING').length;
+  const rejected = allOrders.filter(o => o.STATUS === 'REJECTED').length;
+
+  const circ = 2 * Math.PI * 40; // 251.2
+
+  const aFrac = approved / total;
+  const pFrac = pending  / total;
+  const rFrac = rejected / total;
+
+  const aLen = aFrac * circ;
+  const pLen = pFrac * circ;
+  const rLen = rFrac * circ;
+
+  document.getElementById('donutApproved').setAttribute('stroke-dasharray', `${aLen} ${circ}`);
+  document.getElementById('donutRejected').setAttribute('stroke-dasharray', `${rLen} ${circ}`);
+  document.getElementById('donutRejected').setAttribute('stroke-dashoffset', `-${aLen}`);
+  document.getElementById('donutPending').setAttribute('stroke-dasharray', `${pLen} ${circ}`);
+  document.getElementById('donutPending').setAttribute('stroke-dashoffset', `-${aLen + rLen}`);
+  document.getElementById('donutTotal').textContent = total;
+
+  document.getElementById('legendApproved').textContent = approved;
+  document.getElementById('legendPending').textContent  = pending;
+  document.getElementById('legendRejected').textContent = rejected;
+}
+
+// ── Bar chart ────────────────────────────────────────────────
+function updateBarChart() {
+  const counts = { CB001: 0, CB002: 0, CB003: 0, CB004: 0 };
+  allOrders.forEach(o => { if (counts[o.ID_CABANG] !== undefined) counts[o.ID_CABANG]++; });
+
+  const maxVal = Math.max(...Object.values(counts), 1);
+  const labels = ['CB001','CB002','CB003','CB004'];
+  const names  = ['Eltari','Oesapa','TDM','Kefa'];
+
+  document.getElementById('barChart').innerHTML = labels.map((id, i) => {
+    const pct = Math.max((counts[id] / maxVal) * 90, 4);
+    return `<div class="bar-item">
+      <div class="bar-fill" style="height:${pct}%" data-val="${counts[id]} order"></div>
+      <div class="bar-label">${names[i]}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── Activity feed ────────────────────────────────────────────
+function updateActivity() {
+  const sorted = [...allOrders].sort((a,b) =>
+    new Date(b.TANGGAL_ORDER) - new Date(a.TANGGAL_ORDER)
+  ).slice(0, 6);
+
+  const colors = { PENDING: 'orange', APPROVED: 'green', REJECTED: 'red' };
+  const emojis = { PENDING: '⏳', APPROVED: '✅', REJECTED: '❌' };
+
+  const html = sorted.length ? sorted.map(o => {
+    const cb = CABANG_INFO[o.ID_CABANG] || { nama: o.ID_CABANG, pic: '' };
+    return `<div class="activity-item">
+      <div class="activity-dot ${colors[o.STATUS] || 'blue'}"></div>
+      <div class="activity-content">
+        <div class="activity-text">
+          ${emojis[o.STATUS]} Order dari <strong>${cb.pic || o.ID_CABANG}</strong>
+          · <span style="color:var(--muted);font-size:11px;">${o.ORDER_ID}</span>
+        </div>
+        <div class="activity-time">🕐 ${o.TANGGAL_ORDER} WITA</div>
+      </div>
+    </div>`;
+  }).join('')
+  : '<div class="empty-state"><div class="empty-icon">⚡</div><p>Belum ada aktivitas</p></div>';
+
+  document.getElementById('activityFeed').innerHTML = html;
+}
+
+// ── Pending orders table (dashboard) ────────────────────────
+function renderPendingOrders() {
+  const pending = allOrders.filter(o => o.STATUS === 'PENDING');
+  const tbody = document.getElementById('pendingOrdersBody');
+
+  if (!pending.length) {
+    tbody.innerHTML = `<tr><td colspan="5">
+      <div class="empty-state">
+        <div class="empty-icon">✅</div>
+        <p>Tidak ada order pending. Semua sudah diproses!</p>
+      </div>
+    </td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = pending.map(o => {
+    const cb = CABANG_INFO[o.ID_CABANG] || { nama: o.ID_CABANG, pic: '-', icon: '🏪' };
+    const items = o.DETAIL?.length || '?';
+    return `<tr>
+      <td><span class="order-id">${o.ORDER_ID}</span></td>
+      <td>
+        <div class="cabang-badge">
+          ${cb.icon} ${cb.pic}
+        </div>
+      </td>
+      <td style="color:var(--muted);font-size:12px;">${o.TANGGAL_ORDER}</td>
+      <td style="text-align:center;">${items} item</td>
+      <td>
+        <div class="action-btns">
+          <button class="btn-approve" onclick="quickApprove('${o.ORDER_ID}')">✅ Setuju</button>
+          <button class="btn-reject" onclick="quickReject('${o.ORDER_ID}')">❌ Tolak</button>
+          <button class="btn-detail" onclick="showDetail('${o.ORDER_ID}')">👁</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ── All orders table ─────────────────────────────────────────
+function renderAllOrders() {
+  const tbody = document.getElementById('allOrdersBody');
+
+  if (!filteredOrders.length) {
+    tbody.innerHTML = `<tr><td colspan="7">
+      <div class="empty-state">
+        <div class="empty-icon">📦</div>
+        <p>Tidak ada order ditemukan</p>
+      </div>
+    </td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filteredOrders.map((o, i) => {
+    const cb = CABANG_INFO[o.ID_CABANG] || { nama: o.ID_CABANG, pic: '-', icon: '🏪' };
+    const statusMap = {
+      PENDING:  '<span class="status-badge pending">⏳ Pending</span>',
+      APPROVED: '<span class="status-badge approved">✅ Approved</span>',
+      REJECTED: '<span class="status-badge rejected">❌ Rejected</span>'
+    };
+    const actionMap = {
+      PENDING: `<div class="action-btns">
+        <button class="btn-approve" onclick="quickApprove('${o.ORDER_ID}')">✅</button>
+        <button class="btn-reject" onclick="quickReject('${o.ORDER_ID}')">❌</button>
+        <button class="btn-detail" onclick="showDetail('${o.ORDER_ID}')">👁</button>
+      </div>`,
+      APPROVED: `<button class="btn-detail" onclick="showDetail('${o.ORDER_ID}')">👁 Detail</button>`,
+      REJECTED: `<button class="btn-detail" onclick="showDetail('${o.ORDER_ID}')">👁 Detail</button>`
+    };
+
+    return `<tr>
+      <td style="color:var(--muted);font-size:12px;">${i+1}</td>
+      <td><span class="order-id">${o.ORDER_ID}</span></td>
+      <td>
+        <div class="cabang-badge">${cb.icon} ${cb.pic} <span style="color:var(--muted)">(${o.ID_CABANG})</span></div>
+      </td>
+      <td style="font-size:12px;color:var(--muted);">${o.TANGGAL_ORDER}</td>
+      <td style="font-size:12px;color:var(--muted);">${o.CATATAN || '—'}</td>
+      <td>${statusMap[o.STATUS] || o.STATUS}</td>
+      <td>${actionMap[o.STATUS] || ''}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Filter & search orders ────────────────────────────────────
+function filterOrders(status, btn) {
+  currentFilter = status;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const search = document.getElementById('orderSearch').value.toLowerCase();
+  applyFilters(search);
+}
+
+function searchOrders(val) {
+  applyFilters(val.toLowerCase());
+}
+
+function applyFilters(search) {
+  filteredOrders = allOrders.filter(o => {
+    const matchStatus = currentFilter === 'ALL' || o.STATUS === currentFilter;
+    const matchSearch = !search ||
+      o.ORDER_ID.toLowerCase().includes(search) ||
+      (CABANG_INFO[o.ID_CABANG]?.pic || '').toLowerCase().includes(search) ||
+      o.ID_CABANG.toLowerCase().includes(search);
+    return matchStatus && matchSearch;
+  });
+  renderAllOrders();
+}
+
+// ── Katalog ──────────────────────────────────────────────────
+function renderKatalog(filter = '') {
+  const tbody = document.getElementById('katalogBody');
+  const data = allKatalog.filter(b =>
+    !filter ||
+    b.KODE_BARANG?.toLowerCase().includes(filter) ||
+    b.NAMA_BARANG?.toLowerCase().includes(filter)
+  );
+
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="7">
+      <div class="empty-state"><div class="empty-icon">🗂️</div>
+      <p>Tidak ada barang ditemukan</p></div>
+    </td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = data.map((b, i) => {
+    const stok = parseInt(b.STOK) || 0;
+    const stokColor = stok > 10 ? 'var(--green)' : stok > 0 ? 'var(--yellow)' : 'var(--red)';
+    return `<tr>
+      <td style="color:var(--muted);font-size:12px;">${i+1}</td>
+      <td><span class="order-id">${b.KODE_BARANG}</span></td>
+      <td>${b.NAMA_BARANG}</td>
+      <td><span style="background:var(--dark3);padding:3px 10px;border-radius:20px;font-size:11px;">${b.KATEGORI||'—'}</span></td>
+      <td>${b.SATUAN||'—'}</td>
+      <td style="color:var(--orange);font-weight:700;">${formatRp(b.HARGA)}</td>
+      <td style="color:${stokColor};font-weight:700;">${stok}</td>
+    </tr>`;
+  }).join('');
+}
+
+function searchKatalog(val) {
+  renderKatalog(val.toLowerCase());
+}
+
+// ── Cabang ───────────────────────────────────────────────────
+function renderCabang() {
+  const grid = document.getElementById('cabangGrid');
+  grid.innerHTML = Object.entries(CABANG_INFO).map(([id, info]) => {
+    const orders = allOrders.filter(o => o.ID_CABANG === id);
+    const pending  = orders.filter(o => o.STATUS === 'PENDING').length;
+    const approved = orders.filter(o => o.STATUS === 'APPROVED').length;
+    const rejected = orders.filter(o => o.STATUS === 'REJECTED').length;
+
+    return `<div class="cabang-card">
+      <div class="cabang-card-header">
+        <div class="cabang-avatar">${info.icon}</div>
+        <div>
+          <div class="cabang-name">${info.nama}</div>
+          <div class="cabang-id">${id} · PIC: ${info.pic}</div>
+        </div>
+      </div>
+      <div class="cabang-stats">
+        <div class="cabang-stat">
+          <div class="cabang-stat-val" style="color:var(--orange)">${orders.length}</div>
+          <div class="cabang-stat-lbl">Total</div>
+        </div>
+        <div class="cabang-stat">
+          <div class="cabang-stat-val" style="color:var(--green)">${approved}</div>
+          <div class="cabang-stat-lbl">Approved</div>
+        </div>
+        <div class="cabang-stat">
+          <div class="cabang-stat-val" style="color:var(--yellow)">${pending}</div>
+          <div class="cabang-stat-lbl">Pending</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Laporan ──────────────────────────────────────────────────
+function renderLaporan() {
+  const tbody = document.getElementById('laporanBody');
+  let grandTotal = 0, grandPending = 0, grandApproved = 0, grandRejected = 0;
+
+  const rows = Object.entries(CABANG_INFO).map(([id, info]) => {
+    const orders   = allOrders.filter(o => o.ID_CABANG === id);
+    const pending  = orders.filter(o => o.STATUS === 'PENDING').length;
+    const approved = orders.filter(o => o.STATUS === 'APPROVED').length;
+    const rejected = orders.filter(o => o.STATUS === 'REJECTED').length;
+    const rate = orders.length ? Math.round(approved / orders.length * 100) : 0;
+
+    grandTotal += orders.length;
+    grandPending += pending;
+    grandApproved += approved;
+    grandRejected += rejected;
+
+    return `<tr>
+      <td><span class="cabang-badge">${info.icon} ${id}</span></td>
+      <td>${info.nama}</td>
+      <td>${info.pic}</td>
+      <td style="font-weight:700;color:var(--orange)">${orders.length}</td>
+      <td style="color:var(--yellow)">${pending}</td>
+      <td style="color:var(--green)">${approved}</td>
+      <td style="color:var(--red)">${rejected}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="flex:1;height:6px;background:var(--dark3);border-radius:3px;overflow:hidden;">
+            <div style="width:${rate}%;height:100%;background:var(--green);border-radius:3px;"></div>
+          </div>
+          <span style="font-size:12px;font-weight:700;color:var(--green);min-width:35px">${rate}%</span>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  const grandRate = grandTotal ? Math.round(grandApproved / grandTotal * 100) : 0;
+  const totalRow = `<tr class="total-row">
+    <td colspan="3">TOTAL KESELURUHAN</td>
+    <td>${grandTotal}</td>
+    <td>${grandPending}</td>
+    <td>${grandApproved}</td>
+    <td>${grandRejected}</td>
+    <td>${grandRate}%</td>
+  </tr>`;
+
+  tbody.innerHTML = rows + totalRow;
+}
+
+// ── Approve / Reject ─────────────────────────────────────────
+async function quickApprove(orderId) {
+  if (!confirm(`Setujui order ${orderId}?`)) return;
+  await updateOrderStatus(orderId, 'APPROVED');
+}
+
+async function quickReject(orderId) {
+  if (!confirm(`Tolak order ${orderId}?`)) return;
+  await updateOrderStatus(orderId, 'REJECTED');
+}
+
+async function updateOrderStatus(orderId, status) {
+  try {
+    showToast(`Memproses ${orderId}...`, 'info');
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'updateStatus', orderId, status })
+    });
+    const data = await res.json();
+    if (data.status === 'ok') {
+      showToast(`Order ${status === 'APPROVED' ? 'disetujui ✅' : 'ditolak ❌'} — email notifikasi terkirim`, 'success', 4000);
+      // Update local state
+      const o = allOrders.find(x => x.ORDER_ID === orderId);
+      if (o) o.STATUS = status;
+      filteredOrders = [...allOrders];
+      updateStats();
+      renderPendingOrders();
+      updateDonut();
+      updateActivity();
+      updatePendingBadge();
+      renderAllOrders();
+    } else {
+      showToast('Gagal update status: ' + (data.message || ''), 'error');
+    }
+  } catch(err) {
+    showToast('Error koneksi ke server', 'error');
+  }
+}
+
+// ── Detail modal ─────────────────────────────────────────────
+function showDetail(orderId) {
+  const order = allOrders.find(o => o.ORDER_ID === orderId);
+  if (!order) return;
+
+  const cb = CABANG_INFO[order.ID_CABANG] || { nama: order.ID_CABANG, pic: '-', icon: '🏪' };
+  const statusColor = { PENDING:'var(--yellow)', APPROVED:'var(--green)', REJECTED:'var(--red)' };
+
+  const detailRows = (order.DETAIL || []).map(d =>
+    `<tr>
+      <td style="font-family:monospace;font-size:11px;color:var(--orange)">${d.KODE_BARANG||'—'}</td>
+      <td>${d.NAMA_BARANG||'—'}</td>
+      <td style="text-align:center">${d.QTY||0} ${d.SATUAN||''}</td>
+      <td style="text-align:right">${formatRp(d.HARGA_SATUAN)}</td>
+      <td style="text-align:right;color:var(--orange);font-weight:700">${formatRp(d.SUBTOTAL)}</td>
+    </tr>`
+  ).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">Data detail tidak tersedia</td></tr>';
+
+  const total = (order.DETAIL||[]).reduce((s,d) => s + (parseFloat(d.SUBTOTAL)||0), 0);
+
+  document.getElementById('modalTitle').textContent = `📦 ${orderId}`;
+  document.getElementById('modalBody').innerHTML = `
+    <div class="info-row">
+      <span class="info-label">Cabang</span>
+      <span class="info-value">${cb.icon} ${cb.nama} (${order.ID_CABANG})</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">PIC</span>
+      <span class="info-value">${cb.pic}</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Tanggal Order</span>
+      <span class="info-value">${order.TANGGAL_ORDER} WITA</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Status</span>
+      <span class="info-value" style="color:${statusColor[order.STATUS]||'#fff'};font-weight:800">
+        ${order.STATUS}
+      </span>
+    </div>
+    ${order.CATATAN ? `<div class="info-row">
+      <span class="info-label">Catatan</span>
+      <span class="info-value">${order.CATATAN}</span>
+    </div>` : ''}
+
+    <h3 style="margin:20px 0 12px;font-size:14px;color:var(--muted)">📦 Detail Barang</h3>
+    <div class="order-table-wrap">
+      <table class="order-table">
+        <thead>
+          <tr>
+            <th>Kode</th><th>Nama Barang</th>
+            <th style="text-align:center">Qty</th>
+            <th style="text-align:right">Harga</th>
+            <th style="text-align:right">Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>${detailRows}</tbody>
+        ${total > 0 ? `<tfoot>
+          <tr class="total-row">
+            <td colspan="4" style="text-align:right;color:var(--muted)">Total</td>
+            <td style="text-align:right">${formatRp(total)}</td>
+          </tr>
+        </tfoot>` : ''}
+      </table>
+    </div>
+
+    ${order.STATUS === 'PENDING' ? `
+    <div style="display:flex;gap:10px;margin-top:20px;">
+      <button class="btn-approve" style="flex:1;padding:12px;font-size:13px"
+        onclick="quickApprove('${orderId}');closeModalDirect()">
+        ✅ Setujui Order Ini
+      </button>
+      <button class="btn-reject" style="flex:1;padding:12px;font-size:13px"
+        onclick="quickReject('${orderId}');closeModalDirect()">
+        ❌ Tolak Order Ini
+      </button>
+    </div>` : ''}
+  `;
+
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModalDirect();
+}
+function closeModalDirect() {
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+
+// ── Utils ────────────────────────────────────────────────────
+function formatRp(val) {
+  const n = parseFloat(val) || 0;
+  return 'Rp ' + n.toLocaleString('id-ID');
+}
+
+// ── INIT ─────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  const session = checkSession();
+  if (!session) return;
+
+  // Set nama admin
+  document.getElementById('adminNama').textContent = session.nama || 'Admin';
+  document.getElementById('sidebarUserName').textContent = session.nama || 'Admin';
+
+  // Clock
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  // Load data
+  loadAllData();
+
+  // Auto refresh setiap 5 menit
+  setInterval(loadAllData, 5 * 60 * 1000);
+});
+</script>
+</body>
+</html>
