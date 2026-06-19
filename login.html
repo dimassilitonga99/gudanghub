@@ -1,0 +1,578 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GudangHub Admin — Login</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --orange: #ff6b00;
+      --orange-light: #ff8c38;
+      --dark: #0d0d1a;
+      --dark2: #12122a;
+      --dark3: #1a1a35;
+      --card: #1e1e3a;
+      --border: rgba(255,107,0,0.2);
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+    }
+
+    body {
+      background: var(--dark);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Animated background */
+    .bg-orbs {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.15;
+      animation: float 8s ease-in-out infinite;
+    }
+    .orb-1 {
+      width: 400px; height: 400px;
+      background: var(--orange);
+      top: -100px; left: -100px;
+      animation-delay: 0s;
+    }
+    .orb-2 {
+      width: 300px; height: 300px;
+      background: #6366f1;
+      bottom: -80px; right: -80px;
+      animation-delay: 3s;
+    }
+    .orb-3 {
+      width: 200px; height: 200px;
+      background: var(--orange-light);
+      top: 50%; left: 60%;
+      animation-delay: 5s;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-30px) scale(1.05); }
+    }
+
+    /* Grid pattern */
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,107,0,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,107,0,0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+      z-index: 0;
+    }
+
+    /* Login container */
+    .login-wrap {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 420px;
+      padding: 20px;
+    }
+
+    /* Logo area */
+    .logo-area {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .logo-icon {
+      width: 72px; height: 72px;
+      background: linear-gradient(135deg, var(--orange), var(--orange-light));
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      margin-bottom: 16px;
+      box-shadow: 0 0 40px rgba(255,107,0,0.4);
+      animation: pulse-logo 3s ease-in-out infinite;
+    }
+    @keyframes pulse-logo {
+      0%, 100% { box-shadow: 0 0 40px rgba(255,107,0,0.4); }
+      50% { box-shadow: 0 0 60px rgba(255,107,0,0.7); }
+    }
+    .logo-title {
+      font-size: 28px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #fff, var(--orange-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .logo-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* Card */
+    .login-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 36px;
+      backdrop-filter: blur(20px);
+      box-shadow:
+        0 25px 50px rgba(0,0,0,0.5),
+        0 0 0 1px rgba(255,107,0,0.1) inset;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .card-desc {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+
+    /* Form */
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+    .input-wrap {
+      position: relative;
+    }
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
+      opacity: 0.6;
+      pointer-events: none;
+    }
+    .form-input {
+      width: 100%;
+      background: var(--dark3);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 14px 14px 14px 44px;
+      color: var(--text);
+      font-size: 14px;
+      font-family: inherit;
+      transition: all 0.2s;
+      outline: none;
+    }
+    .form-input:focus {
+      border-color: var(--orange);
+      box-shadow: 0 0 0 3px rgba(255,107,0,0.15);
+    }
+    .form-input::placeholder {
+      color: var(--muted);
+    }
+
+    /* Toggle password */
+    .toggle-pw {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 16px;
+      padding: 4px;
+      transition: color 0.2s;
+    }
+    .toggle-pw:hover { color: var(--orange); }
+
+    /* Role selector */
+    .role-select {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .role-btn {
+      background: var(--dark3);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 12px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .role-btn .role-icon { font-size: 20px; }
+    .role-btn:hover {
+      border-color: rgba(255,107,0,0.3);
+      color: var(--text);
+    }
+    .role-btn.active {
+      background: rgba(255,107,0,0.15);
+      border-color: var(--orange);
+      color: var(--orange);
+    }
+
+    /* Login button */
+    .btn-login {
+      width: 100%;
+      background: linear-gradient(135deg, var(--orange), var(--orange-light));
+      border: none;
+      border-radius: 12px;
+      padding: 15px;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+    .btn-login::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--orange-light), var(--orange));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .btn-login:hover::before { opacity: 1; }
+    .btn-login:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(255,107,0,0.4); }
+    .btn-login:active { transform: translateY(0); }
+    .btn-login span { position: relative; z-index: 1; }
+    .btn-login.loading { pointer-events: none; opacity: 0.7; }
+
+    /* Error message */
+    .error-msg {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.3);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #f87171;
+      margin-bottom: 16px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+    .error-msg.show { display: flex; }
+
+    /* Footer */
+    .login-footer {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .login-footer strong { color: var(--orange); }
+
+    /* Loading spinner */
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      display: inline-block;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Hint box */
+    .hint-box {
+      background: rgba(255,107,0,0.05);
+      border: 1px solid rgba(255,107,0,0.15);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-top: 20px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .hint-box strong { color: var(--orange); display: block; margin-bottom: 6px; }
+    .hint-box code {
+      background: rgba(0,0,0,0.3);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+      color: var(--text);
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-orbs">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+<div class="bg-grid"></div>
+
+<div class="login-wrap">
+  <!-- Logo -->
+  <div class="logo-area">
+    <div class="logo-icon">🏪</div>
+    <div class="logo-title">GudangHub</div>
+    <div class="logo-sub">PT Central Perabot Utama — NTT</div>
+  </div>
+
+  <!-- Card -->
+  <div class="login-card">
+    <div class="card-title">Masuk ke Sistem</div>
+    <div class="card-desc">Pilih peran Anda dan masukkan kredensial</div>
+
+    <!-- Role selector -->
+    <div class="role-select">
+      <button class="role-btn active" onclick="setRole('admin')" id="role-admin">
+        <span class="role-icon">🏭</span>
+        Admin Gudang
+      </button>
+      <button class="role-btn" onclick="setRole('cabang')" id="role-cabang">
+        <span class="role-icon">🏪</span>
+        Cabang
+      </button>
+    </div>
+
+    <!-- Error -->
+    <div class="error-msg" id="errorMsg">
+      <span>⚠️</span>
+      <span id="errorText">Username atau password salah.</span>
+    </div>
+
+    <!-- Form -->
+    <form onsubmit="doLogin(event)">
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <div class="input-wrap">
+          <span class="input-icon">👤</span>
+          <input type="text" class="form-input" id="inputUser"
+                 placeholder="Masukkan username" autocomplete="username" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <div class="input-wrap">
+          <span class="input-icon">🔒</span>
+          <input type="password" class="form-input" id="inputPass"
+                 placeholder="Masukkan password" autocomplete="current-password" required>
+          <button type="button" class="toggle-pw" onclick="togglePw()" id="toggleBtn">👁️</button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-login" id="btnLogin">
+        <span id="btnText">🚀 Masuk</span>
+      </button>
+    </form>
+
+    <!-- Hint -->
+    <div class="hint-box">
+      <strong>🔑 Kredensial Default</strong>
+      Admin Gudang: <code>admin</code> / <code>gudang2025</code><br><br>
+      Cabang CB001: <code>cb001</code> / <code>arfa2025</code><br>
+      Cabang CB002: <code>cb002</code> / <code>akmal2025</code><br>
+      Cabang CB003: <code>cb003</code> / <code>shally2025</code><br>
+      Cabang CB004: <code>cb004</code> / <code>fajar2025</code>
+    </div>
+  </div>
+
+  <div class="login-footer">
+    <strong>GudangHub v2.0</strong> · PT Central Perabot Utama · WITA
+  </div>
+</div>
+
+<script>
+// ── KONFIGURASI USERS ─────────────────────────────────────────
+// Ganti password sesuai kebutuhan
+const USERS = {
+  admin: {
+    password: "gudang2025",
+    role: "admin",
+    nama: "Admin Gudang Pusat",
+    redirect: "dashboard.html"
+  },
+  cb001: {
+    password: "arfa2025",
+    role: "cabang",
+    nama: "Toko Nasional Eltari – Arfa",
+    idCabang: "CB001",
+    redirect: "index.html?cabang=CB001"
+  },
+  cb002: {
+    password: "akmal2025",
+    role: "cabang",
+    nama: "Toko Perabot Mama Oesapa – Akmal",
+    idCabang: "CB002",
+    redirect: "index.html?cabang=CB002"
+  },
+  cb003: {
+    password: "shally2025",
+    role: "cabang",
+    nama: "Toko Perabot Mama TDM – Shally",
+    idCabang: "CB003",
+    redirect: "index.html?cabang=CB003"
+  },
+  cb004: {
+    password: "fajar2025",
+    role: "cabang",
+    nama: "Toko Perabot Mama Kefamenanu – Fajar",
+    idCabang: "CB004",
+    redirect: "index.html?cabang=CB004"
+  }
+};
+
+let currentRole = 'admin';
+
+function setRole(role) {
+  currentRole = role;
+  document.getElementById('role-admin').classList.toggle('active', role === 'admin');
+  document.getElementById('role-cabang').classList.toggle('active', role === 'cabang');
+
+  // Hint username berdasarkan role
+  const input = document.getElementById('inputUser');
+  if (role === 'admin') {
+    input.placeholder = 'Contoh: admin';
+  } else {
+    input.placeholder = 'Contoh: cb001, cb002, cb003, cb004';
+  }
+}
+
+function togglePw() {
+  const inp = document.getElementById('inputPass');
+  const btn = document.getElementById('toggleBtn');
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    btn.textContent = '🙈';
+  } else {
+    inp.type = 'password';
+    btn.textContent = '👁️';
+  }
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  document.getElementById('errorText').textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 4000);
+}
+
+function doLogin(e) {
+  e.preventDefault();
+
+  const username = document.getElementById('inputUser').value.trim().toLowerCase();
+  const password = document.getElementById('inputPass').value;
+  const btn = document.getElementById('btnLogin');
+  const btnText = document.getElementById('btnText');
+
+  // Loading state
+  btn.classList.add('loading');
+  btnText.innerHTML = '<span class="spinner"></span>Memverifikasi...';
+
+  // Simulasi delay autentikasi
+  setTimeout(() => {
+    const user = USERS[username];
+
+    if (!user) {
+      showError('Username tidak ditemukan. Periksa kembali.');
+      btn.classList.remove('loading');
+      btnText.textContent = '🚀 Masuk';
+      return;
+    }
+
+    if (user.password !== password) {
+      showError('Password salah. Coba lagi.');
+      btn.classList.remove('loading');
+      btnText.textContent = '🚀 Masuk';
+      // Shake animation
+      document.querySelector('.login-card').style.animation = 'shake 0.4s ease';
+      setTimeout(() => document.querySelector('.login-card').style.animation = '', 400);
+      return;
+    }
+
+    if (user.role !== currentRole && !(currentRole === 'admin' && user.role === 'admin')) {
+      // Validasi role match (longgar untuk admin)
+    }
+
+    // Simpan session
+    const session = {
+      username,
+      role: user.role,
+      nama: user.nama,
+      idCabang: user.idCabang || null,
+      loginAt: new Date().toISOString(),
+      expires: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString() // 8 jam
+    };
+    sessionStorage.setItem('gudanghub_session', JSON.stringify(session));
+    localStorage.setItem('gudanghub_lastuser', username);
+
+    btnText.innerHTML = '✅ Berhasil! Mengalihkan...';
+
+    setTimeout(() => {
+      window.location.href = user.redirect;
+    }, 800);
+
+  }, 900);
+}
+
+// Shake keyframe
+const style = document.createElement('style');
+style.textContent = `@keyframes shake {
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-8px)}
+  40%{transform:translateX(8px)}
+  60%{transform:translateX(-5px)}
+  80%{transform:translateX(5px)}
+}`;
+document.head.appendChild(style);
+
+// Auto-fill last username
+window.addEventListener('load', () => {
+  const last = localStorage.getItem('gudanghub_lastuser');
+  if (last) document.getElementById('inputUser').value = last;
+});
+
+// Cek jika sudah login
+const existingSession = sessionStorage.getItem('gudanghub_session');
+if (existingSession) {
+  try {
+    const sess = JSON.parse(existingSession);
+    if (new Date(sess.expires) > new Date()) {
+      const u = USERS[sess.username];
+      if (u) window.location.href = u.redirect;
+    }
+  } catch(e) {}
+}
+</script>
+</body>
+</html>
