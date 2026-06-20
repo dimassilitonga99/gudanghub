@@ -1575,7 +1575,28 @@ function updateActivity() {
 
   document.getElementById('activityFeed').innerHTML = html;
 }
+// Tambahkan fungsi ini di bagian utils/bawah script:
+function formatTanggalOrder(str) {
+  if (!str) return '-';
+  str = String(str).trim();
 
+  // Jika sudah format dd-MM-yyyy → langsung return
+  if (str.match(/^\d{2}-\d{2}-\d{4}/)) return str;
+
+  // Jika format ISO (dari Google Sheets kadang return ini)
+  try {
+    const d = new Date(str);
+    if (isNaN(d.getTime())) return str;
+    // Convert ke WITA (UTC+8)
+    const wita = new Date(d.getTime() + (8 * 60 * 60 * 1000));
+    const pad  = n => String(n).padStart(2,'0');
+    return `${pad(wita.getUTCDate())}-${pad(wita.getUTCMonth()+1)}-${wita.getUTCFullYear()} ` +
+           `${pad(wita.getUTCHours())}:${pad(wita.getUTCMinutes())}:${pad(wita.getUTCSeconds())}`;
+  } catch(e) {
+    return str;
+  }
+}
+  
 // ── Pending orders table (dashboard) ────────────────────────
 function renderPendingOrders() {
   const pending = allOrders.filter(o => o.STATUS === 'PENDING');
@@ -1601,7 +1622,7 @@ function renderPendingOrders() {
           ${cb.icon} ${cb.pic}
         </div>
       </td>
-      <td style="color:var(--muted);font-size:12px;">${o.TANGGAL_ORDER}</td>
+      <td style="color:var(--muted);font-size:12px;">${formatTanggalOrder(o.TANGGAL_ORDER)}</td>
       <td style="text-align:center;">${items} item</td>
       <td>
         <div class="action-btns">
@@ -1651,7 +1672,7 @@ function renderAllOrders() {
       <td>
         <div class="cabang-badge">${cb.icon} ${cb.pic} <span style="color:var(--muted)">(${o.ID_CABANG})</span></div>
       </td>
-      <td style="font-size:12px;color:var(--muted);">${o.TANGGAL_ORDER}</td>
+      <td style="font-size:12px;color:var(--muted);">${formatTanggalOrder(o.TANGGAL_ORDER)}</td>
       <td style="font-size:12px;color:var(--muted);">${o.CATATAN || '—'}</td>
       <td>${statusMap[o.STATUS] || o.STATUS}</td>
       <td>${actionMap[o.STATUS] || ''}</td>
