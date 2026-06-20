@@ -1472,15 +1472,24 @@ function loadDemoData() {
 
 // ── Stats ────────────────────────────────────────────────────
 function updateStats() {
-  const total = allOrders.length;
-  const pending = allOrders.filter(o => o.STATUS === 'PENDING').length;
-  const approved = allOrders.filter(o => o.STATUS === 'APPROVED').length;
-  const rejected = allOrders.filter(o => o.STATUS === 'REJECTED').length;
+  const total    = allOrders.length;
+  const pending  = allOrders.filter(o =>
+    String(o.STATUS).toUpperCase() === 'PENDING').length;
+  const approved = allOrders.filter(o =>
+    String(o.STATUS).toUpperCase() === 'APPROVED').length;
+  const rejected = allOrders.filter(o =>
+    String(o.STATUS).toUpperCase() === 'REJECTED').length;
 
-  animateNumber('statTotal', total);
-  animateNumber('statPending', pending);
-  animateNumber('statApproved', approved);
-  animateNumber('statRejected', rejected);
+  // Set langsung tanpa animasi — mencegah bergetar
+  const set = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  };
+
+  set('statTotal',    total);
+  set('statPending',  pending);
+  set('statApproved', approved);
+  set('statRejected', rejected);
 }
 
 function animateNumber(id, target) {
