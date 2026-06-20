@@ -1861,29 +1861,57 @@ async function quickReject(orderId) {
 async function updateOrderStatus(orderId, status) {
   try {
     showToast(`Memproses ${orderId}...`, 'info');
-    const res = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'updateStatus', orderId, status })
-    });
-    const data = await res.json();
+
+    // Kirim via GET untuk hindari CORS (sama seperti submitOrder)
+    const payload = {
+      action:  'updateStatus',
+      orderId: orderId,
+      status:  status
+    };
+
+    const encoded = encodeURIComponent(JSON.stringify(payload));
+    const url     = `${API_URL}?action=updateStatus&payload=${encoded}`;
+
+    const res  = await fetch(url, { method: 'GET' });
+    const text = await res.text();
+
+    let data = {};
+    try {
+      data = JSON.parse(text);
+    } catch(pe) {
+      // Coba bersihkan response jika ada prefix/suffix
+      const clean = text.replace(/^[^{]*/, '').replace(/[^}]*$/, '');
+      data = JSON.parse(clean.length > 2 ? clean : '{"status":"error","message":"Response tidak valid"}');
+    }
+
     if (data.status === 'ok') {
-      showToast(`Order ${status === 'APPROVED' ? 'disetujui ✅' : 'ditolak ❌'} — email notifikasi terkirim`, 'success', 4000);
-      // Update local state
+      showToast(
+        status === 'APPROVED'
+          ? '✅ Order disetujui — email notifikasi terkirim ke cabang'
+          : '❌ Order ditolak — email notifikasi terkirim ke cabang',
+        'success', 4000
+      );
+
+      // Update data lokal tanpa reload
       const o = allOrders.find(x => x.ORDER_ID === orderId);
       if (o) o.STATUS = status;
       filteredOrders = [...allOrders];
+
+      // Refresh semua UI
       updateStats();
       renderPendingOrders();
       updateDonut();
       updateActivity();
       updatePendingBadge();
       renderAllOrders();
+
     } else {
-      showToast('Gagal update status: ' + (data.message || ''), 'error');
+      showToast('Gagal: ' + (data.message || 'Error tidak diketahui'), 'error');
     }
+
   } catch(err) {
-    showToast('Error koneksi ke server', 'error');
+    console.error('updateOrderStatus error:', err);
+    showToast('Error koneksi ke server: ' + err.message, 'error', 5000);
   }
 }
 
