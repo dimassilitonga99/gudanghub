@@ -1634,7 +1634,28 @@ function renderPendingOrders() {
     </tr>`;
   }).join('');
 }
+// Tambahkan fungsi ini di bagian utils/bawah script:
+function formatTanggalOrder(str) {
+  if (!str) return '-';
+  str = String(str).trim();
 
+  // Jika sudah format dd-MM-yyyy → langsung return
+  if (str.match(/^\d{2}-\d{2}-\d{4}/)) return str;
+
+  // Jika format ISO (dari Google Sheets kadang return ini)
+  try {
+    const d = new Date(str);
+    if (isNaN(d.getTime())) return str;
+    // Convert ke WITA (UTC+8)
+    const wita = new Date(d.getTime() + (8 * 60 * 60 * 1000));
+    const pad  = n => String(n).padStart(2,'0');
+    return `${pad(wita.getUTCDate())}-${pad(wita.getUTCMonth()+1)}-${wita.getUTCFullYear()} ` +
+           `${pad(wita.getUTCHours())}:${pad(wita.getUTCMinutes())}:${pad(wita.getUTCSeconds())}`;
+  } catch(e) {
+    return str;
+  }
+}
+  
 // ── All orders table ─────────────────────────────────────────
 function renderAllOrders() {
   const tbody = document.getElementById('allOrdersBody');
