@@ -1088,61 +1088,35 @@ async function submitOrder() {
   btn.disabled  = true;
   btn.textContent = '⏳ Mengirim order...';
 
-  try {
-    const payload = {
-      action:   'submitOrder',
-      idCabang: idCabang,
-      catatan:  catatan,
-      items:    items.map(i => ({
-        kode:     i.kode,
-        nama:     i.nama,
-        kategori: i.kat || '',
-        qty:      i.qty,
-        satuan:   i.satuan,
-        harga:    i.harga
-      }))
-    };
+  const payload = {
+    action:   'submitOrder',
+    idCabang: idCabang,
+    catatan:  catatan,
+    items:    items.map(i => ({
+      kode:     i.kode,
+      nama:     i.nama,
+      kategori: i.kat || '',
+      qty:      i.qty,
+      satuan:   i.satuan,
+      harga:    i.harga
+    }))
+  };
 
-    // ── Kirim via GET dengan payload di URL ────────────────
-    // Cara ini 100% bebas CORS untuk Google Apps Script
-    const encoded = encodeURIComponent(JSON.stringify(payload));
-    const url     = `${API_URL}?action=submitOrder&payload=${encoded}`;
+  const hasil = await kirimOrderKeServer(payload);
 
-    const res  = await fetch(url, { method: 'GET' });
-    const text = await res.text();
-
-    let data = {};
-    try {
-      // Kadang Apps Script wrap dalam callback, coba parse
-      const clean = text.replace(/^[^{]*/, '').replace(/[^}]*$/, '');
-      data = JSON.parse(clean.length > 2 ? clean : text);
-    } catch(pe) {
-      console.error('Parse error, raw response:', text.substring(0, 300));
-      throw new Error('Response tidak valid dari server. Cek Apps Script log.');
-    }
-
-    if (data.status === 'ok') {
-      // Reset
-      cart = {};
-      document.getElementById('catatanInput').value = '';
-      closeCart();
-      updateCartUI();
-      renderKatalog();
-      showToast(
-        '✅ Order berhasil dikirim! Email notifikasi sudah terkirim ke admin.',
-        'success', 5000
-      );
-    } else {
-      showToast('❌ Gagal: ' + (data.message || 'Error tidak diketahui'), 'error', 5000);
-    }
-
-  } catch(err) {
-    console.error('submitOrder error:', err);
-    showToast('❌ ' + err.message, 'error', 5000);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '🚀 Kirim Order ke Gudang';
+  if (hasil.status === 'ok') {
+    cart = {};
+    document.getElementById('catatanInput').value = '';
+    closeCart();
+    updateCartUI();
+    renderKatalog();
+    showToast('✅ Order berhasil dikirim! Email notifikasi terkirim.', 'success', 5000);
+  } else {
+    showToast('❌ Gagal: ' + hasil.message, 'error', 5000);
   }
+
+  btn.disabled = false;
+  btn.textContent = '🚀 Kirim Order ke Gudang';
 }
 
 // ════════════════════════════════════════════════════════
@@ -1529,63 +1503,197 @@ async function submitOrderMassal() {
   const catatan = document.getElementById('catatanMassal').value.trim();
   const btn     = document.getElementById('btnSubmitMassal');
   btn.disabled  = true;
-  btn.textContent = '⏳ Mengirim order massal...';
+  btn.textContent = `⏳ Mengirim ${validItems.length} barang...`;
 
-  try {
-    const payload = {
-      action:   'submitOrder',
-      idCabang: idCabang,
-      catatan:  catatan ? `[ORDER MASSAL] ${catatan}` : '[ORDER MASSAL]',
-      items:    validItems.map(i => ({
-        kode:     i.kode,
-        nama:     i.nama,
-        kategori: i.kat,
-        qty:      i.qty,
-        satuan:   i.satuan,
-        harga:    i.harga
-      }))
-    };
+  const payload = {
+    action:   'submitOrder',
+    idCabang: idCabang,
+    catatan:  catatan ? `[ORDER MASSAL] ${catatan}` : '[ORDER MASSAL]',
+    items:    validItems.map(i => ({
+      kode:     i.kode,
+      nama:     i.nama,
+      kategori: i.kat,
+      qty:      i.qty,
+      satuan:   i.satuan,
+      harga:    i.harga
+    }))
+  };
 
-    const encoded = encodeURIComponent(JSON.stringify(payload));
-    const url     = `${API_URL}?action=submitOrder&payload=${encoded}`;
-    const res     = await fetch(url, { method: 'GET' });
-    const text    = await res.text();
+  // Coba kirim — otomatis pilih metode terbaik
+  const hasil = await kirimOrderKeServer(payload);
 
-    let data = {};
-    try {
-      data = JSON.parse(text);
-    } catch(pe) {
-      const clean = text.replace(/^[^{]*/, '').replace(/[^}]*$/, '');
-      data = JSON.parse(clean.length > 2 ? clean : '{"status":"error","message":"Response tidak valid"}');
-    }
-
-    if (data.status === 'ok') {
-      // Reset form
-      massalItems = [];
-      document.getElementById('massalInput').value   = '';
-      document.getElementById('catatanMassal').value = '';
-      renderMassalPreview();
-      updateMassalSummary();
-
-      showToast(
-        `✅ Order massal ${validItems.length} barang berhasil dikirim!`,
-        'success', 5000
-      );
-
-      // Pindah ke riwayat
-      setTimeout(() => showTab('riwayat'), 1500);
-
-    } else {
-      showToast('❌ Gagal: ' + (data.message || 'Error tidak diketahui'), 'error', 5000);
-    }
-
-  } catch(err) {
-    console.error('submitOrderMassal error:', err);
-    showToast('❌ ' + err.message, 'error', 5000);
-  } finally {
+  if (hasil.status === 'ok') {
+    massalItems = [];
+    document.getElementById('massalInput').value   = '';
+    document.getElementById('catatanMassal').value = '';
+    renderMassalPreview();
+    updateMassalSummary();
+    showToast(
+      `✅ Order massal ${validItems.length} barang berhasil dikirim!`,
+      'success', 5000
+    );
+    setTimeout(() => showTab('riwayat'), 1500);
+  } else {
+    showToast('❌ Gagal: ' + (hasil.message || 'Error tidak diketahui'), 'error', 6000);
     btn.disabled = false;
     updateMassalSummary();
   }
+}
+// ════════════════════════════════════════════════════════
+//  KIRIM ORDER KE SERVER — Universal, auto-fallback
+// ════════════════════════════════════════════════════════
+async function kirimOrderKeServer(payload) {
+  const jsonStr = JSON.stringify(payload);
+  const encoded = encodeURIComponent(jsonStr);
+  const urlGet  = `${API_URL}?action=submitOrder&payload=${encoded}`;
+
+  // ── METODE 1: GET (works jika payload < 7000 char) ──────
+  if (urlGet.length < 7000) {
+    try {
+      console.log('Mencoba metode GET...');
+      const res  = await fetch(urlGet, { method: 'GET' });
+      const text = await res.text();
+      const data = parseResponse(text);
+      if (data.status === 'ok') {
+        console.log('✅ Berhasil via GET');
+        return data;
+      }
+      console.warn('GET gagal:', data.message);
+    } catch(e) {
+      console.warn('GET error:', e.message);
+    }
+  } else {
+    console.log('Payload terlalu besar untuk GET, skip ke metode lain...');
+  }
+
+  // ── METODE 2: POST JSON ──────────────────────────────────
+  try {
+    console.log('Mencoba metode POST JSON...');
+    const res  = await fetch(API_URL, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    jsonStr
+    });
+    const text = await res.text();
+    const data = parseResponse(text);
+    if (data.status === 'ok') {
+      console.log('✅ Berhasil via POST JSON');
+      return data;
+    }
+    console.warn('POST JSON gagal:', data.message);
+  } catch(e) {
+    console.warn('POST JSON error:', e.message);
+  }
+
+  // ── METODE 3: POST Form ──────────────────────────────────
+  try {
+    console.log('Mencoba metode POST Form...');
+    const form = new FormData();
+    form.append('payload', jsonStr);
+    const res  = await fetch(API_URL, { method: 'POST', body: form });
+    const text = await res.text();
+    const data = parseResponse(text);
+    if (data.status === 'ok') {
+      console.log('✅ Berhasil via POST Form');
+      return data;
+    }
+    console.warn('POST Form gagal:', data.message);
+  } catch(e) {
+    console.warn('POST Form error:', e.message);
+  }
+
+  // ── METODE 4: Chunking — Pecah jadi beberapa order ──────
+  // Jika semua gagal karena payload besar, pecah per 20 item
+  const items = payload.items || [];
+  if (items.length > 20) {
+    console.log('Mencoba chunking — pecah per 20 item...');
+    const CHUNK_SIZE = 20;
+    const chunks = [];
+    for (let i = 0; i < items.length; i += CHUNK_SIZE) {
+      chunks.push(items.slice(i, i + CHUNK_SIZE));
+    }
+
+    let successCount = 0;
+    let lastOrderId  = '';
+    const errors     = [];
+
+    for (let c = 0; c < chunks.length; c++) {
+      const chunkPayload = {
+        ...payload,
+        catatan: `${payload.catatan} [Bagian ${c+1}/${chunks.length}]`,
+        items:   chunks[c]
+      };
+
+      showToast(
+        `⏳ Mengirim bagian ${c+1} dari ${chunks.length}...`,
+        'info', 2000
+      );
+
+      const encoded2 = encodeURIComponent(JSON.stringify(chunkPayload));
+      const urlChunk = `${API_URL}?action=submitOrder&payload=${encoded2}`;
+
+      try {
+        const res  = await fetch(urlChunk, { method: 'GET' });
+        const text = await res.text();
+        const data = parseResponse(text);
+        if (data.status === 'ok') {
+          successCount++;
+          lastOrderId = data.orderId || '';
+        } else {
+          errors.push(`Bagian ${c+1}: ${data.message}`);
+        }
+      } catch(e) {
+        errors.push(`Bagian ${c+1}: ${e.message}`);
+      }
+
+      // Jeda antar chunk agar tidak throttle
+      if (c < chunks.length - 1) {
+        await new Promise(r => setTimeout(r, 800));
+      }
+    }
+
+    if (successCount === chunks.length) {
+      return {
+        status:  'ok',
+        message: `Semua ${chunks.length} bagian berhasil dikirim`,
+        orderId: lastOrderId
+      };
+    } else if (successCount > 0) {
+      return {
+        status:  'ok',
+        message: `${successCount} dari ${chunks.length} bagian berhasil. ${errors.join(', ')}`,
+        orderId: lastOrderId
+      };
+    } else {
+      return {
+        status:  'error',
+        message: 'Semua bagian gagal: ' + errors.join(', ')
+      };
+    }
+  }
+
+  // Semua metode gagal
+  return {
+    status:  'error',
+    message: 'Gagal terhubung ke server. Cek koneksi internet dan pastikan Apps Script sudah di-deploy.'
+  };
+}
+
+// ── Helper parse response dari Apps Script ────────────────
+function parseResponse(text) {
+  if (!text || text.trim() === '') {
+    return { status: 'error', message: 'Response kosong dari server' };
+  }
+  // Coba parse langsung
+  try {
+    return JSON.parse(text);
+  } catch(e1) {}
+  // Coba bersihkan prefix/suffix HTML
+  try {
+    const match = text.match(/\{[\s\S]*\}/);
+    if (match) return JSON.parse(match[0]);
+  } catch(e2) {}
+  return { status: 'error', message: 'Response tidak valid: ' + text.substring(0, 100) };
 }
   
 </script>
