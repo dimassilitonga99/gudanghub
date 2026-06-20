@@ -358,6 +358,107 @@
     ::-webkit-scrollbar{width:4px;height:4px;}
     ::-webkit-scrollbar-track{background:transparent;}
     ::-webkit-scrollbar-thumb{background:rgba(255,107,0,0.3);border-radius:2px;}
+/* ── ORDER MASSAL PREVIEW ── */
+.massal-item {
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.2s;
+}
+.massal-item.valid {
+  border-color: rgba(34,197,94,0.3);
+}
+.massal-item.invalid {
+  border-color: rgba(239,68,68,0.3);
+  background: rgba(239,68,68,0.05);
+}
+.massal-item.warning {
+  border-color: rgba(245,158,11,0.3);
+  background: rgba(245,158,11,0.05);
+}
+.massal-status-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.massal-info { flex: 1; min-width: 0; }
+.massal-nama {
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.massal-kode {
+  font-size: 10px;
+  color: var(--orange);
+  font-family: monospace;
+  margin-bottom: 2px;
+}
+.massal-harga { font-size: 11px; color: var(--muted); }
+.massal-right { text-align: right; flex-shrink: 0; }
+.massal-subtotal {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--orange);
+}
+.massal-qty-wrap {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 4px;
+  justify-content: flex-end;
+}
+.massal-qty-btn {
+  width: 24px; height: 24px;
+  border-radius: 6px; border: none;
+  background: var(--dark3);
+  color: var(--text); font-size: 14px;
+  cursor: pointer; transition: all 0.15s;
+}
+.massal-qty-btn:hover { background: var(--orange); color: #fff; }
+.massal-qty-num {
+  width: 36px; text-align: center;
+  font-size: 12px; font-weight: 700;
+  background: var(--dark3); border-radius: 5px;
+  padding: 3px; border: none; outline: none;
+  color: var(--text);
+}
+.massal-del {
+  background: none; border: none;
+  color: var(--muted); font-size: 14px;
+  cursor: pointer; padding: 2px;
+  transition: color 0.2s;
+}
+.massal-del:hover { color: var(--red); }
+
+/* Error/warning badge */
+.massal-error {
+  font-size: 10px;
+  color: var(--red);
+  margin-top: 2px;
+}
+.massal-warn {
+  font-size: 10px;
+  color: var(--yellow);
+  margin-top: 2px;
+}
+
+/* Summary bar */
+.massal-summary {
+  background: var(--dark3);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+    
   </style>
 </head>
 <body>
@@ -397,6 +498,122 @@
   </div>
 </div>
 
+<!-- HALAMAN ORDER MASSAL -->
+<div id="pageMassal" style="display:none;">
+  <div style="padding:20px 16px 0;">
+    <div style="font-size:18px;font-weight:800;">⚡ Order Massal</div>
+    <div style="font-size:12px;color:var(--muted);margin-top:4px;">
+      Copy-paste kode & jumlah barang sekaligus
+    </div>
+  </div>
+
+  <!-- CARA PAKAI -->
+  <div style="margin:16px 16px 0;background:rgba(255,107,0,0.08);
+              border:1px solid rgba(255,107,0,0.2);border-radius:14px;padding:16px;">
+    <div style="font-size:12px;font-weight:700;color:var(--orange);margin-bottom:8px;">
+      📋 Format Input
+    </div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.8;font-family:monospace;
+                background:rgba(0,0,0,0.3);border-radius:8px;padding:10px;">
+      KODE001;5<br>
+      KODE002;10<br>
+      KODE003;3
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.6;">
+      • Satu baris = satu barang<br>
+      • Format: <strong style="color:var(--orange)">KODE_BARANG;JUMLAH</strong><br>
+      • Pisahkan dengan titik koma ( ; )<br>
+      • Bisa copy dari Excel/WhatsApp
+    </div>
+  </div>
+
+  <!-- INPUT AREA -->
+  <div style="padding:16px;">
+    <div style="font-size:12px;font-weight:600;color:var(--muted);
+                text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">
+      Input Kode & Jumlah
+    </div>
+    <textarea id="massalInput"
+      style="width:100%;min-height:200px;background:var(--card);
+             border:1px solid var(--border2);border-radius:14px;
+             padding:14px;color:var(--text);font-size:14px;
+             font-family:monospace;line-height:1.8;resize:vertical;
+             outline:none;transition:border-color 0.2s;"
+      placeholder="Contoh:&#10;NN00000;5&#10;NN00001;10&#10;MM00001;3&#10;&#10;Copy dari Excel atau ketik manual..."
+      oninput="autoPreviewMassal()"
+      onfocus="this.style.borderColor='var(--orange)'"
+      onblur="this.style.borderColor='var(--border2)'"></textarea>
+
+    <!-- Tombol aksi input -->
+    <div style="display:flex;gap:8px;margin-top:10px;">
+      <button onclick="pasteFromClipboard()"
+        style="flex:1;padding:10px;background:var(--dark3);
+               border:1px solid var(--border2);border-radius:10px;
+               color:var(--muted);font-size:12px;font-weight:600;
+               cursor:pointer;transition:all 0.2s;"
+        onmouseover="this.style.color='var(--text)'"
+        onmouseout="this.style.color='var(--muted)'">
+        📋 Paste dari Clipboard
+      </button>
+      <button onclick="clearMassalInput()"
+        style="padding:10px 16px;background:var(--dark3);
+               border:1px solid var(--border2);border-radius:10px;
+               color:var(--muted);font-size:12px;font-weight:600;
+               cursor:pointer;transition:all 0.2s;"
+        onmouseover="this.style.color='var(--red)'"
+        onmouseout="this.style.color='var(--muted)'">
+        🗑 Hapus
+      </button>
+    </div>
+  </div>
+
+  <!-- PREVIEW HASIL PARSING -->
+  <div style="padding:0 16px 16px;">
+    <div style="font-size:12px;font-weight:600;color:var(--muted);
+                text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">
+      Preview Barang
+    </div>
+    <div id="massalPreview">
+      <div style="text-align:center;padding:30px;color:var(--muted);
+                  background:var(--card);border-radius:14px;
+                  border:1px dashed var(--border2);">
+        <div style="font-size:32px;margin-bottom:8px;">⚡</div>
+        <div style="font-size:13px;">Mulai ketik atau paste kode barang di atas</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CATATAN & TOMBOL SUBMIT -->
+  <div style="padding:0 16px 120px;">
+    <textarea id="catatanMassal"
+      style="width:100%;background:var(--card);border:1px solid var(--border2);
+             border-radius:10px;padding:10px 14px;color:var(--text);
+             font-size:13px;font-family:inherit;resize:none;outline:none;
+             transition:border-color 0.2s;margin-bottom:12px;"
+      placeholder="Catatan untuk admin gudang (opsional)..." rows="2"
+      onfocus="this.style.borderColor='var(--orange)'"
+      onblur="this.style.borderColor='var(--border2)'"></textarea>
+
+    <button id="btnSubmitMassal" onclick="submitOrderMassal()"
+      style="width:100%;padding:15px;border-radius:14px;border:none;
+             background:linear-gradient(135deg,var(--orange),var(--orange-light));
+             color:#fff;font-size:15px;font-weight:800;cursor:pointer;
+             transition:all 0.2s;opacity:0.5;pointer-events:none;"
+      disabled>
+      ⚡ Kirim Order Massal ke Gudang
+    </button>
+
+    <div id="massalSummaryBar"
+      style="display:none;margin-top:10px;
+             background:var(--dark3);border-radius:10px;padding:10px 14px;
+             display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:12px;color:var(--muted)" id="massalSummaryItem">0 item</span>
+      <span style="font-size:14px;font-weight:800;color:var(--orange)"
+            id="massalSummaryTotal">Rp 0</span>
+    </div>
+  </div>
+</div>
+  
 <!-- HALAMAN RIWAYAT -->
 <div id="pageRiwayat" style="display:none;">
   <div style="padding:20px 16px 8px;">
@@ -425,6 +642,9 @@
 <div class="bottom-nav">
   <button class="nav-tab active" id="tab-katalog" onclick="showTab('katalog')">
     <span class="nt-icon">🛍️</span>Katalog
+  </button>
+  <button class="nav-tab" id="tab-massal" onclick="showTab('massal')">
+    <span class="nt-icon">⚡</span>Order Massal
   </button>
   <button class="nav-tab" id="tab-riwayat" onclick="showTab('riwayat')">
     <span class="nt-icon">📋</span>Riwayat
@@ -1029,6 +1249,345 @@ window.addEventListener('load', () => {
   if (!initSession()) return;
   loadKatalog();
 });
+// ════════════════════════════════════════════════════════
+//  ORDER MASSAL
+// ════════════════════════════════════════════════════════
+
+// State order massal
+let massalItems = []; // { kode, nama, kat, harga, satuan, qty, valid, error }
+
+// Update showTab agar support tab massal
+const _showTabOri = showTab;
+function showTab(tab) {
+  document.getElementById('pageKatalog').style.display  = tab==='katalog' ? '' : 'none';
+  document.getElementById('pageMassal').style.display   = tab==='massal'  ? '' : 'none';
+  document.getElementById('pageRiwayat').style.display  = tab==='riwayat' ? '' : 'none';
+
+  document.getElementById('tab-katalog').classList.toggle('active', tab==='katalog');
+  document.getElementById('tab-massal').classList.toggle('active',  tab==='massal');
+  document.getElementById('tab-riwayat').classList.toggle('active', tab==='riwayat');
+
+  if (tab === 'riwayat') loadRiwayat();
+  if (tab === 'massal')  renderMassalPreview();
+}
+
+// Paste dari clipboard
+async function pasteFromClipboard() {
+  try {
+    const text = await navigator.clipboard.readText();
+    document.getElementById('massalInput').value = text;
+    autoPreviewMassal();
+    showToast('✅ Berhasil paste dari clipboard', 'success');
+  } catch(e) {
+    showToast('Gagal paste otomatis — paste manual dengan Ctrl+V', 'info');
+  }
+}
+
+// Hapus input
+function clearMassalInput() {
+  document.getElementById('massalInput').value = '';
+  massalItems = [];
+  renderMassalPreview();
+  updateMassalSummary();
+}
+
+// Auto preview saat mengetik
+function autoPreviewMassal() {
+  parseMassalInput();
+  renderMassalPreview();
+  updateMassalSummary();
+}
+
+// Parse input teks → array massalItems
+function parseMassalInput() {
+  const raw   = document.getElementById('massalInput').value || '';
+  const lines = raw.split('\n').map(l => l.trim()).filter(l => l !== '');
+
+  massalItems = lines.map(line => {
+    // Terima separator: ; atau , atau tab atau spasi ganda
+    const parts = line.split(/[;,\t]/).map(p => p.trim());
+
+    if (parts.length < 2) {
+      return {
+        kode: line, nama: '', kat: '', harga: 0, satuan: '',
+        qty: 0, valid: false,
+        error: 'Format salah — gunakan KODE;JUMLAH'
+      };
+    }
+
+    const kode = String(parts[0]).trim().toUpperCase();
+    const qty  = parseInt(parts[1]) || 0;
+
+    if (!kode) {
+      return { kode:'', nama:'', kat:'', harga:0, satuan:'', qty:0,
+               valid:false, error:'Kode barang kosong' };
+    }
+    if (qty <= 0) {
+      return { kode, nama:'', kat:'', harga:0, satuan:'', qty:0,
+               valid:false, error:'Jumlah harus lebih dari 0' };
+    }
+
+    // Cari di katalog
+    const barang = semuaBarang.find(b =>
+      String(b.KODE_BARANG || '').trim().toUpperCase() === kode
+    );
+
+    if (!barang) {
+      return { kode, nama:'', kat:'', harga:0, satuan:'', qty,
+               valid:false, error:`Kode "${kode}" tidak ditemukan di katalog` };
+    }
+
+    const stok = parseInt(barang.STOK) || 0;
+    const warn = stok > 0 && qty > stok
+      ? `⚠️ Jumlah (${qty}) melebihi stok (${stok})`
+      : '';
+
+    return {
+      kode,
+      nama:    String(barang.NAMA_BARANG || ''),
+      kat:     String(barang.KATEGORI   || ''),
+      harga:   parseFloat(barang.HARGA) || 0,
+      satuan:  String(barang.SATUAN     || 'PCS'),
+      qty,
+      stok,
+      valid:   true,
+      warning: warn,
+      error:   ''
+    };
+  });
+}
+
+// Render preview card
+function renderMassalPreview() {
+  const wrap = document.getElementById('massalPreview');
+  if (!wrap) return;
+
+  if (!massalItems.length) {
+    wrap.innerHTML = `
+      <div style="text-align:center;padding:30px;color:var(--muted);
+                  background:var(--card);border-radius:14px;
+                  border:1px dashed var(--border2);">
+        <div style="font-size:32px;margin-bottom:8px;">⚡</div>
+        <div style="font-size:13px;">Mulai ketik atau paste kode barang di atas</div>
+      </div>`;
+    return;
+  }
+
+  const validCount   = massalItems.filter(i => i.valid).length;
+  const invalidCount = massalItems.filter(i => !i.valid).length;
+
+  // Summary bar atas
+  let summaryBar = `
+    <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+      <span style="background:rgba(34,197,94,0.15);color:var(--green);
+                   padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;">
+        ✅ ${validCount} valid
+      </span>
+      ${invalidCount > 0 ? `
+      <span style="background:rgba(239,68,68,0.15);color:var(--red);
+                   padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;">
+        ❌ ${invalidCount} error
+      </span>` : ''}
+      <span style="background:var(--dark3);color:var(--muted);
+                   padding:4px 12px;border-radius:20px;font-size:11px;">
+        Total ${massalItems.length} baris
+      </span>
+    </div>`;
+
+  const cards = massalItems.map((item, idx) => {
+    if (!item.valid) {
+      return `
+        <div class="massal-item invalid">
+          <span class="massal-status-icon">❌</span>
+          <div class="massal-info">
+            <div class="massal-kode">${item.kode || '?'}</div>
+            <div class="massal-nama" style="color:var(--red);">Tidak ditemukan</div>
+            <div class="massal-error">${item.error}</div>
+          </div>
+          <button class="massal-del" onclick="hapusMassalItem(${idx})">🗑</button>
+        </div>`;
+    }
+
+    const subtotal = item.qty * item.harga;
+    return `
+      <div class="massal-item valid" id="massal-card-${idx}">
+        <span class="massal-status-icon">
+          ${item.warning ? '⚠️' : '✅'}
+        </span>
+        <div class="massal-info">
+          <div class="massal-kode">${item.kode}</div>
+          <div class="massal-nama">${item.nama}</div>
+          <div class="massal-harga">
+            ${formatRp(item.harga)} / ${item.satuan}
+            ${item.stok !== undefined
+              ? `· Stok: <span style="color:${item.stok>5?'var(--green)':item.stok>0?'var(--yellow)':'var(--red)'}">
+                   ${item.stok}
+                 </span>`
+              : ''}
+          </div>
+          ${item.warning
+            ? `<div class="massal-warn">${item.warning}</div>`
+            : ''}
+        </div>
+        <div class="massal-right">
+          <div class="massal-subtotal">${formatRp(subtotal)}</div>
+          <div class="massal-qty-wrap">
+            <button class="massal-qty-btn"
+              onclick="massalQty(${idx},-1)">−</button>
+            <input class="massal-qty-num" type="number"
+              value="${item.qty}" min="1"
+              onchange="massalQtySet(${idx},this.value)"
+              id="massal-qty-${idx}"/>
+            <button class="massal-qty-btn"
+              onclick="massalQty(${idx},1)">+</button>
+          </div>
+        </div>
+        <button class="massal-del" onclick="hapusMassalItem(${idx})">🗑</button>
+      </div>`;
+  }).join('');
+
+  wrap.innerHTML = summaryBar + cards;
+}
+
+// Hapus 1 item dari massal
+function hapusMassalItem(idx) {
+  massalItems.splice(idx, 1);
+  // Update textarea juga
+  const lines = document.getElementById('massalInput').value
+    .split('\n').filter(l => l.trim() !== '');
+  lines.splice(idx, 1);
+  document.getElementById('massalInput').value = lines.join('\n');
+  renderMassalPreview();
+  updateMassalSummary();
+}
+
+// Ubah qty dari tombol +/-
+function massalQty(idx, delta) {
+  if (!massalItems[idx] || !massalItems[idx].valid) return;
+  massalItems[idx].qty = Math.max(1, massalItems[idx].qty + delta);
+  // Sync input
+  const inp = document.getElementById('massal-qty-' + idx);
+  if (inp) inp.value = massalItems[idx].qty;
+  // Re-render hanya card ini
+  updateMassalSummary();
+  renderMassalPreview();
+}
+
+// Set qty dari input langsung
+function massalQtySet(idx, val) {
+  if (!massalItems[idx] || !massalItems[idx].valid) return;
+  massalItems[idx].qty = Math.max(1, parseInt(val) || 1);
+  updateMassalSummary();
+}
+
+// Update summary bar bawah & enable/disable tombol
+function updateMassalSummary() {
+  const validItems = massalItems.filter(i => i.valid);
+  const total      = validItems.reduce((s,i) => s + i.qty * i.harga, 0);
+  const totalQty   = validItems.reduce((s,i) => s + i.qty, 0);
+
+  const btn     = document.getElementById('btnSubmitMassal');
+  const barItem = document.getElementById('massalSummaryItem');
+  const barTotal= document.getElementById('massalSummaryTotal');
+  const bar     = document.getElementById('massalSummaryBar');
+
+  if (validItems.length > 0) {
+    if (btn) {
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.style.pointerEvents = 'auto';
+      btn.textContent = `⚡ Kirim ${validItems.length} Barang ke Gudang`;
+    }
+    if (bar)     bar.style.display = 'flex';
+    if (barItem) barItem.textContent = `${validItems.length} jenis · ${totalQty} unit`;
+    if (barTotal)barTotal.textContent = formatRp(total);
+  } else {
+    if (btn) {
+      btn.disabled = true;
+      btn.style.opacity = '0.5';
+      btn.style.pointerEvents = 'none';
+      btn.textContent = '⚡ Kirim Order Massal ke Gudang';
+    }
+    if (bar) bar.style.display = 'none';
+  }
+}
+
+// Submit order massal
+async function submitOrderMassal() {
+  const validItems = massalItems.filter(i => i.valid);
+
+  if (!validItems.length) {
+    showToast('Tidak ada barang valid untuk dikirim!', 'error');
+    return;
+  }
+  if (!idCabang) {
+    showToast('Session tidak valid, silakan login ulang.', 'error');
+    setTimeout(() => window.location.href = 'login.html', 1500);
+    return;
+  }
+
+  const catatan = document.getElementById('catatanMassal').value.trim();
+  const btn     = document.getElementById('btnSubmitMassal');
+  btn.disabled  = true;
+  btn.textContent = '⏳ Mengirim order massal...';
+
+  try {
+    const payload = {
+      action:   'submitOrder',
+      idCabang: idCabang,
+      catatan:  catatan ? `[ORDER MASSAL] ${catatan}` : '[ORDER MASSAL]',
+      items:    validItems.map(i => ({
+        kode:     i.kode,
+        nama:     i.nama,
+        kategori: i.kat,
+        qty:      i.qty,
+        satuan:   i.satuan,
+        harga:    i.harga
+      }))
+    };
+
+    const encoded = encodeURIComponent(JSON.stringify(payload));
+    const url     = `${API_URL}?action=submitOrder&payload=${encoded}`;
+    const res     = await fetch(url, { method: 'GET' });
+    const text    = await res.text();
+
+    let data = {};
+    try {
+      data = JSON.parse(text);
+    } catch(pe) {
+      const clean = text.replace(/^[^{]*/, '').replace(/[^}]*$/, '');
+      data = JSON.parse(clean.length > 2 ? clean : '{"status":"error","message":"Response tidak valid"}');
+    }
+
+    if (data.status === 'ok') {
+      // Reset form
+      massalItems = [];
+      document.getElementById('massalInput').value   = '';
+      document.getElementById('catatanMassal').value = '';
+      renderMassalPreview();
+      updateMassalSummary();
+
+      showToast(
+        `✅ Order massal ${validItems.length} barang berhasil dikirim!`,
+        'success', 5000
+      );
+
+      // Pindah ke riwayat
+      setTimeout(() => showTab('riwayat'), 1500);
+
+    } else {
+      showToast('❌ Gagal: ' + (data.message || 'Error tidak diketahui'), 'error', 5000);
+    }
+
+  } catch(err) {
+    console.error('submitOrderMassal error:', err);
+    showToast('❌ ' + err.message, 'error', 5000);
+  } finally {
+    btn.disabled = false;
+    updateMassalSummary();
+  }
+}
+  
 </script>
 </body>
 </html>
