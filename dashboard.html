@@ -1551,23 +1551,29 @@ function updateBarChart() {
 
 // ── Activity feed ────────────────────────────────────────────
 function updateActivity() {
-  const sorted = [...allOrders].sort((a,b) =>
-    new Date(b.TANGGAL_ORDER) - new Date(a.TANGGAL_ORDER)
-  ).slice(0, 6);
+  const sorted = [...allOrders].sort((a, b) => {
+    const da = parseWITADate(String(a.TANGGAL_ORDER));
+    const db = parseWITADate(String(b.TANGGAL_ORDER));
+    return db - da;
+  }).slice(0, 6);
 
-  const colors = { PENDING: 'orange', APPROVED: 'green', REJECTED: 'red' };
-  const emojis = { PENDING: '⏳', APPROVED: '✅', REJECTED: '❌' };
+  const colors = { PENDING:'orange', APPROVED:'green', REJECTED:'red' };
+  const emojis = { PENDING:'⏳', APPROVED:'✅', REJECTED:'❌' };
 
   const html = sorted.length ? sorted.map(o => {
-    const cb = CABANG_INFO[o.ID_CABANG] || { nama: o.ID_CABANG, pic: '' };
+    const cb     = CABANG_INFO[o.ID_CABANG] || { nama: o.ID_CABANG, pic: o.ID_CABANG };
+    const status = String(o.STATUS || '').toUpperCase();
+    const tgl    = formatTanggalDisplay(String(o.TANGGAL_ORDER || ''));
+
     return `<div class="activity-item">
-      <div class="activity-dot ${colors[o.STATUS] || 'blue'}"></div>
+      <div class="activity-dot ${colors[status] || 'blue'}"></div>
       <div class="activity-content">
         <div class="activity-text">
-          ${emojis[o.STATUS]} Order dari <strong>${cb.pic || o.ID_CABANG}</strong>
+          ${emojis[status] || '📦'} Order dari
+          <strong>${cb.pic || o.ID_CABANG}</strong>
           · <span style="color:var(--muted);font-size:11px;">${o.ORDER_ID}</span>
         </div>
-        <div class="activity-time">🕐 ${o.TANGGAL_ORDER} WITA</div>
+        <div class="activity-time">🕐 ${tgl} WITA</div>
       </div>
     </div>`;
   }).join('')
@@ -1622,7 +1628,7 @@ function renderPendingOrders() {
           ${cb.icon} ${cb.pic}
         </div>
       </td>
-      <td style="color:var(--muted);font-size:12px;">${formatTanggalOrder(o.TANGGAL_ORDER)}</td>
+      <td style="color:var(--muted);font-size:12px;">${formatTanggalDisplay(String(o.TANGGAL_ORDER||''))}</td>
       <td style="text-align:center;">${items} item</td>
       <td>
         <div class="action-btns">
@@ -1693,7 +1699,7 @@ function renderAllOrders() {
       <td>
         <div class="cabang-badge">${cb.icon} ${cb.pic} <span style="color:var(--muted)">(${o.ID_CABANG})</span></div>
       </td>
-      <td style="font-size:12px;color:var(--muted);">${formatTanggalOrder(o.TANGGAL_ORDER)}</td>
+      <td style="font-size:12px;color:var(--muted);">${formatTanggalDisplay(String(o.TANGGAL_ORDER||''))}</td>
       <td style="font-size:12px;color:var(--muted);">${o.CATATAN || '—'}</td>
       <td>${statusMap[o.STATUS] || o.STATUS}</td>
       <td>${actionMap[o.STATUS] || ''}</td>
@@ -1947,7 +1953,7 @@ function showDetail(orderId) {
     </div>
     <div class="info-row">
       <span class="info-label">Tanggal Order</span>
-      <span class="info-value">${order.TANGGAL_ORDER} WITA</span>
+      <span class="info-value">${formatTanggalDisplay(String(order.TANGGAL_ORDER||''))} WITA</span>
     </div>
     <div class="info-row">
       <span class="info-label">Status</span>
@@ -2009,7 +2015,31 @@ function formatRp(val) {
   const n = parseFloat(val) || 0;
   return 'Rp ' + n.toLocaleString('id-ID');
 }
+function formatTanggalDisplay(str) {
+  if (!str || str === '') return '-';
+  str = String(str).trim();
 
+  // Sudah format benar: dd-MM-yyyy HH:mm:ss → langsung return
+  if (/^\d{2}-\d{2}-\d{4}/.test(str)) {
+    return str.replace(' ', ' ').split('.')[0]; // buang milidetik jika ada
+  }
+
+  // Format ISO: 2026-06-20T06:04:29.000Z atau 2026-06-20T06:04:29+08:00
+  try {
+    const d = new Date(str);
+    if (isNaN(d.getTime())) return str;
+
+    // Konversi ke WITA (UTC+8)
+    const wita = new Date(d.getTime() + (8 * 60 * 60 * 1000));
+    const pad  = n => String(n).padStart(2, '0');
+
+    return `${pad(wita.getUTCDate())}-${pad(wita.getUTCMonth() + 1)}-${wita.getUTCFullYear()} ` +
+           `${pad(wita.getUTCHours())}:${pad(wita.getUTCMinutes())}:${pad(wita.getUTCSeconds())}`;
+  } catch(e) {
+    return str;
+  }
+}
+  
 // ── INIT ─────────────────────────────────────────────────────
 window.addEventListener('load', () => {
   const session = checkSession();
