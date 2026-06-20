@@ -1485,17 +1485,7 @@ function updateStats() {
 
 function animateNumber(id, target) {
   const el = document.getElementById(id);
-  const start = parseInt(el.textContent) || 0;
-  const step = Math.ceil(Math.abs(target - start) / 20) || 1;
-  let curr = start;
-  const timer = setInterval(() => {
-    curr += (target > curr ? 1 : -1) * step;
-    if ((target > start && curr >= target) || (target < start && curr <= target)) {
-      curr = target;
-      clearInterval(timer);
-    }
-    el.textContent = curr;
-  }, 30);
+  if (el) el.textContent = target;
 }
 
 function updatePendingBadge() {
