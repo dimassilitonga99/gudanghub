@@ -458,6 +458,30 @@
   justify-content: space-between;
   align-items: center;
 }
+/* Search responsif */
+#searchInput {
+  -webkit-appearance: none;
+  appearance: none;
+  font-size: 16px; /* Cegah zoom di iOS */
+  will-change: contents;
+}
+
+/* Katalog grid pakai contain untuk performa */
+.katalog-grid {
+  contain: layout style;
+}
+
+/* Item card — GPU accelerated hover */
+.item-card {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* Smooth label update */
+#sectionLabel {
+  transition: none; /* Tidak perlu transisi, langsung update */
+  min-height: 20px;
+}
     
   </style>
 </head>
@@ -482,8 +506,12 @@
     <div class="search-box">
       <span class="search-icon">🔍</span>
       <input type="text" id="searchInput"
-             placeholder="Cari kode atau nama barang..."
-             oninput="filterKatalog()"/>
+       placeholder="Cari kode atau nama barang..."
+       oninput="debounceSearch(this.value)"
+       autocomplete="off"
+       autocorrect="off"
+       autocapitalize="off"
+       spellcheck="false"/>
     </div>
     <div class="filter-scroll" id="filterScroll">
       <div class="filter-chip active" onclick="setKategori('',this)">Semua</div>
@@ -859,18 +887,75 @@ function setKategori(kat, el) {
   filterKatalog();
 }
 
-function filterKatalog() {
-  const q = document.getElementById('searchInput').value.toLowerCase().trim();
-  tampilBarang = semuaBarang.filter(b => {
-    const matchKat = !kategoriAktif ||
-      String(b.KATEGORI || '') === kategoriAktif;
-    const matchQ = !q ||
-      String(b.KODE_BARANG || '').toLowerCase().includes(q) ||
-      String(b.NAMA_BARANG || '').toLowerCase().includes(q) ||
-      String(b.KATEGORI   || '').toLowerCase().includes(q);
-    return matchKat && matchQ;
-  });
+// ── Debounce timer ────────────────────────────────────────
+let searchTimer = null;
+let searchCache = {};
+
+function debounceSearch(val) {
+  clearTimeout(searchTimer);
+  // Tampilkan indikator loading instan
+  const label = document.getElementById('sectionLabel');
+  if (label) label.textContent = 'Mencari...';
+  // Tunggu 180ms setelah berhenti mengetik
+  searchTimer = setTimeout(() => {
+    filterKatalog(val);
+  }, 180);
+}
+
+function filterKatalog(val) {
+  // Ambil nilai dari parameter atau dari input
+  const raw = val !== undefined ? val : (document.getElementById('searchInput')?.value || '');
+  const q   = raw.toLowerCase().trim();
+
+  // Cek cache — jika query sama & kategori sama, skip re-filter
+  const cacheKey = q + '|' + kategoriAktif;
+  if (searchCache[cacheKey]) {
+    tampilBarang = searchCache[cacheKey];
+    renderKatalog();
+    return;
+  }
+
+  // Filter
+  if (!q && !kategoriAktif) {
+    // Tidak ada filter → tampil semua
+    tampilBarang = semuaBarang;
+  } else {
+    tampilBarang = semuaBarang.filter(b => {
+      const matchKat = !kategoriAktif ||
+        String(b.KATEGORI || '') === kategoriAktif;
+
+      if (!q) return matchKat;
+
+      // Cek kode dulu (exact prefix match = prioritas)
+      const kode = String(b.KODE_BARANG || '').toLowerCase();
+      const nama = String(b.NAMA_BARANG || '').toLowerCase();
+      const kat  = String(b.KATEGORI   || '').toLowerCase();
+
+      const matchQ = kode.startsWith(q) ||
+                     kode.includes(q)   ||
+                     nama.includes(q)   ||
+                     kat.includes(q);
+
+      return matchKat && matchQ;
+    });
+  }
+
+  // Simpan ke cache (max 30 entry)
+  const cacheKeys = Object.keys(searchCache);
+  if (cacheKeys.length > 30) delete searchCache[cacheKeys[0]];
+  searchCache[cacheKey] = tampilBarang;
+
   renderKatalog();
+}
+
+function setKategori(kat, el) {
+  kategoriAktif = kat;
+  // Reset cache saat kategori berubah
+  searchCache = {};
+  document.querySelectorAll('.filter-chip')
+    .forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  filterKatalog(document.getElementById('searchInput')?.value || '');
 }
 
 function getEmoji(kat) {
@@ -882,65 +967,127 @@ function getEmoji(kat) {
   return map[kat] || '📦';
 }
 
-function renderKatalog() {
-  const grid = document.getElementById('katalogGrid');
-  document.getElementById('sectionLabel').textContent =
-    `Katalog Barang — ${tampilBarang.length} item`;
+// ── Render katalog — optimized ────────────────────────────
+let lastRenderedCount = -1;
 
-  if (!tampilBarang.length) {
+function renderKatalog() {
+  const grid  = document.getElementById('katalogGrid');
+  const label = document.getElementById('sectionLabel');
+  if (!grid) return;
+
+  const count = tampilBarang.length;
+  label.textContent = `Katalog Barang — ${count} item`;
+
+  if (!count) {
     grid.innerHTML = `
       <div class="empty-state">
         <div class="ei">🔍</div>
         <p>Barang tidak ditemukan</p>
       </div>`;
+    lastRenderedCount = 0;
     return;
   }
 
-  grid.innerHTML = tampilBarang.map(b => {
-    const kode   = String(b.KODE_BARANG || '');
-    const nama   = String(b.NAMA_BARANG || '');
-    const kat    = String(b.KATEGORI   || '');
-    const satuan = String(b.SATUAN     || 'PCS');
-    const harga  = parseFloat(b.HARGA) || 0;
-    const stok   = parseInt(b.STOK)    || 0;
-    const qtyVal = cart[kode] ? cart[kode].qty : 1;
+  // Batasi render awal — tampilkan 40 item dulu, sisanya lazy
+  const BATCH   = 40;
+  const tampil  = tampilBarang.slice(0, BATCH);
+  const sisanya = count - tampil.length;
 
-    let stokCls  = 'stok-ok';
-    let stokTeks = `Stok: ${stok}`;
-    if (stok === 0)  { stokCls = 'stok-habis'; stokTeks = 'Habis'; }
-    else if (stok <= 5) { stokCls = 'stok-low'; stokTeks = `Stok: ${stok}`; }
+  // Build HTML string (jauh lebih cepat dari createElement)
+  const html = tampil.map(b => buildItemCard(b)).join('');
 
-    const inCart    = cart[kode] ? 'in-cart' : '';
-    const addedCls  = cart[kode] ? 'added'   : '';
-    const addedTeks = cart[kode] ? '✅ Di Keranjang' : '+ Tambah';
-    const disabled  = stok === 0 ? 'disabled' : '';
+  const more = sisanya > 0 ? `
+    <div style="grid-column:1/-1;text-align:center;padding:20px;">
+      <button onclick="loadMoreKatalog()"
+        style="background:var(--orange-dim);border:1px solid var(--border);
+               border-radius:12px;padding:12px 32px;color:var(--orange);
+               font-size:13px;font-weight:700;cursor:pointer;">
+        Tampilkan ${sisanya} barang lainnya ▼
+      </button>
+    </div>` : '';
 
-    return `
-      <div class="item-card ${inCart}" id="card-${kode}">
-        <span class="item-stok ${stokCls}">${stokTeks}</span>
-        <span class="item-emoji">${getEmoji(kat)}</span>
-        <div class="item-kode">${kode}</div>
-        <div class="item-nama">${nama}</div>
-        <div class="item-kat">${kat}</div>
-        <div class="item-harga">${formatRp(harga)}</div>
-        <div class="item-satuan">per ${satuan}</div>
-        <div class="qty-wrap">
-          <button class="qty-btn"
-            onclick="changeQtyCard('${kode}',-1)">−</button>
-          <input class="qty-num" type="number" min="1"
-            id="qty-${kode}" value="${qtyVal}"
-            onchange="setQtyCard('${kode}',this.value)"/>
-          <button class="qty-btn"
-            onclick="changeQtyCard('${kode}',1)">+</button>
-        </div>
-        <button class="btn-add ${addedCls}" ${disabled}
-          id="btn-${kode}"
-          onclick="addToCart('${kode}','${nama.replace(/'/g,"\\'")}',
-                             '${kat}',${harga},'${satuan}')">
-          ${addedTeks}
-        </button>
-      </div>`;
-  }).join('');
+  grid.innerHTML = html + more;
+  lastRenderedCount = tampil.length;
+}
+
+// Load more saat klik
+function loadMoreKatalog() {
+  const grid   = document.getElementById('katalogGrid');
+  const sudah  = lastRenderedCount;
+  const tambah = tampilBarang.slice(sudah, sudah + 40);
+  const sisanya= tampilBarang.length - sudah - tambah.length;
+
+  // Hapus tombol load more dulu
+  const btnWrap = grid.querySelector('[onclick="loadMoreKatalog()"]')?.parentElement;
+  if (btnWrap) btnWrap.remove();
+
+  // Append HTML baru
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = tambah.map(b => buildItemCard(b)).join('');
+  while (tempDiv.firstChild) grid.appendChild(tempDiv.firstChild);
+
+  lastRenderedCount += tambah.length;
+
+  // Tambah tombol lagi jika masih ada
+  if (sisanya > 0) {
+    const moreDiv = document.createElement('div');
+    moreDiv.style.cssText = 'grid-column:1/-1;text-align:center;padding:20px;';
+    moreDiv.innerHTML = `
+      <button onclick="loadMoreKatalog()"
+        style="background:var(--orange-dim);border:1px solid var(--border);
+               border-radius:12px;padding:12px 32px;color:var(--orange);
+               font-size:13px;font-weight:700;cursor:pointer;">
+        Tampilkan ${sisanya} barang lainnya ▼
+      </button>`;
+    grid.appendChild(moreDiv);
+  }
+}
+
+// Build 1 card HTML — pisahkan agar mudah di-reuse
+function buildItemCard(b) {
+  const kode   = String(b.KODE_BARANG || '');
+  const nama   = String(b.NAMA_BARANG || '');
+  const kat    = String(b.KATEGORI   || '');
+  const satuan = String(b.SATUAN     || 'PCS');
+  const harga  = parseFloat(b.HARGA) || 0;
+  const stok   = parseInt(b.STOK)    || 0;
+  const qtyVal = cart[kode] ? cart[kode].qty : 1;
+
+  let stokCls  = 'stok-ok';
+  let stokTeks = `Stok: ${stok}`;
+  if (stok === 0)       { stokCls = 'stok-habis'; stokTeks = 'Habis'; }
+  else if (stok <= 5)   { stokCls = 'stok-low';   stokTeks = `Sisa: ${stok}`; }
+
+  const inCart    = cart[kode] ? 'in-cart' : '';
+  const addedCls  = cart[kode] ? 'added'   : '';
+  const addedTeks = cart[kode] ? '✅ Di Keranjang' : '+ Tambah';
+  const disabled  = stok === 0 ? 'disabled' : '';
+
+  // Escape nama untuk onclick attribute
+  const namaSafe = nama.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+  const katSafe  = kat.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+  return `<div class="item-card ${inCart}" id="card-${kode}">
+    <span class="item-stok ${stokCls}">${stokTeks}</span>
+    <span class="item-emoji">${getEmoji(kat)}</span>
+    <div class="item-kode">${kode}</div>
+    <div class="item-nama">${nama}</div>
+    <div class="item-kat">${kat}</div>
+    <div class="item-harga">${formatRp(harga)}</div>
+    <div class="item-satuan">per ${satuan}</div>
+    <div class="qty-wrap">
+      <button class="qty-btn" onclick="changeQtyCard('${kode}',-1)">−</button>
+      <input class="qty-num" type="number" min="1"
+        id="qty-${kode}" value="${qtyVal}"
+        onchange="setQtyCard('${kode}',this.value)"/>
+      <button class="qty-btn" onclick="changeQtyCard('${kode}',1)">+</button>
+    </div>
+    <button class="btn-add ${addedCls}" ${disabled}
+      id="btn-${kode}"
+      onclick="addToCart('${kode}','${namaSafe}','${katSafe}',${harga},'${satuan}')">
+      ${addedTeks}
+    </button>
+  </div>`;
 }
 
 // ════════════════════════════════════════════════════════
