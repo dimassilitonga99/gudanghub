@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>GudangHub — Order Barang</title>
   <style>
@@ -9,8 +9,7 @@
     :root{
       --orange:#ff6b00;--orange-light:#ff8c38;--orange-dim:rgba(255,107,0,0.12);
       --dark:#0d0d1a;--dark2:#12122a;--dark3:#1a1a35;
-      --card:#1e1e3a;--card2:#22223f;
-      --border:rgba(255,107,0,0.18);--border2:rgba(255,255,255,0.06);
+      --card:#1e1e3a;--border:rgba(255,107,0,0.18);--border2:rgba(255,255,255,0.06);
       --text:#e2e8f0;--muted:#94a3b8;
       --green:#22c55e;--red:#ef4444;--yellow:#f59e0b;
     }
@@ -19,484 +18,254 @@
          min-height:100vh;padding-bottom:160px;}
 
     /* TOPBAR */
-    .topbar{
-      background:var(--dark2);border-bottom:1px solid var(--border);
+    .topbar{background:var(--dark2);border-bottom:1px solid var(--border);
       padding:0 16px;display:flex;align-items:center;
-      gap:12px;height:60px;position:sticky;top:0;z-index:200;
-    }
-    .topbar-logo{
-      width:36px;height:36px;
+      gap:12px;height:60px;position:sticky;top:0;z-index:200;}
+    .topbar-logo{width:36px;height:36px;
       background:linear-gradient(135deg,var(--orange),var(--orange-light));
       border-radius:10px;display:flex;align-items:center;
-      justify-content:center;font-size:18px;flex-shrink:0;
-    }
-    .topbar-title{
-      font-size:16px;font-weight:800;
+      justify-content:center;font-size:18px;flex-shrink:0;}
+    .topbar-title{font-size:16px;font-weight:800;
       background:linear-gradient(135deg,#fff,var(--orange-light));
       -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-      background-clip:text;
-    }
-    .topbar-cabang{
-      margin-left:auto;
-      background:var(--orange-dim);border:1px solid var(--border);
-      border-radius:20px;padding:6px 14px;
+      background-clip:text;}
+    .topbar-cabang{margin-left:auto;background:var(--orange-dim);
+      border:1px solid var(--border);border-radius:20px;padding:6px 14px;
       font-size:12px;font-weight:700;color:var(--orange);
-      display:flex;align-items:center;gap:6px;
-      white-space:nowrap;
-    }
-    .btn-logout-top{
-      background:rgba(255,255,255,0.05);
-      border:1px solid var(--border2);
-      border-radius:8px;padding:6px 10px;
-      color:var(--muted);font-size:12px;cursor:pointer;
-      transition:all 0.2s;white-space:nowrap;flex-shrink:0;
-    }
+      display:flex;align-items:center;gap:6px;white-space:nowrap;}
+    .btn-logout-top{background:rgba(255,255,255,0.05);border:1px solid var(--border2);
+      border-radius:8px;padding:6px 10px;color:var(--muted);font-size:12px;
+      cursor:pointer;transition:all 0.2s;white-space:nowrap;flex-shrink:0;}
     .btn-logout-top:hover{color:var(--red);border-color:rgba(239,68,68,0.3);}
 
-    /* SEARCH & FILTER */
-    .search-wrap{
-      padding:16px;position:sticky;top:60px;
-      z-index:100;background:var(--dark);
-    }
-    .search-box{
-      display:flex;gap:10px;align-items:center;
-      background:var(--card);border:1px solid var(--border2);
-      border-radius:14px;padding:10px 16px;margin-bottom:12px;
-    }
-    .search-box input{
-      flex:1;background:none;border:none;outline:none;
-      color:var(--text);font-size:14px;
-    }
+    /* SEARCH */
+    .search-wrap{padding:16px;position:sticky;top:60px;z-index:100;background:var(--dark);}
+    .search-box{display:flex;gap:10px;align-items:center;background:var(--card);
+      border:1px solid var(--border2);border-radius:14px;padding:10px 16px;margin-bottom:12px;}
+    .search-box input{flex:1;background:none;border:none;outline:none;
+      color:var(--text);font-size:16px;}
     .search-box input::placeholder{color:var(--muted);}
     .search-icon{font-size:16px;opacity:0.5;}
-    .filter-scroll{
-      display:flex;gap:8px;overflow-x:auto;
-      padding-bottom:4px;scrollbar-width:none;
-    }
+    .filter-scroll{display:flex;gap:8px;overflow-x:auto;
+      padding-bottom:4px;scrollbar-width:none;}
     .filter-scroll::-webkit-scrollbar{display:none;}
-    .filter-chip{
-      background:var(--card);border:1px solid var(--border2);
-      border-radius:20px;padding:6px 16px;
-      font-size:12px;font-weight:600;color:var(--muted);
-      cursor:pointer;white-space:nowrap;transition:all 0.2s;flex-shrink:0;
-    }
-    .filter-chip:hover{color:var(--text);}
-    .filter-chip.active{
-      background:var(--orange-dim);border-color:var(--orange);color:var(--orange);
-    }
+    .filter-chip{background:var(--card);border:1px solid var(--border2);
+      border-radius:20px;padding:6px 16px;font-size:12px;font-weight:600;
+      color:var(--muted);cursor:pointer;white-space:nowrap;
+      transition:all 0.2s;flex-shrink:0;}
+    .filter-chip.active{background:var(--orange-dim);
+      border-color:var(--orange);color:var(--orange);}
 
-    /* KATALOG GRID */
-    .section-label{
-      padding:8px 16px 4px;font-size:11px;color:var(--muted);
-      font-weight:600;text-transform:uppercase;letter-spacing:0.5px;
-    }
-    .katalog-grid{
-      display:grid;grid-template-columns:repeat(2,1fr);
-      gap:12px;padding:8px 16px;
-    }
+    /* KATALOG */
+    .section-label{padding:8px 16px 4px;font-size:11px;color:var(--muted);
+      font-weight:600;text-transform:uppercase;letter-spacing:0.5px;min-height:24px;}
+    .katalog-grid{display:grid;grid-template-columns:repeat(2,1fr);
+      gap:12px;padding:8px 16px;contain:layout style;}
     @media(min-width:480px){.katalog-grid{grid-template-columns:repeat(3,1fr);}}
     @media(min-width:768px){.katalog-grid{grid-template-columns:repeat(4,1fr);}}
     @media(min-width:1024px){.katalog-grid{grid-template-columns:repeat(5,1fr);}}
 
-    .item-card{
-      background:var(--card);border:1px solid var(--border2);
-      border-radius:14px;padding:14px;cursor:pointer;
-      transition:all 0.2s;position:relative;overflow:hidden;
-    }
-    .item-card:hover{
-      border-color:var(--orange);transform:translateY(-2px);
-      box-shadow:0 8px 24px rgba(0,0,0,0.3);
-    }
+    .item-card{background:var(--card);border:1px solid var(--border2);
+      border-radius:14px;padding:14px;cursor:pointer;transition:all 0.2s;
+      position:relative;overflow:hidden;will-change:transform;transform:translateZ(0);}
+    .item-card:hover{border-color:var(--orange);transform:translateY(-2px);
+      box-shadow:0 8px 24px rgba(0,0,0,0.3);}
     .item-card.in-cart{border-color:rgba(34,197,94,0.5);}
     .item-emoji{font-size:28px;margin-bottom:8px;display:block;}
-    .item-kode{
-      font-size:10px;color:var(--orange);font-weight:700;
-      font-family:monospace;margin-bottom:3px;
-    }
+    .item-kode{font-size:10px;color:var(--orange);font-weight:700;
+      font-family:monospace;margin-bottom:3px;}
     .item-nama{font-size:12px;font-weight:700;line-height:1.3;margin-bottom:3px;}
     .item-kat{font-size:10px;color:var(--muted);margin-bottom:6px;}
     .item-harga{font-size:13px;font-weight:800;color:var(--orange);}
     .item-satuan{font-size:10px;color:var(--muted);}
-    .item-stok{
-      position:absolute;top:8px;right:8px;
-      font-size:9px;font-weight:700;padding:2px 6px;border-radius:8px;
-    }
+    .item-stok{position:absolute;top:8px;right:8px;font-size:9px;
+      font-weight:700;padding:2px 6px;border-radius:8px;}
     .stok-ok{background:rgba(34,197,94,0.15);color:var(--green);}
     .stok-low{background:rgba(245,158,11,0.15);color:var(--yellow);}
     .stok-habis{background:rgba(239,68,68,0.15);color:var(--red);}
-
-    .qty-wrap{
-      display:flex;align-items:center;gap:5px;margin-top:8px;
-    }
-    .qty-btn{
-      width:26px;height:26px;border-radius:7px;border:none;
-      background:var(--dark3);color:var(--text);font-size:16px;
-      cursor:pointer;display:flex;align-items:center;justify-content:center;
-      transition:all 0.15s;flex-shrink:0;
-    }
+    .qty-wrap{display:flex;align-items:center;gap:5px;margin-top:8px;}
+    .qty-btn{width:26px;height:26px;border-radius:7px;border:none;
+      background:var(--dark3);color:var(--text);font-size:16px;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;
+      transition:all 0.15s;flex-shrink:0;}
     .qty-btn:hover{background:var(--orange);color:#fff;}
-    .qty-num{
-      flex:1;text-align:center;font-size:13px;font-weight:700;
+    .qty-num{flex:1;text-align:center;font-size:13px;font-weight:700;
       background:var(--dark3);border-radius:6px;padding:4px 2px;
-      border:none;outline:none;color:var(--text);min-width:0;
-    }
-    .btn-add{
-      width:100%;margin-top:8px;padding:7px;border-radius:10px;border:none;
+      border:none;outline:none;color:var(--text);min-width:0;}
+    .btn-add{width:100%;margin-top:8px;padding:7px;border-radius:10px;border:none;
       background:linear-gradient(135deg,var(--orange),var(--orange-light));
-      color:#fff;font-size:12px;font-weight:700;cursor:pointer;
-      transition:all 0.2s;
-    }
-    .btn-add:hover{opacity:0.9;}
+      color:#fff;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.2s;}
     .btn-add.added{background:linear-gradient(135deg,var(--green),#16a34a);}
-    .btn-add:disabled{opacity:0.5;cursor:not-allowed;}
+    .btn-add:disabled{opacity:0.4;cursor:not-allowed;}
 
     /* EMPTY & LOADING */
-    .empty-state{
-      text-align:center;padding:60px 20px;color:var(--muted);
-      grid-column:1/-1;
-    }
+    .empty-state{text-align:center;padding:60px 20px;color:var(--muted);grid-column:1/-1;}
     .empty-state .ei{font-size:48px;margin-bottom:12px;}
-    .loading-wrap{
-      display:flex;flex-direction:column;align-items:center;
-      justify-content:center;padding:60px 20px;gap:16px;
-      color:var(--muted);grid-column:1/-1;
-    }
-    .spinner{
-      width:36px;height:36px;border:3px solid var(--border2);
+    .loading-wrap{display:flex;flex-direction:column;align-items:center;
+      justify-content:center;padding:60px 20px;gap:16px;color:var(--muted);grid-column:1/-1;}
+    .spinner{width:36px;height:36px;border:3px solid var(--border2);
       border-top-color:var(--orange);border-radius:50%;
-      animation:spin 0.7s linear infinite;
-    }
+      animation:spin 0.7s linear infinite;}
     @keyframes spin{to{transform:rotate(360deg);}}
 
-    /* CART BUTTON */
-    .cart-bar{
-      position:fixed;bottom:72px;left:0;right:0;
-      padding:10px 16px;z-index:300;
-    }
-    .cart-btn{
-      background:linear-gradient(135deg,var(--orange),var(--orange-light));
-      border:none;border-radius:16px;padding:14px 20px;
-      width:100%;color:#fff;font-size:15px;font-weight:800;
-      cursor:pointer;display:flex;align-items:center;
-      justify-content:space-between;
-      box-shadow:0 8px 30px rgba(255,107,0,0.4);
-      transition:all 0.2s;
-    }
+    /* CART */
+    .cart-bar{position:fixed;bottom:72px;left:0;right:0;padding:10px 16px;z-index:300;}
+    .cart-btn{background:linear-gradient(135deg,var(--orange),var(--orange-light));
+      border:none;border-radius:16px;padding:14px 20px;width:100%;color:#fff;
+      font-size:15px;font-weight:800;cursor:pointer;display:flex;
+      align-items:center;justify-content:space-between;
+      box-shadow:0 8px 30px rgba(255,107,0,0.4);transition:all 0.2s;}
     .cart-btn:hover{transform:translateY(-2px);}
-    .cart-count{
-      background:rgba(255,255,255,0.25);
-      border-radius:20px;padding:3px 12px;font-size:13px;
-    }
+    .cart-count{background:rgba(255,255,255,0.25);border-radius:20px;
+      padding:3px 12px;font-size:13px;}
 
     /* SHEET */
-    .sheet-overlay{
-      position:fixed;inset:0;background:rgba(0,0,0,0.75);
+    .sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);
       z-index:400;opacity:0;pointer-events:none;
-      transition:opacity 0.3s;backdrop-filter:blur(4px);
-    }
+      transition:opacity 0.3s;backdrop-filter:blur(4px);}
     .sheet-overlay.show{opacity:1;pointer-events:all;}
-    .bottom-sheet{
-      position:fixed;bottom:0;left:0;right:0;
+    .bottom-sheet{position:fixed;bottom:0;left:0;right:0;
       background:var(--dark2);border-radius:24px 24px 0 0;
-      border-top:1px solid var(--border);
-      max-height:88vh;overflow-y:auto;z-index:500;
-      transform:translateY(100%);
-      transition:transform 0.35s cubic-bezier(0.34,1.2,0.64,1);
-    }
+      border-top:1px solid var(--border);max-height:88vh;overflow-y:auto;
+      z-index:500;transform:translateY(100%);
+      transition:transform 0.35s cubic-bezier(0.34,1.2,0.64,1);}
     .bottom-sheet.show{transform:translateY(0);}
-    .sheet-handle{
-      width:40px;height:4px;background:rgba(255,255,255,0.12);
-      border-radius:2px;margin:12px auto 0;
-    }
-    .sheet-header{
-      padding:16px 20px;border-bottom:1px solid var(--border2);
+    .sheet-handle{width:40px;height:4px;background:rgba(255,255,255,0.12);
+      border-radius:2px;margin:12px auto 0;}
+    .sheet-header{padding:16px 20px;border-bottom:1px solid var(--border2);
       display:flex;align-items:center;justify-content:space-between;
-      position:sticky;top:0;background:var(--dark2);z-index:1;
-    }
+      position:sticky;top:0;background:var(--dark2);z-index:1;}
     .sheet-title{font-size:16px;font-weight:800;}
-    .sheet-close{
-      background:rgba(255,255,255,0.08);border:none;
-      width:32px;height:32px;border-radius:8px;
-      color:var(--muted);font-size:16px;cursor:pointer;transition:all 0.2s;
-    }
+    .sheet-close{background:rgba(255,255,255,0.08);border:none;width:32px;height:32px;
+      border-radius:8px;color:var(--muted);font-size:16px;cursor:pointer;transition:all 0.2s;}
     .sheet-close:hover{background:var(--red);color:#fff;}
-
-    /* CART ITEMS */
     .cart-items{padding:8px 16px;}
-    .cart-item{
-      display:flex;align-items:center;gap:10px;
-      padding:12px 0;border-bottom:1px solid var(--border2);
-    }
+    .cart-item{display:flex;align-items:center;gap:10px;padding:12px 0;
+      border-bottom:1px solid var(--border2);}
     .cart-item:last-child{border-bottom:none;}
     .ci-info{flex:1;min-width:0;}
-    .ci-nama{
-      font-size:13px;font-weight:700;
-      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-    }
+    .ci-nama{font-size:13px;font-weight:700;white-space:nowrap;
+      overflow:hidden;text-overflow:ellipsis;}
     .ci-kode{font-size:10px;color:var(--orange);font-family:monospace;}
     .ci-harga{font-size:11px;color:var(--muted);}
     .ci-qty{display:flex;align-items:center;gap:5px;flex-shrink:0;}
-    .ci-qty-btn{
-      width:26px;height:26px;border-radius:7px;border:none;
-      background:var(--dark3);color:var(--text);font-size:14px;
-      cursor:pointer;transition:all 0.15s;
-    }
+    .ci-qty-btn{width:26px;height:26px;border-radius:7px;border:none;
+      background:var(--dark3);color:var(--text);font-size:14px;cursor:pointer;
+      transition:all 0.15s;}
     .ci-qty-btn:hover{background:var(--orange);color:#fff;}
-    .ci-qty-num{
-      width:34px;text-align:center;font-size:13px;font-weight:700;
+    .ci-qty-num{width:34px;text-align:center;font-size:13px;font-weight:700;
       background:var(--dark3);border-radius:6px;padding:3px;
-      border:none;outline:none;color:var(--text);
-    }
-    .ci-sub{
-      font-size:12px;font-weight:800;color:var(--orange);
-      min-width:70px;text-align:right;flex-shrink:0;
-    }
-    .ci-del{
-      background:none;border:none;color:var(--muted);
-      font-size:16px;cursor:pointer;padding:4px;
-      transition:color 0.2s;flex-shrink:0;
-    }
+      border:none;outline:none;color:var(--text);}
+    .ci-sub{font-size:12px;font-weight:800;color:var(--orange);
+      min-width:70px;text-align:right;flex-shrink:0;}
+    .ci-del{background:none;border:none;color:var(--muted);font-size:16px;
+      cursor:pointer;padding:4px;transition:color 0.2s;flex-shrink:0;}
     .ci-del:hover{color:var(--red);}
     .cart-empty{text-align:center;padding:40px;color:var(--muted);}
-
-    /* CART SUMMARY */
-    .cart-summary{
-      padding:16px 20px;background:var(--dark3);
-      border-top:1px solid var(--border2);
-      position:sticky;bottom:0;
-    }
-    .summary-row{
-      display:flex;justify-content:space-between;
-      font-size:13px;margin-bottom:6px;color:var(--muted);
-    }
+    .cart-summary{padding:16px 20px;background:var(--dark3);
+      border-top:1px solid var(--border2);position:sticky;bottom:0;}
+    .summary-row{display:flex;justify-content:space-between;
+      font-size:13px;margin-bottom:6px;color:var(--muted);}
     .summary-row span:last-child{color:var(--text);font-weight:600;}
-    .summary-total{
-      display:flex;justify-content:space-between;
+    .summary-total{display:flex;justify-content:space-between;
       font-size:17px;font-weight:800;color:var(--orange);
-      margin:10px 0;padding-top:10px;
-      border-top:1px solid var(--border);
-    }
-    .catatan-input{
-      width:100%;background:var(--dark);border:1px solid var(--border2);
-      border-radius:10px;padding:10px 14px;color:var(--text);
-      font-size:13px;font-family:inherit;resize:none;outline:none;
-      transition:border-color 0.2s;margin-bottom:12px;
-    }
+      margin:10px 0;padding-top:10px;border-top:1px solid var(--border);}
+    .catatan-input{width:100%;background:var(--dark);border:1px solid var(--border2);
+      border-radius:10px;padding:10px 14px;color:var(--text);font-size:13px;
+      font-family:inherit;resize:none;outline:none;
+      transition:border-color 0.2s;margin-bottom:12px;}
     .catatan-input:focus{border-color:var(--orange);}
-    .btn-submit{
-      width:100%;padding:15px;border-radius:14px;border:none;
+    .btn-submit{width:100%;padding:15px;border-radius:14px;border:none;
       background:linear-gradient(135deg,var(--orange),var(--orange-light));
-      color:#fff;font-size:15px;font-weight:800;cursor:pointer;
-      transition:all 0.2s;
-    }
-    .btn-submit:hover{opacity:0.9;transform:translateY(-1px);}
-    .btn-submit:disabled{
-      opacity:0.6;cursor:not-allowed;transform:none;
-    }
+      color:#fff;font-size:15px;font-weight:800;cursor:pointer;transition:all 0.2s;}
+    .btn-submit:disabled{opacity:0.6;cursor:not-allowed;}
 
     /* BOTTOM NAV */
-    .bottom-nav{
-      position:fixed;bottom:0;left:0;right:0;
-      background:var(--dark2);border-top:1px solid var(--border2);
-      display:flex;height:65px;z-index:200;
-    }
-    .nav-tab{
-      flex:1;display:flex;flex-direction:column;align-items:center;
-      justify-content:center;gap:3px;cursor:pointer;
-      color:var(--muted);font-size:10px;font-weight:600;
-      transition:all 0.2s;border:none;background:none;
-    }
+    .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--dark2);
+      border-top:1px solid var(--border2);display:flex;height:65px;z-index:200;}
+    .nav-tab{flex:1;display:flex;flex-direction:column;align-items:center;
+      justify-content:center;gap:3px;cursor:pointer;color:var(--muted);
+      font-size:10px;font-weight:600;transition:all 0.2s;border:none;background:none;}
     .nav-tab .nt-icon{font-size:20px;}
     .nav-tab.active{color:var(--orange);}
     .nav-tab:hover{color:var(--text);}
 
     /* RIWAYAT */
     .riwayat-list{padding:16px;}
-    .riwayat-item{
-      background:var(--card);border:1px solid var(--border2);
-      border-radius:14px;padding:16px;margin-bottom:12px;
-      transition:border-color 0.2s;
-    }
+    .riwayat-item{background:var(--card);border:1px solid var(--border2);
+      border-radius:14px;padding:16px;margin-bottom:12px;transition:border-color 0.2s;}
     .riwayat-item:hover{border-color:var(--border);}
-    .riwayat-header{
-      display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;
-    }
-    .riwayat-id{
-      font-size:11px;font-family:monospace;color:var(--orange);
-      font-weight:700;flex:1;word-break:break-all;
-    }
-    .status-badge{
-      padding:3px 10px;border-radius:20px;font-size:10px;
-      font-weight:700;white-space:nowrap;flex-shrink:0;
-    }
+    .riwayat-header{display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;}
+    .riwayat-id{font-size:11px;font-family:monospace;color:var(--orange);
+      font-weight:700;flex:1;word-break:break-all;}
+    .status-badge{padding:3px 10px;border-radius:20px;font-size:10px;
+      font-weight:700;white-space:nowrap;flex-shrink:0;}
     .status-pending{background:rgba(245,158,11,0.15);color:var(--yellow);}
     .status-approved{background:rgba(34,197,94,0.15);color:var(--green);}
     .status-rejected{background:rgba(239,68,68,0.15);color:var(--red);}
     .riwayat-tgl{font-size:11px;color:var(--muted);margin-bottom:5px;}
     .riwayat-items-text{font-size:12px;color:var(--muted);line-height:1.5;}
 
+    /* ORDER MASSAL */
+    .massal-item{background:var(--card);border:1px solid var(--border2);
+      border-radius:12px;padding:12px 14px;margin-bottom:8px;
+      display:flex;align-items:center;gap:12px;transition:all 0.2s;}
+    .massal-item.valid{border-color:rgba(34,197,94,0.3);}
+    .massal-item.invalid{border-color:rgba(239,68,68,0.3);
+      background:rgba(239,68,68,0.05);}
+    .massal-status-icon{font-size:18px;flex-shrink:0;}
+    .massal-info{flex:1;min-width:0;}
+    .massal-nama{font-size:13px;font-weight:700;white-space:nowrap;
+      overflow:hidden;text-overflow:ellipsis;}
+    .massal-kode{font-size:10px;color:var(--orange);
+      font-family:monospace;margin-bottom:2px;}
+    .massal-harga{font-size:11px;color:var(--muted);}
+    .massal-right{text-align:right;flex-shrink:0;}
+    .massal-subtotal{font-size:13px;font-weight:800;color:var(--orange);}
+    .massal-qty-wrap{display:flex;align-items:center;gap:5px;
+      margin-top:4px;justify-content:flex-end;}
+    .massal-qty-btn{width:24px;height:24px;border-radius:6px;border:none;
+      background:var(--dark3);color:var(--text);font-size:14px;cursor:pointer;
+      transition:all 0.15s;}
+    .massal-qty-btn:hover{background:var(--orange);color:#fff;}
+    .massal-qty-num{width:36px;text-align:center;font-size:12px;font-weight:700;
+      background:var(--dark3);border-radius:5px;padding:3px;
+      border:none;outline:none;color:var(--text);}
+    .massal-del{background:none;border:none;color:var(--muted);font-size:14px;
+      cursor:pointer;padding:2px;transition:color 0.2s;}
+    .massal-del:hover{color:var(--red);}
+    .massal-error{font-size:10px;color:var(--red);margin-top:2px;}
+    .massal-warn{font-size:10px;color:var(--yellow);margin-top:2px;}
+
     /* TOAST */
-    .toast-wrap{
-      position:fixed;top:70px;left:50%;transform:translateX(-50%);
-      z-index:9999;display:flex;flex-direction:column;
-      align-items:center;gap:8px;pointer-events:none;width:90%;max-width:400px;
-    }
-    .toast{
-      background:var(--card);border:1px solid var(--border);
+    .toast-wrap{position:fixed;top:70px;left:50%;transform:translateX(-50%);
+      z-index:9999;display:flex;flex-direction:column;align-items:center;
+      gap:8px;pointer-events:none;width:90%;max-width:400px;}
+    .toast{background:var(--card);border:1px solid var(--border);
       border-radius:12px;padding:12px 20px;font-size:13px;font-weight:600;
       display:flex;align-items:center;gap:8px;
-      box-shadow:0 8px 24px rgba(0,0,0,0.4);
-      opacity:0;transform:translateY(-10px);
-      transition:all 0.3s;width:100%;
-    }
+      box-shadow:0 8px 24px rgba(0,0,0,0.4);opacity:0;
+      transform:translateY(-10px);transition:all 0.3s;width:100%;}
     .toast.show{opacity:1;transform:translateY(0);}
     .toast.success{border-color:rgba(34,197,94,0.5);color:var(--green);}
     .toast.error{border-color:rgba(239,68,68,0.5);color:var(--red);}
     .toast.info{border-color:rgba(255,107,0,0.5);color:var(--orange);}
 
-    /* SCROLLBAR */
+    #searchInput{-webkit-appearance:none;appearance:none;font-size:16px;}
     ::-webkit-scrollbar{width:4px;height:4px;}
     ::-webkit-scrollbar-track{background:transparent;}
     ::-webkit-scrollbar-thumb{background:rgba(255,107,0,0.3);border-radius:2px;}
-/* ── ORDER MASSAL PREVIEW ── */
-.massal-item {
-  background: var(--card);
-  border: 1px solid var(--border2);
-  border-radius: 12px;
-  padding: 12px 14px;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  transition: all 0.2s;
-}
-.massal-item.valid {
-  border-color: rgba(34,197,94,0.3);
-}
-.massal-item.invalid {
-  border-color: rgba(239,68,68,0.3);
-  background: rgba(239,68,68,0.05);
-}
-.massal-item.warning {
-  border-color: rgba(245,158,11,0.3);
-  background: rgba(245,158,11,0.05);
-}
-.massal-status-icon {
-  font-size: 18px;
-  flex-shrink: 0;
-}
-.massal-info { flex: 1; min-width: 0; }
-.massal-nama {
-  font-size: 13px;
-  font-weight: 700;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.massal-kode {
-  font-size: 10px;
-  color: var(--orange);
-  font-family: monospace;
-  margin-bottom: 2px;
-}
-.massal-harga { font-size: 11px; color: var(--muted); }
-.massal-right { text-align: right; flex-shrink: 0; }
-.massal-subtotal {
-  font-size: 13px;
-  font-weight: 800;
-  color: var(--orange);
-}
-.massal-qty-wrap {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  margin-top: 4px;
-  justify-content: flex-end;
-}
-.massal-qty-btn {
-  width: 24px; height: 24px;
-  border-radius: 6px; border: none;
-  background: var(--dark3);
-  color: var(--text); font-size: 14px;
-  cursor: pointer; transition: all 0.15s;
-}
-.massal-qty-btn:hover { background: var(--orange); color: #fff; }
-.massal-qty-num {
-  width: 36px; text-align: center;
-  font-size: 12px; font-weight: 700;
-  background: var(--dark3); border-radius: 5px;
-  padding: 3px; border: none; outline: none;
-  color: var(--text);
-}
-.massal-del {
-  background: none; border: none;
-  color: var(--muted); font-size: 14px;
-  cursor: pointer; padding: 2px;
-  transition: color 0.2s;
-}
-.massal-del:hover { color: var(--red); }
-
-/* Error/warning badge */
-.massal-error {
-  font-size: 10px;
-  color: var(--red);
-  margin-top: 2px;
-}
-.massal-warn {
-  font-size: 10px;
-  color: var(--yellow);
-  margin-top: 2px;
-}
-
-/* Summary bar */
-.massal-summary {
-  background: var(--dark3);
-  border-radius: 10px;
-  padding: 12px 14px;
-  margin-top: 12px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-/* Search responsif */
-#searchInput {
-  -webkit-appearance: none;
-  appearance: none;
-  font-size: 16px; /* Cegah zoom di iOS */
-  will-change: contents;
-}
-
-/* Katalog grid pakai contain untuk performa */
-.katalog-grid {
-  contain: layout style;
-}
-
-/* Item card — GPU accelerated hover */
-.item-card {
-  will-change: transform;
-  transform: translateZ(0);
-}
-
-/* Smooth label update */
-#sectionLabel {
-  transition: none; /* Tidak perlu transisi, langsung update */
-  min-height: 20px;
-}
-    
   </style>
 </head>
 <body>
 
-<!-- Toast -->
 <div class="toast-wrap" id="toastWrap"></div>
 
 <!-- TOPBAR -->
 <div class="topbar">
   <div class="topbar-logo">🏪</div>
   <div class="topbar-title">GudangHub</div>
-  <div class="topbar-cabang" id="topbarCabang">
-    🏬 <span id="cabangLabel">Memuat...</span>
-  </div>
+  <div class="topbar-cabang">🏬 <span id="cabangLabel">Memuat...</span></div>
   <button class="btn-logout-top" onclick="doLogout()">Keluar 🚪</button>
 </div>
 
@@ -506,12 +275,10 @@
     <div class="search-box">
       <span class="search-icon">🔍</span>
       <input type="text" id="searchInput"
-       placeholder="Cari kode atau nama barang..."
-       oninput="debounceSearch(this.value)"
-       autocomplete="off"
-       autocorrect="off"
-       autocapitalize="off"
-       spellcheck="false"/>
+             placeholder="Cari kode atau nama barang..."
+             oninput="debounceSearch(this.value)"
+             autocomplete="off" autocorrect="off"
+             autocapitalize="off" spellcheck="false"/>
     </div>
     <div class="filter-scroll" id="filterScroll">
       <div class="filter-chip active" onclick="setKategori('',this)">Semua</div>
@@ -531,11 +298,9 @@
   <div style="padding:20px 16px 0;">
     <div style="font-size:18px;font-weight:800;">⚡ Order Massal</div>
     <div style="font-size:12px;color:var(--muted);margin-top:4px;">
-      Copy-paste kode & jumlah barang sekaligus
+      Copy-paste kode &amp; jumlah barang sekaligus
     </div>
   </div>
-
-  <!-- CARA PAKAI -->
   <div style="margin:16px 16px 0;background:rgba(255,107,0,0.08);
               border:1px solid rgba(255,107,0,0.2);border-radius:14px;padding:16px;">
     <div style="font-size:12px;font-weight:700;color:var(--orange);margin-bottom:8px;">
@@ -543,59 +308,39 @@
     </div>
     <div style="font-size:12px;color:var(--muted);line-height:1.8;font-family:monospace;
                 background:rgba(0,0,0,0.3);border-radius:8px;padding:10px;">
-      KODE001;5<br>
-      KODE002;10<br>
-      KODE003;3
+      KODE001;5<br>KODE002;10<br>KODE003;3
     </div>
     <div style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.6;">
-      • Satu baris = satu barang<br>
       • Format: <strong style="color:var(--orange)">KODE_BARANG;JUMLAH</strong><br>
-      • Pisahkan dengan titik koma ( ; )<br>
+      • Satu baris = satu barang<br>
       • Bisa copy dari Excel/WhatsApp
     </div>
   </div>
-
-  <!-- INPUT AREA -->
   <div style="padding:16px;">
-    <div style="font-size:12px;font-weight:600;color:var(--muted);
-                text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">
-      Input Kode & Jumlah
-    </div>
     <textarea id="massalInput"
-      style="width:100%;min-height:200px;background:var(--card);
-             border:1px solid var(--border2);border-radius:14px;
-             padding:14px;color:var(--text);font-size:14px;
-             font-family:monospace;line-height:1.8;resize:vertical;
-             outline:none;transition:border-color 0.2s;"
-      placeholder="Contoh:&#10;NN00000;5&#10;NN00001;10&#10;MM00001;3&#10;&#10;Copy dari Excel atau ketik manual..."
+      style="width:100%;min-height:180px;background:var(--card);
+             border:1px solid var(--border2);border-radius:14px;padding:14px;
+             color:var(--text);font-size:14px;font-family:monospace;
+             line-height:1.8;resize:vertical;outline:none;"
+      placeholder="Contoh:&#10;NN00000;5&#10;NN00001;10&#10;&#10;Ketik atau paste di sini..."
       oninput="autoPreviewMassal()"
       onfocus="this.style.borderColor='var(--orange)'"
       onblur="this.style.borderColor='var(--border2)'"></textarea>
-
-    <!-- Tombol aksi input -->
     <div style="display:flex;gap:8px;margin-top:10px;">
       <button onclick="pasteFromClipboard()"
         style="flex:1;padding:10px;background:var(--dark3);
                border:1px solid var(--border2);border-radius:10px;
-               color:var(--muted);font-size:12px;font-weight:600;
-               cursor:pointer;transition:all 0.2s;"
-        onmouseover="this.style.color='var(--text)'"
-        onmouseout="this.style.color='var(--muted)'">
-        📋 Paste dari Clipboard
+               color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;">
+        📋 Paste Clipboard
       </button>
       <button onclick="clearMassalInput()"
         style="padding:10px 16px;background:var(--dark3);
                border:1px solid var(--border2);border-radius:10px;
-               color:var(--muted);font-size:12px;font-weight:600;
-               cursor:pointer;transition:all 0.2s;"
-        onmouseover="this.style.color='var(--red)'"
-        onmouseout="this.style.color='var(--muted)'">
+               color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;">
         🗑 Hapus
       </button>
     </div>
   </div>
-
-  <!-- PREVIEW HASIL PARSING -->
   <div style="padding:0 16px 16px;">
     <div style="font-size:12px;font-weight:600;color:var(--muted);
                 text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">
@@ -610,50 +355,44 @@
       </div>
     </div>
   </div>
-
-  <!-- CATATAN & TOMBOL SUBMIT -->
   <div style="padding:0 16px 120px;">
     <textarea id="catatanMassal"
       style="width:100%;background:var(--card);border:1px solid var(--border2);
-             border-radius:10px;padding:10px 14px;color:var(--text);
-             font-size:13px;font-family:inherit;resize:none;outline:none;
-             transition:border-color 0.2s;margin-bottom:12px;"
+             border-radius:10px;padding:10px 14px;color:var(--text);font-size:13px;
+             font-family:inherit;resize:none;outline:none;margin-bottom:12px;"
       placeholder="Catatan untuk admin gudang (opsional)..." rows="2"
       onfocus="this.style.borderColor='var(--orange)'"
       onblur="this.style.borderColor='var(--border2)'"></textarea>
-
-    <button id="btnSubmitMassal" onclick="submitOrderMassal()"
+    <button id="btnSubmitMassal" onclick="submitOrderMassal()" disabled
       style="width:100%;padding:15px;border-radius:14px;border:none;
              background:linear-gradient(135deg,var(--orange),var(--orange-light));
              color:#fff;font-size:15px;font-weight:800;cursor:pointer;
-             transition:all 0.2s;opacity:0.5;pointer-events:none;"
-      disabled>
+             opacity:0.5;pointer-events:none;transition:all 0.2s;">
       ⚡ Kirim Order Massal ke Gudang
     </button>
-
+    <!-- Summary bar — display diatur oleh JS -->
     <div id="massalSummaryBar"
-      style="display:none;margin-top:10px;
-             background:var(--dark3);border-radius:10px;padding:10px 14px;
-             display:flex;justify-content:space-between;align-items:center;">
+      style="display:none;margin-top:10px;background:var(--dark3);border-radius:10px;
+             padding:10px 14px;justify-content:space-between;align-items:center;">
       <span style="font-size:12px;color:var(--muted)" id="massalSummaryItem">0 item</span>
       <span style="font-size:14px;font-weight:800;color:var(--orange)"
             id="massalSummaryTotal">Rp 0</span>
     </div>
   </div>
 </div>
-  
+
 <!-- HALAMAN RIWAYAT -->
 <div id="pageRiwayat" style="display:none;">
   <div style="padding:20px 16px 8px;">
     <div style="font-size:18px;font-weight:800;">📋 Riwayat Order</div>
     <div style="font-size:12px;color:var(--muted);margin-top:4px;">
-      Semua order dari cabang <strong id="riwayatCabangLabel" style="color:var(--orange)"></strong>
+      Semua order dari cabang
+      <strong id="riwayatCabangLabel" style="color:var(--orange)"></strong>
     </div>
   </div>
   <div class="riwayat-list" id="riwayatList">
     <div class="loading-wrap" style="grid-column:unset">
-      <div class="spinner"></div>
-      <div>Memuat riwayat...</div>
+      <div class="spinner"></div><div>Memuat riwayat...</div>
     </div>
   </div>
 </div>
@@ -679,7 +418,6 @@
   </button>
 </div>
 
-<!-- OVERLAY -->
 <div class="sheet-overlay" id="sheetOverlay" onclick="closeCart()"></div>
 
 <!-- CART BOTTOM SHEET -->
@@ -697,16 +435,13 @@
   </div>
   <div class="cart-summary">
     <div class="summary-row">
-      <span>Jumlah Item</span>
-      <span id="sumItem">0 item</span>
+      <span>Jumlah Item</span><span id="sumItem">0 item</span>
     </div>
     <div class="summary-total">
-      <span>Total Order</span>
-      <span id="sumTotal">Rp 0</span>
+      <span>Total Order</span><span id="sumTotal">Rp 0</span>
     </div>
     <textarea class="catatan-input" id="catatanInput"
-              placeholder="Catatan untuk admin gudang (opsional)..."
-              rows="2"></textarea>
+      placeholder="Catatan untuk admin gudang (opsional)..." rows="2"></textarea>
     <button class="btn-submit" id="btnSubmit" onclick="submitOrder()">
       🚀 Kirim Order ke Gudang
     </button>
@@ -714,90 +449,71 @@
 </div>
 
 <script>
-// ════════════════════════════════════════════════════════
-//  ⚙️ KONFIGURASI — GANTI DENGAN URL APPS SCRIPT KAMU
-// ════════════════════════════════════════════════════════
-const API_URL = 'https://script.google.com/macros/s/AKfycbzk8A4xuXOVGqbK6a4zffpG6u2s4jVROZwIitmCDat2fYU7qyU3VkxQJmtxtEtjQxji/exec';
+// ══════════════════════════════════════════════════════════
+//  ⚙️ CONFIG — GANTI URL INI DENGAN URL APPS SCRIPT KAMU
+// ══════════════════════════════════════════════════════════
+const API_URL = 'GANTI_DENGAN_URL_WEB_APP_ANDA';
 
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 //  STATE
-// ════════════════════════════════════════════════════════
-let semuaBarang   = [];
-let tampilBarang  = [];
-let cart          = {};
-let kategoriAktif = '';
-let idCabang      = '';
-let namaCabang    = '';
+// ══════════════════════════════════════════════════════════
+let semuaBarang      = [];
+let tampilBarang     = [];
+let cart             = {};
+let kategoriAktif    = '';
+let idCabang         = '';
+let namaCabang       = '';
+let massalItems      = [];
+let searchTimer      = null;
+let searchCache      = {};
+let lastRenderedCount= 0;
 
-// ════════════════════════════════════════════════════════
-//  DATA CABANG LOKAL (fallback)
-// ════════════════════════════════════════════════════════
 const CABANG_DATA = {
-  CB001: { nama: 'Toko Nasional Eltari – Arfa',          pic: 'Arfa'   },
-  CB002: { nama: 'Toko Perabot Mama Oesapa – Akmal',     pic: 'Akmal'  },
-  CB003: { nama: 'Toko Perabot Mama TDM – Shally',       pic: 'Shally' },
-  CB004: { nama: 'Toko Perabot Mama Kefamenanu – Fajar', pic: 'Fajar'  }
+  CB001:{nama:'Toko Nasional Eltari – Arfa',          pic:'Arfa'  },
+  CB002:{nama:'Toko Perabot Mama Oesapa – Akmal',     pic:'Akmal' },
+  CB003:{nama:'Toko Perabot Mama TDM – Shally',       pic:'Shally'},
+  CB004:{nama:'Toko Perabot Mama Kefamenanu – Fajar', pic:'Fajar' }
 };
 
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 //  SESSION CHECK
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 function initSession() {
-  const raw = sessionStorage.getItem('gudanghub_session');
+  const params = new URLSearchParams(window.location.search);
+  const urlCab = params.get('cabang');
+  const raw    = sessionStorage.getItem('gudanghub_session');
 
   if (raw) {
     try {
       const sess = JSON.parse(raw);
-
-      // Cek expired
       if (new Date(sess.expires) < new Date()) {
         sessionStorage.removeItem('gudanghub_session');
-        window.location.href = 'login.html';
-        return false;
+        if (!urlCab) { window.location.href = 'login.html'; return false; }
+      } else {
+        if (sess.role === 'admin') {
+          window.location.href = 'dashboard.html'; return false;
+        }
+        idCabang   = sess.idCabang || urlCab || '';
+        namaCabang = sess.nama || CABANG_DATA[idCabang]?.nama || idCabang;
       }
-
-      // Admin tidak boleh di sini
-      if (sess.role === 'admin') {
-        window.location.href = 'dashboard.html';
-        return false;
-      }
-
-      idCabang   = sess.idCabang || '';
-      namaCabang = sess.nama     || CABANG_DATA[idCabang]?.nama || idCabang;
-
     } catch(e) {
-      sessionStorage.removeItem('gudanghub_session');
-      window.location.href = 'login.html';
-      return false;
-    }
-  } else {
-    // Cek URL parameter sebagai fallback
-    const params = new URLSearchParams(window.location.search);
-    const urlCab = params.get('cabang');
-    if (urlCab) {
-      idCabang   = urlCab.toUpperCase();
-      namaCabang = CABANG_DATA[idCabang]?.nama || idCabang;
-    } else {
-      window.location.href = 'login.html';
-      return false;
+      if (!urlCab) { window.location.href = 'login.html'; return false; }
     }
   }
 
-  if (!idCabang) {
-    window.location.href = 'login.html';
-    return false;
+  if (!idCabang && urlCab) {
+    idCabang   = urlCab.toUpperCase();
+    namaCabang = CABANG_DATA[idCabang]?.nama || idCabang;
   }
 
-  // Update UI
+  if (!idCabang) { window.location.href = 'login.html'; return false; }
+
   const pic = CABANG_DATA[idCabang]?.pic || idCabang;
-  document.getElementById('cabangLabel').textContent = idCabang + ' · ' + pic;
+  document.getElementById('cabangLabel').textContent        = `${idCabang} · ${pic}`;
   document.getElementById('riwayatCabangLabel').textContent = idCabang;
   return true;
 }
 
-// ════════════════════════════════════════════════════════
-//  LOGOUT
-// ════════════════════════════════════════════════════════
 function doLogout() {
   if (confirm('Yakin ingin keluar dari GudangHub?')) {
     sessionStorage.removeItem('gudanghub_session');
@@ -805,267 +521,147 @@ function doLogout() {
   }
 }
 
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 //  TABS
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 function showTab(tab) {
-  document.getElementById('pageKatalog').style.display =
-    tab === 'katalog' ? '' : 'none';
-  document.getElementById('pageRiwayat').style.display =
-    tab === 'riwayat' ? '' : 'none';
-  document.getElementById('tab-katalog')
-    .classList.toggle('active', tab === 'katalog');
-  document.getElementById('tab-riwayat')
-    .classList.toggle('active', tab === 'riwayat');
-
-  if (tab === 'riwayat') ();
+  const pages = { katalog:'pageKatalog', massal:'pageMassal', riwayat:'pageRiwayat' };
+  Object.entries(pages).forEach(([key, id]) => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = key === tab ? '' : 'none';
+    const btn = document.getElementById('tab-' + key);
+    if (btn) btn.classList.toggle('active', key === tab);
+  });
+  if (tab === 'riwayat') loadRiwayat();
 }
 
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 //  LOAD KATALOG
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 async function loadKatalog() {
   try {
     const res  = await fetch(`${API_URL}?action=getBarang`);
     const data = await res.json();
-
-    if (data.status === 'ok' && Array.isArray(data.data) && data.data.length > 0) {
+    if (data.status === 'ok' && data.data?.length > 0) {
       semuaBarang  = data.data;
       tampilBarang = [...semuaBarang];
       buildFilterKategori();
       renderKatalog();
     } else {
-      showKatalogError('Katalog masih kosong. Minta admin isi MASTER_BARANG.', '📦');
+      showKatalogMsg('📦','Katalog Kosong',
+        'Minta admin isi data barang di MASTER_BARANG', false);
     }
   } catch(err) {
-    console.error('loadKatalog error:', err);
-    showKatalogError(
-      'Gagal memuat katalog.<br>Pastikan API_URL sudah diisi dengan benar.',
-      '⚠️',
-      true
-    );
+    showKatalogMsg('⚠️','Gagal Memuat Katalog',
+      'Pastikan API_URL sudah diisi dengan benar', true);
   }
 }
 
-function showKatalogError(pesan, icon, showRetry) {
+function showKatalogMsg(icon, judul, pesan, retry) {
   document.getElementById('katalogGrid').innerHTML = `
     <div class="empty-state">
       <div class="ei">${icon}</div>
-      <p style="font-weight:700;margin-bottom:8px;">${pesan}</p>
-      ${showRetry ? `<button onclick="loadKatalog()" style="margin-top:12px;
-        padding:10px 24px;background:var(--orange);border:none;
-        border-radius:10px;color:#fff;font-weight:700;cursor:pointer;">
-        🔄 Coba Lagi
-      </button>` : ''}
+      <p style="font-weight:700;margin-bottom:6px;">${judul}</p>
+      <p style="font-size:12px;">${pesan}</p>
+      ${retry ? `<button onclick="loadKatalog()" style="margin-top:14px;padding:10px 24px;
+        background:var(--orange);border:none;border-radius:10px;
+        color:#fff;font-weight:700;cursor:pointer;">🔄 Coba Lagi</button>` : ''}
     </div>`;
   document.getElementById('sectionLabel').textContent = 'Katalog — 0 item';
 }
 
+// ══════════════════════════════════════════════════════════
+//  FILTER & SEARCH
+// ══════════════════════════════════════════════════════════
 function buildFilterKategori() {
-  const kategori = [...new Set(
+  const kat  = [...new Set(
     semuaBarang.map(b => String(b.KATEGORI || '')).filter(Boolean)
   )].sort();
-
   const wrap = document.getElementById('filterScroll');
-  wrap.innerHTML = `
-    <div class="filter-chip active" onclick="setKategori('',this)">Semua</div>
-  `;
-  kategori.forEach(k => {
+  wrap.innerHTML = `<div class="filter-chip active" onclick="setKategori('',this)">Semua</div>`;
+  kat.forEach(k => {
     const el = document.createElement('div');
-    el.className = 'filter-chip';
-    el.textContent = k;
-    el.onclick = () => setKategori(k, el);
+    el.className  = 'filter-chip';
+    el.textContent= k;
+    el.onclick    = () => setKategori(k, el);
     wrap.appendChild(el);
   });
 }
 
 function setKategori(kat, el) {
   kategoriAktif = kat;
-  document.querySelectorAll('.filter-chip')
-    .forEach(c => c.classList.remove('active'));
+  searchCache   = {};
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
-  filterKatalog();
+  filterKatalog(document.getElementById('searchInput')?.value || '');
 }
-
-// ── Debounce timer ────────────────────────────────────────
-let searchTimer = null;
-let searchCache = {};
 
 function debounceSearch(val) {
   clearTimeout(searchTimer);
-  // Tampilkan indikator loading instan
   const label = document.getElementById('sectionLabel');
   if (label) label.textContent = 'Mencari...';
-  // Tunggu 180ms setelah berhenti mengetik
-  searchTimer = setTimeout(() => {
-    filterKatalog(val);
-  }, 180);
+  searchTimer = setTimeout(() => filterKatalog(val), 180);
 }
 
 function filterKatalog(val) {
-  // Ambil nilai dari parameter atau dari input
-  const raw = val !== undefined ? val : (document.getElementById('searchInput')?.value || '');
-  const q   = raw.toLowerCase().trim();
-
-  // Cek cache — jika query sama & kategori sama, skip re-filter
+  const q        = String(val !== undefined ? val : '').toLowerCase().trim();
   const cacheKey = q + '|' + kategoriAktif;
+
   if (searchCache[cacheKey]) {
     tampilBarang = searchCache[cacheKey];
     renderKatalog();
     return;
   }
 
-  // Filter
-  if (!q && !kategoriAktif) {
-    // Tidak ada filter → tampil semua
-    tampilBarang = semuaBarang;
-  } else {
-    tampilBarang = semuaBarang.filter(b => {
-      const matchKat = !kategoriAktif ||
-        String(b.KATEGORI || '') === kategoriAktif;
+  tampilBarang = (!q && !kategoriAktif)
+    ? semuaBarang
+    : semuaBarang.filter(b => {
+        const matchKat = !kategoriAktif || String(b.KATEGORI || '') === kategoriAktif;
+        if (!q) return matchKat;
+        const kode = String(b.KODE_BARANG || '').toLowerCase();
+        const nama = String(b.NAMA_BARANG || '').toLowerCase();
+        const kat  = String(b.KATEGORI   || '').toLowerCase();
+        return matchKat && (kode.includes(q) || nama.includes(q) || kat.includes(q));
+      });
 
-      if (!q) return matchKat;
-
-      // Cek kode dulu (exact prefix match = prioritas)
-      const kode = String(b.KODE_BARANG || '').toLowerCase();
-      const nama = String(b.NAMA_BARANG || '').toLowerCase();
-      const kat  = String(b.KATEGORI   || '').toLowerCase();
-
-      const matchQ = kode.startsWith(q) ||
-                     kode.includes(q)   ||
-                     nama.includes(q)   ||
-                     kat.includes(q);
-
-      return matchKat && matchQ;
-    });
-  }
-
-  // Simpan ke cache (max 30 entry)
-  const cacheKeys = Object.keys(searchCache);
-  if (cacheKeys.length > 30) delete searchCache[cacheKeys[0]];
+  const keys = Object.keys(searchCache);
+  if (keys.length > 30) delete searchCache[keys[0]];
   searchCache[cacheKey] = tampilBarang;
-
   renderKatalog();
 }
 
-function setKategori(kat, el) {
-  kategoriAktif = kat;
-  // Reset cache saat kategori berubah
-  searchCache = {};
-  document.querySelectorAll('.filter-chip')
-    .forEach(c => c.classList.remove('active'));
-  el.classList.add('active');
-  filterKatalog(document.getElementById('searchInput')?.value || '');
-}
-
+// ══════════════════════════════════════════════════════════
+//  RENDER KATALOG
+// ══════════════════════════════════════════════════════════
 function getEmoji(kat) {
-  const map = {
+  const m = {
     'Kursi':'🪑','Meja':'🪞','Lemari':'🗄️','Sofa':'🛋️',
-    'Kasur':'🛏️','Rak':'📚','Bufet':'🗃️','Meja Makan':'🍽️',
-    'Perabot':'🏠','Dekorasi':'🎨','Dapur':'🍳','Kamar':'🛏️'
+    'Kasur':'🛏️','Rak':'📚','Bufet':'🗃️','Dapur':'🍳','Dekorasi':'🎨'
   };
-  return map[kat] || '📦';
+  return m[kat] || '📦';
 }
 
-// ── Render katalog — optimized ────────────────────────────
-let lastRenderedCount = -1;
-
-function renderKatalog() {
-  const grid  = document.getElementById('katalogGrid');
-  const label = document.getElementById('sectionLabel');
-  if (!grid) return;
-
-  const count = tampilBarang.length;
-  label.textContent = `Katalog Barang — ${count} item`;
-
-  if (!count) {
-    grid.innerHTML = `
-      <div class="empty-state">
-        <div class="ei">🔍</div>
-        <p>Barang tidak ditemukan</p>
-      </div>`;
-    lastRenderedCount = 0;
-    return;
-  }
-
-  // Batasi render awal — tampilkan 40 item dulu, sisanya lazy
-  const BATCH   = 40;
-  const tampil  = tampilBarang.slice(0, BATCH);
-  const sisanya = count - tampil.length;
-
-  // Build HTML string (jauh lebih cepat dari createElement)
-  const html = tampil.map(b => buildItemCard(b)).join('');
-
-  const more = sisanya > 0 ? `
-    <div style="grid-column:1/-1;text-align:center;padding:20px;">
-      <button onclick="loadMoreKatalog()"
-        style="background:var(--orange-dim);border:1px solid var(--border);
-               border-radius:12px;padding:12px 32px;color:var(--orange);
-               font-size:13px;font-weight:700;cursor:pointer;">
-        Tampilkan ${sisanya} barang lainnya ▼
-      </button>
-    </div>` : '';
-
-  grid.innerHTML = html + more;
-  lastRenderedCount = tampil.length;
-}
-
-// Load more saat klik
-function loadMoreKatalog() {
-  const grid   = document.getElementById('katalogGrid');
-  const sudah  = lastRenderedCount;
-  const tambah = tampilBarang.slice(sudah, sudah + 40);
-  const sisanya= tampilBarang.length - sudah - tambah.length;
-
-  // Hapus tombol load more dulu
-  const btnWrap = grid.querySelector('[onclick="loadMoreKatalog()"]')?.parentElement;
-  if (btnWrap) btnWrap.remove();
-
-  // Append HTML baru
-  const tempDiv = document.createElement('div');
-  tempDiv.innerHTML = tambah.map(b => buildItemCard(b)).join('');
-  while (tempDiv.firstChild) grid.appendChild(tempDiv.firstChild);
-
-  lastRenderedCount += tambah.length;
-
-  // Tambah tombol lagi jika masih ada
-  if (sisanya > 0) {
-    const moreDiv = document.createElement('div');
-    moreDiv.style.cssText = 'grid-column:1/-1;text-align:center;padding:20px;';
-    moreDiv.innerHTML = `
-      <button onclick="loadMoreKatalog()"
-        style="background:var(--orange-dim);border:1px solid var(--border);
-               border-radius:12px;padding:12px 32px;color:var(--orange);
-               font-size:13px;font-weight:700;cursor:pointer;">
-        Tampilkan ${sisanya} barang lainnya ▼
-      </button>`;
-    grid.appendChild(moreDiv);
-  }
-}
-
-// Build 1 card HTML — pisahkan agar mudah di-reuse
 function buildItemCard(b) {
   const kode   = String(b.KODE_BARANG || '');
   const nama   = String(b.NAMA_BARANG || '');
-  const kat    = String(b.KATEGORI   || '');
-  const satuan = String(b.SATUAN     || 'PCS');
-  const harga  = parseFloat(b.HARGA) || 0;
-  const stok   = parseInt(b.STOK)    || 0;
-  const qtyVal = cart[kode] ? cart[kode].qty : 1;
+  const kat    = String(b.KATEGORI    || '');
+  const satuan = String(b.SATUAN      || 'PCS');
+  const harga  = parseFloat(b.HARGA)  || 0;
+  const stok   = parseInt(b.STOK)     || 0;
+  const qtyVal = cart[kode]?.qty      || 1;
 
-  let stokCls  = 'stok-ok';
-  let stokTeks = `Stok: ${stok}`;
-  if (stok === 0)       { stokCls = 'stok-habis'; stokTeks = 'Habis'; }
-  else if (stok <= 5)   { stokCls = 'stok-low';   stokTeks = `Sisa: ${stok}`; }
+  let stokCls = 'stok-ok', stokTeks = `Stok: ${stok}`;
+  if (stok === 0)      { stokCls = 'stok-habis'; stokTeks = 'Habis'; }
+  else if (stok <= 5)  { stokCls = 'stok-low';   stokTeks = `Sisa: ${stok}`; }
 
   const inCart    = cart[kode] ? 'in-cart' : '';
   const addedCls  = cart[kode] ? 'added'   : '';
   const addedTeks = cart[kode] ? '✅ Di Keranjang' : '+ Tambah';
   const disabled  = stok === 0 ? 'disabled' : '';
 
-  // Escape nama untuk onclick attribute
-  const namaSafe = nama.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-  const katSafe  = kat.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+  // Escape karakter khusus untuk onclick attribute
+  const namaSafe = nama.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+  const katSafe  = kat.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
 
   return `<div class="item-card ${inCart}" id="card-${kode}">
     <span class="item-stok ${stokCls}">${stokTeks}</span>
@@ -1082,24 +678,87 @@ function buildItemCard(b) {
         onchange="setQtyCard('${kode}',this.value)"/>
       <button class="qty-btn" onclick="changeQtyCard('${kode}',1)">+</button>
     </div>
-    <button class="btn-add ${addedCls}" ${disabled}
-      id="btn-${kode}"
+    <button class="btn-add ${addedCls}" ${disabled} id="btn-${kode}"
       onclick="addToCart('${kode}','${namaSafe}','${katSafe}',${harga},'${satuan}')">
       ${addedTeks}
     </button>
   </div>`;
 }
 
-// ════════════════════════════════════════════════════════
-//  CART LOGIC
-// ════════════════════════════════════════════════════════
+function renderKatalog() {
+  const grid  = document.getElementById('katalogGrid');
+  const label = document.getElementById('sectionLabel');
+  if (!grid) return;
+
+  const count = tampilBarang.length;
+  label.textContent = `Katalog Barang — ${count} item`;
+  lastRenderedCount = 0; // Reset setiap render baru
+
+  if (!count) {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <div class="ei">🔍</div>
+        <p>Barang tidak ditemukan</p>
+      </div>`;
+    return;
+  }
+
+  const BATCH   = 40;
+  const tampil  = tampilBarang.slice(0, BATCH);
+  const sisanya = count - tampil.length;
+
+  const more = sisanya > 0 ? `
+    <div style="grid-column:1/-1;text-align:center;padding:20px;">
+      <button onclick="loadMoreKatalog()"
+        style="background:var(--orange-dim);border:1px solid var(--border);
+               border-radius:12px;padding:12px 32px;color:var(--orange);
+               font-size:13px;font-weight:700;cursor:pointer;">
+        Tampilkan ${sisanya} lainnya ▼
+      </button>
+    </div>` : '';
+
+  grid.innerHTML = tampil.map(b => buildItemCard(b)).join('') + more;
+  lastRenderedCount = tampil.length;
+}
+
+function loadMoreKatalog() {
+  const grid    = document.getElementById('katalogGrid');
+  const sudah   = lastRenderedCount;
+  const tambah  = tampilBarang.slice(sudah, sudah + 40);
+  const sisanya = tampilBarang.length - sudah - tambah.length;
+
+  const btnWrap = grid.querySelector('[onclick="loadMoreKatalog()"]')?.parentElement;
+  if (btnWrap) btnWrap.remove();
+
+  const tmp = document.createElement('div');
+  tmp.innerHTML = tambah.map(b => buildItemCard(b)).join('');
+  while (tmp.firstChild) grid.appendChild(tmp.firstChild);
+  lastRenderedCount += tambah.length;
+
+  if (sisanya > 0) {
+    const d = document.createElement('div');
+    d.style.cssText = 'grid-column:1/-1;text-align:center;padding:20px;';
+    d.innerHTML = `
+      <button onclick="loadMoreKatalog()"
+        style="background:var(--orange-dim);border:1px solid var(--border);
+               border-radius:12px;padding:12px 32px;color:var(--orange);
+               font-size:13px;font-weight:700;cursor:pointer;">
+        Tampilkan ${sisanya} lainnya ▼
+      </button>`;
+    grid.appendChild(d);
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  CART
+// ══════════════════════════════════════════════════════════
 function changeQtyCard(kode, delta) {
   const inp = document.getElementById('qty-' + kode);
   if (!inp) return;
-  let val = (parseInt(inp.value) || 1) + delta;
-  if (val < 1) val = 1;
-  inp.value = val;
-  if (cart[kode]) { cart[kode].qty = val; updateCartUI(); }
+  let v = (parseInt(inp.value) || 1) + delta;
+  if (v < 1) v = 1;
+  inp.value = v;
+  if (cart[kode]) { cart[kode].qty = v; updateCartUI(); }
 }
 
 function setQtyCard(kode, val) {
@@ -1111,15 +770,12 @@ function setQtyCard(kode, val) {
 
 function addToCart(kode, nama, kat, harga, satuan) {
   const inp = document.getElementById('qty-' + kode);
-  const qty = parseInt(inp ? inp.value : 1) || 1;
-
+  const qty = parseInt(inp?.value) || 1;
   cart[kode] = { kode, nama, kat, harga, satuan, qty };
-
   const card = document.getElementById('card-' + kode);
   const btn  = document.getElementById('btn-'  + kode);
   if (card) card.classList.add('in-cart');
   if (btn)  { btn.textContent = '✅ Di Keranjang'; btn.classList.add('added'); }
-
   updateCartUI();
   showToast('✅ Ditambah ke keranjang', 'success');
 }
@@ -1135,17 +791,16 @@ function removeFromCart(kode) {
 }
 
 function updateCartUI() {
-  const items  = Object.values(cart);
-  const total  = items.reduce((s, i) => s + i.qty * i.harga, 0);
-  const count  = items.reduce((s, i) => s + i.qty, 0);
-  const cartBar = document.getElementById('cartBar');
-
+  const items = Object.values(cart);
+  const total = items.reduce((s, i) => s + i.qty * i.harga, 0);
+  const count = items.reduce((s, i) => s + i.qty, 0);
+  const bar   = document.getElementById('cartBar');
   if (items.length > 0) {
-    cartBar.style.display = '';
+    bar.style.display = '';
     document.getElementById('cartCount').textContent =
       `${count} item · ${formatRp(total)}`;
   } else {
-    cartBar.style.display = 'none';
+    bar.style.display = 'none';
   }
   document.getElementById('sumItem').textContent  = count + ' item';
   document.getElementById('sumTotal').textContent = formatRp(total);
@@ -1165,43 +820,37 @@ function closeCart() {
 function renderCartSheet() {
   const items = Object.values(cart);
   const wrap  = document.getElementById('cartItems');
-
   if (!items.length) {
     wrap.innerHTML = `
       <div class="cart-empty">
-        <div style="font-size:40px;margin-bottom:8px;">🛒</div>
+        <div style="font-size:36px;margin-bottom:8px;">🛒</div>
         <div>Keranjang masih kosong</div>
       </div>`;
     return;
   }
-
   wrap.innerHTML = items.map(item => `
-    <div class="cart-item" id="ci-${item.kode}">
+    <div class="cart-item">
       <div class="ci-info">
         <div class="ci-nama">${item.nama}</div>
         <div class="ci-kode">${item.kode}</div>
         <div class="ci-harga">${formatRp(item.harga)} / ${item.satuan}</div>
       </div>
       <div class="ci-qty">
-        <button class="ci-qty-btn"
-          onclick="ciQty('${item.kode}',-1)">−</button>
-        <input class="ci-qty-num" type="number"
-          value="${item.qty}" min="1"
+        <button class="ci-qty-btn" onclick="ciQty('${item.kode}',-1)">−</button>
+        <input class="ci-qty-num" type="number" value="${item.qty}" min="1"
           onchange="ciQtySet('${item.kode}',this.value)"/>
-        <button class="ci-qty-btn"
-          onclick="ciQty('${item.kode}',1)">+</button>
+        <button class="ci-qty-btn" onclick="ciQty('${item.kode}',1)">+</button>
       </div>
       <div class="ci-sub">${formatRp(item.qty * item.harga)}</div>
-      <button class="ci-del"
-        onclick="removeFromCart('${item.kode}')">🗑</button>
+      <button class="ci-del" onclick="removeFromCart('${item.kode}')">🗑</button>
     </div>`).join('');
 }
 
 function ciQty(kode, delta) {
   if (!cart[kode]) return;
   cart[kode].qty = Math.max(1, cart[kode].qty + delta);
-  const cardInp = document.getElementById('qty-' + kode);
-  if (cardInp) cardInp.value = cart[kode].qty;
+  const inp = document.getElementById('qty-' + kode);
+  if (inp) inp.value = cart[kode].qty;
   updateCartUI();
   renderCartSheet();
 }
@@ -1210,25 +859,18 @@ function ciQtySet(kode, val) {
   if (!cart[kode]) return;
   const v = Math.max(1, parseInt(val) || 1);
   cart[kode].qty = v;
-  const cardInp = document.getElementById('qty-' + kode);
-  if (cardInp) cardInp.value = v;
+  const inp = document.getElementById('qty-' + kode);
+  if (inp) inp.value = v;
   updateCartUI();
 }
 
-// ════════════════════════════════════════════════════════
-//  SUBMIT ORDER — pakai GET agar bebas CORS
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
+//  SUBMIT ORDER BIASA
+// ══════════════════════════════════════════════════════════
 async function submitOrder() {
   const items = Object.values(cart);
-  if (!items.length) {
-    showToast('Keranjang masih kosong!', 'error');
-    return;
-  }
-  if (!idCabang) {
-    showToast('Session tidak valid, silakan login ulang.', 'error');
-    setTimeout(() => window.location.href = 'login.html', 1500);
-    return;
-  }
+  if (!items.length) { showToast('Keranjang masih kosong!', 'error'); return; }
+  if (!idCabang)     { showToast('Session tidak valid, login ulang.', 'error'); return; }
 
   const catatan = document.getElementById('catatanInput').value.trim();
   const btn     = document.getElementById('btnSubmit');
@@ -1236,44 +878,375 @@ async function submitOrder() {
   btn.textContent = '⏳ Mengirim order...';
 
   const payload = {
-    action:   'submitOrder',
-    idCabang: idCabang,
-    catatan:  catatan,
-    items:    items.map(i => ({
-      kode:     i.kode,
-      nama:     i.nama,
-      kategori: i.kat || '',
-      qty:      i.qty,
-      satuan:   i.satuan,
-      harga:    i.harga
+    action: 'submitOrder', idCabang, catatan,
+    items: items.map(i => ({
+      kode: i.kode, nama: i.nama,
+      kategori: i.kat || '', qty: i.qty,
+      satuan: i.satuan, harga: i.harga
     }))
   };
 
   const hasil = await kirimOrderKeServer(payload);
 
   if (hasil.status === 'ok') {
-    cart = {};
+    cart        = {};
+    searchCache = {}; // Reset cache agar card tidak stuck "Di Keranjang"
     document.getElementById('catatanInput').value = '';
     closeCart();
     updateCartUI();
-    renderKatalog();
+    renderKatalog(); // Re-render bersih
     showToast('✅ Order berhasil dikirim! Email notifikasi terkirim.', 'success', 5000);
   } else {
-    showToast('❌ Gagal: ' + hasil.message, 'error', 5000);
+    showToast('❌ ' + (hasil.message || 'Gagal mengirim order'), 'error', 5000);
   }
 
-  btn.disabled = false;
+  btn.disabled    = false;
   btn.textContent = '🚀 Kirim Order ke Gudang';
 }
 
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
+//  ORDER MASSAL
+// ══════════════════════════════════════════════════════════
+async function pasteFromClipboard() {
+  try {
+    const text = await navigator.clipboard.readText();
+    document.getElementById('massalInput').value = text;
+    autoPreviewMassal();
+    showToast('✅ Berhasil paste dari clipboard', 'success');
+  } catch(e) {
+    showToast('Paste manual dengan Ctrl+V', 'info');
+  }
+}
+
+function clearMassalInput() {
+  document.getElementById('massalInput').value = '';
+  massalItems = [];
+  renderMassalPreview();
+  updateMassalSummary();
+}
+
+function autoPreviewMassal() {
+  parseMassalInput();
+  renderMassalPreview();
+  updateMassalSummary();
+}
+
+function parseMassalInput() {
+  const raw   = document.getElementById('massalInput').value || '';
+  const lines = raw.split('\n').map(l => l.trim()).filter(l => l !== '');
+
+  massalItems = lines.map(line => {
+    const parts = line.split(/[;,\t]/).map(p => p.trim());
+    if (parts.length < 2) return {
+      kode: line, nama: '', kat: '', harga: 0, satuan: '', qty: 0,
+      valid: false, error: 'Format salah — gunakan KODE;JUMLAH'
+    };
+
+    const kode = String(parts[0]).trim().toUpperCase();
+    const qty  = parseInt(parts[1]) || 0;
+
+    if (!kode) return { kode:'', nama:'', kat:'', harga:0, satuan:'', qty:0,
+      valid:false, error:'Kode barang kosong' };
+    if (qty <= 0) return { kode, nama:'', kat:'', harga:0, satuan:'', qty:0,
+      valid:false, error:'Jumlah harus lebih dari 0' };
+
+    const barang = semuaBarang.find(b =>
+      String(b.KODE_BARANG || '').trim().toUpperCase() === kode
+    );
+    if (!barang) return { kode, nama:'', kat:'', harga:0, satuan:'', qty,
+      valid:false, error:`Kode "${kode}" tidak ditemukan di katalog` };
+
+    const stok = parseInt(barang.STOK) || 0;
+    return {
+      kode,
+      nama:    String(barang.NAMA_BARANG || ''),
+      kat:     String(barang.KATEGORI   || ''),
+      harga:   parseFloat(barang.HARGA) || 0,
+      satuan:  String(barang.SATUAN     || 'PCS'),
+      qty, stok, valid: true,
+      warning: qty > stok && stok > 0 ? `⚠️ Melebihi stok (${stok})` : '',
+      error: ''
+    };
+  });
+}
+
+function renderMassalPreview() {
+  const wrap = document.getElementById('massalPreview');
+  if (!wrap) return;
+
+  if (!massalItems.length) {
+    wrap.innerHTML = `
+      <div style="text-align:center;padding:30px;color:var(--muted);
+                  background:var(--card);border-radius:14px;
+                  border:1px dashed var(--border2);">
+        <div style="font-size:32px;margin-bottom:8px;">⚡</div>
+        <div style="font-size:13px;">Mulai ketik atau paste kode barang di atas</div>
+      </div>`;
+    return;
+  }
+
+  const validCount   = massalItems.filter(i =>  i.valid).length;
+  const invalidCount = massalItems.filter(i => !i.valid).length;
+
+  const bar = `
+    <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+      <span style="background:rgba(34,197,94,0.15);color:var(--green);
+                   padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;">
+        ✅ ${validCount} valid
+      </span>
+      ${invalidCount > 0 ? `
+      <span style="background:rgba(239,68,68,0.15);color:var(--red);
+                   padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;">
+        ❌ ${invalidCount} error
+      </span>` : ''}
+      <span style="background:var(--dark3);color:var(--muted);
+                   padding:4px 12px;border-radius:20px;font-size:11px;">
+        ${massalItems.length} baris
+      </span>
+    </div>`;
+
+  const cards = massalItems.map((item, idx) => {
+    if (!item.valid) return `
+      <div class="massal-item invalid">
+        <span class="massal-status-icon">❌</span>
+        <div class="massal-info">
+          <div class="massal-kode">${item.kode || '?'}</div>
+          <div class="massal-nama" style="color:var(--red);">Tidak ditemukan</div>
+          <div class="massal-error">${item.error}</div>
+        </div>
+        <button class="massal-del" onclick="hapusMassalItem(${idx})">🗑</button>
+      </div>`;
+
+    const stokColor = item.stok > 5
+      ? 'var(--green)' : item.stok > 0 ? 'var(--yellow)' : 'var(--red)';
+
+    return `
+      <div class="massal-item valid" id="mc-${idx}">
+        <span class="massal-status-icon">${item.warning ? '⚠️' : '✅'}</span>
+        <div class="massal-info">
+          <div class="massal-kode">${item.kode}</div>
+          <div class="massal-nama">${item.nama}</div>
+          <div class="massal-harga">
+            ${formatRp(item.harga)} / ${item.satuan}
+            · Stok: <span style="color:${stokColor}">${item.stok}</span>
+          </div>
+          ${item.warning ? `<div class="massal-warn">${item.warning}</div>` : ''}
+        </div>
+        <div class="massal-right">
+          <div class="massal-subtotal">${formatRp(item.qty * item.harga)}</div>
+          <div class="massal-qty-wrap">
+            <button class="massal-qty-btn" onclick="massalQty(${idx},-1)">−</button>
+            <input class="massal-qty-num" type="number"
+              value="${item.qty}" min="1"
+              onchange="massalQtySet(${idx},this.value)"
+              id="mq-${idx}"/>
+            <button class="massal-qty-btn" onclick="massalQty(${idx},1)">+</button>
+          </div>
+        </div>
+        <button class="massal-del" onclick="hapusMassalItem(${idx})">🗑</button>
+      </div>`;
+  }).join('');
+
+  wrap.innerHTML = bar + cards;
+}
+
+function hapusMassalItem(idx) {
+  massalItems.splice(idx, 1);
+  const lines = document.getElementById('massalInput').value
+    .split('\n').filter(l => l.trim() !== '');
+  lines.splice(idx, 1);
+  document.getElementById('massalInput').value = lines.join('\n');
+  renderMassalPreview();
+  updateMassalSummary();
+}
+
+function massalQty(idx, delta) {
+  if (!massalItems[idx]?.valid) return;
+  massalItems[idx].qty = Math.max(1, massalItems[idx].qty + delta);
+  const inp = document.getElementById('mq-' + idx);
+  if (inp) inp.value = massalItems[idx].qty;
+  updateMassalSummary();
+  renderMassalPreview();
+}
+
+function massalQtySet(idx, val) {
+  if (!massalItems[idx]?.valid) return;
+  massalItems[idx].qty = Math.max(1, parseInt(val) || 1);
+  updateMassalSummary();
+}
+
+function updateMassalSummary() {
+  const valid  = massalItems.filter(i => i.valid);
+  const total  = valid.reduce((s, i) => s + i.qty * i.harga, 0);
+  const totalQ = valid.reduce((s, i) => s + i.qty, 0);
+  const btn    = document.getElementById('btnSubmitMassal');
+  const bar    = document.getElementById('massalSummaryBar');
+
+  if (valid.length > 0) {
+    if (btn) {
+      btn.disabled            = false;
+      btn.style.opacity       = '1';
+      btn.style.pointerEvents = 'auto';
+      btn.textContent         = `⚡ Kirim ${valid.length} Barang ke Gudang`;
+    }
+    if (bar) {
+      bar.style.display = 'flex';
+      document.getElementById('massalSummaryItem').textContent =
+        `${valid.length} jenis · ${totalQ} unit`;
+      document.getElementById('massalSummaryTotal').textContent = formatRp(total);
+    }
+  } else {
+    if (btn) {
+      btn.disabled            = true;
+      btn.style.opacity       = '0.5';
+      btn.style.pointerEvents = 'none';
+      btn.textContent         = '⚡ Kirim Order Massal ke Gudang';
+    }
+    if (bar) bar.style.display = 'none';
+  }
+}
+
+async function submitOrderMassal() {
+  const valid = massalItems.filter(i => i.valid);
+  if (!valid.length) { showToast('Tidak ada barang valid!', 'error'); return; }
+  if (!idCabang)     { showToast('Session tidak valid', 'error'); return; }
+
+  const catatan = document.getElementById('catatanMassal').value.trim();
+  const btn     = document.getElementById('btnSubmitMassal');
+  btn.disabled  = true;
+  btn.textContent = `⏳ Mengirim ${valid.length} barang...`;
+
+  const payload = {
+    action: 'submitOrder', idCabang,
+    catatan: catatan ? `[ORDER MASSAL] ${catatan}` : '[ORDER MASSAL]',
+    items: valid.map(i => ({
+      kode: i.kode, nama: i.nama, kategori: i.kat,
+      qty: i.qty, satuan: i.satuan, harga: i.harga
+    }))
+  };
+
+  const hasil = await kirimOrderKeServer(payload);
+
+  if (hasil.status === 'ok') {
+    massalItems = [];
+    document.getElementById('massalInput').value   = '';
+    document.getElementById('catatanMassal').value = '';
+    renderMassalPreview();
+    updateMassalSummary();
+    showToast(
+      `✅ Order massal ${valid.length} barang berhasil dikirim!`,
+      'success', 5000
+    );
+    setTimeout(() => showTab('riwayat'), 1500);
+  } else {
+    showToast('❌ ' + (hasil.message || 'Gagal'), 'error', 5000);
+    btn.disabled = false;
+    updateMassalSummary();
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  KIRIM ORDER KE SERVER — Universal auto-fallback
+// ══════════════════════════════════════════════════════════
+async function kirimOrderKeServer(payload) {
+  const jsonStr = JSON.stringify(payload);
+  const encoded = encodeURIComponent(jsonStr);
+  const urlGet  = `${API_URL}?action=submitOrder&payload=${encoded}`;
+
+  // Metode 1: GET (jika payload tidak terlalu besar)
+  if (urlGet.length < 7000) {
+    try {
+      const res  = await fetch(urlGet, { method: 'GET' });
+      const data = parseResponse(await res.text());
+      if (data.status === 'ok') return data;
+      console.warn('GET gagal:', data.message);
+    } catch(e) { console.warn('GET error:', e.message); }
+  }
+
+  // Metode 2: POST JSON
+  try {
+    const res  = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: jsonStr
+    });
+    const data = parseResponse(await res.text());
+    if (data.status === 'ok') return data;
+    console.warn('POST JSON gagal:', data.message);
+  } catch(e) { console.warn('POST JSON error:', e.message); }
+
+  // Metode 3: POST FormData
+  try {
+    const form = new FormData();
+    form.append('payload', jsonStr);
+    const res  = await fetch(API_URL, { method: 'POST', body: form });
+    const data = parseResponse(await res.text());
+    if (data.status === 'ok') return data;
+    console.warn('POST Form gagal:', data.message);
+  } catch(e) { console.warn('POST Form error:', e.message); }
+
+  // Metode 4: Chunking (payload besar > 20 item)
+  const items = payload.items || [];
+  if (items.length > 20) {
+    const CHUNK = 20;
+    let ok = 0, lastId = '';
+    const total = Math.ceil(items.length / CHUNK);
+
+    for (let i = 0; i < items.length; i += CHUNK) {
+      const bagian = Math.floor(i / CHUNK) + 1;
+      const chunk  = {
+        ...payload,
+        catatan: `${payload.catatan} [Bagian ${bagian}/${total}]`,
+        items:   items.slice(i, i + CHUNK)
+      };
+      showToast(`⏳ Mengirim bagian ${bagian} dari ${total}...`, 'info', 1500);
+      try {
+        const enc  = encodeURIComponent(JSON.stringify(chunk));
+        const res  = await fetch(
+          `${API_URL}?action=submitOrder&payload=${enc}`, { method: 'GET' }
+        );
+        const data = parseResponse(await res.text());
+        if (data.status === 'ok') { ok++; lastId = data.orderId || ''; }
+      } catch(e) { console.warn(`Chunk ${bagian} gagal:`, e.message); }
+
+      if (i + CHUNK < items.length) {
+        await new Promise(r => setTimeout(r, 800));
+      }
+    }
+
+    if (ok > 0) return {
+      status: 'ok',
+      message: `${ok} dari ${total} bagian berhasil dikirim`,
+      orderId: lastId
+    };
+  }
+
+  return {
+    status: 'error',
+    message: 'Gagal terhubung ke server. Cek koneksi dan pastikan API_URL benar.'
+  };
+}
+
+function parseResponse(text) {
+  if (!text || text.trim() === '')
+    return { status:'error', message:'Response kosong dari server' };
+  try { return JSON.parse(text); } catch(e) {}
+  try {
+    const m = text.match(/\{[\s\S]*\}/);
+    if (m) return JSON.parse(m[0]);
+  } catch(e) {}
+  return { status:'error', message:'Response tidak valid: ' + text.substring(0, 100) };
+}
+
+// ══════════════════════════════════════════════════════════
 //  RIWAYAT ORDER
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 async function loadRiwayat() {
   const list = document.getElementById('riwayatList');
   list.innerHTML = `
     <div class="loading-wrap" style="grid-column:unset">
-      <div class="spinner"></div><div>Memuat riwayat...</div>
+      <div class="spinner"></div>
+      <div>Memuat riwayat...</div>
     </div>`;
 
   try {
@@ -1281,9 +1254,17 @@ async function loadRiwayat() {
     const data = await res.json();
     if (data.status !== 'ok') throw new Error(data.message);
 
-    const myOrders = (data.data || []).filter(o =>
+    // Filter hanya order cabang ini
+    let myOrders = (data.data || []).filter(o =>
       String(o.ID_CABANG || '').trim().toUpperCase() === idCabang.toUpperCase()
     );
+
+    // Sort terbaru dulu
+    myOrders.sort((a, b) => {
+      const da = new Date(toISO(String(a.TANGGAL_ORDER || '')));
+      const db = new Date(toISO(String(b.TANGGAL_ORDER || '')));
+      return db - da;
+    });
 
     if (!myOrders.length) {
       list.innerHTML = `
@@ -1295,35 +1276,26 @@ async function loadRiwayat() {
     }
 
     list.innerHTML = myOrders.map(o => {
-      const stsCls = {
-        PENDING:  'status-pending',
-        APPROVED: 'status-approved',
-        REJECTED: 'status-rejected'
-      }[String(o.STATUS).toUpperCase()] || 'status-pending';
-
-      const stsEmoji = {
-        PENDING:'⏳', APPROVED:'✅', REJECTED:'❌'
-      }[String(o.STATUS).toUpperCase()] || '⏳';
-
-      // ── Fix tanggal ──────────────────────────────────────
-      const tglTampil = fixTanggalWITA(String(o.TANGGAL_ORDER || ''));
-
-      const detail    = (o.DETAIL || []);
-      const detailTeks = detail.length > 0
-        ? detail.slice(0,3).map(d => `${d.KODE_BARANG} ×${d.QTY}`).join(', ')
-          + (detail.length > 3 ? ` +${detail.length - 3} lagi` : '')
+      const sts    = String(o.STATUS || 'PENDING').toUpperCase();
+      const stsCls = { PENDING:'status-pending', APPROVED:'status-approved',
+                       REJECTED:'status-rejected' }[sts] || 'status-pending';
+      const stsEmoji = { PENDING:'⏳', APPROVED:'✅', REJECTED:'❌' }[sts] || '⏳';
+      const tgl      = formatTanggalWITA(String(o.TANGGAL_ORDER || ''));
+      const detail   = o.DETAIL || [];
+      const dteks    = detail.length > 0
+        ? detail.slice(0, 3).map(d =>
+            `${d.KODE_BARANG} ×${d.QTY} ${d.SATUAN || ''}`
+          ).join(', ') + (detail.length > 3 ? ` +${detail.length-3} lagi` : '')
         : '(detail tidak tersedia)';
 
       return `
         <div class="riwayat-item">
           <div class="riwayat-header">
             <div class="riwayat-id">${o.ORDER_ID}</div>
-            <span class="status-badge ${stsCls}">
-              ${stsEmoji} ${o.STATUS}
-            </span>
+            <span class="status-badge ${stsCls}">${stsEmoji} ${sts}</span>
           </div>
-          <div class="riwayat-tgl">🕐 ${tglTampil}</div>
-          <div class="riwayat-items-text">📦 ${detailTeks}</div>
+          <div class="riwayat-tgl">🕐 ${tgl}</div>
+          <div class="riwayat-items-text">📦 ${dteks}</div>
           ${o.CATATAN
             ? `<div style="font-size:11px;color:var(--muted);margin-top:4px;">
                📝 ${o.CATATAN}</div>`
@@ -1345,9 +1317,43 @@ async function loadRiwayat() {
   }
 }
 
-// ════════════════════════════════════════════════════════
-//  UTILS
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
+//  UTILS — TANGGAL
+// ══════════════════════════════════════════════════════════
+
+// Konversi ke ISO string untuk keperluan sorting
+function toISO(str) {
+  if (!str || str.trim() === '') return '2000-01-01T00:00:00Z';
+  str = String(str).trim();
+  if (str.includes('T')) return str; // sudah ISO
+  // Format dd-MM-yyyy HH:mm:ss
+  const parts = str.split(' ');
+  const dp    = (parts[0] || '').split('-');
+  const tp    = parts[1] || '00:00:00';
+  if (dp.length === 3) return `${dp[2]}-${dp[1]}-${dp[0]}T${tp}+08:00`;
+  return str;
+}
+
+// Format tampilan: apapun → dd-MM-yyyy HH:mm:ss WITA
+function formatTanggalWITA(str) {
+  if (!str || str.trim() === '') return '-';
+  str = String(str).trim();
+  // Sudah format dd-MM-yyyy HH:mm:ss
+  if (/^\d{2}-\d{2}-\d{4}\s\d{2}:\d{2}:\d{2}$/.test(str)) return str + ' WITA';
+  // Format ISO → konversi +8 jam
+  try {
+    const d = new Date(str);
+    if (isNaN(d.getTime())) return str;
+    const w = new Date(d.getTime() + 8 * 60 * 60 * 1000);
+    const p = n => String(n).padStart(2, '0');
+    return `${p(w.getUTCDate())}-${p(w.getUTCMonth()+1)}-${w.getUTCFullYear()} ` +
+           `${p(w.getUTCHours())}:${p(w.getUTCMinutes())}:${p(w.getUTCSeconds())} WITA`;
+  } catch(e) { return str; }
+}
+
+// ══════════════════════════════════════════════════════════
+//  UTILS — UMUM
+// ══════════════════════════════════════════════════════════
 function formatRp(n) {
   return 'Rp ' + (parseFloat(n) || 0).toLocaleString('id-ID');
 }
@@ -1355,8 +1361,8 @@ function formatRp(n) {
 function showToast(msg, type = 'info', duration = 3000) {
   const wrap = document.getElementById('toastWrap');
   const el   = document.createElement('div');
-  el.className = `toast ${type}`;
-  el.textContent = msg;
+  el.className  = `toast ${type}`;
+  el.textContent= msg;
   wrap.appendChild(el);
   requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
   setTimeout(() => {
@@ -1365,516 +1371,13 @@ function showToast(msg, type = 'info', duration = 3000) {
   }, duration);
 }
 
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 //  INIT
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 window.addEventListener('load', () => {
   if (!initSession()) return;
   loadKatalog();
 });
-// ════════════════════════════════════════════════════════
-//  ORDER MASSAL
-// ════════════════════════════════════════════════════════
-
-// State order massal
-let massalItems = []; // { kode, nama, kat, harga, satuan, qty, valid, error }
-
-// Update showTab agar support tab massal
-const _showTabOri = showTab;
-function showTab(tab) {
-  document.getElementById('pageKatalog').style.display  = tab==='katalog' ? '' : 'none';
-  document.getElementById('pageMassal').style.display   = tab==='massal'  ? '' : 'none';
-  document.getElementById('pageRiwayat').style.display  = tab==='riwayat' ? '' : 'none';
-
-  document.getElementById('tab-katalog').classList.toggle('active', tab==='katalog');
-  document.getElementById('tab-massal').classList.toggle('active',  tab==='massal');
-  document.getElementById('tab-riwayat').classList.toggle('active', tab==='riwayat');
-
-  if (tab === 'riwayat') loadRiwayat();
-  if (tab === 'massal')  renderMassalPreview();
-}
-
-// Paste dari clipboard
-async function pasteFromClipboard() {
-  try {
-    const text = await navigator.clipboard.readText();
-    document.getElementById('massalInput').value = text;
-    autoPreviewMassal();
-    showToast('✅ Berhasil paste dari clipboard', 'success');
-  } catch(e) {
-    showToast('Gagal paste otomatis — paste manual dengan Ctrl+V', 'info');
-  }
-}
-
-// Hapus input
-function clearMassalInput() {
-  document.getElementById('massalInput').value = '';
-  massalItems = [];
-  renderMassalPreview();
-  updateMassalSummary();
-}
-
-// Auto preview saat mengetik
-function autoPreviewMassal() {
-  parseMassalInput();
-  renderMassalPreview();
-  updateMassalSummary();
-}
-
-// Parse input teks → array massalItems
-function parseMassalInput() {
-  const raw   = document.getElementById('massalInput').value || '';
-  const lines = raw.split('\n').map(l => l.trim()).filter(l => l !== '');
-
-  massalItems = lines.map(line => {
-    // Terima separator: ; atau , atau tab atau spasi ganda
-    const parts = line.split(/[;,\t]/).map(p => p.trim());
-
-    if (parts.length < 2) {
-      return {
-        kode: line, nama: '', kat: '', harga: 0, satuan: '',
-        qty: 0, valid: false,
-        error: 'Format salah — gunakan KODE;JUMLAH'
-      };
-    }
-
-    const kode = String(parts[0]).trim().toUpperCase();
-    const qty  = parseInt(parts[1]) || 0;
-
-    if (!kode) {
-      return { kode:'', nama:'', kat:'', harga:0, satuan:'', qty:0,
-               valid:false, error:'Kode barang kosong' };
-    }
-    if (qty <= 0) {
-      return { kode, nama:'', kat:'', harga:0, satuan:'', qty:0,
-               valid:false, error:'Jumlah harus lebih dari 0' };
-    }
-
-    // Cari di katalog
-    const barang = semuaBarang.find(b =>
-      String(b.KODE_BARANG || '').trim().toUpperCase() === kode
-    );
-
-    if (!barang) {
-      return { kode, nama:'', kat:'', harga:0, satuan:'', qty,
-               valid:false, error:`Kode "${kode}" tidak ditemukan di katalog` };
-    }
-
-    const stok = parseInt(barang.STOK) || 0;
-    const warn = stok > 0 && qty > stok
-      ? `⚠️ Jumlah (${qty}) melebihi stok (${stok})`
-      : '';
-
-    return {
-      kode,
-      nama:    String(barang.NAMA_BARANG || ''),
-      kat:     String(barang.KATEGORI   || ''),
-      harga:   parseFloat(barang.HARGA) || 0,
-      satuan:  String(barang.SATUAN     || 'PCS'),
-      qty,
-      stok,
-      valid:   true,
-      warning: warn,
-      error:   ''
-    };
-  });
-}
-
-// Render preview card
-function renderMassalPreview() {
-  const wrap = document.getElementById('massalPreview');
-  if (!wrap) return;
-
-  if (!massalItems.length) {
-    wrap.innerHTML = `
-      <div style="text-align:center;padding:30px;color:var(--muted);
-                  background:var(--card);border-radius:14px;
-                  border:1px dashed var(--border2);">
-        <div style="font-size:32px;margin-bottom:8px;">⚡</div>
-        <div style="font-size:13px;">Mulai ketik atau paste kode barang di atas</div>
-      </div>`;
-    return;
-  }
-
-  const validCount   = massalItems.filter(i => i.valid).length;
-  const invalidCount = massalItems.filter(i => !i.valid).length;
-
-  // Summary bar atas
-  let summaryBar = `
-    <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
-      <span style="background:rgba(34,197,94,0.15);color:var(--green);
-                   padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;">
-        ✅ ${validCount} valid
-      </span>
-      ${invalidCount > 0 ? `
-      <span style="background:rgba(239,68,68,0.15);color:var(--red);
-                   padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;">
-        ❌ ${invalidCount} error
-      </span>` : ''}
-      <span style="background:var(--dark3);color:var(--muted);
-                   padding:4px 12px;border-radius:20px;font-size:11px;">
-        Total ${massalItems.length} baris
-      </span>
-    </div>`;
-
-  const cards = massalItems.map((item, idx) => {
-    if (!item.valid) {
-      return `
-        <div class="massal-item invalid">
-          <span class="massal-status-icon">❌</span>
-          <div class="massal-info">
-            <div class="massal-kode">${item.kode || '?'}</div>
-            <div class="massal-nama" style="color:var(--red);">Tidak ditemukan</div>
-            <div class="massal-error">${item.error}</div>
-          </div>
-          <button class="massal-del" onclick="hapusMassalItem(${idx})">🗑</button>
-        </div>`;
-    }
-
-    const subtotal = item.qty * item.harga;
-    return `
-      <div class="massal-item valid" id="massal-card-${idx}">
-        <span class="massal-status-icon">
-          ${item.warning ? '⚠️' : '✅'}
-        </span>
-        <div class="massal-info">
-          <div class="massal-kode">${item.kode}</div>
-          <div class="massal-nama">${item.nama}</div>
-          <div class="massal-harga">
-            ${formatRp(item.harga)} / ${item.satuan}
-            ${item.stok !== undefined
-              ? `· Stok: <span style="color:${item.stok>5?'var(--green)':item.stok>0?'var(--yellow)':'var(--red)'}">
-                   ${item.stok}
-                 </span>`
-              : ''}
-          </div>
-          ${item.warning
-            ? `<div class="massal-warn">${item.warning}</div>`
-            : ''}
-        </div>
-        <div class="massal-right">
-          <div class="massal-subtotal">${formatRp(subtotal)}</div>
-          <div class="massal-qty-wrap">
-            <button class="massal-qty-btn"
-              onclick="massalQty(${idx},-1)">−</button>
-            <input class="massal-qty-num" type="number"
-              value="${item.qty}" min="1"
-              onchange="massalQtySet(${idx},this.value)"
-              id="massal-qty-${idx}"/>
-            <button class="massal-qty-btn"
-              onclick="massalQty(${idx},1)">+</button>
-          </div>
-        </div>
-        <button class="massal-del" onclick="hapusMassalItem(${idx})">🗑</button>
-      </div>`;
-  }).join('');
-
-  wrap.innerHTML = summaryBar + cards;
-}
-
-// Hapus 1 item dari massal
-function hapusMassalItem(idx) {
-  massalItems.splice(idx, 1);
-  // Update textarea juga
-  const lines = document.getElementById('massalInput').value
-    .split('\n').filter(l => l.trim() !== '');
-  lines.splice(idx, 1);
-  document.getElementById('massalInput').value = lines.join('\n');
-  renderMassalPreview();
-  updateMassalSummary();
-}
-
-// Ubah qty dari tombol +/-
-function massalQty(idx, delta) {
-  if (!massalItems[idx] || !massalItems[idx].valid) return;
-  massalItems[idx].qty = Math.max(1, massalItems[idx].qty + delta);
-  // Sync input
-  const inp = document.getElementById('massal-qty-' + idx);
-  if (inp) inp.value = massalItems[idx].qty;
-  // Re-render hanya card ini
-  updateMassalSummary();
-  renderMassalPreview();
-}
-
-// Set qty dari input langsung
-function massalQtySet(idx, val) {
-  if (!massalItems[idx] || !massalItems[idx].valid) return;
-  massalItems[idx].qty = Math.max(1, parseInt(val) || 1);
-  updateMassalSummary();
-}
-
-// Update summary bar bawah & enable/disable tombol
-function updateMassalSummary() {
-  const validItems = massalItems.filter(i => i.valid);
-  const total      = validItems.reduce((s,i) => s + i.qty * i.harga, 0);
-  const totalQty   = validItems.reduce((s,i) => s + i.qty, 0);
-
-  const btn     = document.getElementById('btnSubmitMassal');
-  const barItem = document.getElementById('massalSummaryItem');
-  const barTotal= document.getElementById('massalSummaryTotal');
-  const bar     = document.getElementById('massalSummaryBar');
-
-  if (validItems.length > 0) {
-    if (btn) {
-      btn.disabled = false;
-      btn.style.opacity = '1';
-      btn.style.pointerEvents = 'auto';
-      btn.textContent = `⚡ Kirim ${validItems.length} Barang ke Gudang`;
-    }
-    if (bar)     bar.style.display = 'flex';
-    if (barItem) barItem.textContent = `${validItems.length} jenis · ${totalQty} unit`;
-    if (barTotal)barTotal.textContent = formatRp(total);
-  } else {
-    if (btn) {
-      btn.disabled = true;
-      btn.style.opacity = '0.5';
-      btn.style.pointerEvents = 'none';
-      btn.textContent = '⚡ Kirim Order Massal ke Gudang';
-    }
-    if (bar) bar.style.display = 'none';
-  }
-}
-
-// Submit order massal
-async function submitOrderMassal() {
-  const validItems = massalItems.filter(i => i.valid);
-
-  if (!validItems.length) {
-    showToast('Tidak ada barang valid untuk dikirim!', 'error');
-    return;
-  }
-  if (!idCabang) {
-    showToast('Session tidak valid, silakan login ulang.', 'error');
-    setTimeout(() => window.location.href = 'login.html', 1500);
-    return;
-  }
-
-  const catatan = document.getElementById('catatanMassal').value.trim();
-  const btn     = document.getElementById('btnSubmitMassal');
-  btn.disabled  = true;
-  btn.textContent = `⏳ Mengirim ${validItems.length} barang...`;
-
-  const payload = {
-    action:   'submitOrder',
-    idCabang: idCabang,
-    catatan:  catatan ? `[ORDER MASSAL] ${catatan}` : '[ORDER MASSAL]',
-    items:    validItems.map(i => ({
-      kode:     i.kode,
-      nama:     i.nama,
-      kategori: i.kat,
-      qty:      i.qty,
-      satuan:   i.satuan,
-      harga:    i.harga
-    }))
-  };
-
-  // Coba kirim — otomatis pilih metode terbaik
-  const hasil = await kirimOrderKeServer(payload);
-
-  if (hasil.status === 'ok') {
-    massalItems = [];
-    document.getElementById('massalInput').value   = '';
-    document.getElementById('catatanMassal').value = '';
-    renderMassalPreview();
-    updateMassalSummary();
-    showToast(
-      `✅ Order massal ${validItems.length} barang berhasil dikirim!`,
-      'success', 5000
-    );
-    setTimeout(() => showTab('riwayat'), 1500);
-  } else {
-    showToast('❌ Gagal: ' + (hasil.message || 'Error tidak diketahui'), 'error', 6000);
-    btn.disabled = false;
-    updateMassalSummary();
-  }
-}
-// ════════════════════════════════════════════════════════
-//  KIRIM ORDER KE SERVER — Universal, auto-fallback
-// ════════════════════════════════════════════════════════
-async function kirimOrderKeServer(payload) {
-  const jsonStr = JSON.stringify(payload);
-  const encoded = encodeURIComponent(jsonStr);
-  const urlGet  = `${API_URL}?action=submitOrder&payload=${encoded}`;
-
-  // ── METODE 1: GET (works jika payload < 7000 char) ──────
-  if (urlGet.length < 7000) {
-    try {
-      console.log('Mencoba metode GET...');
-      const res  = await fetch(urlGet, { method: 'GET' });
-      const text = await res.text();
-      const data = parseResponse(text);
-      if (data.status === 'ok') {
-        console.log('✅ Berhasil via GET');
-        return data;
-      }
-      console.warn('GET gagal:', data.message);
-    } catch(e) {
-      console.warn('GET error:', e.message);
-    }
-  } else {
-    console.log('Payload terlalu besar untuk GET, skip ke metode lain...');
-  }
-
-  // ── METODE 2: POST JSON ──────────────────────────────────
-  try {
-    console.log('Mencoba metode POST JSON...');
-    const res  = await fetch(API_URL, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    jsonStr
-    });
-    const text = await res.text();
-    const data = parseResponse(text);
-    if (data.status === 'ok') {
-      console.log('✅ Berhasil via POST JSON');
-      return data;
-    }
-    console.warn('POST JSON gagal:', data.message);
-  } catch(e) {
-    console.warn('POST JSON error:', e.message);
-  }
-
-  // ── METODE 3: POST Form ──────────────────────────────────
-  try {
-    console.log('Mencoba metode POST Form...');
-    const form = new FormData();
-    form.append('payload', jsonStr);
-    const res  = await fetch(API_URL, { method: 'POST', body: form });
-    const text = await res.text();
-    const data = parseResponse(text);
-    if (data.status === 'ok') {
-      console.log('✅ Berhasil via POST Form');
-      return data;
-    }
-    console.warn('POST Form gagal:', data.message);
-  } catch(e) {
-    console.warn('POST Form error:', e.message);
-  }
-
-  // ── METODE 4: Chunking — Pecah jadi beberapa order ──────
-  // Jika semua gagal karena payload besar, pecah per 20 item
-  const items = payload.items || [];
-  if (items.length > 20) {
-    console.log('Mencoba chunking — pecah per 20 item...');
-    const CHUNK_SIZE = 20;
-    const chunks = [];
-    for (let i = 0; i < items.length; i += CHUNK_SIZE) {
-      chunks.push(items.slice(i, i + CHUNK_SIZE));
-    }
-
-    let successCount = 0;
-    let lastOrderId  = '';
-    const errors     = [];
-
-    for (let c = 0; c < chunks.length; c++) {
-      const chunkPayload = {
-        ...payload,
-        catatan: `${payload.catatan} [Bagian ${c+1}/${chunks.length}]`,
-        items:   chunks[c]
-      };
-
-      showToast(
-        `⏳ Mengirim bagian ${c+1} dari ${chunks.length}...`,
-        'info', 2000
-      );
-
-      const encoded2 = encodeURIComponent(JSON.stringify(chunkPayload));
-      const urlChunk = `${API_URL}?action=submitOrder&payload=${encoded2}`;
-
-      try {
-        const res  = await fetch(urlChunk, { method: 'GET' });
-        const text = await res.text();
-        const data = parseResponse(text);
-        if (data.status === 'ok') {
-          successCount++;
-          lastOrderId = data.orderId || '';
-        } else {
-          errors.push(`Bagian ${c+1}: ${data.message}`);
-        }
-      } catch(e) {
-        errors.push(`Bagian ${c+1}: ${e.message}`);
-      }
-
-      // Jeda antar chunk agar tidak throttle
-      if (c < chunks.length - 1) {
-        await new Promise(r => setTimeout(r, 800));
-      }
-    }
-
-    if (successCount === chunks.length) {
-      return {
-        status:  'ok',
-        message: `Semua ${chunks.length} bagian berhasil dikirim`,
-        orderId: lastOrderId
-      };
-    } else if (successCount > 0) {
-      return {
-        status:  'ok',
-        message: `${successCount} dari ${chunks.length} bagian berhasil. ${errors.join(', ')}`,
-        orderId: lastOrderId
-      };
-    } else {
-      return {
-        status:  'error',
-        message: 'Semua bagian gagal: ' + errors.join(', ')
-      };
-    }
-  }
-
-  // Semua metode gagal
-  return {
-    status:  'error',
-    message: 'Gagal terhubung ke server. Cek koneksi internet dan pastikan Apps Script sudah di-deploy.'
-  };
-}
-
-// ── Helper parse response dari Apps Script ────────────────
-function parseResponse(text) {
-  if (!text || text.trim() === '') {
-    return { status: 'error', message: 'Response kosong dari server' };
-  }
-  // Coba parse langsung
-  try {
-    return JSON.parse(text);
-  } catch(e1) {}
-  // Coba bersihkan prefix/suffix HTML
-  try {
-    const match = text.match(/\{[\s\S]*\}/);
-    if (match) return JSON.parse(match[0]);
-  } catch(e2) {}
-  return { status: 'error', message: 'Response tidak valid: ' + text.substring(0, 100) };
-}
-// ════════════════════════════════════════════════════════
-//  FIX TANGGAL — Convert apapun ke format dd-MM-yyyy HH:mm:ss WITA
-// ════════════════════════════════════════════════════════
-function fixTanggalWITA(str) {
-  if (!str || str.trim() === '') return '-';
-  str = String(str).trim();
-
-  // ── Sudah format benar: dd-MM-yyyy HH:mm:ss ──────────
-  if (/^\d{2}-\d{2}-\d{4}\s\d{2}:\d{2}:\d{2}$/.test(str)) {
-    return str + ' WITA';
-  }
-
-  // ── Format ISO: 2026-06-20T04:50:19.000Z ─────────────
-  // atau: 2026-06-20T04:50:19+08:00
-  try {
-    const d = new Date(str);
-    if (isNaN(d.getTime())) return str;
-
-    // Konversi ke WITA (UTC+8)
-    const wita = new Date(d.getTime() + 8 * 60 * 60 * 1000);
-    const pad  = n => String(n).padStart(2, '0');
-
-    const tgl = `${pad(wita.getUTCDate())}-${pad(wita.getUTCMonth() + 1)}-${wita.getUTCFullYear()}`;
-    const jam = `${pad(wita.getUTCHours())}:${pad(wita.getUTCMinutes())}:${pad(wita.getUTCSeconds())}`;
-
-    return `${tgl} ${jam} WITA`;
-  } catch(e) {
-    return str;
-  }
-}
-  
 </script>
 </body>
 </html>
