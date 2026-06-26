@@ -818,7 +818,7 @@ function showTab(tab) {
   document.getElementById('tab-riwayat')
     .classList.toggle('active', tab === 'riwayat');
 
-  if (tab === 'riwayat') loadRiwayat();
+  if (tab === 'riwayat') ();
 }
 
 // ════════════════════════════════════════════════════════
@@ -1305,11 +1305,13 @@ async function loadRiwayat() {
         PENDING:'⏳', APPROVED:'✅', REJECTED:'❌'
       }[String(o.STATUS).toUpperCase()] || '⏳';
 
-      const detail = (o.DETAIL || []);
+      // ── Fix tanggal ──────────────────────────────────────
+      const tglTampil = fixTanggalWITA(String(o.TANGGAL_ORDER || ''));
+
+      const detail    = (o.DETAIL || []);
       const detailTeks = detail.length > 0
-        ? detail.slice(0,3).map(d =>
-            `${d.KODE_BARANG} ×${d.QTY}`
-          ).join(', ') + (detail.length > 3 ? ` +${detail.length-3} lagi` : '')
+        ? detail.slice(0,3).map(d => `${d.KODE_BARANG} ×${d.QTY}`).join(', ')
+          + (detail.length > 3 ? ` +${detail.length - 3} lagi` : '')
         : '(detail tidak tersedia)';
 
       return `
@@ -1320,7 +1322,7 @@ async function loadRiwayat() {
               ${stsEmoji} ${o.STATUS}
             </span>
           </div>
-          <div class="riwayat-tgl">🕐 ${o.TANGGAL_ORDER} WITA</div>
+          <div class="riwayat-tgl">🕐 ${tglTampil}</div>
           <div class="riwayat-items-text">📦 ${detailTeks}</div>
           ${o.CATATAN
             ? `<div style="font-size:11px;color:var(--muted);margin-top:4px;">
@@ -1841,6 +1843,36 @@ function parseResponse(text) {
     if (match) return JSON.parse(match[0]);
   } catch(e2) {}
   return { status: 'error', message: 'Response tidak valid: ' + text.substring(0, 100) };
+}
+// ════════════════════════════════════════════════════════
+//  FIX TANGGAL — Convert apapun ke format dd-MM-yyyy HH:mm:ss WITA
+// ════════════════════════════════════════════════════════
+function fixTanggalWITA(str) {
+  if (!str || str.trim() === '') return '-';
+  str = String(str).trim();
+
+  // ── Sudah format benar: dd-MM-yyyy HH:mm:ss ──────────
+  if (/^\d{2}-\d{2}-\d{4}\s\d{2}:\d{2}:\d{2}$/.test(str)) {
+    return str + ' WITA';
+  }
+
+  // ── Format ISO: 2026-06-20T04:50:19.000Z ─────────────
+  // atau: 2026-06-20T04:50:19+08:00
+  try {
+    const d = new Date(str);
+    if (isNaN(d.getTime())) return str;
+
+    // Konversi ke WITA (UTC+8)
+    const wita = new Date(d.getTime() + 8 * 60 * 60 * 1000);
+    const pad  = n => String(n).padStart(2, '0');
+
+    const tgl = `${pad(wita.getUTCDate())}-${pad(wita.getUTCMonth() + 1)}-${wita.getUTCFullYear()}`;
+    const jam = `${pad(wita.getUTCHours())}:${pad(wita.getUTCMinutes())}:${pad(wita.getUTCSeconds())}`;
+
+    return `${tgl} ${jam} WITA`;
+  } catch(e) {
+    return str;
+  }
 }
   
 </script>
