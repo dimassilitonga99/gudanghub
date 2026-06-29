@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="theme-color" content="#ff6b00"/>
+  <meta name="description" content="GudangHub — Sistem order barang antar cabang"/>
   <title>GudangHub — Order Barang</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
@@ -251,6 +253,23 @@
     .toast.error{border-color:rgba(239,68,68,0.5);color:var(--red);}
     .toast.info{border-color:rgba(255,107,0,0.5);color:var(--orange);}
 
+    /* CONFIRM MODAL */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:600;
+      display:none;align-items:center;justify-content:center;padding:20px;
+      backdrop-filter:blur(4px);}
+    .modal-overlay.show{display:flex;}
+    .modal-box{background:var(--dark2);border:1px solid var(--border);
+      border-radius:18px;padding:24px;max-width:340px;width:100%;text-align:center;}
+    .modal-box h3{font-size:16px;margin-bottom:8px;}
+    .modal-box p{font-size:13px;color:var(--muted);margin-bottom:18px;line-height:1.5;}
+    .modal-actions{display:flex;gap:10px;}
+    .modal-btn{flex:1;padding:12px;border-radius:10px;border:none;
+      font-size:13px;font-weight:700;cursor:pointer;}
+    .modal-btn.cancel{background:var(--dark3);color:var(--muted);
+      border:1px solid var(--border2);}
+    .modal-btn.ok{background:linear-gradient(135deg,var(--orange),var(--orange-light));
+      color:#fff;}
+
     #searchInput{-webkit-appearance:none;appearance:none;font-size:16px;}
     ::-webkit-scrollbar{width:4px;height:4px;}
     ::-webkit-scrollbar-track{background:transparent;}
@@ -266,7 +285,7 @@
   <div class="topbar-logo">🏪</div>
   <div class="topbar-title">GudangHub</div>
   <div class="topbar-cabang">🏬 <span id="cabangLabel">Memuat...</span></div>
-  <button class="btn-logout-top" onclick="doLogout()">Keluar 🚪</button>
+  <button class="btn-logout-top" id="btnLogout" aria-label="Keluar">Keluar 🚪</button>
 </div>
 
 <!-- HALAMAN KATALOG -->
@@ -276,12 +295,11 @@
       <span class="search-icon">🔍</span>
       <input type="text" id="searchInput"
              placeholder="Cari kode atau nama barang..."
-             oninput="debounceSearch(this.value)"
              autocomplete="off" autocorrect="off"
              autocapitalize="off" spellcheck="false"/>
     </div>
     <div class="filter-scroll" id="filterScroll">
-      <div class="filter-chip active" onclick="setKategori('',this)">Semua</div>
+      <div class="filter-chip active" data-kat="">Semua</div>
     </div>
   </div>
   <div class="section-label" id="sectionLabel">Memuat katalog...</div>
@@ -322,18 +340,15 @@
              border:1px solid var(--border2);border-radius:14px;padding:14px;
              color:var(--text);font-size:14px;font-family:monospace;
              line-height:1.8;resize:vertical;outline:none;"
-      placeholder="Contoh:&#10;NN00000;5&#10;NN00001;10&#10;&#10;Ketik atau paste di sini..."
-      oninput="autoPreviewMassal()"
-      onfocus="this.style.borderColor='var(--orange)'"
-      onblur="this.style.borderColor='var(--border2)'"></textarea>
+      placeholder="Contoh:&#10;NN00000;5&#10;NN00001;10&#10;&#10;Ketik atau paste di sini..."></textarea>
     <div style="display:flex;gap:8px;margin-top:10px;">
-      <button onclick="pasteFromClipboard()"
+      <button id="btnPasteClip"
         style="flex:1;padding:10px;background:var(--dark3);
                border:1px solid var(--border2);border-radius:10px;
                color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;">
         📋 Paste Clipboard
       </button>
-      <button onclick="clearMassalInput()"
+      <button id="btnClearMassal"
         style="padding:10px 16px;background:var(--dark3);
                border:1px solid var(--border2);border-radius:10px;
                color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;">
@@ -360,17 +375,14 @@
       style="width:100%;background:var(--card);border:1px solid var(--border2);
              border-radius:10px;padding:10px 14px;color:var(--text);font-size:13px;
              font-family:inherit;resize:none;outline:none;margin-bottom:12px;"
-      placeholder="Catatan untuk admin gudang (opsional)..." rows="2"
-      onfocus="this.style.borderColor='var(--orange)'"
-      onblur="this.style.borderColor='var(--border2)'"></textarea>
-    <button id="btnSubmitMassal" onclick="submitOrderMassal()" disabled
+      placeholder="Catatan untuk admin gudang (opsional)..." rows="2"></textarea>
+    <button id="btnSubmitMassal" disabled
       style="width:100%;padding:15px;border-radius:14px;border:none;
              background:linear-gradient(135deg,var(--orange),var(--orange-light));
              color:#fff;font-size:15px;font-weight:800;cursor:pointer;
              opacity:0.5;pointer-events:none;transition:all 0.2s;">
       ⚡ Kirim Order Massal ke Gudang
     </button>
-    <!-- Summary bar — display diatur oleh JS -->
     <div id="massalSummaryBar"
       style="display:none;margin-top:10px;background:var(--dark3);border-radius:10px;
              padding:10px 14px;justify-content:space-between;align-items:center;">
@@ -399,7 +411,7 @@
 
 <!-- CART BUTTON -->
 <div class="cart-bar" id="cartBar" style="display:none;">
-  <button class="cart-btn" onclick="openCart()">
+  <button class="cart-btn" id="btnOpenCart">
     <span>🛒 Lihat Keranjang</span>
     <span class="cart-count" id="cartCount">0 item</span>
   </button>
@@ -407,25 +419,25 @@
 
 <!-- BOTTOM NAV -->
 <div class="bottom-nav">
-  <button class="nav-tab active" id="tab-katalog" onclick="showTab('katalog')">
+  <button class="nav-tab active" id="tab-katalog" data-tab="katalog">
     <span class="nt-icon">🛍️</span>Katalog
   </button>
-  <button class="nav-tab" id="tab-massal" onclick="showTab('massal')">
+  <button class="nav-tab" id="tab-massal" data-tab="massal">
     <span class="nt-icon">⚡</span>Order Massal
   </button>
-  <button class="nav-tab" id="tab-riwayat" onclick="showTab('riwayat')">
+  <button class="nav-tab" id="tab-riwayat" data-tab="riwayat">
     <span class="nt-icon">📋</span>Riwayat
   </button>
 </div>
 
-<div class="sheet-overlay" id="sheetOverlay" onclick="closeCart()"></div>
+<div class="sheet-overlay" id="sheetOverlay"></div>
 
 <!-- CART BOTTOM SHEET -->
 <div class="bottom-sheet" id="cartSheet">
   <div class="sheet-handle"></div>
   <div class="sheet-header">
     <div class="sheet-title">🛒 Keranjang Order</div>
-    <button class="sheet-close" onclick="closeCart()">✕</button>
+    <button class="sheet-close" id="btnCloseCart" aria-label="Tutup keranjang">✕</button>
   </div>
   <div class="cart-items" id="cartItems">
     <div class="cart-empty">
@@ -442,31 +454,46 @@
     </div>
     <textarea class="catatan-input" id="catatanInput"
       placeholder="Catatan untuk admin gudang (opsional)..." rows="2"></textarea>
-    <button class="btn-submit" id="btnSubmit" onclick="submitOrder()">
+    <button class="btn-submit" id="btnSubmit" disabled>
       🚀 Kirim Order ke Gudang
     </button>
   </div>
 </div>
 
+<!-- CONFIRM MODAL -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-box">
+    <h3 id="confirmTitle">Konfirmasi</h3>
+    <p id="confirmMsg">Yakin?</p>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" id="confirmCancel">Batal</button>
+      <button class="modal-btn ok" id="confirmOk">Ya, Lanjut</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ══════════════════════════════════════════════════════════
-//  ⚙️ CONFIG — GANTI URL INI DENGAN URL APPS SCRIPT KAMU
+//  ⚙️ CONFIG
 // ══════════════════════════════════════════════════════════
 const API_URL = 'https://script.google.com/macros/s/AKfycbzk8A4xuXOVGqbK6a4zffpG6u2s4jVROZwIitmCDat2fYU7qyU3VkxQJmtxtEtjQxji/exec';
 
 // ══════════════════════════════════════════════════════════
 //  STATE
 // ══════════════════════════════════════════════════════════
-let semuaBarang      = [];
-let tampilBarang     = [];
-let cart             = {};
-let kategoriAktif    = '';
-let idCabang         = '';
-let namaCabang       = '';
-let massalItems      = [];
-let searchTimer      = null;
-let searchCache      = {};
-let lastRenderedCount= 0;
+let semuaBarang       = [];
+let barangByKode      = {};      // index cepat by kode
+let tampilBarang      = [];
+let cart              = {};
+let kategoriAktif     = '';
+let idCabang          = '';
+let namaCabang        = '';
+let massalItems       = [];
+let searchTimer       = null;
+let massalTimer       = null;
+let searchCache       = {};
+let lastRenderedCount = 0;
+let isSubmitting      = false;   // anti double-submit
 
 const CABANG_DATA = {
   CB001:{nama:'Toko Nasional Eltari – Arfa',          pic:'Arfa'  },
@@ -476,7 +503,19 @@ const CABANG_DATA = {
 };
 
 // ══════════════════════════════════════════════════════════
-//  SESSION CHECK
+//  🔒 ESCAPE HTML (Anti-XSS)
+// ══════════════════════════════════════════════════════════
+function esc(s){
+  return String(s ?? '')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+
+// ══════════════════════════════════════════════════════════
+//  SESSION
 // ══════════════════════════════════════════════════════════
 function initSession() {
   const params = new URLSearchParams(window.location.search);
@@ -490,9 +529,7 @@ function initSession() {
         sessionStorage.removeItem('gudanghub_session');
         if (!urlCab) { window.location.href = 'login.html'; return false; }
       } else {
-        if (sess.role === 'admin') {
-          window.location.href = 'dashboard.html'; return false;
-        }
+        if (sess.role === 'admin') { window.location.href = 'dashboard.html'; return false; }
         idCabang   = sess.idCabang || urlCab || '';
         namaCabang = sess.nama || CABANG_DATA[idCabang]?.nama || idCabang;
       }
@@ -505,7 +542,6 @@ function initSession() {
     idCabang   = urlCab.toUpperCase();
     namaCabang = CABANG_DATA[idCabang]?.nama || idCabang;
   }
-
   if (!idCabang) { window.location.href = 'login.html'; return false; }
 
   const pic = CABANG_DATA[idCabang]?.pic || idCabang;
@@ -515,10 +551,10 @@ function initSession() {
 }
 
 function doLogout() {
-  if (confirm('Yakin ingin keluar dari GudangHub?')) {
+  showConfirm('Keluar dari GudangHub?', 'Anda akan diarahkan ke halaman login.', () => {
     sessionStorage.removeItem('gudanghub_session');
     window.location.href = 'login.html';
-  }
+  });
 }
 
 // ══════════════════════════════════════════════════════════
@@ -540,10 +576,14 @@ function showTab(tab) {
 // ══════════════════════════════════════════════════════════
 async function loadKatalog() {
   try {
-    const res  = await fetch(`${API_URL}?action=getBarang`);
+    const res  = await fetch(`${API_URL}?action=getBarang&t=${Date.now()}`);
     const data = await res.json();
     if (data.status === 'ok' && data.data?.length > 0) {
       semuaBarang  = data.data;
+      barangByKode = {};
+      semuaBarang.forEach(b => {
+        barangByKode[String(b.KODE_BARANG || '').trim().toUpperCase()] = b;
+      });
       tampilBarang = [...semuaBarang];
       buildFilterKategori();
       renderKatalog();
@@ -560,14 +600,16 @@ async function loadKatalog() {
 function showKatalogMsg(icon, judul, pesan, retry) {
   document.getElementById('katalogGrid').innerHTML = `
     <div class="empty-state">
-      <div class="ei">${icon}</div>
-      <p style="font-weight:700;margin-bottom:6px;">${judul}</p>
-      <p style="font-size:12px;">${pesan}</p>
-      ${retry ? `<button onclick="loadKatalog()" style="margin-top:14px;padding:10px 24px;
+      <div class="ei">${esc(icon)}</div>
+      <p style="font-weight:700;margin-bottom:6px;">${esc(judul)}</p>
+      <p style="font-size:12px;">${esc(pesan)}</p>
+      ${retry ? `<button id="btnRetryKatalog" style="margin-top:14px;padding:10px 24px;
         background:var(--orange);border:none;border-radius:10px;
         color:#fff;font-weight:700;cursor:pointer;">🔄 Coba Lagi</button>` : ''}
     </div>`;
   document.getElementById('sectionLabel').textContent = 'Katalog — 0 item';
+  const r = document.getElementById('btnRetryKatalog');
+  if (r) r.addEventListener('click', loadKatalog);
 }
 
 // ══════════════════════════════════════════════════════════
@@ -578,12 +620,12 @@ function buildFilterKategori() {
     semuaBarang.map(b => String(b.KATEGORI || '')).filter(Boolean)
   )].sort();
   const wrap = document.getElementById('filterScroll');
-  wrap.innerHTML = `<div class="filter-chip active" onclick="setKategori('',this)">Semua</div>`;
+  wrap.innerHTML = `<div class="filter-chip active" data-kat="">Semua</div>`;
   kat.forEach(k => {
     const el = document.createElement('div');
-    el.className  = 'filter-chip';
-    el.textContent= k;
-    el.onclick    = () => setKategori(k, el);
+    el.className   = 'filter-chip';
+    el.textContent = k;            // aman: textContent
+    el.dataset.kat = k;
     wrap.appendChild(el);
   });
 }
@@ -635,7 +677,7 @@ function filterKatalog(val) {
 // ══════════════════════════════════════════════════════════
 function getEmoji(kat) {
   const m = {
-    'Kursi':'🪑','Meja':'🪞','Lemari':'🗄️','Sofa':'🛋️',
+    'Kursi':'🪑','Meja':'🍽️','Lemari':'🗄️','Sofa':'🛋️',
     'Kasur':'🛏️','Rak':'📚','Bufet':'🗃️','Dapur':'🍳','Dekorasi':'🎨'
   };
   return m[kat] || '📦';
@@ -658,28 +700,25 @@ function buildItemCard(b) {
   const addedCls  = cart[kode] ? 'added'   : '';
   const addedTeks = cart[kode] ? '✅ Di Keranjang' : '+ Tambah';
   const disabled  = stok === 0 ? 'disabled' : '';
+  const ek = esc(kode);
 
-  // Escape karakter khusus untuk onclick attribute
-  const namaSafe = nama.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
-  const katSafe  = kat.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
-
-  return `<div class="item-card ${inCart}" id="card-${kode}">
-    <span class="item-stok ${stokCls}">${stokTeks}</span>
+  // Semua data ditaruh via data-attr & di-escape — TIDAK ada onclick inline
+  return `<div class="item-card ${inCart}" id="card-${ek}">
+    <span class="item-stok ${stokCls}">${esc(stokTeks)}</span>
     <span class="item-emoji">${getEmoji(kat)}</span>
-    <div class="item-kode">${kode}</div>
-    <div class="item-nama">${nama}</div>
-    <div class="item-kat">${kat}</div>
-    <div class="item-harga">${formatRp(harga)}</div>
-    <div class="item-satuan">per ${satuan}</div>
+    <div class="item-kode">${ek}</div>
+    <div class="item-nama">${esc(nama)}</div>
+    <div class="item-kat">${esc(kat)}</div>
+    <div class="item-harga">${esc(formatRp(harga))}</div>
+    <div class="item-satuan">per ${esc(satuan)}</div>
     <div class="qty-wrap">
-      <button class="qty-btn" onclick="changeQtyCard('${kode}',-1)">−</button>
-      <input class="qty-num" type="number" min="1"
-        id="qty-${kode}" value="${qtyVal}"
-        onchange="setQtyCard('${kode}',this.value)"/>
-      <button class="qty-btn" onclick="changeQtyCard('${kode}',1)">+</button>
+      <button class="qty-btn" data-act="dec" data-kode="${ek}">−</button>
+      <input class="qty-num" type="number" min="1" max="${stok || 9999}"
+        id="qty-${ek}" value="${qtyVal}" data-act="setqty" data-kode="${ek}"/>
+      <button class="qty-btn" data-act="inc" data-kode="${ek}">+</button>
     </div>
-    <button class="btn-add ${addedCls}" ${disabled} id="btn-${kode}"
-      onclick="addToCart('${kode}','${namaSafe}','${katSafe}',${harga},'${satuan}')">
+    <button class="btn-add ${addedCls}" ${disabled}
+      data-act="add" data-kode="${ek}" id="btn-${ek}">
       ${addedTeks}
     </button>
   </div>`;
@@ -692,7 +731,7 @@ function renderKatalog() {
 
   const count = tampilBarang.length;
   label.textContent = `Katalog Barang — ${count} item`;
-  lastRenderedCount = 0; // Reset setiap render baru
+  lastRenderedCount = 0;
 
   if (!count) {
     grid.innerHTML = `
@@ -709,7 +748,7 @@ function renderKatalog() {
 
   const more = sisanya > 0 ? `
     <div style="grid-column:1/-1;text-align:center;padding:20px;">
-      <button onclick="loadMoreKatalog()"
+      <button data-act="more"
         style="background:var(--orange-dim);border:1px solid var(--border);
                border-radius:12px;padding:12px 32px;color:var(--orange);
                font-size:13px;font-weight:700;cursor:pointer;">
@@ -727,7 +766,7 @@ function loadMoreKatalog() {
   const tambah  = tampilBarang.slice(sudah, sudah + 40);
   const sisanya = tampilBarang.length - sudah - tambah.length;
 
-  const btnWrap = grid.querySelector('[onclick="loadMoreKatalog()"]')?.parentElement;
+  const btnWrap = grid.querySelector('[data-act="more"]')?.parentElement;
   if (btnWrap) btnWrap.remove();
 
   const tmp = document.createElement('div');
@@ -739,7 +778,7 @@ function loadMoreKatalog() {
     const d = document.createElement('div');
     d.style.cssText = 'grid-column:1/-1;text-align:center;padding:20px;';
     d.innerHTML = `
-      <button onclick="loadMoreKatalog()"
+      <button data-act="more"
         style="background:var(--orange-dim);border:1px solid var(--border);
                border-radius:12px;padding:12px 32px;color:var(--orange);
                font-size:13px;font-weight:700;cursor:pointer;">
@@ -750,28 +789,52 @@ function loadMoreKatalog() {
 }
 
 // ══════════════════════════════════════════════════════════
-//  CART
+//  CART (qty dibatasi stok)
 // ══════════════════════════════════════════════════════════
+function getStok(kode){
+  const b = barangByKode[String(kode).toUpperCase()];
+  return b ? (parseInt(b.STOK) || 0) : 0;
+}
+
+function clampQty(kode, v){
+  const stok = getStok(kode);
+  if (v < 1) v = 1;
+  if (stok > 0 && v > stok) { v = stok; showToast(`⚠️ Maksimal stok ${stok}`, 'info'); }
+  return v;
+}
+
 function changeQtyCard(kode, delta) {
   const inp = document.getElementById('qty-' + kode);
   if (!inp) return;
-  let v = (parseInt(inp.value) || 1) + delta;
-  if (v < 1) v = 1;
+  let v = clampQty(kode, (parseInt(inp.value) || 1) + delta);
   inp.value = v;
   if (cart[kode]) { cart[kode].qty = v; updateCartUI(); }
 }
 
 function setQtyCard(kode, val) {
-  let v = parseInt(val) || 1;
-  if (v < 1) v = 1;
-  document.getElementById('qty-' + kode).value = v;
+  let v = clampQty(kode, parseInt(val) || 1);
+  const inp = document.getElementById('qty-' + kode);
+  if (inp) inp.value = v;
   if (cart[kode]) { cart[kode].qty = v; updateCartUI(); }
 }
 
-function addToCart(kode, nama, kat, harga, satuan) {
+function addToCart(kode) {
+  const b = barangByKode[String(kode).toUpperCase()];
+  if (!b) { showToast('Barang tidak ditemukan', 'error'); return; }
+  const stok = parseInt(b.STOK) || 0;
+  if (stok === 0) { showToast('Stok habis', 'error'); return; }
+
   const inp = document.getElementById('qty-' + kode);
-  const qty = parseInt(inp?.value) || 1;
-  cart[kode] = { kode, nama, kat, harga, satuan, qty };
+  const qty = clampQty(kode, parseInt(inp?.value) || 1);
+
+  cart[kode] = {
+    kode,
+    nama:   String(b.NAMA_BARANG || ''),
+    kat:    String(b.KATEGORI    || ''),
+    harga:  parseFloat(b.HARGA)  || 0,
+    satuan: String(b.SATUAN      || 'PCS'),
+    qty
+  };
   const card = document.getElementById('card-' + kode);
   const btn  = document.getElementById('btn-'  + kode);
   if (card) card.classList.add('in-cart');
@@ -795,12 +858,15 @@ function updateCartUI() {
   const total = items.reduce((s, i) => s + i.qty * i.harga, 0);
   const count = items.reduce((s, i) => s + i.qty, 0);
   const bar   = document.getElementById('cartBar');
+  const btnSubmit = document.getElementById('btnSubmit');
+
   if (items.length > 0) {
     bar.style.display = '';
-    document.getElementById('cartCount').textContent =
-      `${count} item · ${formatRp(total)}`;
+    document.getElementById('cartCount').textContent = `${count} item · ${formatRp(total)}`;
+    if (btnSubmit) btnSubmit.disabled = false;
   } else {
     bar.style.display = 'none';
+    if (btnSubmit) btnSubmit.disabled = true;
   }
   document.getElementById('sumItem').textContent  = count + ' item';
   document.getElementById('sumTotal').textContent = formatRp(total);
@@ -811,7 +877,6 @@ function openCart() {
   document.getElementById('sheetOverlay').classList.add('show');
   document.getElementById('cartSheet').classList.add('show');
 }
-
 function closeCart() {
   document.getElementById('sheetOverlay').classList.remove('show');
   document.getElementById('cartSheet').classList.remove('show');
@@ -828,49 +893,63 @@ function renderCartSheet() {
       </div>`;
     return;
   }
-  wrap.innerHTML = items.map(item => `
+  wrap.innerHTML = items.map(item => {
+    const ek = esc(item.kode);
+    return `
     <div class="cart-item">
       <div class="ci-info">
-        <div class="ci-nama">${item.nama}</div>
-        <div class="ci-kode">${item.kode}</div>
-        <div class="ci-harga">${formatRp(item.harga)} / ${item.satuan}</div>
+        <div class="ci-nama">${esc(item.nama)}</div>
+        <div class="ci-kode">${ek}</div>
+        <div class="ci-harga">${esc(formatRp(item.harga))} / ${esc(item.satuan)}</div>
       </div>
       <div class="ci-qty">
-        <button class="ci-qty-btn" onclick="ciQty('${item.kode}',-1)">−</button>
+        <button class="ci-qty-btn" data-act="ci-dec" data-kode="${ek}">−</button>
         <input class="ci-qty-num" type="number" value="${item.qty}" min="1"
-          onchange="ciQtySet('${item.kode}',this.value)"/>
-        <button class="ci-qty-btn" onclick="ciQty('${item.kode}',1)">+</button>
+          data-act="ci-set" data-kode="${ek}"/>
+        <button class="ci-qty-btn" data-act="ci-inc" data-kode="${ek}">+</button>
       </div>
-      <div class="ci-sub">${formatRp(item.qty * item.harga)}</div>
-      <button class="ci-del" onclick="removeFromCart('${item.kode}')">🗑</button>
-    </div>`).join('');
+      <div class="ci-sub">${esc(formatRp(item.qty * item.harga))}</div>
+      <button class="ci-del" data-act="ci-del" data-kode="${ek}" aria-label="Hapus">🗑</button>
+    </div>`;
+  }).join('');
 }
 
 function ciQty(kode, delta) {
   if (!cart[kode]) return;
-  cart[kode].qty = Math.max(1, cart[kode].qty + delta);
+  cart[kode].qty = clampQty(kode, cart[kode].qty + delta);
   const inp = document.getElementById('qty-' + kode);
   if (inp) inp.value = cart[kode].qty;
   updateCartUI();
   renderCartSheet();
 }
-
 function ciQtySet(kode, val) {
   if (!cart[kode]) return;
-  const v = Math.max(1, parseInt(val) || 1);
-  cart[kode].qty = v;
+  cart[kode].qty = clampQty(kode, parseInt(val) || 1);
   const inp = document.getElementById('qty-' + kode);
-  if (inp) inp.value = v;
+  if (inp) inp.value = cart[kode].qty;
   updateCartUI();
 }
 
 // ══════════════════════════════════════════════════════════
 //  SUBMIT ORDER BIASA
 // ══════════════════════════════════════════════════════════
-async function submitOrder() {
+function submitOrder() {
   const items = Object.values(cart);
   if (!items.length) { showToast('Keranjang masih kosong!', 'error'); return; }
   if (!idCabang)     { showToast('Session tidak valid, login ulang.', 'error'); return; }
+  if (isSubmitting)  return;
+
+  const total = items.reduce((s,i)=>s+i.qty*i.harga,0);
+  showConfirm(
+    'Kirim Order?',
+    `${items.length} jenis barang · Total ${formatRp(total)} ke gudang ${idCabang}.`,
+    () => doSubmitOrder(items)
+  );
+}
+
+async function doSubmitOrder(items) {
+  if (isSubmitting) return;
+  isSubmitting = true;
 
   const catatan = document.getElementById('catatanInput').value.trim();
   const btn     = document.getElementById('btnSubmit');
@@ -890,18 +969,19 @@ async function submitOrder() {
 
   if (hasil.status === 'ok') {
     cart        = {};
-    searchCache = {}; // Reset cache agar card tidak stuck "Di Keranjang"
+    searchCache = {};
     document.getElementById('catatanInput').value = '';
     closeCart();
     updateCartUI();
-    renderKatalog(); // Re-render bersih
+    renderKatalog();
     showToast('✅ Order berhasil dikirim! Email notifikasi terkirim.', 'success', 5000);
   } else {
     showToast('❌ ' + (hasil.message || 'Gagal mengirim order'), 'error', 5000);
   }
 
-  btn.disabled    = false;
   btn.textContent = '🚀 Kirim Order ke Gudang';
+  btn.disabled    = Object.keys(cart).length === 0;
+  isSubmitting    = false;
 }
 
 // ══════════════════════════════════════════════════════════
@@ -926,9 +1006,12 @@ function clearMassalInput() {
 }
 
 function autoPreviewMassal() {
-  parseMassalInput();
-  renderMassalPreview();
-  updateMassalSummary();
+  clearTimeout(massalTimer);
+  massalTimer = setTimeout(() => {
+    parseMassalInput();
+    renderMassalPreview();
+    updateMassalSummary();
+  }, 200);
 }
 
 function parseMassalInput() {
@@ -938,8 +1021,8 @@ function parseMassalInput() {
   massalItems = lines.map(line => {
     const parts = line.split(/[;,\t]/).map(p => p.trim());
     if (parts.length < 2) return {
-      kode: line, nama: '', kat: '', harga: 0, satuan: '', qty: 0,
-      valid: false, error: 'Format salah — gunakan KODE;JUMLAH'
+      kode: line, nama:'', kat:'', harga:0, satuan:'', qty:0,
+      valid:false, error:'Format salah — gunakan KODE;JUMLAH'
     };
 
     const kode = String(parts[0]).trim().toUpperCase();
@@ -950,22 +1033,20 @@ function parseMassalInput() {
     if (qty <= 0) return { kode, nama:'', kat:'', harga:0, satuan:'', qty:0,
       valid:false, error:'Jumlah harus lebih dari 0' };
 
-    const barang = semuaBarang.find(b =>
-      String(b.KODE_BARANG || '').trim().toUpperCase() === kode
-    );
+    const barang = barangByKode[kode];
     if (!barang) return { kode, nama:'', kat:'', harga:0, satuan:'', qty,
       valid:false, error:`Kode "${kode}" tidak ditemukan di katalog` };
 
     const stok = parseInt(barang.STOK) || 0;
     return {
       kode,
-      nama:    String(barang.NAMA_BARANG || ''),
-      kat:     String(barang.KATEGORI   || ''),
-      harga:   parseFloat(barang.HARGA) || 0,
-      satuan:  String(barang.SATUAN     || 'PCS'),
-      qty, stok, valid: true,
+      nama:   String(barang.NAMA_BARANG || ''),
+      kat:    String(barang.KATEGORI   || ''),
+      harga:  parseFloat(barang.HARGA) || 0,
+      satuan: String(barang.SATUAN     || 'PCS'),
+      qty, stok, valid:true,
       warning: qty > stok && stok > 0 ? `⚠️ Melebihi stok (${stok})` : '',
-      error: ''
+      error:''
     };
   });
 }
@@ -1010,11 +1091,11 @@ function renderMassalPreview() {
       <div class="massal-item invalid">
         <span class="massal-status-icon">❌</span>
         <div class="massal-info">
-          <div class="massal-kode">${item.kode || '?'}</div>
+          <div class="massal-kode">${esc(item.kode || '?')}</div>
           <div class="massal-nama" style="color:var(--red);">Tidak ditemukan</div>
-          <div class="massal-error">${item.error}</div>
+          <div class="massal-error">${esc(item.error)}</div>
         </div>
-        <button class="massal-del" onclick="hapusMassalItem(${idx})">🗑</button>
+        <button class="massal-del" data-act="m-del" data-idx="${idx}" aria-label="Hapus">🗑</button>
       </div>`;
 
     const stokColor = item.stok > 5
@@ -1024,38 +1105,40 @@ function renderMassalPreview() {
       <div class="massal-item valid" id="mc-${idx}">
         <span class="massal-status-icon">${item.warning ? '⚠️' : '✅'}</span>
         <div class="massal-info">
-          <div class="massal-kode">${item.kode}</div>
-          <div class="massal-nama">${item.nama}</div>
+          <div class="massal-kode">${esc(item.kode)}</div>
+          <div class="massal-nama">${esc(item.nama)}</div>
           <div class="massal-harga">
-            ${formatRp(item.harga)} / ${item.satuan}
+            ${esc(formatRp(item.harga))} / ${esc(item.satuan)}
             · Stok: <span style="color:${stokColor}">${item.stok}</span>
           </div>
-          ${item.warning ? `<div class="massal-warn">${item.warning}</div>` : ''}
+          ${item.warning ? `<div class="massal-warn">${esc(item.warning)}</div>` : ''}
         </div>
         <div class="massal-right">
-          <div class="massal-subtotal">${formatRp(item.qty * item.harga)}</div>
+          <div class="massal-subtotal">${esc(formatRp(item.qty * item.harga))}</div>
           <div class="massal-qty-wrap">
-            <button class="massal-qty-btn" onclick="massalQty(${idx},-1)">−</button>
-            <input class="massal-qty-num" type="number"
-              value="${item.qty}" min="1"
-              onchange="massalQtySet(${idx},this.value)"
-              id="mq-${idx}"/>
-            <button class="massal-qty-btn" onclick="massalQty(${idx},1)">+</button>
+            <button class="massal-qty-btn" data-act="m-dec" data-idx="${idx}">−</button>
+            <input class="massal-qty-num" type="number" value="${item.qty}" min="1"
+              data-act="m-set" data-idx="${idx}" id="mq-${idx}"/>
+            <button class="massal-qty-btn" data-act="m-inc" data-idx="${idx}">+</button>
           </div>
         </div>
-        <button class="massal-del" onclick="hapusMassalItem(${idx})">🗑</button>
+        <button class="massal-del" data-act="m-del" data-idx="${idx}" aria-label="Hapus">🗑</button>
       </div>`;
   }).join('');
 
   wrap.innerHTML = bar + cards;
 }
 
+// FIX: rebuild textarea dari massalItems (bukan index baris yg rapuh)
+function syncMassalTextarea() {
+  const txt = massalItems.map(i => `${i.kode};${i.qty}`).join('\n');
+  document.getElementById('massalInput').value = txt;
+}
+
 function hapusMassalItem(idx) {
+  if (idx < 0 || idx >= massalItems.length) return;
   massalItems.splice(idx, 1);
-  const lines = document.getElementById('massalInput').value
-    .split('\n').filter(l => l.trim() !== '');
-  lines.splice(idx, 1);
-  document.getElementById('massalInput').value = lines.join('\n');
+  syncMassalTextarea();
   renderMassalPreview();
   updateMassalSummary();
 }
@@ -1063,15 +1146,15 @@ function hapusMassalItem(idx) {
 function massalQty(idx, delta) {
   if (!massalItems[idx]?.valid) return;
   massalItems[idx].qty = Math.max(1, massalItems[idx].qty + delta);
-  const inp = document.getElementById('mq-' + idx);
-  if (inp) inp.value = massalItems[idx].qty;
-  updateMassalSummary();
+  syncMassalTextarea();
   renderMassalPreview();
+  updateMassalSummary();
 }
 
 function massalQtySet(idx, val) {
   if (!massalItems[idx]?.valid) return;
   massalItems[idx].qty = Math.max(1, parseInt(val) || 1);
+  syncMassalTextarea();
   updateMassalSummary();
 }
 
@@ -1106,14 +1189,28 @@ function updateMassalSummary() {
   }
 }
 
-async function submitOrderMassal() {
+function submitOrderMassal() {
   const valid = massalItems.filter(i => i.valid);
   if (!valid.length) { showToast('Tidak ada barang valid!', 'error'); return; }
   if (!idCabang)     { showToast('Session tidak valid', 'error'); return; }
+  if (isSubmitting)  return;
+
+  const total = valid.reduce((s,i)=>s+i.qty*i.harga,0);
+  showConfirm(
+    'Kirim Order Massal?',
+    `${valid.length} barang · Total ${formatRp(total)} ke gudang ${idCabang}.`,
+    () => doSubmitMassal(valid)
+  );
+}
+
+async function doSubmitMassal(valid) {
+  if (isSubmitting) return;
+  isSubmitting = true;
 
   const catatan = document.getElementById('catatanMassal').value.trim();
   const btn     = document.getElementById('btnSubmitMassal');
   btn.disabled  = true;
+  btn.style.pointerEvents = 'none';
   btn.textContent = `⏳ Mengirim ${valid.length} barang...`;
 
   const payload = {
@@ -1133,16 +1230,13 @@ async function submitOrderMassal() {
     document.getElementById('catatanMassal').value = '';
     renderMassalPreview();
     updateMassalSummary();
-    showToast(
-      `✅ Order massal ${valid.length} barang berhasil dikirim!`,
-      'success', 5000
-    );
+    showToast(`✅ Order massal ${valid.length} barang berhasil dikirim!`, 'success', 5000);
     setTimeout(() => showTab('riwayat'), 1500);
   } else {
     showToast('❌ ' + (hasil.message || 'Gagal'), 'error', 5000);
-    btn.disabled = false;
     updateMassalSummary();
   }
+  isSubmitting = false;
 }
 
 // ══════════════════════════════════════════════════════════
@@ -1153,7 +1247,6 @@ async function kirimOrderKeServer(payload) {
   const encoded = encodeURIComponent(jsonStr);
   const urlGet  = `${API_URL}?action=submitOrder&payload=${encoded}`;
 
-  // Metode 1: GET (jika payload tidak terlalu besar)
   if (urlGet.length < 7000) {
     try {
       const res  = await fetch(urlGet, { method: 'GET' });
@@ -1163,7 +1256,6 @@ async function kirimOrderKeServer(payload) {
     } catch(e) { console.warn('GET error:', e.message); }
   }
 
-  // Metode 2: POST JSON
   try {
     const res  = await fetch(API_URL, {
       method: 'POST',
@@ -1175,7 +1267,6 @@ async function kirimOrderKeServer(payload) {
     console.warn('POST JSON gagal:', data.message);
   } catch(e) { console.warn('POST JSON error:', e.message); }
 
-  // Metode 3: POST FormData
   try {
     const form = new FormData();
     form.append('payload', jsonStr);
@@ -1185,7 +1276,6 @@ async function kirimOrderKeServer(payload) {
     console.warn('POST Form gagal:', data.message);
   } catch(e) { console.warn('POST Form error:', e.message); }
 
-  // Metode 4: Chunking (payload besar > 20 item)
   const items = payload.items || [];
   if (items.length > 20) {
     const CHUNK = 20;
@@ -1202,16 +1292,12 @@ async function kirimOrderKeServer(payload) {
       showToast(`⏳ Mengirim bagian ${bagian} dari ${total}...`, 'info', 1500);
       try {
         const enc  = encodeURIComponent(JSON.stringify(chunk));
-        const res  = await fetch(
-          `${API_URL}?action=submitOrder&payload=${enc}`, { method: 'GET' }
-        );
+        const res  = await fetch(`${API_URL}?action=submitOrder&payload=${enc}`, { method: 'GET' });
         const data = parseResponse(await res.text());
         if (data.status === 'ok') { ok++; lastId = data.orderId || ''; }
       } catch(e) { console.warn(`Chunk ${bagian} gagal:`, e.message); }
 
-      if (i + CHUNK < items.length) {
-        await new Promise(r => setTimeout(r, 800));
-      }
+      if (i + CHUNK < items.length) await new Promise(r => setTimeout(r, 800));
     }
 
     if (ok > 0) return {
@@ -1250,16 +1336,14 @@ async function loadRiwayat() {
     </div>`;
 
   try {
-    const res  = await fetch(`${API_URL}?action=getOrders`);
+    const res  = await fetch(`${API_URL}?action=getOrders&t=${Date.now()}`);
     const data = await res.json();
     if (data.status !== 'ok') throw new Error(data.message);
 
-    // Filter hanya order cabang ini
     let myOrders = (data.data || []).filter(o =>
       String(o.ID_CABANG || '').trim().toUpperCase() === idCabang.toUpperCase()
     );
 
-    // Sort terbaru dulu
     myOrders.sort((a, b) => {
       const da = new Date(toISO(String(a.TANGGAL_ORDER || '')));
       const db = new Date(toISO(String(b.TANGGAL_ORDER || '')));
@@ -1284,21 +1368,21 @@ async function loadRiwayat() {
       const detail   = o.DETAIL || [];
       const dteks    = detail.length > 0
         ? detail.slice(0, 3).map(d =>
-            `${d.KODE_BARANG} ×${d.QTY} ${d.SATUAN || ''}`
+            `${esc(d.KODE_BARANG)} ×${esc(d.QTY)} ${esc(d.SATUAN || '')}`
           ).join(', ') + (detail.length > 3 ? ` +${detail.length-3} lagi` : '')
         : '(detail tidak tersedia)';
 
       return `
         <div class="riwayat-item">
           <div class="riwayat-header">
-            <div class="riwayat-id">${o.ORDER_ID}</div>
-            <span class="status-badge ${stsCls}">${stsEmoji} ${sts}</span>
+            <div class="riwayat-id">${esc(o.ORDER_ID)}</div>
+            <span class="status-badge ${stsCls}">${stsEmoji} ${esc(sts)}</span>
           </div>
-          <div class="riwayat-tgl">🕐 ${tgl}</div>
+          <div class="riwayat-tgl">🕐 ${esc(tgl)}</div>
           <div class="riwayat-items-text">📦 ${dteks}</div>
           ${o.CATATAN
             ? `<div style="font-size:11px;color:var(--muted);margin-top:4px;">
-               📝 ${o.CATATAN}</div>`
+               📝 ${esc(o.CATATAN)}</div>`
             : ''}
         </div>`;
     }).join('');
@@ -1308,25 +1392,24 @@ async function loadRiwayat() {
       <div class="empty-state" style="grid-column:unset">
         <div class="ei">⚠️</div>
         <p>Gagal memuat riwayat</p>
-        <button onclick="loadRiwayat()" style="margin-top:12px;padding:8px 20px;
+        <button id="btnRetryRiwayat" style="margin-top:12px;padding:8px 20px;
           background:var(--orange);border:none;border-radius:10px;
           color:#fff;font-weight:700;cursor:pointer;font-size:13px;">
           🔄 Coba Lagi
         </button>
       </div>`;
+    const r = document.getElementById('btnRetryRiwayat');
+    if (r) r.addEventListener('click', loadRiwayat);
   }
 }
 
 // ══════════════════════════════════════════════════════════
 //  UTILS — TANGGAL
 // ══════════════════════════════════════════════════════════
-
-// Konversi ke ISO string untuk keperluan sorting
 function toISO(str) {
   if (!str || str.trim() === '') return '2000-01-01T00:00:00Z';
   str = String(str).trim();
-  if (str.includes('T')) return str; // sudah ISO
-  // Format dd-MM-yyyy HH:mm:ss
+  if (str.includes('T')) return str;
   const parts = str.split(' ');
   const dp    = (parts[0] || '').split('-');
   const tp    = parts[1] || '00:00:00';
@@ -1334,13 +1417,10 @@ function toISO(str) {
   return str;
 }
 
-// Format tampilan: apapun → dd-MM-yyyy HH:mm:ss WITA
 function formatTanggalWITA(str) {
   if (!str || str.trim() === '') return '-';
   str = String(str).trim();
-  // Sudah format dd-MM-yyyy HH:mm:ss
   if (/^\d{2}-\d{2}-\d{4}\s\d{2}:\d{2}:\d{2}$/.test(str)) return str + ' WITA';
-  // Format ISO → konversi +8 jam
   try {
     const d = new Date(str);
     if (isNaN(d.getTime())) return str;
@@ -1361,8 +1441,8 @@ function formatRp(n) {
 function showToast(msg, type = 'info', duration = 3000) {
   const wrap = document.getElementById('toastWrap');
   const el   = document.createElement('div');
-  el.className  = `toast ${type}`;
-  el.textContent= msg;
+  el.className   = `toast ${type}`;
+  el.textContent = msg;            // aman: textContent
   wrap.appendChild(el);
   requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
   setTimeout(() => {
@@ -1371,11 +1451,122 @@ function showToast(msg, type = 'info', duration = 3000) {
   }, duration);
 }
 
+// CONFIRM modal (pengganti confirm() bawaan)
+let _confirmCb = null;
+function showConfirm(title, msg, onOk) {
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMsg').textContent   = msg;
+  _confirmCb = onOk;
+  document.getElementById('confirmModal').classList.add('show');
+}
+function hideConfirm() {
+  document.getElementById('confirmModal').classList.remove('show');
+  _confirmCb = null;
+}
+
+// ══════════════════════════════════════════════════════════
+//  EVENT DELEGATION (pengganti onclick inline — aman dari XSS)
+// ══════════════════════════════════════════════════════════
+function bindEvents() {
+  // Topbar
+  document.getElementById('btnLogout').addEventListener('click', doLogout);
+
+  // Search
+  document.getElementById('searchInput')
+    .addEventListener('input', e => debounceSearch(e.target.value));
+
+  // Filter kategori (delegation)
+  document.getElementById('filterScroll').addEventListener('click', e => {
+    const chip = e.target.closest('.filter-chip');
+    if (chip) setKategori(chip.dataset.kat || '', chip);
+  });
+
+  // Bottom nav
+  document.querySelectorAll('.nav-tab').forEach(btn => {
+    btn.addEventListener('click', () => showTab(btn.dataset.tab));
+  });
+
+  // Katalog grid (delegation: klik)
+  const grid = document.getElementById('katalogGrid');
+  grid.addEventListener('click', e => {
+    const el = e.target.closest('[data-act]');
+    if (!el) return;
+    const act  = el.dataset.act;
+    const kode = el.dataset.kode;
+    if (act === 'add')      addToCart(kode);
+    else if (act === 'inc') changeQtyCard(kode, 1);
+    else if (act === 'dec') changeQtyCard(kode, -1);
+    else if (act === 'more') loadMoreKatalog();
+  });
+  grid.addEventListener('change', e => {
+    const el = e.target.closest('[data-act="setqty"]');
+    if (el) setQtyCard(el.dataset.kode, el.value);
+  });
+
+  // Cart sheet (delegation)
+  document.getElementById('btnOpenCart').addEventListener('click', openCart);
+  document.getElementById('btnCloseCart').addEventListener('click', closeCart);
+  document.getElementById('sheetOverlay').addEventListener('click', closeCart);
+  document.getElementById('btnSubmit').addEventListener('click', submitOrder);
+
+  const cartItems = document.getElementById('cartItems');
+  cartItems.addEventListener('click', e => {
+    const el = e.target.closest('[data-act]');
+    if (!el) return;
+    const act = el.dataset.act, kode = el.dataset.kode;
+    if (act === 'ci-inc')      ciQty(kode, 1);
+    else if (act === 'ci-dec') ciQty(kode, -1);
+    else if (act === 'ci-del') removeFromCart(kode);
+  });
+  cartItems.addEventListener('change', e => {
+    const el = e.target.closest('[data-act="ci-set"]');
+    if (el) ciQtySet(el.dataset.kode, el.value);
+  });
+
+  // Order massal
+  document.getElementById('massalInput')
+    .addEventListener('input', autoPreviewMassal);
+  document.getElementById('massalInput')
+    .addEventListener('focus', e => e.target.style.borderColor = 'var(--orange)');
+  document.getElementById('massalInput')
+    .addEventListener('blur',  e => e.target.style.borderColor = 'var(--border2)');
+  document.getElementById('catatanMassal')
+    .addEventListener('focus', e => e.target.style.borderColor = 'var(--orange)');
+  document.getElementById('catatanMassal')
+    .addEventListener('blur',  e => e.target.style.borderColor = 'var(--border2)');
+  document.getElementById('btnPasteClip').addEventListener('click', pasteFromClipboard);
+  document.getElementById('btnClearMassal').addEventListener('click', clearMassalInput);
+  document.getElementById('btnSubmitMassal').addEventListener('click', submitOrderMassal);
+
+  const mp = document.getElementById('massalPreview');
+  mp.addEventListener('click', e => {
+    const el = e.target.closest('[data-act]');
+    if (!el) return;
+    const act = el.dataset.act, idx = parseInt(el.dataset.idx);
+    if (act === 'm-del')      hapusMassalItem(idx);
+    else if (act === 'm-inc') massalQty(idx, 1);
+    else if (act === 'm-dec') massalQty(idx, -1);
+  });
+  mp.addEventListener('change', e => {
+    const el = e.target.closest('[data-act="m-set"]');
+    if (el) massalQtySet(parseInt(el.dataset.idx), el.value);
+  });
+
+  // Confirm modal
+  document.getElementById('confirmCancel').addEventListener('click', hideConfirm);
+  document.getElementById('confirmOk').addEventListener('click', () => {
+    const cb = _confirmCb;
+    hideConfirm();
+    if (typeof cb === 'function') cb();
+  });
+}
+
 // ══════════════════════════════════════════════════════════
 //  INIT
 // ══════════════════════════════════════════════════════════
 window.addEventListener('load', () => {
   if (!initSession()) return;
+  bindEvents();
   loadKatalog();
 });
 </script>
