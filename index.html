@@ -230,6 +230,39 @@ a { color: inherit; text-decoration: none; }
 .tile-solid.accent .tl-k { opacity: 0.85; }
 .tile-solid .tl-k { color: var(--muted); }
 
+/* ═══════════ TEAM CAROUSEL ═══════════ */
+.team { padding: var(--space) 0 calc(var(--space) - 24px); text-align: center; overflow: hidden; }
+.team-head { max-width: 780px; margin: 0 auto 8px; }
+.team-head h2 { font-size: clamp(32px, 5vw, 60px); font-weight: 500; }
+.team-head h2 em { font-style: italic; color: var(--orange); }
+.team-head p { color: var(--muted); font-size: clamp(15px,1.6vw,18px); margin-top: 20px; max-width: 44ch; margin-inline: auto; }
+.team-head .btn { margin-top: 30px; }
+
+.team-stage {
+  position: relative; margin-top: clamp(40px, 6vw, 68px);
+  perspective: 1400px; cursor: grab; user-select: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+          mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+.team-stage.dragging { cursor: grabbing; }
+.team-track { display: flex; transform-style: preserve-3d; will-change: transform; padding: 30px 0; }
+.team-card {
+  position: relative; flex: 0 0 auto;
+  width: clamp(190px, 20vw, 240px); aspect-ratio: 3 / 3.9;
+  margin: 0 9px; border-radius: 22px; overflow: hidden;
+  background: var(--ink3); border: 1px solid var(--line2);
+  box-shadow: 0 30px 60px -22px rgba(0,0,0,0.75);
+  transform-style: preserve-3d; will-change: transform;
+  transition: box-shadow 0.3s;
+}
+.team-card img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
+.team-card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, rgba(10,10,18,0.85)); }
+.team-cap { position: absolute; left: 0; right: 0; bottom: 16px; z-index: 2; padding: 0 16px; }
+.team-cap .tc-name { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 600; }
+.team-cap .tc-role { font-size: 12px; color: var(--orange); font-weight: 700; letter-spacing: 0.04em; margin-top: 2px; }
+.team-hint { margin-top: 8px; font-size: 12.5px; color: var(--muted); display: inline-flex; align-items: center; gap: 8px; }
+.team-hint [data-lucide] { color: var(--orange); }
+
 /* ═══════════ ABOUT ═══════════ */
 .about { padding: var(--space) 0; background: var(--ink2); border-top: 1px solid var(--line2); border-bottom: 1px solid var(--line2); }
 .about-inner { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(40px, 6vw, 90px); align-items: center; }
@@ -324,6 +357,7 @@ a { color: inherit; text-decoration: none; }
     <div class="nav-links">
       <a href="#cara">Cara Kerja</a>
       <a href="#katalog">Katalog</a>
+      <a href="#tim">Tim</a>
       <a href="#tentang">Tentang</a>
       <a href="#cabang">Cabang</a>
     </div>
@@ -341,7 +375,7 @@ a { color: inherit; text-decoration: none; }
 <!-- ═══════════ HERO ═══════════ -->
 <header class="hero wrap" id="top">
   <div class="hero-top">
-    <span class="hero-eyebrow reveal"><span class="dot"></span> 5 Central Perabot · Grosir Perabot Murah &amp; Lengkap</span>
+    <span class="hero-eyebrow reveal"><span class="dot"></span> PT Central Perabot Utama</span>
     <h1 class="reveal" data-d="1">Kirim order barang <em>antar cabang</em> tanpa ribet.</h1>
     <p class="hero-lead reveal" data-d="2">Satu sistem menghubungkan empat toko cabang ke gudang pusat PT Central Perabot Utama. Cabang tinggal pilih dari katalog, admin tinggal proses. Semua tercatat, real-time.</p>
     <div class="hero-actions reveal" data-d="3">
@@ -352,7 +386,7 @@ a { color: inherit; text-decoration: none; }
 
   <div class="hero-banner reveal" data-d="2">
     <!-- Simpan foto toko kamu sebagai "toko.jpg" di folder yang sama -->
-    <img src="toko.jpg" alt="Toko 5 Central Perabot — grosir perabot rumah tangga">
+    <img src="toko.jpg" alt="Toko PT Central Perabot Utama — grosir perabot rumah tangga">
     <div class="hero-tag"><i data-lucide="badge-check" width="17" height="17"></i> Stok Real-time</div>
     <div class="hero-badge">
       <span class="hb-ic"><i data-lucide="package-check" width="24" height="24"></i></span>
@@ -474,6 +508,27 @@ a { color: inherit; text-decoration: none; }
   </div>
 </section>
 
+<!-- ═══════════ TIM DI BALIK LAYAR ═══════════ -->
+<section class="team" id="tim">
+  <div class="wrap team-head">
+    <h2 class="reveal">Tim di Balik Layar<br><em>PT Central Perabot Utama</em></h2>
+    <p class="reveal" data-d="1">Orang-orang yang menjaga stok tetap jalan dan order tiap cabang selalu tepat waktu.</p>
+    <a href="#cabang" class="btn btn-solid reveal" data-d="2">Kenali Tim Kami <i data-lucide="arrow-right" width="18" height="18"></i></a>
+  </div>
+
+  <div class="team-stage reveal" data-d="2" id="teamStage">
+    <div class="team-track" id="teamTrack">
+      <!-- 5 foto tim — simpan foto-tim-1.jpg ... foto-tim-5.jpg di folder yang sama -->
+      <div class="team-card"><img src="foto-tim-1.jpg" alt="Anggota tim 1"><div class="team-cap"><div class="tc-name">Nama 1</div><div class="tc-role">Admin Gudang Pusat</div></div></div>
+      <div class="team-card"><img src="foto-tim-2.jpg" alt="Anggota tim 2"><div class="team-cap"><div class="tc-name">Arfa</div><div class="tc-role">PIC Cabang CB001</div></div></div>
+      <div class="team-card"><img src="foto-tim-3.jpg" alt="Anggota tim 3"><div class="team-cap"><div class="tc-name">Akmal</div><div class="tc-role">PIC Cabang CB002</div></div></div>
+      <div class="team-card"><img src="foto-tim-4.jpg" alt="Anggota tim 4"><div class="team-cap"><div class="tc-name">Shally</div><div class="tc-role">PIC Cabang CB003</div></div></div>
+      <div class="team-card"><img src="foto-tim-5.jpg" alt="Anggota tim 5"><div class="team-cap"><div class="tc-name">Fajar</div><div class="tc-role">PIC Cabang CB004</div></div></div>
+    </div>
+  </div>
+  <div class="team-hint"><i data-lucide="move-horizontal" width="16" height="16"></i> Geser ke samping untuk menjelajah</div>
+</section>
+
 <!-- ═══════════ ABOUT ═══════════ -->
 <section class="about" id="tentang">
   <div class="wrap about-inner">
@@ -583,7 +638,7 @@ a { color: inherit; text-decoration: none; }
         <h5>Jelajah</h5>
         <a href="#cara">Cara Kerja</a>
         <a href="#katalog">Katalog</a>
-        <a href="#tentang">Tentang</a>
+        <a href="#tim">Tim</a>
         <a href="#cabang">Cabang</a>
       </div>
       <div class="footer-col">
@@ -649,6 +704,99 @@ a { color: inherit; text-decoration: none; }
       background: 'var(--ink2)', padding: '22px 28px', gap: '18px', borderBottom: '1px solid var(--line2)'
     });
   });
+
+  /* ═══════════ TEAM CAROUSEL (drag + infinite loop + fan effect) ═══════════ */
+  (function () {
+    const stage = document.getElementById('teamStage');
+    const track = document.getElementById('teamTrack');
+    if (!stage || !track) return;
+
+    // Gandakan kartu supaya bisa berputar mulus tanpa habis
+    const originals = Array.from(track.children);
+    for (let c = 0; c < 3; c++) {
+      originals.forEach(card => track.appendChild(card.cloneNode(true)));
+    }
+
+    let setWidth = 0;      // lebar satu set (5 kartu)
+    let offset = 0;        // posisi geser saat ini
+    let velocity = 0;      // untuk inersia
+    let dragging = false;
+    let startX = 0, startOffset = 0, lastX = 0, lastT = 0;
+    let autoDrift = -0.35; // gerak pelan otomatis
+
+    function measure() {
+      const card = track.children[0];
+      const style = getComputedStyle(card);
+      const w = card.offsetWidth + parseFloat(style.marginLeft) + parseFloat(style.marginRight);
+      setWidth = w * originals.length;
+      offset = -setWidth; // mulai di set tengah
+    }
+
+    function wrap() {
+      if (setWidth <= 0) return;
+      // jaga offset selalu di rentang tengah biar loop tak terlihat
+      while (offset <= -setWidth * 2) offset += setWidth;
+      while (offset >= 0) offset -= setWidth;
+    }
+
+    function applyFan() {
+      const stageRect = stage.getBoundingClientRect();
+      const center = stageRect.left + stageRect.width / 2;
+      const half = stageRect.width / 2;
+      for (const card of track.children) {
+        const r = card.getBoundingClientRect();
+        const cardCenter = r.left + r.width / 2;
+        let d = (cardCenter - center) / half; // -1..1
+        d = Math.max(-1.4, Math.min(1.4, d));
+        const rotY = -d * 34;
+        const tz = -Math.abs(d) * 120;
+        const scale = 1 - Math.abs(d) * 0.06;
+        card.style.transform = `translateZ(${tz}px) rotateY(${rotY}deg) scale(${scale})`;
+        card.style.zIndex = String(100 - Math.round(Math.abs(d) * 50));
+      }
+    }
+
+    function frame() {
+      if (!dragging) {
+        offset += velocity || autoDrift;
+        velocity *= 0.92;
+        if (Math.abs(velocity) < 0.02) velocity = 0;
+      }
+      wrap();
+      track.style.transform = `translateX(${offset}px)`;
+      applyFan();
+      requestAnimationFrame(frame);
+    }
+
+    // Pointer drag
+    stage.addEventListener('pointerdown', (e) => {
+      dragging = true; stage.classList.add('dragging');
+      startX = lastX = e.clientX; startOffset = offset;
+      lastT = performance.now(); velocity = 0;
+      stage.setPointerCapture(e.pointerId);
+    });
+    stage.addEventListener('pointermove', (e) => {
+      if (!dragging) return;
+      offset = startOffset + (e.clientX - startX);
+      const now = performance.now();
+      const dt = now - lastT || 16;
+      velocity = (e.clientX - lastX) / dt * 16;
+      lastX = e.clientX; lastT = now;
+    });
+    function endDrag(e) {
+      if (!dragging) return;
+      dragging = false; stage.classList.remove('dragging');
+      try { stage.releasePointerCapture(e.pointerId); } catch (_) {}
+    }
+    stage.addEventListener('pointerup', endDrag);
+    stage.addEventListener('pointercancel', endDrag);
+    stage.addEventListener('pointerleave', endDrag);
+
+    // Init setelah gambar/tata letak siap
+    window.addEventListener('load', () => { measure(); frame(); });
+    window.addEventListener('resize', measure);
+    measure(); requestAnimationFrame(frame);
+  })();
 </script>
 </body>
 </html>
