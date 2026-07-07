@@ -258,8 +258,7 @@ a { color: inherit; text-decoration: none; }
 .team-card img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
 .team-card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, rgba(10,10,18,0.85)); }
 .team-cap { position: absolute; left: 0; right: 0; bottom: 16px; z-index: 2; padding: 0 16px; }
-.team-cap .tc-name { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 600; }
-.team-cap .tc-role { font-size: 12px; color: var(--orange); font-weight: 700; letter-spacing: 0.04em; margin-top: 2px; }
+.team-cap .tc-name { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 600; }
 .team-hint { margin-top: 8px; font-size: 12.5px; color: var(--muted); display: inline-flex; align-items: center; gap: 8px; }
 .team-hint [data-lucide] { color: var(--orange); }
 
@@ -519,11 +518,11 @@ a { color: inherit; text-decoration: none; }
   <div class="team-stage reveal" data-d="2" id="teamStage">
     <div class="team-track" id="teamTrack">
       <!-- 5 foto tim — simpan foto-tim-1.jpg ... foto-tim-5.jpg di folder yang sama -->
-      <div class="team-card"><img src="foto-tim-1.jpg" alt="Anggota tim 1"><div class="team-cap"><div class="tc-name">Nama 1</div><div class="tc-role">Admin Gudang Pusat</div></div></div>
-      <div class="team-card"><img src="foto-tim-2.jpg" alt="Anggota tim 2"><div class="team-cap"><div class="tc-name">Arfa</div><div class="tc-role">PIC Cabang CB001</div></div></div>
-      <div class="team-card"><img src="foto-tim-3.jpg" alt="Anggota tim 3"><div class="team-cap"><div class="tc-name">Akmal</div><div class="tc-role">PIC Cabang CB002</div></div></div>
-      <div class="team-card"><img src="foto-tim-4.jpg" alt="Anggota tim 4"><div class="team-cap"><div class="tc-name">Shally</div><div class="tc-role">PIC Cabang CB003</div></div></div>
-      <div class="team-card"><img src="foto-tim-5.jpg" alt="Anggota tim 5"><div class="team-cap"><div class="tc-name">Fajar</div><div class="tc-role">PIC Cabang CB004</div></div></div>
+      <div class="team-card"><img src="foto-tim-1.jpg" alt="Risty"><div class="team-cap"><div class="tc-name">Risty</div></div></div>
+      <div class="team-card"><img src="foto-tim-2.jpg" alt="Irwan"><div class="team-cap"><div class="tc-name">Irwan</div></div></div>
+      <div class="team-card"><img src="foto-tim-3.jpg" alt="Dimas"><div class="team-cap"><div class="tc-name">Dimas</div></div></div>
+      <div class="team-card"><img src="foto-tim-4.jpg" alt="Safira"><div class="team-cap"><div class="tc-name">Safira</div></div></div>
+      <div class="team-card"><img src="foto-tim-5.jpg" alt="Nanda"><div class="team-cap"><div class="tc-name">Nanda</div></div></div>
     </div>
   </div>
   <div class="team-hint"><i data-lucide="move-horizontal" width="16" height="16"></i> Geser ke samping untuk menjelajah</div>
@@ -711,30 +710,28 @@ a { color: inherit; text-decoration: none; }
     const track = document.getElementById('teamTrack');
     if (!stage || !track) return;
 
-    // Gandakan kartu supaya bisa berputar mulus tanpa habis
     const originals = Array.from(track.children);
     for (let c = 0; c < 3; c++) {
       originals.forEach(card => track.appendChild(card.cloneNode(true)));
     }
 
-    let setWidth = 0;      // lebar satu set (5 kartu)
-    let offset = 0;        // posisi geser saat ini
-    let velocity = 0;      // untuk inersia
+    let setWidth = 0;
+    let offset = 0;
+    let velocity = 0;
     let dragging = false;
     let startX = 0, startOffset = 0, lastX = 0, lastT = 0;
-    let autoDrift = -0.35; // gerak pelan otomatis
+    let autoDrift = -0.35;
 
     function measure() {
       const card = track.children[0];
       const style = getComputedStyle(card);
       const w = card.offsetWidth + parseFloat(style.marginLeft) + parseFloat(style.marginRight);
       setWidth = w * originals.length;
-      offset = -setWidth; // mulai di set tengah
+      offset = -setWidth;
     }
 
     function wrap() {
       if (setWidth <= 0) return;
-      // jaga offset selalu di rentang tengah biar loop tak terlihat
       while (offset <= -setWidth * 2) offset += setWidth;
       while (offset >= 0) offset -= setWidth;
     }
@@ -746,7 +743,7 @@ a { color: inherit; text-decoration: none; }
       for (const card of track.children) {
         const r = card.getBoundingClientRect();
         const cardCenter = r.left + r.width / 2;
-        let d = (cardCenter - center) / half; // -1..1
+        let d = (cardCenter - center) / half;
         d = Math.max(-1.4, Math.min(1.4, d));
         const rotY = -d * 34;
         const tz = -Math.abs(d) * 120;
@@ -768,7 +765,6 @@ a { color: inherit; text-decoration: none; }
       requestAnimationFrame(frame);
     }
 
-    // Pointer drag
     stage.addEventListener('pointerdown', (e) => {
       dragging = true; stage.classList.add('dragging');
       startX = lastX = e.clientX; startOffset = offset;
@@ -792,7 +788,6 @@ a { color: inherit; text-decoration: none; }
     stage.addEventListener('pointercancel', endDrag);
     stage.addEventListener('pointerleave', endDrag);
 
-    // Init setelah gambar/tata letak siap
     window.addEventListener('load', () => { measure(); frame(); });
     window.addEventListener('resize', measure);
     measure(); requestAnimationFrame(frame);
