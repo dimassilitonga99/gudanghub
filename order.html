@@ -94,9 +94,21 @@
 --text:#e2e8f0;--muted:#94a3b8;
 --green:#22c55e;--red:#ef4444;--yellow:#f59e0b;
 }
-body{background:var(--dark);color:var(--text);
+html{background:var(--dark);}
+body{background:transparent;color:var(--text);
 font-family:'Segoe UI',system-ui,sans-serif;
-min-height:100vh;padding-bottom:160px;}
+min-height:100vh;padding-bottom:160px;position:relative;}
+
+/* ── BACKGROUND BERTEKSTUR (siluet perabot + grid samar) ── */
+body::before{
+content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;
+background-color:var(--dark);
+background-image:
+linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px),
+url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='640'%20height='640'%20viewBox='0%200%20640%20640'%3E%3Cg%20fill='none'%20stroke='%23ffb27a'%20stroke-opacity='0.05'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M60%20180%20q0%20-18%2018%20-18%20h108%20q18%200%2018%2018%20v46%20h-144%20z'/%3E%3Cpath%20d='M78%20162%20v-22%20q0%20-12%2012%20-12%20h84%20q12%200%2012%2012%20v22'/%3E%3Cpath%20d='M66%20226%20v16%20M186%20226%20v16'/%3E%3Cpath%20d='M330%20150%20v78%20M388%20150%20v78%20M330%20188%20h58%20M330%20150%20q29%20-22%2058%200'/%3E%3Cpath%20d='M326%20228%20l-8%2034%20M392%20228%20l8%2034'/%3E%3Cpath%20d='M90%20470%20h150%20M104%20470%20v46%20M226%20470%20v46'/%3E%3Cpath%20d='M150%20470%20v-30%20M135%20420%20h30%20l-8%2020%20h-14%20z'/%3E%3Cpath%20d='M360%20500%20h180%20v-34%20h-180%20z%20M360%20466%20v-70%20h34%20v70'/%3E%3Cpath%20d='M360%20534%20v14%20M540%20534%20v14'/%3E%3Cpath%20d='M470%20120%20h110%20v150%20h-110%20z%20M470%20170%20h110%20M470%20220%20h110'/%3E%3Cpath%20d='M250%20300%20l24%200%20l-6%20-44%20h-12%20z%20M262%20300%20v70%20M246%20372%20h32'/%3E%3C/g%3E%3C/svg%3E");
+background-size:auto, 46px 46px, 46px 46px, 340px 340px;
+}
 
 /* TOPBAR */
 .topbar{background:var(--dark2);border-bottom:1px solid var(--border);
@@ -581,9 +593,6 @@ CB003:{nama:'Toko Perabot Mama TDM – Shally', pic:'Shally'},
 CB004:{nama:'Toko Perabot Mama Kefamenanu – Fajar', pic:'Fajar' }
 };
 
-// ══════════════════════════════════════════════════════════
-// 🔒 ESCAPE HTML (Anti-XSS)
-// ══════════════════════════════════════════════════════════
 function esc(s){
 return String(s ?? '')
 .replace(/&/g,'&amp;')
@@ -593,9 +602,6 @@ return String(s ?? '')
 .replace(/'/g,'&#39;');
 }
 
-// ══════════════════════════════════════════════════════════
-// SESSION
-// ══════════════════════════════════════════════════════════
 function initSession() {
 const params = new URLSearchParams(window.location.search);
 const urlCab = params.get('cabang');
@@ -636,9 +642,6 @@ window.location.href = 'login.html';
 });
 }
 
-// ══════════════════════════════════════════════════════════
-// TABS
-// ══════════════════════════════════════════════════════════
 function showTab(tab) {
 const pages = { katalog:'pageKatalog', massal:'pageMassal', riwayat:'pageRiwayat' };
 Object.entries(pages).forEach(([key, id]) => {
@@ -650,9 +653,6 @@ if (btn) btn.classList.toggle('active', key === tab);
 if (tab === 'riwayat') loadRiwayat();
 }
 
-// ══════════════════════════════════════════════════════════
-// LOAD KATALOG
-// ══════════════════════════════════════════════════════════
 async function loadKatalog() {
 try {
 const res = await fetch(`${API_URL}?action=getBarang&t=${Date.now()}`);
@@ -691,9 +691,6 @@ const r = document.getElementById('btnRetryKatalog');
 if (r) r.addEventListener('click', loadKatalog);
 }
 
-// ══════════════════════════════════════════════════════════
-// FILTER & SEARCH
-// ══════════════════════════════════════════════════════════
 function buildFilterKategori() {
 const kat = [...new Set(
 semuaBarang.map(b => String(b.KATEGORI || '')).filter(Boolean)
@@ -751,9 +748,6 @@ searchCache[cacheKey] = tampilBarang;
 renderKatalog();
 }
 
-// ══════════════════════════════════════════════════════════
-// RENDER KATALOG
-// ══════════════════════════════════════════════════════════
 function getEmoji(kat) {
 const m = {
 'Kursi':'🪑','Meja':'🍽️','Lemari':'🗄️','Sofa':'🛋️',
@@ -866,9 +860,6 @@ grid.appendChild(d);
 }
 }
 
-// ══════════════════════════════════════════════════════════
-// CART (qty dibatasi stok)
-// ══════════════════════════════════════════════════════════
 function getStok(kode){
 const b = barangByKode[String(kode).toUpperCase()];
 return b ? (parseInt(b.STOK) || 0) : 0;
@@ -1008,9 +999,6 @@ if (inp) inp.value = cart[kode].qty;
 updateCartUI();
 }
 
-// ══════════════════════════════════════════════════════════
-// SUBMIT ORDER BIASA
-// ══════════════════════════════════════════════════════════
 function submitOrder() {
 const items = Object.values(cart);
 if (!items.length) { showToast('Keranjang masih kosong!', 'error'); return; }
@@ -1062,9 +1050,6 @@ btn.disabled = Object.keys(cart).length === 0;
 isSubmitting = false;
 }
 
-// ══════════════════════════════════════════════════════════
-// ORDER MASSAL
-// ══════════════════════════════════════════════════════════
 async function pasteFromClipboard() {
 try {
 const text = await navigator.clipboard.readText();
@@ -1316,9 +1301,6 @@ updateMassalSummary();
 isSubmitting = false;
 }
 
-// ══════════════════════════════════════════════════════════
-// KIRIM ORDER KE SERVER — Universal auto-fallback
-// ══════════════════════════════════════════════════════════
 async function kirimOrderKeServer(payload) {
 const jsonStr = JSON.stringify(payload);
 const encoded = encodeURIComponent(jsonStr);
@@ -1401,9 +1383,6 @@ if (m) return JSON.parse(m[0]);
 return { status:'error', message:'Response tidak valid: ' + text.substring(0, 100) };
 }
 
-// ══════════════════════════════════════════════════════════
-// RIWAYAT ORDER
-// ══════════════════════════════════════════════════════════
 async function loadRiwayat() {
 const list = document.getElementById('riwayatList');
 list.innerHTML = `
@@ -1480,9 +1459,6 @@ if (r) r.addEventListener('click', loadRiwayat);
 }
 }
 
-// ══════════════════════════════════════════════════════════
-// UTILS — TANGGAL
-// ══════════════════════════════════════════════════════════
 function toISO(str) {
 if (!str || str.trim() === '') return '2000-01-01T00:00:00Z';
 str = String(str).trim();
@@ -1508,9 +1484,6 @@ return `${p(w.getUTCDate())}-${p(w.getUTCMonth()+1)}-${w.getUTCFullYear()} ` +
 } catch(e) { return str; }
 }
 
-// ══════════════════════════════════════════════════════════
-// UTILS — UMUM
-// ══════════════════════════════════════════════════════════
 function formatRp(n) {
 return 'Rp ' + (parseFloat(n) || 0).toLocaleString('id-ID');
 }
@@ -1540,9 +1513,6 @@ document.getElementById('confirmModal').classList.remove('show');
 _confirmCb = null;
 }
 
-// ══════════════════════════════════════════════════════════
-// EVENT DELEGATION
-// ══════════════════════════════════════════════════════════
 function bindEvents() {
 document.getElementById('btnLogout').addEventListener('click', doLogout);
 
@@ -1624,9 +1594,6 @@ if (typeof cb === 'function') cb();
 });
 }
 
-// ══════════════════════════════════════════════════════════
-// INIT
-// ══════════════════════════════════════════════════════════
 window.addEventListener('load', () => {
 if (!initSession()) return;
 bindEvents();
