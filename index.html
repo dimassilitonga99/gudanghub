@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<!-- skill:chrome -->
+<style>
+/* Credit line — bottom-right */
+.design-ui-credit {
+  position: fixed;
+  bottom: 12px;
+  right: 12px;
+  font: 11px/1 system-ui, sans-serif;
+  color: rgba(128,128,128,0.5);
+  pointer-events: none;
+  z-index: 2147483647;
+  transition: opacity 0.4s ease;
+  user-select: none;
+  letter-spacing: 0.02em;
+}
+
+/* Hide chrome on touch devices */
+@media (hover: none) {
+  .design-ui-credit { display: none; }
+}
+
+/* Print fixes */
+@media print {
+  * {
+    transition: none !important;
+    animation: none !important;
+    box-shadow: none !important;
+  }
+  body {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  .design-ui-credit { display: none !important; }
+}
+
+</style>
+<script>
+(function () {
+    // Design-ui pages are single compositions, so the whole body is editable.
+    function markEditable() {
+        document.body.classList.add('artifact-editable');
+    }
+
+    // Credit badge with idle-fade. Hover devices only.
+    function initChromeUI() {
+        if (!matchMedia('(hover: hover)').matches) return;
+
+        var credit = document.createElement('div');
+        credit.className = 'design-ui-credit';
+        credit.setAttribute('aria-hidden', 'true');
+        credit.innerHTML = '\u{1F49C} by ClickUp Brain';
+        document.body.appendChild(credit);
+
+        var timer = null;
+        var fade = function (out) { credit.style.opacity = out ? '0' : ''; };
+        fade(true);
+        var show = function () {
+            fade(false);
+            clearTimeout(timer);
+            timer = setTimeout(function () { fade(true); }, 3000);
+        };
+        document.addEventListener('mousemove', show);
+        show();
+    }
+
+    function init() {
+        markEditable();
+        initChromeUI();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
+
+</script>
+<!-- /skill:chrome -->
+<!-- skill:libraries -->
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.383.0/dist/umd/lucide.min.js" integrity="sha384-wHFvAtjmgnkA2PJcMsDaCgdipf7X7YV44X/igbLHpvGiq6T5/PvFKl93grpvtbQT" crossorigin="anonymous"></script>
+<script>document.addEventListener("DOMContentLoaded",()=>lucide.createIcons())</script>
+<!-- /skill:libraries -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GudangHub — Sistem Order Barang Antar Cabang</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --orange: #ff6b00;
+  --orange-light: #ff8c38;
+  --orange-deep: #e05a00;
+  --ink: #0c0c15;
+  --ink2: #14141f;
+  --ink3: #1c1c2b;
+  --line: rgba(255,255,255,0.09);
+  --line2: rgba(255,255,255,0.05);
+  --text: #ede8e2;
+  --muted: #9a958f;
+  --space: clamp(72px, 9vw, 140px);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--ink);
+  color: var(--text);
+  font-family: 'Manrope', system-ui, sans-serif;
+  line-height: 1.55;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: var(--orange); color: #fff; }
+
+h1, h2, h3, h4 { font-family: 'Fraunces', Georgia, serif; font-weight: 600; text-wrap: balance; letter-spacing: -0.01em; line-height: 1.05; }
+
+.wrap { max-width: 1240px; margin: 0 auto; padding: 0 clamp(20px, 4vw, 48px); }
+
+a { color: inherit; text-decoration: none; }
+
+[data-lucide] { display: inline-block; vertical-align: middle; stroke-width: 1.6; }
+
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.9s cubic-bezier(0.16,1,0.3,1), transform 0.9s cubic-bezier(0.16,1,0.3,1); }
+.reveal.in { opacity: 1; transform: none; }
+.reveal[data-d="1"] { transition-delay: 0.08s; }
+.reveal[data-d="2"] { transition-delay: 0.16s; }
+.reveal[data-d="3"] { transition-delay: 0.24s; }
+
+/* ═══════════ NAV ═══════════ */
+.nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; transition: background 0.4s ease, border-color 0.4s ease, backdrop-filter 0.4s; border-bottom: 1px solid transparent; }
+.nav.scrolled { background: rgba(12,12,21,0.82); backdrop-filter: blur(14px); border-bottom-color: var(--line2); }
+.nav-inner { max-width: 1240px; margin: 0 auto; padding: 18px clamp(20px,4vw,48px); display: flex; align-items: center; gap: 40px; }
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand-mark { width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0; background: linear-gradient(140deg, var(--orange), var(--orange-deep)); display: grid; place-items: center; color: #fff; box-shadow: 0 6px 18px rgba(255,107,0,0.32); }
+.brand-name { font-family: 'Fraunces', serif; font-weight: 600; font-size: 21px; letter-spacing: -0.02em; }
+.brand-name em { color: var(--orange); font-style: normal; }
+.nav-links { display: flex; gap: 30px; margin-left: 8px; }
+.nav-links a { font-size: 14.5px; font-weight: 500; color: var(--muted); transition: color 0.25s; }
+.nav-links a:hover { color: var(--text); }
+.nav-cta { margin-left: auto; display: flex; align-items: center; gap: 22px; }
+.nav-call { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; }
+.nav-call b { display: block; color: var(--text); font-size: 14px; font-weight: 700; letter-spacing: 0.01em; }
+.btn { display: inline-flex; align-items: center; gap: 9px; font-weight: 700; font-size: 14.5px; padding: 12px 24px; border-radius: 999px; transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s, background 0.3s, color 0.3s; cursor: pointer; border: none; }
+.btn-solid { background: var(--orange); color: #fff; box-shadow: 0 8px 22px rgba(255,107,0,0.32); }
+.btn-solid:hover { transform: translateY(-3px); box-shadow: 0 14px 32px rgba(255,107,0,0.45); background: var(--orange-light); }
+.btn-outline { background: transparent; color: var(--text); border: 1px solid var(--line); }
+.btn-outline:hover { border-color: var(--orange); color: var(--orange); }
+.burger { display: none; background: none; border: none; color: var(--text); cursor: pointer; }
+
+/* ═══════════ HERO ═══════════ */
+.hero { padding-top: 132px; }
+.hero-top { max-width: 860px; margin: 0 auto; text-align: center; }
+.hero-eyebrow { display: inline-flex; align-items: center; gap: 10px; font-size: 12.5px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--orange); padding: 8px 16px; border: 1px solid var(--line); border-radius: 999px; margin-bottom: 26px; }
+.hero-eyebrow .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--orange); box-shadow: 0 0 0 4px rgba(255,107,0,0.2); }
+.hero h1 { font-size: clamp(40px, 6vw, 78px); font-weight: 600; margin-bottom: 24px; }
+.hero h1 em { font-style: italic; color: var(--orange); }
+.hero-lead { font-size: clamp(16px, 1.6vw, 18.5px); color: var(--muted); max-width: 54ch; margin: 0 auto 34px; }
+.hero-actions { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; justify-content: center; }
+.hero-btn-lg { padding: 16px 30px; font-size: 15.5px; }
+
+.hero-banner { position: relative; margin-top: clamp(44px, 6vw, 72px); border-radius: 26px; overflow: hidden; box-shadow: 0 50px 100px -30px rgba(0,0,0,0.75); }
+.hero-banner img { width: 100%; height: clamp(300px, 42vw, 560px); object-fit: cover; object-position: center 62%; display: block; transform: scale(1.04); transition: transform 1.4s cubic-bezier(0.16,1,0.3,1); }
+.hero-banner:hover img { transform: scale(1); }
+.hero-banner::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(12,12,21,0.12) 0%, transparent 30%, rgba(12,12,21,0.55) 100%); pointer-events: none; }
+.hero-tag { position: absolute; right: 20px; top: 20px; z-index: 3; background: var(--orange); color: #fff; border-radius: 12px; padding: 11px 17px; font-weight: 700; font-size: 13.5px; box-shadow: 0 14px 34px -8px rgba(255,107,0,0.6); display: flex; align-items: center; gap: 9px; }
+.hero-badge { position: absolute; left: 20px; bottom: 20px; z-index: 3; background: rgba(20,20,31,0.86); backdrop-filter: blur(10px); border: 1px solid var(--line); border-radius: 16px; padding: 15px 20px; display: flex; align-items: center; gap: 14px; box-shadow: 0 20px 44px -14px rgba(0,0,0,0.7); }
+.hero-badge .hb-ic { width: 44px; height: 44px; border-radius: 11px; background: rgba(255,107,0,0.16); color: var(--orange); display: grid; place-items: center; flex-shrink: 0; }
+.hero-badge .hb-t { font-weight: 700; font-size: 15px; }
+.hero-badge .hb-s { font-size: 12.5px; color: var(--muted); }
+
+.hero-meta { display: flex; justify-content: center; gap: clamp(30px, 6vw, 72px); margin-top: 44px; flex-wrap: wrap; }
+.hero-meta .hm-num { font-family: 'Fraunces', serif; font-size: clamp(32px,4vw,42px); font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+.hero-meta .hm-lbl { font-size: 13px; color: var(--muted); margin-top: 2px; text-align: center; }
+
+/* ═══════════ MARQUEE ═══════════ */
+.marquee { margin-top: var(--space); border-top: 1px solid var(--line2); border-bottom: 1px solid var(--line2); padding: 22px 0; overflow: hidden; background: var(--ink2); }
+.marquee-track { display: flex; gap: 56px; width: max-content; animation: slide 32s linear infinite; }
+.marquee:hover .marquee-track { animation-play-state: paused; }
+@keyframes slide { to { transform: translateX(-50%); } }
+.marquee-item { display: flex; align-items: center; gap: 13px; font-family: 'Fraunces', serif; font-size: 21px; color: var(--muted); white-space: nowrap; }
+.marquee-item [data-lucide] { color: var(--orange); }
+
+/* ═══════════ CARA KERJA ═══════════ */
+.section-head { max-width: 620px; margin-bottom: 56px; }
+.section-kicker { display: inline-flex; align-items: center; gap: 9px; font-size: 12.5px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--orange); margin-bottom: 18px; }
+.section-kicker::before { content: ''; width: 28px; height: 1px; background: var(--orange); }
+.section-head h2 { font-size: clamp(30px, 4vw, 50px); }
+.section-head p { color: var(--muted); font-size: 17px; margin-top: 18px; }
+
+.steps { padding: var(--space) 0; }
+.steps-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-top: 1px solid var(--line); }
+.step { padding: 40px 28px 40px 0; border-right: 1px solid var(--line2); position: relative; }
+.step:last-child { border-right: none; padding-right: 0; }
+.step-n { font-family: 'Fraunces', serif; font-size: 15px; color: var(--orange); font-weight: 600; margin-bottom: 26px; }
+.step-ic { width: 54px; height: 54px; border-radius: 14px; background: var(--ink3); color: var(--orange); display: grid; place-items: center; margin-bottom: 22px; transition: background 0.35s, color 0.35s, transform 0.35s cubic-bezier(0.16,1,0.3,1); }
+.step:hover .step-ic { background: var(--orange); color: #fff; transform: translateY(-4px); }
+.step h3 { font-size: 21px; margin-bottom: 12px; }
+.step p { font-size: 14.5px; color: var(--muted); }
+
+/* ═══════════ SHOWCASE ═══════════ */
+.showcase { padding: 0 0 var(--space); }
+.showcase-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 30px; margin-bottom: 44px; flex-wrap: wrap; }
+.gallery { display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 200px; gap: 16px; }
+.tile { position: relative; border-radius: 20px; overflow: hidden; border: 1px solid var(--line2); }
+.tile img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.9s cubic-bezier(0.16,1,0.3,1); }
+.tile:hover img { transform: scale(1.07); }
+.tile::after { content: ''; position: absolute; inset: 0; background: linear-gradient(200deg, transparent 40%, rgba(10,10,18,0.82)); }
+.tile-label { position: absolute; left: 20px; bottom: 18px; z-index: 2; }
+.tile-label .tl-k { font-size: 12px; color: var(--orange); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.tile-label .tl-n { font-family: 'Fraunces', serif; font-size: 23px; font-weight: 600; }
+.tile-arrow { position: absolute; right: 18px; top: 18px; z-index: 2; width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,0.1); backdrop-filter: blur(6px); display: grid; place-items: center; color: #fff; opacity: 0; transform: translate(-6px,6px); transition: all 0.4s cubic-bezier(0.16,1,0.3,1); }
+.tile:hover .tile-arrow { opacity: 1; transform: none; }
+.t-big { grid-column: span 3; grid-row: span 2; }
+.t-tall { grid-column: span 2; grid-row: span 2; }
+.t-wide { grid-column: span 3; }
+.t-sq { grid-column: span 2; }
+.tile-solid { display: flex; flex-direction: column; justify-content: space-between; padding: 22px; background: var(--ink3); }
+.tile-solid.accent { background: linear-gradient(150deg, var(--orange), var(--orange-deep)); }
+.tile-solid::after { display: none; }
+.tile-solid .ts-ic { color: var(--orange); }
+.tile-solid.accent .ts-ic, .tile-solid.accent .tl-k, .tile-solid.accent .tl-n { color: #fff; }
+.tile-solid.accent .tl-k { opacity: 0.85; }
+.tile-solid .tl-k { color: var(--muted); }
+
+/* ═══════════ ABOUT ═══════════ */
+.about { padding: var(--space) 0; background: var(--ink2); border-top: 1px solid var(--line2); border-bottom: 1px solid var(--line2); }
+.about-inner { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(40px, 6vw, 90px); align-items: center; }
+.about-media { position: relative; }
+.about-media .am-main { border-radius: 24px; overflow: hidden; aspect-ratio: 5/5.6; box-shadow: 0 40px 80px -24px rgba(0,0,0,0.7); }
+.about-media .am-main img { width: 100%; height: 100%; object-fit: cover; }
+.about-media .am-float { position: absolute; right: -30px; bottom: 60px; width: 44%; border-radius: 18px; overflow: hidden; border: 4px solid var(--ink2); box-shadow: 0 24px 50px -14px rgba(0,0,0,0.75); }
+.about-media .am-float img { width: 100%; display: block; }
+.about h2 { font-size: clamp(30px, 4vw, 50px); margin-bottom: 22px; }
+.about > .about-inner p.lead { color: var(--muted); font-size: 17px; margin-bottom: 36px; max-width: 48ch; }
+.about-list { display: flex; flex-direction: column; gap: 26px; margin-bottom: 40px; }
+.about-item { display: flex; gap: 18px; }
+.about-item .ai-ic { width: 48px; height: 48px; border-radius: 12px; flex-shrink: 0; background: rgba(255,107,0,0.13); color: var(--orange); display: grid; place-items: center; }
+.about-item h4 { font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 16.5px; margin-bottom: 5px; letter-spacing: 0; }
+.about-item p { font-size: 14.5px; color: var(--muted); }
+
+/* ═══════════ STATS ═══════════ */
+.stats { padding: var(--space) 0; }
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.stat { padding: 34px 0; border-top: 2px solid var(--orange); }
+.stat .s-num { font-family: 'Fraunces', serif; font-size: clamp(44px, 5vw, 66px); font-weight: 600; color: var(--text); line-height: 1; font-variant-numeric: tabular-nums; }
+.stat .s-num .suf { color: var(--orange); }
+.stat .s-lbl { margin-top: 14px; font-size: 15px; color: var(--muted); }
+
+/* ═══════════ CABANG ═══════════ */
+.cabang { padding: var(--space) 0; background: var(--ink2); border-top: 1px solid var(--line2); }
+.cabang-list { border-top: 1px solid var(--line); }
+.cabang-row { display: grid; grid-template-columns: 90px 1fr 1fr auto; gap: 24px; align-items: center; padding: 30px 8px; border-bottom: 1px solid var(--line2); transition: background 0.35s, padding 0.35s; }
+.cabang-row:hover { background: rgba(255,107,0,0.05); padding-left: 22px; }
+.cabang-row .cr-id { font-family: 'Fraunces', serif; font-size: 26px; color: var(--orange); font-weight: 600; }
+.cabang-row .cr-store { font-family: 'Fraunces', serif; font-size: 21px; }
+.cabang-row .cr-pic { display: flex; align-items: center; gap: 11px; color: var(--muted); font-size: 15px; }
+.cabang-row .cr-pic .cr-av { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(140deg, var(--orange), var(--orange-deep)); display: grid; place-items: center; color: #fff; font-weight: 700; font-family: 'Manrope'; font-size: 15px; }
+.cabang-row .cr-go { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--line); display: grid; place-items: center; color: var(--muted); transition: all 0.35s cubic-bezier(0.16,1,0.3,1); }
+.cabang-row:hover .cr-go { background: var(--orange); border-color: var(--orange); color: #fff; transform: rotate(-45deg); }
+
+/* ═══════════ CTA ═══════════ */
+.cta { padding: var(--space) 0; }
+.cta-box { position: relative; border-radius: 30px; overflow: hidden; padding: clamp(48px, 7vw, 96px); text-align: center; }
+.cta-box img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
+.cta-box::after { content: ''; position: absolute; inset: 0; background: linear-gradient(120deg, rgba(224,90,0,0.92), rgba(255,107,0,0.78)); z-index: 1; }
+.cta-box > * { position: relative; z-index: 2; }
+.cta-box h2 { font-size: clamp(34px, 5vw, 62px); color: #fff; margin-bottom: 20px; }
+.cta-box p { color: rgba(255,255,255,0.92); font-size: 18px; max-width: 52ch; margin: 0 auto 38px; }
+.cta-box .btn-solid { background: #fff; color: var(--orange-deep); box-shadow: 0 14px 34px rgba(0,0,0,0.28); }
+.cta-box .btn-solid:hover { background: var(--ink); color: #fff; }
+
+/* ═══════════ FOOTER ═══════════ */
+.footer { padding: 72px 0 34px; border-top: 1px solid var(--line2); }
+.footer-top { display: grid; grid-template-columns: 1.8fr 1fr 1fr 1fr; gap: 40px; padding-bottom: 48px; }
+.footer-about p { color: var(--muted); font-size: 14.5px; max-width: 34ch; margin-top: 18px; }
+.footer-col h5 { font-family: 'Manrope'; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text); margin-bottom: 18px; }
+.footer-col a { display: block; color: var(--muted); font-size: 14.5px; margin-bottom: 12px; transition: color 0.25s; }
+.footer-col a:hover { color: var(--orange); }
+.footer-bottom { display: flex; justify-content: space-between; align-items: center; padding-top: 28px; border-top: 1px solid var(--line2); color: var(--muted); font-size: 13px; flex-wrap: wrap; gap: 12px; }
+.footer-bottom b { color: var(--orange); }
+
+/* ═══════════ RESPONSIVE ═══════════ */
+@media (max-width: 1000px) {
+  .nav-links, .nav-call { display: none; }
+  .burger { display: grid; place-items: center; }
+  .steps-grid { grid-template-columns: 1fr 1fr; }
+  .step { border-right: none; border-bottom: 1px solid var(--line2); padding-right: 24px; }
+  .gallery { grid-template-columns: repeat(4, 1fr); }
+  .t-big, .t-tall, .t-wide { grid-column: span 2; }
+  .about-inner { grid-template-columns: 1fr; }
+  .about-media { max-width: 460px; }
+  .stats-grid { grid-template-columns: 1fr 1fr; gap: 8px 24px; }
+  .footer-top { grid-template-columns: 1fr 1fr; gap: 32px; }
+}
+@media (max-width: 600px) {
+  .hero-meta { gap: 26px; }
+  .steps-grid { grid-template-columns: 1fr; }
+  .gallery { grid-template-columns: 1fr 1fr; grid-auto-rows: 160px; }
+  .t-big, .t-tall, .t-wide, .t-sq { grid-column: span 2; grid-row: span 1; }
+  .t-big, .t-tall { grid-row: span 2; }
+  .cabang-row { grid-template-columns: 60px 1fr auto; }
+  .cabang-row .cr-pic { display: none; }
+  .footer-top { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ NAV ═══════════ -->
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="#top" class="brand">
+      <span class="brand-mark"><i data-lucide="warehouse" width="22" height="22"></i></span>
+      <span class="brand-name">Gudang<em>Hub</em></span>
+    </a>
+    <div class="nav-links">
+      <a href="#cara">Cara Kerja</a>
+      <a href="#katalog">Katalog</a>
+      <a href="#tentang">Tentang</a>
+      <a href="#cabang">Cabang</a>
+    </div>
+    <div class="nav-cta">
+      <div class="nav-call">
+        <i data-lucide="phone" width="18" height="18" style="color:var(--orange)"></i>
+        <div><span>Gudang Pusat</span><b>+62 812 3456 7890</b></div>
+      </div>
+      <a href="login.html" class="btn btn-solid">Masuk <i data-lucide="arrow-right" width="17" height="17"></i></a>
+      <button class="burger" id="burger" aria-label="Menu"><i data-lucide="menu" width="26" height="26"></i></button>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════ HERO ═══════════ -->
+<header class="hero wrap" id="top">
+  <div class="hero-top">
+    <span class="hero-eyebrow reveal"><span class="dot"></span> 5 Central Perabot · Grosir Perabot Murah &amp; Lengkap</span>
+    <h1 class="reveal" data-d="1">Kirim order barang <em>antar cabang</em> tanpa ribet.</h1>
+    <p class="hero-lead reveal" data-d="2">Satu sistem menghubungkan empat toko cabang ke gudang pusat PT Central Perabot Utama. Cabang tinggal pilih dari katalog, admin tinggal proses. Semua tercatat, real-time.</p>
+    <div class="hero-actions reveal" data-d="3">
+      <a href="login.html" class="btn btn-solid hero-btn-lg">Mulai Order <i data-lucide="arrow-right" width="18" height="18"></i></a>
+      <a href="#cara" class="btn btn-outline hero-btn-lg">Lihat Cara Kerja</a>
+    </div>
+  </div>
+
+  <div class="hero-banner reveal" data-d="2">
+    <!-- Simpan foto toko kamu sebagai "toko.jpg" di folder yang sama -->
+    <img src="toko.jpg" alt="Toko 5 Central Perabot — grosir perabot rumah tangga">
+    <div class="hero-tag"><i data-lucide="badge-check" width="17" height="17"></i> Stok Real-time</div>
+    <div class="hero-badge">
+      <span class="hb-ic"><i data-lucide="package-check" width="24" height="24"></i></span>
+      <div><div class="hb-t">Order disetujui</div><div class="hb-s">Notifikasi email otomatis</div></div>
+    </div>
+  </div>
+
+  <div class="hero-meta">
+    <div class="reveal"><div class="hm-num" data-count="4">0</div><div class="hm-lbl">Cabang aktif</div></div>
+    <div class="reveal" data-d="1"><div class="hm-num" data-count="9">0</div><div class="hm-lbl">Kategori barang</div></div>
+    <div class="reveal" data-d="2"><div class="hm-num" data-count="500" data-suffix="+">0</div><div class="hm-lbl">Item furnitur</div></div>
+  </div>
+</header>
+
+<!-- ═══════════ MARQUEE ═══════════ -->
+<div class="marquee">
+  <div class="marquee-track">
+    <span class="marquee-item"><i data-lucide="armchair" width="22" height="22"></i> Kursi</span>
+    <span class="marquee-item"><i data-lucide="utensils" width="22" height="22"></i> Meja</span>
+    <span class="marquee-item"><i data-lucide="archive" width="22" height="22"></i> Lemari</span>
+    <span class="marquee-item"><i data-lucide="sofa" width="22" height="22"></i> Sofa</span>
+    <span class="marquee-item"><i data-lucide="bed-double" width="22" height="22"></i> Kasur</span>
+    <span class="marquee-item"><i data-lucide="library" width="22" height="22"></i> Rak</span>
+    <span class="marquee-item"><i data-lucide="layout-grid" width="22" height="22"></i> Bufet</span>
+    <span class="marquee-item"><i data-lucide="cooking-pot" width="22" height="22"></i> Dapur</span>
+    <span class="marquee-item"><i data-lucide="palette" width="22" height="22"></i> Dekorasi</span>
+    <span class="marquee-item"><i data-lucide="armchair" width="22" height="22"></i> Kursi</span>
+    <span class="marquee-item"><i data-lucide="utensils" width="22" height="22"></i> Meja</span>
+    <span class="marquee-item"><i data-lucide="archive" width="22" height="22"></i> Lemari</span>
+    <span class="marquee-item"><i data-lucide="sofa" width="22" height="22"></i> Sofa</span>
+    <span class="marquee-item"><i data-lucide="bed-double" width="22" height="22"></i> Kasur</span>
+    <span class="marquee-item"><i data-lucide="library" width="22" height="22"></i> Rak</span>
+    <span class="marquee-item"><i data-lucide="layout-grid" width="22" height="22"></i> Bufet</span>
+    <span class="marquee-item"><i data-lucide="cooking-pot" width="22" height="22"></i> Dapur</span>
+    <span class="marquee-item"><i data-lucide="palette" width="22" height="22"></i> Dekorasi</span>
+  </div>
+</div>
+
+<!-- ═══════════ CARA KERJA ═══════════ -->
+<section class="steps wrap" id="cara">
+  <div class="section-head reveal">
+    <span class="section-kicker">Alur Sistem</span>
+    <h2>Dari pilih barang sampai barang jalan, empat langkah.</h2>
+  </div>
+  <div class="steps-grid">
+    <div class="step reveal" data-d="1">
+      <div class="step-n">01</div>
+      <div class="step-ic"><i data-lucide="search" width="26" height="26"></i></div>
+      <h3>Telusuri Katalog</h3>
+      <p>Cabang buka katalog barang lengkap dengan kode, harga, dan stok terkini.</p>
+    </div>
+    <div class="step reveal" data-d="2">
+      <div class="step-n">02</div>
+      <div class="step-ic"><i data-lucide="shopping-cart" width="26" height="26"></i></div>
+      <h3>Susun Order</h3>
+      <p>Tambah ke keranjang satu per satu, atau tempel banyak kode sekaligus lewat order massal.</p>
+    </div>
+    <div class="step reveal" data-d="3">
+      <div class="step-n">03</div>
+      <div class="step-ic"><i data-lucide="clipboard-check" width="26" height="26"></i></div>
+      <h3>Admin Proses</h3>
+      <p>Gudang pusat menyetujui atau menolak dari dashboard. Status langsung berubah.</p>
+    </div>
+    <div class="step reveal" data-d="3">
+      <div class="step-n">04</div>
+      <div class="step-ic"><i data-lucide="truck" width="26" height="26"></i></div>
+      <h3>Barang Dikirim</h3>
+      <p>Order approved masuk antrean kirim. Cabang dapat notifikasi email otomatis.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ SHOWCASE ═══════════ -->
+<section class="showcase wrap" id="katalog">
+  <div class="showcase-head">
+    <div class="section-head reveal" style="margin-bottom:0">
+      <span class="section-kicker">Katalog Furnitur</span>
+      <h2>Sembilan kategori, satu gudang.</h2>
+    </div>
+    <a href="login.html" class="btn btn-outline reveal" data-d="1">Buka Katalog Lengkap <i data-lucide="arrow-up-right" width="17" height="17"></i></a>
+  </div>
+  <div class="gallery">
+    <div class="tile t-big reveal">
+      <img src="https://images.unsplash.com/photo-1760067537064-b3a93d6e4bc2?w=900&q=80&auto=format&fit=crop" alt="Ruang tamu dengan sofa dan kursi kayu">
+      <div class="tile-arrow"><i data-lucide="arrow-up-right" width="18" height="18"></i></div>
+      <div class="tile-label"><div class="tl-k">Set Ruang Tamu</div><div class="tl-n">Sofa &amp; Kursi</div></div>
+    </div>
+    <div class="tile t-tall reveal" data-d="1">
+      <img src="https://images.unsplash.com/photo-1767584394169-cb62eccfe930?w=700&q=80&auto=format&fit=crop" alt="Sofa modern">
+      <div class="tile-arrow"><i data-lucide="arrow-up-right" width="18" height="18"></i></div>
+      <div class="tile-label"><div class="tl-k">Populer</div><div class="tl-n">Sofa</div></div>
+    </div>
+    <div class="tile tile-solid accent reveal" data-d="2">
+      <i class="ts-ic" data-lucide="utensils" width="28" height="28"></i>
+      <div class="tile-label" style="position:static"><div class="tl-k">Kategori</div><div class="tl-n">Meja</div></div>
+    </div>
+    <div class="tile tile-solid reveal" data-d="1">
+      <i class="ts-ic" data-lucide="archive" width="28" height="28"></i>
+      <div class="tile-label" style="position:static"><div class="tl-k">Kategori</div><div class="tl-n">Lemari</div></div>
+    </div>
+    <div class="tile t-sq reveal" data-d="2">
+      <img src="https://images.unsplash.com/photo-1776482128012-a47f853abd57?w=700&q=80&auto=format&fit=crop" alt="Kursi berlengan">
+      <div class="tile-arrow"><i data-lucide="arrow-up-right" width="18" height="18"></i></div>
+      <div class="tile-label"><div class="tl-k">Kategori</div><div class="tl-n">Kursi</div></div>
+    </div>
+    <div class="tile tile-solid reveal" data-d="1">
+      <i class="ts-ic" data-lucide="bed-double" width="28" height="28"></i>
+      <div class="tile-label" style="position:static"><div class="tl-k">Kategori</div><div class="tl-n">Kasur</div></div>
+    </div>
+    <div class="tile tile-solid reveal" data-d="2">
+      <i class="ts-ic" data-lucide="library" width="28" height="28"></i>
+      <div class="tile-label" style="position:static"><div class="tl-k">Kategori</div><div class="tl-n">Rak &amp; Bufet</div></div>
+    </div>
+    <div class="tile t-wide reveal" data-d="1">
+      <img src="https://images.unsplash.com/photo-1758025554726-50b7ed346394?w=900&q=80&auto=format&fit=crop" alt="Interior showroom furnitur">
+      <div class="tile-arrow"><i data-lucide="arrow-up-right" width="18" height="18"></i></div>
+      <div class="tile-label"><div class="tl-k">Dapur &amp; Dekorasi</div><div class="tl-n">Pelengkap Rumah</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ ABOUT ═══════════ -->
+<section class="about" id="tentang">
+  <div class="wrap about-inner">
+    <div class="about-media reveal">
+      <div class="am-main">
+        <img src="https://images.unsplash.com/photo-1730503807844-6b01c05f9c0f?w=800&q=80&auto=format&fit=crop" alt="Interior gudang dengan rak barang">
+      </div>
+      <div class="am-float">
+        <img src="https://images.unsplash.com/photo-1758025554726-50b7ed346394?w=500&q=80&auto=format&fit=crop" alt="Showroom furnitur">
+      </div>
+    </div>
+    <div class="about-copy">
+      <span class="section-kicker reveal">Gudang Terpusat</span>
+      <h2 class="reveal" data-d="1">Semua cabang, satu sumber kebenaran.</h2>
+      <p class="lead reveal" data-d="1">GudangHub menyatukan permintaan dari seluruh toko cabang ke gudang pusat PT Central Perabot Utama. Tidak ada lagi order lewat chat yang tercecer.</p>
+      <div class="about-list">
+        <div class="about-item reveal" data-d="1">
+          <span class="ai-ic"><i data-lucide="refresh-cw" width="22" height="22"></i></span>
+          <div><h4>Order tercatat rapi</h4><p>Setiap permintaan punya ID order unik, lengkap dengan detail barang dan catatan cabang.</p></div>
+        </div>
+        <div class="about-item reveal" data-d="2">
+          <span class="ai-ic"><i data-lucide="zap" width="22" height="22"></i></span>
+          <div><h4>Proses sekali klik</h4><p>Admin menyetujui atau menolak dari dashboard. Pending, approved, rejected langsung sinkron.</p></div>
+        </div>
+        <div class="about-item reveal" data-d="3">
+          <span class="ai-ic"><i data-lucide="bar-chart-3" width="22" height="22"></i></span>
+          <div><h4>Laporan per cabang</h4><p>Pantau total order, approval rate, dan aktivitas tiap toko dalam satu layar.</p></div>
+        </div>
+      </div>
+      <a href="login.html" class="btn btn-solid reveal" data-d="1">Masuk ke Dashboard <i data-lucide="arrow-right" width="18" height="18"></i></a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ STATS ═══════════ -->
+<section class="stats wrap">
+  <div class="section-head reveal">
+    <span class="section-kicker">Dalam Angka</span>
+    <h2>Skala operasi GudangHub.</h2>
+  </div>
+  <div class="stats-grid">
+    <div class="stat reveal"><div class="s-num" data-count="4">0</div><div class="s-lbl">Toko cabang di NTT</div></div>
+    <div class="stat reveal" data-d="1"><div class="s-num" data-count="9">0</div><div class="s-lbl">Kategori furnitur</div></div>
+    <div class="stat reveal" data-d="2"><div class="s-num" data-count="500"><span class="val">0</span><span class="suf">+</span></div><div class="s-lbl">Item dalam katalog</div></div>
+    <div class="stat reveal" data-d="3"><div class="s-num" data-count="24"><span class="val">0</span><span class="suf">/7</span></div><div class="s-lbl">Order kapan saja</div></div>
+  </div>
+</section>
+
+<!-- ═══════════ CABANG ═══════════ -->
+<section class="cabang" id="cabang">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="section-kicker">Jaringan Toko</span>
+      <h2>Empat cabang, terhubung penuh.</h2>
+    </div>
+    <div class="cabang-list">
+      <div class="cabang-row reveal">
+        <div class="cr-id">CB001</div>
+        <div class="cr-store">Toko Nasional Eltari</div>
+        <div class="cr-pic"><span class="cr-av">A</span> PIC · Arfa</div>
+        <span class="cr-go"><i data-lucide="arrow-right" width="18" height="18"></i></span>
+      </div>
+      <div class="cabang-row reveal" data-d="1">
+        <div class="cr-id">CB002</div>
+        <div class="cr-store">Perabot Mama Oesapa</div>
+        <div class="cr-pic"><span class="cr-av">A</span> PIC · Akmal</div>
+        <span class="cr-go"><i data-lucide="arrow-right" width="18" height="18"></i></span>
+      </div>
+      <div class="cabang-row reveal" data-d="2">
+        <div class="cr-id">CB003</div>
+        <div class="cr-store">Perabot Mama TDM</div>
+        <div class="cr-pic"><span class="cr-av">S</span> PIC · Shally</div>
+        <span class="cr-go"><i data-lucide="arrow-right" width="18" height="18"></i></span>
+      </div>
+      <div class="cabang-row reveal" data-d="3">
+        <div class="cr-id">CB004</div>
+        <div class="cr-store">Perabot Mama Kefamenanu</div>
+        <div class="cr-pic"><span class="cr-av">F</span> PIC · Fajar</div>
+        <span class="cr-go"><i data-lucide="arrow-right" width="18" height="18"></i></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ CTA ═══════════ -->
+<section class="cta wrap">
+  <div class="cta-box reveal">
+    <img src="https://images.unsplash.com/photo-1760067537064-b3a93d6e4bc2?w=1200&q=80&auto=format&fit=crop" alt="">
+    <h2>Siap mengelola order hari ini?</h2>
+    <p>Masuk dengan akun cabang atau admin gudang, lalu mulai kirim dan proses order barang.</p>
+    <a href="login.html" class="btn btn-solid hero-btn-lg">Masuk ke GudangHub <i data-lucide="arrow-right" width="18" height="18"></i></a>
+  </div>
+</section>
+
+<!-- ═══════════ FOOTER ═══════════ -->
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="footer-about">
+        <a href="#top" class="brand">
+          <span class="brand-mark"><i data-lucide="warehouse" width="22" height="22"></i></span>
+          <span class="brand-name">Gudang<em>Hub</em></span>
+        </a>
+        <p>Sistem order barang antar cabang untuk PT Central Perabot Utama, Nusa Tenggara Timur.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Jelajah</h5>
+        <a href="#cara">Cara Kerja</a>
+        <a href="#katalog">Katalog</a>
+        <a href="#tentang">Tentang</a>
+        <a href="#cabang">Cabang</a>
+      </div>
+      <div class="footer-col">
+        <h5>Sistem</h5>
+        <a href="login.html">Masuk Cabang</a>
+        <a href="login.html">Masuk Admin</a>
+        <a href="login.html">Dashboard</a>
+      </div>
+      <div class="footer-col">
+        <h5>Kontak</h5>
+        <a href="#">Gudang Pusat NTT</a>
+        <a href="#">+62 812 3456 7890</a>
+        <a href="#">order@gudanghub.id</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span><b>GudangHub v2.0</b> · PT Central Perabot Utama · Waktu WITA</span>
+      <span>© 2026 GudangHub. Semua hak dilindungi.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  if (window.lucide) lucide.createIcons();
+
+  const nav = document.getElementById('nav');
+  const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 20);
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  const easeOut = t => 1 - Math.pow(1 - t, 3);
+  function runCounter(el) {
+    const target = parseFloat(el.dataset.count);
+    const suffix = el.dataset.suffix || '';
+    const valSpan = el.querySelector('.val');
+    const dur = 1400; const start = performance.now();
+    function tick(now) {
+      const p = Math.min((now - start) / dur, 1);
+      const v = Math.round(easeOut(p) * target);
+      if (valSpan) valSpan.textContent = v;
+      else el.textContent = v + (p === 1 ? suffix : '');
+      if (p < 1) requestAnimationFrame(tick);
+      else if (!valSpan) el.textContent = target + suffix;
+    }
+    requestAnimationFrame(tick);
+  }
+  const cio = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { runCounter(e.target); cio.unobserve(e.target); } });
+  }, { threshold: 0.6 });
+  document.querySelectorAll('[data-count]').forEach(el => cio.observe(el));
+
+  document.getElementById('burger')?.addEventListener('click', () => {
+    const links = document.querySelector('.nav-links');
+    const open = links.style.display === 'flex';
+    links.style.display = open ? '' : 'flex';
+    if (!open) Object.assign(links.style, {
+      position: 'absolute', top: '72px', left: '0', right: '0', flexDirection: 'column',
+      background: 'var(--ink2)', padding: '22px 28px', gap: '18px', borderBottom: '1px solid var(--line2)'
+    });
+  });
+</script>
+</body>
+</html>
