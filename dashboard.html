@@ -106,13 +106,27 @@
 --sidebar-w: 260px;
 }
 
+html { background: var(--dark); }
+
 body {
-background: var(--dark);
+background: transparent;
 color: var(--text);
 font-family: 'Segoe UI', system-ui, sans-serif;
 display: flex;
 min-height: 100vh;
 overflow-x: hidden;
+position: relative;
+}
+
+/* ── BACKGROUND BERTEKSTUR (siluet perabot + grid samar) ── */
+body::before {
+content:''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+background-color: var(--dark);
+background-image:
+linear-gradient(rgba(255,255,255,0.016) 1px, transparent 1px),
+linear-gradient(90deg, rgba(255,255,255,0.016) 1px, transparent 1px),
+url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='640'%20height='640'%20viewBox='0%200%20640%20640'%3E%3Cg%20fill='none'%20stroke='%23ffb27a'%20stroke-opacity='0.045'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M60%20180%20q0%20-18%2018%20-18%20h108%20q18%200%2018%2018%20v46%20h-144%20z'/%3E%3Cpath%20d='M78%20162%20v-22%20q0%20-12%2012%20-12%20h84%20q12%200%2012%2012%20v22'/%3E%3Cpath%20d='M66%20226%20v16%20M186%20226%20v16'/%3E%3Cpath%20d='M330%20150%20v78%20M388%20150%20v78%20M330%20188%20h58%20M330%20150%20q29%20-22%2058%200'/%3E%3Cpath%20d='M326%20228%20l-8%2034%20M392%20228%20l8%2034'/%3E%3Cpath%20d='M90%20470%20h150%20M104%20470%20v46%20M226%20470%20v46'/%3E%3Cpath%20d='M150%20470%20v-30%20M135%20420%20h30%20l-8%2020%20h-14%20z'/%3E%3Cpath%20d='M360%20500%20h180%20v-34%20h-180%20z%20M360%20466%20v-70%20h34%20v70'/%3E%3Cpath%20d='M360%20534%20v14%20M540%20534%20v14'/%3E%3Cpath%20d='M470%20120%20h110%20v150%20h-110%20z%20M470%20170%20h110%20M470%20220%20h110'/%3E%3Cpath%20d='M250%20300%20l24%200%20l-6%20-44%20h-12%20z%20M262%20300%20v70%20M246%20372%20h32'/%3E%3C/g%3E%3C/svg%3E");
+background-size: auto, 46px 46px, 46px 46px, 340px 340px;
 }
 
 .sidebar { width: var(--sidebar-w); background: var(--dark2); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; transition: transform 0.3s; }
