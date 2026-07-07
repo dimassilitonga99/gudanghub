@@ -107,15 +107,36 @@
   --space: clamp(72px, 9vw, 140px);
 }
 
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; background: var(--ink); }
 
 body {
-  background: var(--ink);
+  background: transparent;
   color: var(--text);
   font-family: 'Manrope', system-ui, sans-serif;
   line-height: 1.55;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+}
+
+/* ═══════════ BACKGROUND BERTEKSTUR (grid tipis + siluet perabot samar) ═══════════ */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.020) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.020) 1px, transparent 1px),
+    url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='640'%20height='640'%20viewBox='0%200%20640%20640'%3E%3Cg%20fill='none'%20stroke='%23ffb27a'%20stroke-opacity='0.055'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M60%20180%20q0%20-18%2018%20-18%20h108%20q18%200%2018%2018%20v46%20h-144%20z'/%3E%3Cpath%20d='M78%20162%20v-22%20q0%20-12%2012%20-12%20h84%20q12%200%2012%2012%20v22'/%3E%3Cpath%20d='M66%20226%20v16%20M186%20226%20v16'/%3E%3Cpath%20d='M330%20150%20v78%20M388%20150%20v78%20M330%20188%20h58%20M330%20150%20q29%20-22%2058%200'/%3E%3Cpath%20d='M326%20228%20l-8%2034%20M392%20228%20l8%2034'/%3E%3Cpath%20d='M90%20470%20h150%20M104%20470%20v46%20M226%20470%20v46'/%3E%3Cpath%20d='M150%20470%20v-30%20M135%20420%20h30%20l-8%2020%20h-14%20z'/%3E%3Cpath%20d='M360%20500%20h180%20v-34%20h-180%20z%20M360%20466%20v-70%20h34%20v70'/%3E%3Cpath%20d='M360%20534%20v14%20M540%20534%20v14'/%3E%3Cpath%20d='M470%20120%20h110%20v150%20h-110%20z%20M470%20170%20h110%20M470%20220%20h110'/%3E%3Cpath%20d='M250%20300%20l24%200%20l-6%20-44%20h-12%20z%20M262%20300%20v70%20M246%20372%20h32'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 46px 46px, 46px 46px, 340px 340px;
+  -webkit-mask-image: radial-gradient(circle at 50% 30%, #000 0%, rgba(0,0,0,0.7) 60%, rgba(0,0,0,0.5) 100%);
+          mask-image: radial-gradient(circle at 50% 30%, #000 0%, rgba(0,0,0,0.7) 60%, rgba(0,0,0,0.5) 100%);
+}
+/* Glow oranye lembut di belakang, biar background tidak flat */
+body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(60vw 60vw at 82% 8%, rgba(255,107,0,0.06), transparent 60%),
+    radial-gradient(50vw 50vw at 12% 88%, rgba(255,107,0,0.05), transparent 60%);
 }
 
 ::selection { background: var(--orange); color: #fff; }
@@ -127,6 +148,9 @@ h1, h2, h3, h4 { font-family: 'Fraunces', Georgia, serif; font-weight: 600; text
 a { color: inherit; text-decoration: none; }
 
 [data-lucide] { display: inline-block; vertical-align: middle; stroke-width: 1.6; }
+
+/* Semua konten di atas lapisan background */
+.nav, .hero, .marquee, .steps, .showcase, .team, .about, .stats, .cabang, .cta, .footer { position: relative; z-index: 1; }
 
 .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.9s cubic-bezier(0.16,1,0.3,1), transform 0.9s cubic-bezier(0.16,1,0.3,1); }
 .reveal.in { opacity: 1; transform: none; }
@@ -158,7 +182,7 @@ a { color: inherit; text-decoration: none; }
 /* ═══════════ HERO ═══════════ */
 .hero { padding-top: 132px; }
 .hero-top { max-width: 860px; margin: 0 auto; text-align: center; }
-.hero-eyebrow { display: inline-flex; align-items: center; gap: 10px; font-size: 12.5px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--orange); padding: 8px 16px; border: 1px solid var(--line); border-radius: 999px; margin-bottom: 26px; }
+.hero-eyebrow { display: inline-flex; align-items: center; gap: 10px; font-size: 12.5px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--orange); padding: 8px 16px; border: 1px solid var(--line); border-radius: 999px; margin-bottom: 26px; background: rgba(12,12,21,0.4); }
 .hero-eyebrow .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--orange); box-shadow: 0 0 0 4px rgba(255,107,0,0.2); }
 .hero h1 { font-size: clamp(40px, 6vw, 78px); font-weight: 600; margin-bottom: 24px; }
 .hero h1 em { font-style: italic; color: var(--orange); }
@@ -181,7 +205,7 @@ a { color: inherit; text-decoration: none; }
 .hero-meta .hm-lbl { font-size: 13px; color: var(--muted); margin-top: 2px; text-align: center; }
 
 /* ═══════════ MARQUEE ═══════════ */
-.marquee { margin-top: var(--space); border-top: 1px solid var(--line2); border-bottom: 1px solid var(--line2); padding: 22px 0; overflow: hidden; background: var(--ink2); }
+.marquee { margin-top: var(--space); border-top: 1px solid var(--line2); border-bottom: 1px solid var(--line2); padding: 22px 0; overflow: hidden; background: rgba(20,20,31,0.55); backdrop-filter: blur(2px); }
 .marquee-track { display: flex; gap: 56px; width: max-content; animation: slide 32s linear infinite; }
 .marquee:hover .marquee-track { animation-play-state: paused; }
 @keyframes slide { to { transform: translateX(-50%); } }
@@ -263,7 +287,7 @@ a { color: inherit; text-decoration: none; }
 .team-hint [data-lucide] { color: var(--orange); }
 
 /* ═══════════ ABOUT ═══════════ */
-.about { padding: var(--space) 0; background: var(--ink2); border-top: 1px solid var(--line2); border-bottom: 1px solid var(--line2); }
+.about { padding: var(--space) 0; background: rgba(20,20,31,0.55); backdrop-filter: blur(2px); border-top: 1px solid var(--line2); border-bottom: 1px solid var(--line2); }
 .about-inner { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(40px, 6vw, 90px); align-items: center; }
 .about-media { position: relative; }
 .about-media .am-main { border-radius: 24px; overflow: hidden; aspect-ratio: 5/5.6; box-shadow: 0 40px 80px -24px rgba(0,0,0,0.7); }
@@ -287,7 +311,7 @@ a { color: inherit; text-decoration: none; }
 .stat .s-lbl { margin-top: 14px; font-size: 15px; color: var(--muted); }
 
 /* ═══════════ CABANG ═══════════ */
-.cabang { padding: var(--space) 0; background: var(--ink2); border-top: 1px solid var(--line2); }
+.cabang { padding: var(--space) 0; background: rgba(20,20,31,0.55); backdrop-filter: blur(2px); border-top: 1px solid var(--line2); }
 .cabang-list { border-top: 1px solid var(--line); }
 .cabang-row { display: grid; grid-template-columns: 90px 1fr 1fr auto; gap: 24px; align-items: center; padding: 30px 8px; border-bottom: 1px solid var(--line2); transition: background 0.35s, padding 0.35s; }
 .cabang-row:hover { background: rgba(255,107,0,0.05); padding-left: 22px; }
