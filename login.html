@@ -201,11 +201,6 @@ a { color: inherit; text-decoration: none; }
 .error-msg { display: none; align-items: center; gap: 8px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: 10px; padding: 11px 14px; font-size: 13px; color: #f87171; margin-bottom: 16px; }
 .error-msg.show { display: flex; }
 
-.hint { margin-top: 22px; border: 1px solid var(--line2); border-radius: 12px; padding: 14px 16px; font-size: 12px; color: var(--muted); background: rgba(255,107,0,0.04); }
-.hint b { color: var(--orange); display: flex; align-items: center; gap: 7px; margin-bottom: 9px; font-size: 12.5px; }
-.hint code { background: rgba(0,0,0,0.35); padding: 1px 7px; border-radius: 5px; font-family: 'Courier New', monospace; color: var(--text); }
-.hint .hrow { line-height: 1.9; }
-
 .visual-side { position: relative; display: flex; align-items: center; justify-content: center; min-height: 420px; }
 .circle {
   position: relative; width: min(360px, 82%); aspect-ratio: 1;
@@ -289,7 +284,7 @@ a { color: inherit; text-decoration: none; }
           <label class="field-label">Username</label>
           <div class="field">
             <span class="fi"><i data-lucide="user" width="18" height="18"></i></span>
-            <input type="text" id="inputUser" placeholder="Contoh: admin" autocomplete="username" required>
+            <input type="text" id="inputUser" placeholder="Masukkan username" autocomplete="username" required>
           </div>
         </div>
 
@@ -313,17 +308,6 @@ a { color: inherit; text-decoration: none; }
           <span id="btnText" style="display:flex;align-items:center;gap:9px;"><i data-lucide="log-in" width="18" height="18"></i> Masuk</span>
         </button>
       </form>
-
-      <div class="hint">
-        <b><i data-lucide="key-round" width="15" height="15"></i> Kredensial Default</b>
-        <div class="hrow">Admin Gudang: <code>admin</code> / <code>gudang2025</code></div>
-        <div class="hrow" style="margin-top:8px;">
-          CB001: <code>cb001</code> / <code>arfa2025</code><br>
-          CB002: <code>cb002</code> / <code>akmal2025</code><br>
-          CB003: <code>cb003</code> / <code>shally2025</code><br>
-          CB004: <code>cb004</code> / <code>fajar2025</code>
-        </div>
-      </div>
     </div>
 
     <!-- RIGHT: VISUAL (MASKOT) -->
@@ -360,7 +344,7 @@ a { color: inherit; text-decoration: none; }
     currentRole = role;
     document.getElementById('role-admin').classList.toggle('active', role === 'admin');
     document.getElementById('role-cabang').classList.toggle('active', role === 'cabang');
-    document.getElementById('inputUser').placeholder = role === 'admin' ? 'Contoh: admin' : 'Contoh: cb001, cb002, cb003, cb004';
+    document.getElementById('inputUser').placeholder = role === 'admin' ? 'Masukkan username admin' : 'Masukkan username cabang';
   }
 
   function togglePw() {
