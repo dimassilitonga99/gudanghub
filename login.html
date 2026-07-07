@@ -331,13 +331,12 @@ a { color: inherit; text-decoration: none; }
 <script>
   if (window.lucide) lucide.createIcons();
 
-  const USERS = {
-    admin: { password: "gudang2025", role: "admin", nama: "Admin Gudang Pusat", redirect: "dashboard.html" },
-    cb001: { password: "arfa2025", role: "cabang", nama: "Toko Nasional Eltari – Arfa", idCabang: "CB001", redirect: "order.html?cabang=CB001" },
-    cb002: { password: "akmal2025", role: "cabang", nama: "Toko Perabot Mama Oesapa – Akmal", idCabang: "CB002", redirect: "order.html?cabang=CB002" },
-    cb003: { password: "shally2025", role: "cabang", nama: "Toko Perabot Mama TDM – Shally", idCabang: "CB003", redirect: "order.html?cabang=CB003" },
-    cb004: { password: "fajar2025", role: "cabang", nama: "Toko Perabot Mama Kefamenanu – Fajar", idCabang: "CB004", redirect: "order.html?cabang=CB004" }
-  };
+  // ══════════════════════════════════════════════════════════
+  // ⚙️ CONFIG — sama dengan API_URL di order.html / dashboard.html
+  // ══════════════════════════════════════════════════════════
+  const API_URL = 'https://script.google.com/macros/s/AKfycbzk8A4xuXOVGqbK6a4zffpG6u2s4jVROZwIitmCDat2fYU7qyU3VkxQJmtxtEtjQxji/exec';
+
+  // TIDAK ADA daftar password di sini. Semua dicek di server.
 
   let currentRole = 'admin';
   function setRole(role) {
@@ -363,9 +362,54 @@ a { color: inherit; text-decoration: none; }
     setTimeout(() => el.classList.remove('show'), 4000);
   }
 
-  function doLogin(e) {
+  function resetBtn() {
+    const btn = document.getElementById('btnLogin');
+    const btnText = document.getElementById('btnText');
+    btn.classList.remove('loading');
+    btnText.innerHTML = '<i data-lucide="log-in" width="18" height="18"></i> Masuk';
+    if (window.lucide) lucide.createIcons();
+  }
+
+  function shakeCard() {
+    const card = document.getElementById('card');
+    card.style.animation = 'shake 0.4s ease';
+    setTimeout(() => card.style.animation = '', 400);
+  }
+
+  // Kirim login ke server (GET dgn payload, fallback POST) — hindari CORS
+  async function verifikasiKeServer(username, password) {
+    const payload = { action: 'login', username, password };
+    const enc = encodeURIComponent(JSON.stringify(payload));
+
+    // 1) GET
+    try {
+      const res = await fetch(`${API_URL}?action=login&payload=${enc}`, { method: 'GET' });
+      const data = parseResp(await res.text());
+      if (data.status) return data;
+    } catch (e) { /* lanjut fallback */ }
+
+    // 2) POST form
+    try {
+      const form = new FormData();
+      form.append('payload', JSON.stringify(payload));
+      const res = await fetch(`${API_URL}?action=login`, { method: 'POST', body: form });
+      const data = parseResp(await res.text());
+      if (data.status) return data;
+    } catch (e) { /* lanjut */ }
+
+    return { status: 'error', message: 'Gagal terhubung ke server. Cek koneksi internet.' };
+  }
+
+  function parseResp(text) {
+    if (!text) return { status: 'error', message: 'Response kosong dari server.' };
+    try { return JSON.parse(text); } catch (e) {}
+    try { const m = text.match(/\{[\s\S]*\}/); if (m) return JSON.parse(m[0]); } catch (e) {}
+    return { status: 'error', message: 'Response tidak valid dari server.' };
+  }
+
+  async function doLogin(e) {
     e.preventDefault();
-    const username = document.getElementById('inputUser').value.trim().toLowerCase();
+    const username = document.getElementById('inputUser').value.trim();
     const password = document.getElementById('inputPass').value;
     const btn = document.getElementById('btnLogin');
     const btnText = document.getElementById('btnText');
@@ -373,55 +417,71 @@ a { color: inherit; text-decoration: none; }
     btn.classList.add('loading');
     btnText.innerHTML = '<span class="spinner"></span> Memverifikasi...';
 
-    setTimeout(() => {
-      const user = USERS[username];
-      if (!user) {
-        showError('Username tidak ditemukan. Periksa kembali.');
-        btn.classList.remove('loading');
-        btnText.innerHTML = '<i data-lucide="log-in" width="18" height="18"></i> Masuk';
-        if (window.lucide) lucide.createIcons();
-        return;
-      }
-      if (user.password !== password) {
-        showError('Password salah. Coba lagi.');
-        btn.classList.remove('loading');
-        btnText.innerHTML = '<i data-lucide="log-in" width="18" height="18"></i> Masuk';
-        if (window.lucide) lucide.createIcons();
-        const card = document.getElementById('card');
-        card.style.animation = 'shake 0.4s ease';
-        setTimeout(() => card.style.animation = '', 400);
-        return;
-      }
+    const hasil = await verifikasiKeServer(username, password);
 
-      const session = {
-        username, role: user.role, nama: user.nama,
-        idCabang: user.idCabang || null,
-        loginAt: new Date().toISOString(),
-        expires: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString()
-      };
-      sessionStorage.setItem('gudanghub_session', JSON.stringify(session));
-      localStorage.setItem('gudanghub_lastuser', username);
+    if (hasil.status !== 'ok') {
+      showError(hasil.message || 'Username atau password salah.');
+      resetBtn();
+      shakeCard();
+      return;
+    }
 
-      btnText.innerHTML = '<i data-lucide="check" width="18" height="18"></i> Berhasil! Mengalihkan...';
-      if (window.lucide) lucide.createIcons();
-      setTimeout(() => { window.location.href = user.redirect; }, 700);
-    }, 850);
+    const u = hasil.user || {};
+    // Validasi peran sesuai tombol yang dipilih (opsional, mencegah salah pintu)
+    if (currentRole === 'admin' && u.role !== 'admin') {
+      showError('Akun ini bukan Admin Gudang. Pilih peran "Cabang".');
+      resetBtn(); shakeCard(); return;
+    }
+    if (currentRole === 'cabang' && u.role !== 'cabang') {
+      showError('Akun ini bukan Cabang. Pilih peran "Admin Gudang".');
+      resetBtn(); shakeCard(); return;
+    }
+
+    const session = {
+      username: u.username,
+      role: u.role,
+      nama: u.nama,
+      idCabang: u.idCabang || null,
+      token: hasil.token || null,
+      loginAt: new Date().toISOString(),
+      expires: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString()
+    };
+    sessionStorage.setItem('gudanghub_session', JSON.stringify(session));
+    if (document.getElementById('remember').checked) {
+      localStorage.setItem('gudanghub_lastuser', u.username);
+    } else {
+      localStorage.removeItem('gudanghub_lastuser');
+    }
+
+    btnText.innerHTML = '<i data-lucide="check" width="18" height="18"></i> Berhasil! Mengalihkan...';
+    if (window.lucide) lucide.createIcons();
+
+    const redirect = u.role === 'admin'
+      ? 'dashboard.html'
+      : 'order.html?cabang=' + encodeURIComponent(u.idCabang || '');
+    setTimeout(() => { window.location.href = redirect; }, 700);
   }
 
+  // Auto-fill username terakhir (bukan password)
   window.addEventListener('load', () => {
     const last = localStorage.getItem('gudanghub_lastuser');
-    if (last) document.getElementById('inputUser').value = last;
+    if (last) {
+      document.getElementById('inputUser').value = last;
+      document.getElementById('remember').checked = true;
+    }
   });
 
+  // Kalau session masih aktif, langsung arahkan
   const existingSession = sessionStorage.getItem('gudanghub_session');
   if (existingSession) {
     try {
-      const sess = JSON.parse(existingSession);
-      if (new Date(sess.expires) > new Date()) {
-        const u = USERS[sess.username];
-        if (u) window.location.href = u.redirect;
+      const s = JSON.parse(existingSession);
+      if (new Date(s.expires) > new Date()) {
+        window.location.href = s.role === 'admin'
+          ? 'dashboard.html'
+          : 'order.html?cabang=' + encodeURIComponent(s.idCabang || '');
       }
-    } catch(e) {}
+    } catch (e) {}
   }
 </script>
 </body>
