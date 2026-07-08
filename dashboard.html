@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GudangHub — Dashboard Admin v2.5</title>
-<script src="https://cdn.jsdelivr.net/npm/lucide@0.383.0/dist/umd/lucide.min.js"></script>
+<title>GudangHub — Dashboard Admin v2.6 FAST</title>
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.383.0/dist/umd/lucide.min.js" defer></script>
 <style>
 * {
   margin: 0;
@@ -34,18 +34,23 @@
 
 html {
   background: var(--dark);
+  scroll-behavior: smooth;
 }
 
 body {
   background: transparent;
   color: var(--text);
-  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
   display: flex;
   min-height: 100vh;
   overflow-x: hidden;
   position: relative;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeSpeed;
 }
 
+/* GPU-optimized background */
 body::before {
   content: '';
   position: fixed;
@@ -57,6 +62,8 @@ body::before {
     linear-gradient(rgba(255,255,255,0.016) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.016) 1px, transparent 1px);
   background-size: 46px 46px;
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 /* ═══════════ SIDEBAR ═══════════ */
@@ -71,7 +78,9 @@ body::before {
   left: 0;
   bottom: 0;
   z-index: 100;
-  transition: transform 0.3s;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+  contain: layout style;
 }
 
 .sidebar-logo {
@@ -95,26 +104,17 @@ body::before {
   box-shadow: 0 0 20px rgba(255,107,0,0.3);
 }
 
-.sidebar-logo-title {
-  font-size: 16px;
-  font-weight: 800;
-  color: #fff;
-}
-
-.sidebar-logo-sub {
-  font-size: 10px;
-  color: var(--muted);
-}
+.sidebar-logo-title { font-size: 16px; font-weight: 800; color: #fff; }
+.sidebar-logo-sub { font-size: 10px; color: var(--muted); }
 
 .sidebar-nav {
   flex: 1;
   padding: 16px 12px;
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
-.nav-section {
-  margin-bottom: 24px;
-}
+.nav-section { margin-bottom: 24px; }
 
 .nav-section-title {
   font-size: 10px;
@@ -132,12 +132,13 @@ body::before {
   padding: 11px 14px;
   border-radius: 10px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color 0.15s ease, color 0.15s ease;
   color: var(--muted);
   font-size: 14px;
   font-weight: 500;
   border: 1px solid transparent;
   margin-bottom: 2px;
+  user-select: none;
 }
 
 .nav-item:hover {
@@ -151,9 +152,7 @@ body::before {
   color: var(--orange);
 }
 
-.nav-item .nav-icon {
-  font-size: 17px;
-}
+.nav-item .nav-icon { font-size: 17px; }
 
 .nav-badge {
   margin-left: auto;
@@ -165,6 +164,7 @@ body::before {
   border-radius: 20px;
   min-width: 20px;
   text-align: center;
+  transition: transform 0.2s ease;
 }
 
 .sidebar-user {
@@ -193,10 +193,7 @@ body::before {
   flex-shrink: 0;
 }
 
-.user-info {
-  flex: 1;
-  min-width: 0;
-}
+.user-info { flex: 1; min-width: 0; }
 
 .user-name {
   font-size: 13px;
@@ -206,10 +203,7 @@ body::before {
   text-overflow: ellipsis;
 }
 
-.user-role {
-  font-size: 11px;
-  color: var(--orange);
-}
+.user-role { font-size: 11px; color: var(--orange); }
 
 .btn-logout {
   background: none;
@@ -218,12 +212,10 @@ body::before {
   cursor: pointer;
   font-size: 18px;
   padding: 4px;
-  transition: color 0.2s;
+  transition: color 0.15s;
 }
 
-.btn-logout:hover {
-  color: var(--red);
-}
+.btn-logout:hover { color: var(--red); }
 
 /* ═══════════ MAIN ═══════════ */
 .main {
@@ -232,6 +224,7 @@ body::before {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  contain: layout;
 }
 
 .topbar {
@@ -244,6 +237,7 @@ body::before {
   position: sticky;
   top: 0;
   z-index: 50;
+  backdrop-filter: blur(8px);
 }
 
 .topbar-menu {
@@ -255,11 +249,7 @@ body::before {
   cursor: pointer;
 }
 
-.topbar-title {
-  font-size: 18px;
-  font-weight: 700;
-  flex: 1;
-}
+.topbar-title { font-size: 18px; font-weight: 700; flex: 1; }
 
 .topbar-time {
   font-size: 12px;
@@ -267,6 +257,7 @@ body::before {
   background: var(--dark3);
   padding: 6px 14px;
   border-radius: 20px;
+  font-variant-numeric: tabular-nums;
 }
 
 .btn-refresh {
@@ -278,18 +269,17 @@ body::before {
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color 0.15s;
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
-.btn-refresh:hover {
-  background: rgba(255,107,0,0.2);
-}
+.btn-refresh:hover { background: rgba(255,107,0,0.2); }
 
 .btn-refresh.spinning .refresh-icon {
   animation: spin 0.6s linear infinite;
+  display: inline-block;
 }
 
 @keyframes spin {
@@ -299,14 +289,21 @@ body::before {
 .content {
   flex: 1;
   padding: 28px;
+  contain: layout;
 }
 
 .page {
   display: none;
+  animation: fadeIn 0.2s ease;
 }
 
 .page.active {
   display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>
 <style>
@@ -323,7 +320,9 @@ body::before {
   border: 1px solid var(--border2);
   border-radius: 16px;
   padding: 20px;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  contain: layout style;
+  will-change: transform;
 }
 
 .stat-card:hover {
@@ -361,12 +360,11 @@ body::before {
   font-weight: 800;
   line-height: 1;
   margin-bottom: 6px;
+  font-variant-numeric: tabular-nums;
+  transition: color 0.3s ease;
 }
 
-.stat-change {
-  font-size: 12px;
-  color: var(--muted);
-}
+.stat-change { font-size: 12px; color: var(--muted); }
 
 .grid-3-1 {
   display: grid;
@@ -388,6 +386,7 @@ body::before {
   border: 1px solid var(--border2);
   border-radius: 16px;
   overflow: hidden;
+  contain: layout;
 }
 
 .panel-header {
@@ -406,9 +405,7 @@ body::before {
   gap: 8px;
 }
 
-.panel-body {
-  padding: 20px;
-}
+.panel-body { padding: 20px; }
 
 .panel-action {
   background: var(--orange-dim);
@@ -419,22 +416,22 @@ body::before {
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color 0.15s;
 }
 
-.panel-action:hover {
-  background: rgba(255,107,0,0.2);
-}
+.panel-action:hover { background: rgba(255,107,0,0.2); }
 
 /* ═══════════ TABLE ═══════════ */
 .order-table-wrap {
   overflow-x: auto;
+  overscroll-behavior-x: contain;
 }
 
 .order-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
+  contain: layout;
 }
 
 .order-table th {
@@ -447,6 +444,10 @@ body::before {
   letter-spacing: 0.5px;
   border-bottom: 1px solid var(--border2);
   white-space: nowrap;
+  background: var(--card);
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
 .order-table td {
@@ -455,16 +456,18 @@ body::before {
   vertical-align: middle;
 }
 
-.order-table tr:last-child td {
-  border-bottom: none;
+.order-table tr:last-child td { border-bottom: none; }
+
+.order-table tbody tr {
+  transition: background-color 0.1s ease;
 }
 
-.order-table tr:hover td {
+.order-table tbody tr:hover td {
   background: rgba(255,255,255,0.02);
 }
 
 .order-id {
-  font-family: monospace;
+  font-family: 'Courier New', monospace;
   font-size: 11px;
   color: var(--orange);
   font-weight: 700;
@@ -526,12 +529,10 @@ body::before {
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color 0.15s;
 }
 
-.btn-approve:hover {
-  background: rgba(34,197,94,0.25);
-}
+.btn-approve:hover { background: rgba(34,197,94,0.25); }
 
 .btn-reject {
   background: rgba(239,68,68,0.15);
@@ -542,12 +543,10 @@ body::before {
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color 0.15s;
 }
 
-.btn-reject:hover {
-  background: rgba(239,68,68,0.25);
-}
+.btn-reject:hover { background: rgba(239,68,68,0.25); }
 
 .btn-detail {
   background: rgba(255,255,255,0.06);
@@ -557,15 +556,12 @@ body::before {
   color: var(--muted);
   font-size: 11px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color 0.15s, color 0.15s;
 }
 
-.btn-detail:hover {
-  color: var(--text);
-  background: rgba(255,255,255,0.1);
-}
+.btn-detail:hover { color: var(--text); background: rgba(255,255,255,0.1); }
 
-/* ═══════════ CABANG CARD ═══════════ */
+/* ═══════════ CABANG ═══════════ */
 .cabang-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -577,12 +573,10 @@ body::before {
   border: 1px solid var(--border2);
   border-radius: 12px;
   padding: 14px;
-  transition: all 0.2s;
+  transition: border-color 0.2s;
 }
 
-.cabang-card:hover {
-  border-color: rgba(255,107,0,0.3);
-}
+.cabang-card:hover { border-color: rgba(255,107,0,0.3); }
 
 .cabang-card-header {
   display: flex;
@@ -603,15 +597,8 @@ body::before {
   flex-shrink: 0;
 }
 
-.cabang-name {
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.cabang-id {
-  font-size: 10px;
-  color: var(--orange);
-}
+.cabang-name { font-size: 12px; font-weight: 700; }
+.cabang-id { font-size: 10px; color: var(--orange); }
 
 .cabang-stats {
   display: grid;
@@ -629,6 +616,7 @@ body::before {
 .cabang-stat-val {
   font-size: 18px;
   font-weight: 800;
+  font-variant-numeric: tabular-nums;
 }
 
 .cabang-stat-lbl {
@@ -645,9 +633,7 @@ body::before {
   padding: 10px 0;
 }
 
-.donut-legend {
-  flex: 1;
-}
+.donut-legend { flex: 1; }
 
 .legend-item {
   display: flex;
@@ -663,15 +649,13 @@ body::before {
   flex-shrink: 0;
 }
 
-.legend-label {
-  font-size: 12px;
-  color: var(--muted);
-}
+.legend-label { font-size: 12px; color: var(--muted); }
 
 .legend-val {
   margin-left: auto;
   font-size: 13px;
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
 .bar-chart {
@@ -696,17 +680,14 @@ body::before {
   width: 100%;
   background: linear-gradient(to top, var(--orange), var(--orange-light));
   border-radius: 6px 6px 0 0;
-  transition: height 0.8s cubic-bezier(0.25,1,0.5,1);
+  transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   min-height: 4px;
+  will-change: height;
 }
 
-.bar-label {
-  font-size: 10px;
-  color: var(--muted);
-  text-align: center;
-}
+.bar-label { font-size: 10px; color: var(--muted); text-align: center; }
 
-/* ═══════════ ACTIVITY FEED ═══════════ */
+/* ═══════════ ACTIVITY ═══════════ */
 .activity-item {
   display: flex;
   gap: 12px;
@@ -714,9 +695,7 @@ body::before {
   border-bottom: 1px solid var(--border2);
 }
 
-.activity-item:last-child {
-  border-bottom: none;
-}
+.activity-item:last-child { border-bottom: none; }
 
 .activity-dot {
   width: 8px;
@@ -731,24 +710,10 @@ body::before {
 .activity-dot.red { background: var(--red); }
 .activity-dot.blue { background: var(--blue); }
 
-.activity-content {
-  flex: 1;
-}
-
-.activity-text {
-  font-size: 13px;
-  line-height: 1.4;
-}
-
-.activity-text strong {
-  color: var(--orange);
-}
-
-.activity-time {
-  font-size: 11px;
-  color: var(--muted);
-  margin-top: 3px;
-}
+.activity-content { flex: 1; }
+.activity-text { font-size: 13px; line-height: 1.4; }
+.activity-text strong { color: var(--orange); }
+.activity-time { font-size: 11px; color: var(--muted); margin-top: 3px; }
 
 /* ═══════════ MODAL ═══════════ */
 .modal-overlay {
@@ -762,8 +727,9 @@ body::before {
   padding: 20px;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.2s;
+  transition: opacity 0.2s ease;
   backdrop-filter: blur(4px);
+  will-change: opacity;
 }
 
 .modal-overlay.show {
@@ -779,12 +745,15 @@ body::before {
   max-width: 760px;
   max-height: 88vh;
   overflow-y: auto;
-  transform: translateY(20px);
-  transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
+  overscroll-behavior: contain;
+  transform: translateY(20px) scale(0.98);
+  transition: transform 0.25s cubic-bezier(0.16,1,0.3,1);
+  will-change: transform;
+  contain: layout;
 }
 
 .modal-overlay.show .modal {
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
 }
 
 .modal-header {
@@ -800,10 +769,7 @@ body::before {
   border-radius: 20px 20px 0 0;
 }
 
-.modal-title {
-  font-size: 16px;
-  font-weight: 700;
-}
+.modal-title { font-size: 16px; font-weight: 700; }
 
 .modal-close {
   background: rgba(255,255,255,0.08);
@@ -814,17 +780,12 @@ body::before {
   color: var(--muted);
   font-size: 16px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color 0.15s, color 0.15s;
 }
 
-.modal-close:hover {
-  background: var(--red);
-  color: #fff;
-}
+.modal-close:hover { background: var(--red); color: #fff; }
 
-.modal-body {
-  padding: 24px;
-}
+.modal-body { padding: 24px; }
 
 .info-row {
   display: flex;
@@ -834,17 +795,36 @@ body::before {
   font-size: 13px;
 }
 
-.info-row:last-child {
-  border-bottom: none;
+.info-row:last-child { border-bottom: none; }
+.info-label { color: var(--muted); }
+.info-value { font-weight: 600; text-align: right; }
+
+/* ═══════════ SKELETON LOADING ═══════════ */
+.skeleton {
+  background: linear-gradient(90deg, var(--dark3) 0%, rgba(255,255,255,0.04) 50%, var(--dark3) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s ease-in-out infinite;
+  border-radius: 8px;
+  color: transparent !important;
+  pointer-events: none;
 }
 
-.info-label {
-  color: var(--muted);
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
-.info-value {
-  font-weight: 600;
-  text-align: right;
+.skel-row {
+  height: 44px;
+  margin-bottom: 6px;
+  border-radius: 8px;
+}
+
+.skel-stat {
+  height: 32px;
+  width: 60px;
+  border-radius: 6px;
+  margin: 4px 0;
 }
 </style>
 <style>
@@ -868,49 +848,23 @@ body::before {
   font-weight: 700;
 }
 
-/* ═══════════ EDIT ROW ═══════════ */
 .edit-row {
   padding: 12px;
   border: 1px solid var(--border2);
   border-radius: 12px;
   margin-bottom: 8px;
   background: var(--dark3);
-  transition: all 0.2s;
+  transition: border-color 0.2s, background-color 0.2s;
   position: relative;
+  contain: layout;
 }
 
-.edit-row.approved {
-  border-color: rgba(34,197,94,0.3);
-}
-
-.edit-row.edited {
-  border-color: rgba(59,130,246,0.4);
-  background: rgba(59,130,246,0.06);
-}
-
-.edit-row.rejected {
-  opacity: 0.75;
-  border-color: rgba(245,158,11,0.4);
-  background: rgba(245,158,11,0.06);
-}
-
-.edit-row.rejected .er-nama,
-.edit-row.rejected .er-kode {
-  text-decoration: line-through;
-  color: var(--yellow);
-}
-
-.edit-row.deleted {
-  opacity: 0.65;
-  border-color: rgba(239,68,68,0.4);
-  background: rgba(239,68,68,0.06);
-}
-
-.edit-row.deleted .er-nama,
-.edit-row.deleted .er-kode {
-  text-decoration: line-through;
-  color: var(--red);
-}
+.edit-row.approved { border-color: rgba(34,197,94,0.3); }
+.edit-row.edited { border-color: rgba(59,130,246,0.4); background: rgba(59,130,246,0.06); }
+.edit-row.rejected { opacity: 0.75; border-color: rgba(245,158,11,0.4); background: rgba(245,158,11,0.06); }
+.edit-row.rejected .er-nama, .edit-row.rejected .er-kode { text-decoration: line-through; color: var(--yellow); }
+.edit-row.deleted { opacity: 0.65; border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.06); }
+.edit-row.deleted .er-nama, .edit-row.deleted .er-kode { text-decoration: line-through; color: var(--red); }
 
 .er-top {
   display: grid;
@@ -919,23 +873,9 @@ body::before {
   align-items: center;
 }
 
-.er-kode {
-  font-family: monospace;
-  font-size: 10px;
-  color: var(--orange);
-  font-weight: 700;
-}
-
-.er-nama {
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1.3;
-}
-
-.er-harga {
-  font-size: 10px;
-  color: var(--muted);
-}
+.er-kode { font-family: 'Courier New', monospace; font-size: 10px; color: var(--orange); font-weight: 700; }
+.er-nama { font-size: 12px; font-weight: 700; line-height: 1.3; }
+.er-harga { font-size: 10px; color: var(--muted); }
 
 .er-qty {
   width: 100%;
@@ -948,29 +888,22 @@ body::before {
   font-size: 13px;
   font-weight: 700;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.15s;
+  font-variant-numeric: tabular-nums;
 }
 
-.er-qty:focus {
-  border-color: var(--orange);
-}
-
-.er-qty:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
+.er-qty:focus { border-color: var(--orange); }
+.er-qty:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .er-sub {
   font-size: 12px;
   font-weight: 800;
   color: var(--orange);
   text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
-.er-acts {
-  display: flex;
-  gap: 5px;
-}
+.er-acts { display: flex; gap: 5px; }
 
 .er-btn {
   width: 30px;
@@ -983,24 +916,18 @@ body::before {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.15s;
+  transition: background-color 0.15s, border-color 0.15s;
 }
 
-.er-btn:hover {
-  transform: scale(1.05);
-}
-
+.er-btn:hover { transform: scale(1.05); }
 .er-btn.edit { color: var(--blue); }
 .er-btn.edit:hover { background: rgba(59,130,246,0.15); border-color: var(--blue); }
-
 .er-btn.rej { color: var(--yellow); }
 .er-btn.rej:hover { background: rgba(245,158,11,0.15); border-color: var(--yellow); }
 .er-btn.rej.on { background: var(--yellow); color: #000; border-color: var(--yellow); }
-
 .er-btn.del { color: var(--red); }
 .er-btn.del:hover { background: rgba(239,68,68,0.15); border-color: var(--red); }
 .er-btn.del.on { background: var(--red); color: #fff; border-color: var(--red); }
-
 .er-btn.restore { color: var(--green); }
 .er-btn.restore:hover { background: rgba(34,197,94,0.15); border-color: var(--green); }
 
@@ -1046,18 +973,12 @@ body::before {
   resize: vertical;
   min-height: 36px;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.15s;
 }
 
-.er-reason textarea:focus {
-  border-color: var(--orange);
-}
+.er-reason textarea:focus { border-color: var(--orange); }
+.er-reason textarea.required-empty { border-color: var(--red); }
 
-.er-reason textarea.required-empty {
-  border-color: var(--red);
-}
-
-/* ═══════════ ADD ROW ═══════════ */
 .add-row {
   display: grid;
   grid-template-columns: 1fr 66px auto;
@@ -1068,8 +989,7 @@ body::before {
   border-top: 1px dashed var(--border2);
 }
 
-.add-row select,
-.add-row input {
+.add-row select, .add-row input {
   background: var(--dark3);
   border: 1px solid var(--border2);
   border-radius: 8px;
@@ -1078,12 +998,10 @@ body::before {
   font-size: 13px;
   outline: none;
   font-family: inherit;
+  transition: border-color 0.15s;
 }
 
-.add-row select:focus,
-.add-row input:focus {
-  border-color: var(--orange);
-}
+.add-row select:focus, .add-row input:focus { border-color: var(--orange); }
 
 .btn-add-item {
   background: var(--orange-dim);
@@ -1095,12 +1013,10 @@ body::before {
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.2s;
+  transition: background-color 0.15s;
 }
 
-.btn-add-item:hover {
-  background: rgba(255,107,0,0.2);
-}
+.btn-add-item:hover { background: rgba(255,107,0,0.2); }
 
 .edit-total {
   display: flex;
@@ -1113,9 +1029,7 @@ body::before {
   font-weight: 800;
 }
 
-.edit-total span:last-child {
-  color: var(--orange);
-}
+.edit-total span:last-child { color: var(--orange); font-variant-numeric: tabular-nums; }
 
 .edit-catatan {
   width: 100%;
@@ -1129,14 +1043,11 @@ body::before {
   resize: none;
   outline: none;
   margin-top: 14px;
-  transition: border-color 0.2s;
+  transition: border-color 0.15s;
 }
 
-.edit-catatan:focus {
-  border-color: var(--orange);
-}
+.edit-catatan:focus { border-color: var(--orange); }
 
-/* ═══════════ MODAL FOOTER — 3 TOMBOL TERPISAH ═══════════ */
 .modal-foot {
   display: flex;
   gap: 10px;
@@ -1155,7 +1066,7 @@ body::before {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: all 0.2s;
+  transition: transform 0.15s, box-shadow 0.15s;
   font-family: inherit;
 }
 
@@ -1190,9 +1101,7 @@ body::before {
   padding: 13px 20px;
 }
 
-.mf-cancel:hover {
-  color: var(--text);
-}
+.mf-cancel:hover { color: var(--text); }
 
 .mf-btn:disabled {
   opacity: 0.5;
@@ -1212,7 +1121,7 @@ body::before {
   display: inline-block;
 }
 
-/* ═══════════ CONFIRM & PROMPT MODAL ═══════════ */
+/* ═══════════ CONFIRM & PROMPT ═══════════ */
 .confirm-overlay {
   position: fixed;
   inset: 0;
@@ -1225,9 +1134,7 @@ body::before {
   backdrop-filter: blur(4px);
 }
 
-.confirm-overlay.show {
-  display: flex;
-}
+.confirm-overlay.show { display: flex; }
 
 .confirm-box {
   background: var(--dark2);
@@ -1238,6 +1145,7 @@ body::before {
   width: 100%;
   text-align: center;
   animation: cIn 0.2s cubic-bezier(0.16,1,0.3,1);
+  contain: layout;
 }
 
 @keyframes cIn {
@@ -1245,16 +1153,8 @@ body::before {
   to { transform: scale(1); opacity: 1; }
 }
 
-.confirm-icon {
-  font-size: 44px;
-  margin-bottom: 12px;
-}
-
-.confirm-title {
-  font-size: 17px;
-  font-weight: 800;
-  margin-bottom: 8px;
-}
+.confirm-icon { font-size: 44px; margin-bottom: 12px; }
+.confirm-title { font-size: 17px; font-weight: 800; margin-bottom: 8px; }
 
 .confirm-msg {
   font-size: 13px;
@@ -1265,10 +1165,7 @@ body::before {
   text-align: left;
 }
 
-.confirm-actions {
-  display: flex;
-  gap: 10px;
-}
+.confirm-actions { display: flex; gap: 10px; }
 
 .confirm-btn {
   flex: 1;
@@ -1279,8 +1176,10 @@ body::before {
   font-weight: 700;
   cursor: pointer;
   font-family: inherit;
-  transition: all 0.15s;
+  transition: transform 0.1s;
 }
+
+.confirm-btn:active { transform: scale(0.97); }
 
 .confirm-btn.cancel {
   background: var(--dark3);
@@ -1288,35 +1187,14 @@ body::before {
   border: 1px solid var(--border2);
 }
 
-.confirm-btn.cancel:hover {
-  color: var(--text);
-}
+.confirm-btn.cancel:hover { color: var(--text); }
 
-.confirm-btn.ok {
-  background: linear-gradient(135deg, var(--orange), var(--orange-light));
-  color: #fff;
-}
+.confirm-btn.ok { background: linear-gradient(135deg, var(--orange), var(--orange-light)); color: #fff; }
+.confirm-btn.danger { background: linear-gradient(135deg, var(--red), #dc2626); color: #fff; }
+.confirm-btn.success { background: linear-gradient(135deg, var(--green), #16a34a); color: #fff; }
+.confirm-btn.info { background: linear-gradient(135deg, var(--blue), #2563eb); color: #fff; }
 
-.confirm-btn.ok:hover {
-  transform: translateY(-1px);
-}
-
-.confirm-btn.danger {
-  background: linear-gradient(135deg, var(--red), #dc2626);
-  color: #fff;
-}
-
-.confirm-btn.success {
-  background: linear-gradient(135deg, var(--green), #16a34a);
-  color: #fff;
-}
-
-.confirm-btn.info {
-  background: linear-gradient(135deg, var(--blue), #2563eb);
-  color: #fff;
-}
-
-.prompt-input {
+.prompt-input, .prompt-number {
   width: 100%;
   background: var(--dark3);
   border: 1px solid var(--border2);
@@ -1325,35 +1203,24 @@ body::before {
   color: var(--text);
   font-size: 13px;
   font-family: inherit;
-  resize: vertical;
-  min-height: 80px;
   outline: none;
   margin-bottom: 14px;
-  transition: border-color 0.2s;
+  transition: border-color 0.15s;
 }
 
-.prompt-input:focus {
-  border-color: var(--orange);
+.prompt-input {
+  resize: vertical;
+  min-height: 80px;
 }
 
 .prompt-number {
-  width: 100%;
-  background: var(--dark3);
-  border: 1px solid var(--border2);
-  border-radius: 10px;
-  padding: 11px 14px;
-  color: var(--text);
   font-size: 14px;
   font-weight: 700;
   text-align: center;
-  outline: none;
-  margin-bottom: 14px;
-  transition: border-color 0.2s;
+  font-variant-numeric: tabular-nums;
 }
 
-.prompt-number:focus {
-  border-color: var(--orange);
-}
+.prompt-input:focus, .prompt-number:focus { border-color: var(--orange); }
 
 /* ═══════════ FILTER ═══════════ */
 .filter-bar {
@@ -1372,19 +1239,11 @@ body::before {
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color 0.15s, color 0.15s;
 }
 
-.filter-btn:hover {
-  color: var(--text);
-  border-color: rgba(255,255,255,0.15);
-}
-
-.filter-btn.active {
-  background: var(--orange-dim);
-  border-color: var(--orange);
-  color: var(--orange);
-}
+.filter-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.15); }
+.filter-btn.active { background: var(--orange-dim); border-color: var(--orange); color: var(--orange); }
 
 .search-input-wrap {
   flex: 1;
@@ -1399,6 +1258,7 @@ body::before {
   transform: translateY(-50%);
   font-size: 14px;
   opacity: 0.5;
+  pointer-events: none;
 }
 
 .search-input {
@@ -1410,12 +1270,10 @@ body::before {
   color: var(--text);
   font-size: 13px;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.15s;
 }
 
-.search-input:focus {
-  border-color: var(--orange);
-}
+.search-input:focus { border-color: var(--orange); }
 
 .empty-state {
   text-align: center;
@@ -1423,11 +1281,7 @@ body::before {
   color: var(--muted);
 }
 
-.empty-state .empty-icon {
-  font-size: 48px;
-  margin-bottom: 12px;
-  opacity: 0.5;
-}
+.empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
 
 /* ═══════════ TOAST ═══════════ */
 .toast-container {
@@ -1439,6 +1293,7 @@ body::before {
   flex-direction: column;
   gap: 10px;
   max-width: 400px;
+  pointer-events: none;
 }
 
 .toast {
@@ -1454,31 +1309,15 @@ body::before {
   box-shadow: 0 8px 25px rgba(0,0,0,0.4);
   transform: translateX(120%);
   transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
+  pointer-events: all;
+  will-change: transform;
 }
 
-.toast.show {
-  transform: translateX(0);
-}
-
-.toast.success {
-  border-color: rgba(34,197,94,0.4);
-  background: rgba(34,197,94,0.08);
-}
-
-.toast.error {
-  border-color: rgba(239,68,68,0.4);
-  background: rgba(239,68,68,0.08);
-}
-
-.toast.info {
-  border-color: rgba(59,130,246,0.4);
-  background: rgba(59,130,246,0.08);
-}
-
-.toast.warning {
-  border-color: rgba(245,158,11,0.4);
-  background: rgba(245,158,11,0.08);
-}
+.toast.show { transform: translateX(0); }
+.toast.success { border-color: rgba(34,197,94,0.4); background: rgba(34,197,94,0.08); }
+.toast.error { border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.08); }
+.toast.info { border-color: rgba(59,130,246,0.4); background: rgba(59,130,246,0.08); }
+.toast.warning { border-color: rgba(245,158,11,0.4); background: rgba(245,158,11,0.08); }
 
 .toast-close {
   margin-left: auto;
@@ -1490,20 +1329,9 @@ body::before {
   padding: 0;
 }
 
-.page-header {
-  margin-bottom: 24px;
-}
-
-.page-header h1 {
-  font-size: 22px;
-  font-weight: 800;
-}
-
-.page-header p {
-  font-size: 13px;
-  color: var(--muted);
-  margin-top: 4px;
-}
+.page-header { margin-bottom: 24px; }
+.page-header h1 { font-size: 22px; font-weight: 800; }
+.page-header p { font-size: 13px; color: var(--muted); margin-top: 4px; }
 
 .total-row td {
   font-weight: 700;
@@ -1512,7 +1340,7 @@ body::before {
   border-bottom: none !important;
 }
 
-/* ═══════════ RESPONSIVE ═══════════ */
+/* Responsive */
 @media (max-width: 900px) {
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
   .grid-2, .grid-3-1 { grid-template-columns: 1fr; }
@@ -1537,6 +1365,7 @@ body::before {
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(255,107,0,0.3); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,107,0,0.5); }
 </style>
 </head>
 
@@ -1545,7 +1374,7 @@ body::before {
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 <div class="toast-container" id="toastContainer"></div>
 
-<!-- ═══════════ CONFIRM MODAL ═══════════ -->
+<!-- CONFIRM MODAL -->
 <div class="confirm-overlay" id="confirmOverlay">
   <div class="confirm-box">
     <div class="confirm-icon" id="confirmIcon">⚠️</div>
@@ -1558,7 +1387,7 @@ body::before {
   </div>
 </div>
 
-<!-- ═══════════ PROMPT ALASAN MODAL ═══════════ -->
+<!-- PROMPT MODAL -->
 <div class="confirm-overlay" id="promptOverlay">
   <div class="confirm-box" style="max-width:480px;">
     <div class="confirm-icon" id="promptIcon">📝</div>
@@ -1573,13 +1402,13 @@ body::before {
   </div>
 </div>
 
-<!-- ═══════════ SIDEBAR ═══════════ -->
+<!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-logo">
     <div class="sidebar-logo-icon">🏪</div>
     <div>
       <div class="sidebar-logo-title">GudangHub</div>
-      <div class="sidebar-logo-sub">Admin Panel v2.5</div>
+      <div class="sidebar-logo-sub">Admin Panel v2.6</div>
     </div>
   </div>
 
@@ -1631,13 +1460,12 @@ body::before {
   </div>
 </aside>
 
-<!-- ═══════════ MAIN CONTENT ═══════════ -->
 <main class="main">
   <div class="topbar">
     <button class="topbar-menu" onclick="toggleSidebar()">☰</button>
     <div class="topbar-title" id="topbarTitle">📊 Dashboard</div>
     <div class="topbar-time" id="topbarTime">--:--:-- WITA</div>
-    <button class="btn-refresh" onclick="loadAllData()" id="btnRefresh">
+    <button class="btn-refresh" onclick="loadAllData(true)" id="btnRefresh">
       <span class="refresh-icon" id="refreshIcon">🔄</span>
       <span>Refresh</span>
     </button>
@@ -1645,7 +1473,6 @@ body::before {
 
   <div class="content">
 
-    <!-- ═══════════ DASHBOARD PAGE ═══════════ -->
     <div class="page active" id="page-dashboard">
       <div class="page-header">
         <h1>Selamat datang, <span id="adminNama">Admin</span>! 👋</h1>
@@ -1661,7 +1488,6 @@ body::before {
           <div class="stat-value" style="color:var(--orange)" id="statTotal">–</div>
           <div class="stat-change">Semua pesanan masuk</div>
         </div>
-
         <div class="stat-card">
           <div class="stat-header">
             <div class="stat-label">Menunggu</div>
@@ -1670,7 +1496,6 @@ body::before {
           <div class="stat-value" style="color:var(--yellow)" id="statPending">–</div>
           <div class="stat-change">Perlu persetujuan</div>
         </div>
-
         <div class="stat-card">
           <div class="stat-header">
             <div class="stat-label">Disetujui</div>
@@ -1679,7 +1504,6 @@ body::before {
           <div class="stat-value" style="color:var(--green)" id="statApproved">–</div>
           <div class="stat-change">Pesanan berhasil</div>
         </div>
-
         <div class="stat-card">
           <div class="stat-header">
             <div class="stat-label">Ditolak</div>
@@ -1700,22 +1524,10 @@ body::before {
             <div class="order-table-wrap">
               <table class="order-table">
                 <thead>
-                  <tr>
-                    <th>ID Pesanan</th>
-                    <th>Cabang</th>
-                    <th>Item</th>
-                    <th>Aksi</th>
-                  </tr>
+                  <tr><th>ID Pesanan</th><th>Cabang</th><th>Item</th><th>Aksi</th></tr>
                 </thead>
                 <tbody id="pendingOrdersBody">
-                  <tr>
-                    <td colspan="5">
-                      <div class="empty-state">
-                        <div class="empty-icon">⏳</div>
-                        <p>Memuat data...</p>
-                      </div>
-                    </td>
-                  </tr>
+                  <tr><td colspan="5"><div class="empty-state"><div class="empty-icon">⏳</div><p>Memuat data...</p></div></td></tr>
                 </tbody>
               </table>
             </div>
@@ -1723,35 +1535,21 @@ body::before {
         </div>
 
         <div class="panel">
-          <div class="panel-header">
-            <div class="panel-title">📊 Status Order</div>
-          </div>
+          <div class="panel-header"><div class="panel-title">📊 Status Order</div></div>
           <div class="panel-body">
             <div class="donut-wrap">
               <svg width="110" height="110" viewBox="0 0 110 110">
                 <circle cx="55" cy="55" r="40" fill="none" stroke="#1e1e3a" stroke-width="18"/>
-                <circle cx="55" cy="55" r="40" fill="none" stroke="#22c55e" stroke-width="18" stroke-dasharray="0 251.2" id="donutApproved" style="transform:rotate(-90deg);transform-origin:center;transition:stroke-dasharray 1s ease"/>
-                <circle cx="55" cy="55" r="40" fill="none" stroke="#f59e0b" stroke-width="18" stroke-dasharray="0 251.2" id="donutPending" style="transform:rotate(-90deg);transform-origin:center;transition:stroke-dasharray 1s ease"/>
-                <circle cx="55" cy="55" r="40" fill="none" stroke="#ef4444" stroke-width="18" stroke-dasharray="0 251.2" id="donutRejected" style="transform:rotate(-90deg);transform-origin:center;transition:stroke-dasharray 1s ease"/>
+                <circle cx="55" cy="55" r="40" fill="none" stroke="#22c55e" stroke-width="18" stroke-dasharray="0 251.2" id="donutApproved" style="transform:rotate(-90deg);transform-origin:center;transition:stroke-dasharray 0.6s ease"/>
+                <circle cx="55" cy="55" r="40" fill="none" stroke="#f59e0b" stroke-width="18" stroke-dasharray="0 251.2" id="donutPending" style="transform:rotate(-90deg);transform-origin:center;transition:stroke-dasharray 0.6s ease"/>
+                <circle cx="55" cy="55" r="40" fill="none" stroke="#ef4444" stroke-width="18" stroke-dasharray="0 251.2" id="donutRejected" style="transform:rotate(-90deg);transform-origin:center;transition:stroke-dasharray 0.6s ease"/>
                 <text x="55" y="50" text-anchor="middle" fill="#fff" font-size="16" font-weight="800" id="donutTotal">0</text>
                 <text x="55" y="64" text-anchor="middle" fill="#94a3b8" font-size="9">Total</text>
               </svg>
               <div class="donut-legend">
-                <div class="legend-item">
-                  <div class="legend-dot" style="background:#22c55e"></div>
-                  <span class="legend-label">Disetujui</span>
-                  <span class="legend-val" style="color:#22c55e" id="legendApproved">0</span>
-                </div>
-                <div class="legend-item">
-                  <div class="legend-dot" style="background:#f59e0b"></div>
-                  <span class="legend-label">Tertunda</span>
-                  <span class="legend-val" style="color:#f59e0b" id="legendPending">0</span>
-                </div>
-                <div class="legend-item">
-                  <div class="legend-dot" style="background:#ef4444"></div>
-                  <span class="legend-label">Ditolak</span>
-                  <span class="legend-val" style="color:#ef4444" id="legendRejected">0</span>
-                </div>
+                <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div><span class="legend-label">Disetujui</span><span class="legend-val" style="color:#22c55e" id="legendApproved">0</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div><span class="legend-label">Tertunda</span><span class="legend-val" style="color:#f59e0b" id="legendPending">0</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div><span class="legend-label">Ditolak</span><span class="legend-val" style="color:#ef4444" id="legendRejected">0</span></div>
               </div>
             </div>
           </div>
@@ -1760,37 +1558,25 @@ body::before {
 
       <div class="grid-2">
         <div class="panel">
-          <div class="panel-header">
-            <div class="panel-title">📊 Pesanan per Cabang</div>
-          </div>
-          <div class="panel-body">
-            <div class="bar-chart" id="barChart"></div>
-          </div>
+          <div class="panel-header"><div class="panel-title">📊 Pesanan per Cabang</div></div>
+          <div class="panel-body"><div class="bar-chart" id="barChart"></div></div>
         </div>
-
         <div class="panel">
-          <div class="panel-header">
-            <div class="panel-title">⚡ Aktivitas Terbaru</div>
-          </div>
+          <div class="panel-header"><div class="panel-title">⚡ Aktivitas Terbaru</div></div>
           <div class="panel-body" style="padding:10px 20px;">
             <div id="activityFeed">
-              <div class="empty-state">
-                <div class="empty-icon">⚡</div>
-                <p>Memuat aktivitas...</p>
-              </div>
+              <div class="empty-state"><div class="empty-icon">⚡</div><p>Memuat aktivitas...</p></div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- ═══════════ ORDERS PAGE ═══════════ -->
     <div class="page" id="page-orders">
       <div class="page-header">
         <h1>📦 Semua Pesanan</h1>
         <p>Kelola, edit item, dan proses seluruh pesanan dari 4 cabang</p>
       </div>
-
       <div class="filter-bar">
         <button class="filter-btn active" onclick="filterOrders('ALL',this)">Semua</button>
         <button class="filter-btn" onclick="filterOrders('PENDING',this)">⏳ Tertunda</button>
@@ -1798,33 +1584,18 @@ body::before {
         <button class="filter-btn" onclick="filterOrders('REJECTED',this)">❌ Ditolak</button>
         <div class="search-input-wrap">
           <span class="search-icon">🔍</span>
-          <input type="text" class="search-input" id="orderSearch" placeholder="Cari ID Pesanan atau nama cabang..." oninput="searchOrders(this.value)">
+          <input type="text" class="search-input" id="orderSearch" placeholder="Cari ID Pesanan atau nama cabang...">
         </div>
       </div>
-
       <div class="panel">
         <div class="panel-body" style="padding:0;">
           <div class="order-table-wrap">
             <table class="order-table">
               <thead>
-                <tr>
-                  <th>#</th>
-                  <th>ID Pesanan</th>
-                  <th>Cabang</th>
-                  <th>Tanggal</th>
-                  <th>Status</th>
-                  <th>Aksi</th>
-                </tr>
+                <tr><th>#</th><th>ID Pesanan</th><th>Cabang</th><th>Tanggal</th><th>Status</th><th>Aksi</th></tr>
               </thead>
               <tbody id="allOrdersBody">
-                <tr>
-                  <td colspan="6">
-                    <div class="empty-state">
-                      <div class="empty-icon">📦</div>
-                      <p>Memuat data pesanan...</p>
-                    </div>
-                  </td>
-                </tr>
+                <tr><td colspan="6"><div class="empty-state"><div class="empty-icon">📦</div><p>Memuat data pesanan...</p></div></td></tr>
               </tbody>
             </table>
           </div>
@@ -1832,44 +1603,26 @@ body::before {
       </div>
     </div>
 
-    <!-- ═══════════ KATALOG PAGE ═══════════ -->
     <div class="page" id="page-katalog">
       <div class="page-header">
         <h1>📚 Katalog Barang</h1>
         <p>Daftar master barang di gudang pusat</p>
       </div>
-
       <div class="filter-bar">
         <div class="search-input-wrap">
           <span class="search-icon">🔍</span>
-          <input type="text" class="search-input" id="katalogSearch" placeholder="Cari kode atau nama barang..." oninput="searchKatalog(this.value)">
+          <input type="text" class="search-input" id="katalogSearch" placeholder="Cari kode atau nama barang...">
         </div>
       </div>
-
       <div class="panel">
         <div class="panel-body" style="padding:0;">
           <div class="order-table-wrap">
             <table class="order-table">
               <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Kode</th>
-                  <th>Nama Barang</th>
-                  <th>Kategori</th>
-                  <th>Satuan</th>
-                  <th>Harga</th>
-                  <th>Stok</th>
-                </tr>
+                <tr><th>#</th><th>Kode</th><th>Nama Barang</th><th>Kategori</th><th>Satuan</th><th>Harga</th><th>Stok</th></tr>
               </thead>
               <tbody id="katalogBody">
-                <tr>
-                  <td colspan="7">
-                    <div class="empty-state">
-                      <div class="empty-icon">📚</div>
-                      <p>Memuat katalog...</p>
-                    </div>
-                  </td>
-                </tr>
+                <tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📚</div><p>Memuat katalog...</p></div></td></tr>
               </tbody>
             </table>
           </div>
@@ -1877,7 +1630,6 @@ body::before {
       </div>
     </div>
 
-    <!-- ═══════════ CABANG PAGE ═══════════ -->
     <div class="page" id="page-cabang">
       <div class="page-header">
         <h1>🏬 Status Cabang</h1>
@@ -1886,41 +1638,21 @@ body::before {
       <div class="cabang-grid" id="cabangGrid"></div>
     </div>
 
-    <!-- ═══════════ LAPORAN PAGE ═══════════ -->
     <div class="page" id="page-laporan">
       <div class="page-header">
         <h1>📈 Laporan</h1>
         <p>Ringkasan kinerja pesanan per cabang</p>
       </div>
-
       <div class="panel">
-        <div class="panel-header">
-          <div class="panel-title">📊 Rekap Order per Cabang</div>
-        </div>
+        <div class="panel-header"><div class="panel-title">📊 Rekap Order per Cabang</div></div>
         <div class="panel-body" style="padding:0;">
           <div class="order-table-wrap">
             <table class="order-table">
               <thead>
-                <tr>
-                  <th>Cabang</th>
-                  <th>Nama Toko</th>
-                  <th>PIC</th>
-                  <th>Total</th>
-                  <th>Pending</th>
-                  <th>Approved</th>
-                  <th>Rejected</th>
-                  <th>Rate ✅</th>
-                </tr>
+                <tr><th>Cabang</th><th>Nama Toko</th><th>PIC</th><th>Total</th><th>Pending</th><th>Approved</th><th>Rejected</th><th>Rate ✅</th></tr>
               </thead>
               <tbody id="laporanBody">
-                <tr>
-                  <td colspan="8">
-                    <div class="empty-state">
-                      <div class="empty-icon">📈</div>
-                      <p>Memuat laporan...</p>
-                    </div>
-                  </td>
-                </tr>
+                <tr><td colspan="8"><div class="empty-state"><div class="empty-icon">📈</div><p>Memuat laporan...</p></div></td></tr>
               </tbody>
             </table>
           </div>
@@ -1931,7 +1663,7 @@ body::before {
   </div>
 </main>
 
-<!-- ═══════════ MODAL DETAIL + EDIT ═══════════ -->
+<!-- MODAL -->
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
   <div class="modal">
     <div class="modal-header">
@@ -1942,20 +1674,28 @@ body::before {
   </div>
 </div>
 <script>
-// ═══════════════════════════════════════════════════════════════
-// CONFIG — Ganti API_URL dengan URL Web App Apps Script Anda
-// ═══════════════════════════════════════════════════════════════
-const API_URL = 'https://script.google.com/macros/s/AKfycbzk8A4xuXOVGqbK6a4zffpG6u2s4jVROZwIitmCDat2fYU7qyU3VkxQJmtxtEtjQxji/exec';
+'use strict';
 
-// Data global
+// ═══════════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════════
+const API_URL = 'https://script.google.com/macros/s/AKfycbzk8A4xuXOVGqbK6a4zfpG6u2s4jVROZwIitmCDat2fYU7qyU3VkxQJmtxtEtjQxji/exec';
+
+// State
 let allOrders = [];
 let allKatalog = [];
 let filteredOrders = [];
 let currentFilter = 'ALL';
 let editItems = [];
 let editOrderId = '';
+let isLoading = false;
+let lastLoadTime = 0;
+const CACHE_DURATION = 30000; // 30 detik cache
 
-// Info cabang
+// Cache DOM elements (hindari getElementById berulang)
+const $ = (id) => document.getElementById(id);
+const DOM = {};
+
 const CABANG_INFO = {
   CB001: { nama: 'Toko Nasional Eltari', pic: 'Arfa', icon: '🏪' },
   CB002: { nama: 'Toko Perabot Mama Oesapa', pic: 'Akmal', icon: '🏪' },
@@ -1964,994 +1704,54 @@ const CABANG_INFO = {
 };
 
 // ═══════════════════════════════════════════════════════════════
-// SESSION CHECK
+// UTILS OPTIMIZED
 // ═══════════════════════════════════════════════════════════════
-function checkSession() {
-  const s = sessionStorage.getItem('gudanghub_session');
-  if (!s) {
-    window.location.href = 'login.html';
-    return null;
-  }
-  try {
-    const o = JSON.parse(s);
-    if (new Date(o.expires) < new Date()) {
-      sessionStorage.removeItem('gudanghub_session');
-      window.location.href = 'login.html';
-      return null;
-    }
-    if (o.role !== 'admin') {
-      window.location.href = 'order.html';
-      return null;
-    }
-    return o;
-  } catch (e) {
-    window.location.href = 'login.html';
-    return null;
-  }
-}
-
-function doLogout() {
-  showConfirm({
-    icon: '🚪',
-    title: 'Keluar?',
-    msg: 'Yakin ingin keluar dari dashboard?',
-    okText: 'Ya, Keluar',
-    okClass: 'danger',
-    onOk: () => {
-      sessionStorage.removeItem('gudanghub_session');
-      window.location.href = 'login.html';
-    }
-  });
-}
-
-function updateClock() {
-  const w = new Date(Date.now() + 8 * 3600 * 1000);
-  const p = n => String(n).padStart(2, '0');
-  const el = document.getElementById('topbarTime');
-  if (el) el.textContent = `${p(w.getUTCHours())}:${p(w.getUTCMinutes())}:${p(w.getUTCSeconds())} WITA`;
-}
-
-// ═══════════════════════════════════════════════════════════════
-// TOAST
-// ═══════════════════════════════════════════════════════════════
-function showToast(msg, type = 'info', dur = 3500) {
-  const ic = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
-  const c = document.getElementById('toastContainer');
-  if (!c) return;
-  const t = document.createElement('div');
-  t.className = `toast ${type}`;
-  t.innerHTML = `<span>${ic[type] || 'ℹ️'}</span><span style="flex:1">${msg}</span><button class="toast-close" onclick="this.parentElement.remove()">✕</button>`;
-  c.appendChild(t);
-  requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add('show')));
-  setTimeout(() => {
-    t.classList.remove('show');
-    setTimeout(() => t.remove(), 300);
-  }, dur);
-}
-
-// ═══════════════════════════════════════════════════════════════
-// CUSTOM CONFIRM MODAL
-// ═══════════════════════════════════════════════════════════════
-let _confirmCb = null;
-
-function showConfirm({ icon = '⚠️', title = 'Konfirmasi', msg = 'Yakin?', okText = 'Ya, Lanjut', cancelText = 'Batal', okClass = 'ok', onOk = null }) {
-  document.getElementById('confirmIcon').textContent = icon;
-  document.getElementById('confirmTitle').textContent = title;
-  document.getElementById('confirmMsg').textContent = msg;
-  const okBtn = document.getElementById('confirmOk');
-  okBtn.textContent = okText;
-  okBtn.className = `confirm-btn ${okClass}`;
-  document.getElementById('confirmCancel').textContent = cancelText;
-  document.getElementById('confirmOverlay').classList.add('show');
-  _confirmCb = onOk;
-}
-
-document.getElementById('confirmCancel').addEventListener('click', () => {
-  document.getElementById('confirmOverlay').classList.remove('show');
-  _confirmCb = null;
-});
-
-document.getElementById('confirmOk').addEventListener('click', () => {
-  document.getElementById('confirmOverlay').classList.remove('show');
-  if (typeof _confirmCb === 'function') _confirmCb();
-  _confirmCb = null;
-});
-
-// ═══════════════════════════════════════════════════════════════
-// PROMPT MODAL (alasan / qty)
-// ═══════════════════════════════════════════════════════════════
-let _promptCb = null;
-
-function showPrompt({ icon = '📝', title = 'Alasan', msg = 'Isi alasan:', placeholder = 'Ketik alasan...', okText = 'Konfirmasi', okClass = 'danger', required = true, defaultVal = '', showNumber = false, numberVal = 1, onOk = null }) {
-  document.getElementById('promptIcon').textContent = icon;
-  document.getElementById('promptTitle').textContent = title;
-  document.getElementById('promptMsg').textContent = msg;
-
-  const inp = document.getElementById('promptInput');
-  const num = document.getElementById('promptNumber');
-  inp.placeholder = placeholder;
-  inp.value = defaultVal;
-
-  if (showNumber) {
-    num.style.display = 'block';
-    num.value = numberVal;
-  } else {
-    num.style.display = 'none';
-  }
-
-  const okBtn = document.getElementById('promptOk');
-  okBtn.textContent = okText;
-  okBtn.className = `confirm-btn ${okClass}`;
-  document.getElementById('promptOverlay').classList.add('show');
-  setTimeout(() => (showNumber ? num : inp).focus(), 100);
-  _promptCb = { fn: onOk, required, showNumber };
-}
-
-document.getElementById('promptCancel').addEventListener('click', () => {
-  document.getElementById('promptOverlay').classList.remove('show');
-  _promptCb = null;
-});
-
-document.getElementById('promptOk').addEventListener('click', () => {
-  const val = document.getElementById('promptInput').value.trim();
-  const num = parseInt(document.getElementById('promptNumber').value) || 1;
-  if (_promptCb && _promptCb.required && !val) {
-    showToast('⚠️ Alasan wajib diisi!', 'warning');
-    return;
-  }
-  document.getElementById('promptOverlay').classList.remove('show');
-  if (_promptCb && typeof _promptCb.fn === 'function') {
-    _promptCb.fn(_promptCb.showNumber ? { text: val, number: num } : val);
-  }
-  _promptCb = null;
-});
-
-// ═══════════════════════════════════════════════════════════════
-// SIDEBAR (mobile)
-// ═══════════════════════════════════════════════════════════════
-function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('sidebarOverlay').classList.toggle('show');
-}
-
-function closeSidebar() {
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('sidebarOverlay').classList.remove('show');
-}
-
-// ═══════════════════════════════════════════════════════════════
-// PAGE NAVIGATION
-// ═══════════════════════════════════════════════════════════════
-const pageTitles = {
-  dashboard: '📊 Dashboard',
-  orders: '📦 Semua Pesanan',
-  katalog: '📚 Katalog Barang',
-  cabang: '🏬 Status Cabang',
-  laporan: '📈 Laporan'
-};
-
-function showPage(id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById(`page-${id}`)?.classList.add('active');
-  document.querySelector(`[data-page="${id}"]`)?.classList.add('active');
-  document.getElementById('topbarTitle').textContent = pageTitles[id] || id;
-  closeSidebar();
-
-  if (id === 'orders') { filteredOrders = [...allOrders]; renderAllOrders(); }
-  else if (id === 'katalog') renderKatalog();
-  else if (id === 'cabang') renderCabang();
-  else if (id === 'laporan') renderLaporan();
-}
-
-// ═══════════════════════════════════════════════════════════════
-// API CALL — POST dulu (support payload besar), fallback GET
-// ═══════════════════════════════════════════════════════════════
-async function callAPI(action, payload = {}) {
-  const body = JSON.stringify({ ...payload, action });
-
-  // POST dulu (untuk payload besar seperti editOrder)
-  try {
-    const f = new FormData();
-    f.append('payload', body);
-    const r = await fetch(API_URL, { method: 'POST', body: f });
-    const txt = await r.text();
-    const parsed = parseResp(txt);
-    if (parsed.status && parsed.status !== 'error') return parsed;
-    if (parsed.message && parsed.message !== 'Respons kosong.') return parsed;
-  } catch (e) {}
-
-  // Fallback GET
-  try {
-    const enc = encodeURIComponent(body);
-    const r = await fetch(`${API_URL}?action=${action}&payload=${enc}`);
-    return parseResp(await r.text());
-  } catch (e) {}
-
-  return { status: 'error', message: 'Gagal terhubung ke server. Cek koneksi internet.' };
-}
-
-function parseResp(text) {
-  if (!text || !text.trim()) return { status: 'error', message: 'Respons kosong.' };
-  try { return JSON.parse(text); } catch (e) {}
-  try {
-    const m = text.match(/\{[\s\S]*\}/);
-    if (m) return JSON.parse(m[0]);
-  } catch (e) {}
-  return { status: 'error', message: 'Respons tidak valid dari server.' };
-}
-
-// ═══════════════════════════════════════════════════════════════
-// LOAD DATA (PARALEL)
-// ═══════════════════════════════════════════════════════════════
-async function loadAllData() {
-  const btn = document.getElementById('btnRefresh');
-  if (btn) btn.classList.add('spinning');
-  try {
-    const [oRes, kRes] = await Promise.all([
-      fetch(`${API_URL}?action=getOrders&t=${Date.now()}`).then(r => r.text()).then(parseResp),
-      fetch(`${API_URL}?action=getBarang&t=${Date.now()}`).then(r => r.text()).then(parseResp)
-    ]);
-    if (oRes.status === 'ok') allOrders = oRes.data || [];
-    if (kRes.status === 'ok') allKatalog = kRes.data || [];
-
-    updateStats();
-    renderPendingOrders();
-    updateDonut();
-    updateBarChart();
-    updateActivity();
-    updatePendingBadge();
-
-    const ap = document.querySelector('.page.active')?.id?.replace('page-', '');
-    if (ap === 'orders') { filteredOrders = [...allOrders]; renderAllOrders(); }
-    else if (ap === 'katalog') renderKatalog();
-    else if (ap === 'cabang') renderCabang();
-    else if (ap === 'laporan') renderLaporan();
-  } catch (err) {
-    showToast('Gagal memuat: ' + err.message, 'error');
-  } finally {
-    if (btn) btn.classList.remove('spinning');
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════
-// STATS
-// ═══════════════════════════════════════════════════════════════
-function updateStats() {
-  const t = allOrders.length;
-  const p = allOrders.filter(o => String(o.STATUS).toUpperCase() === 'PENDING').length;
-  const a = allOrders.filter(o => String(o.STATUS).toUpperCase() === 'APPROVED').length;
-  const r = allOrders.filter(o => String(o.STATUS).toUpperCase() === 'REJECTED').length;
-  const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
-  set('statTotal', t);
-  set('statPending', p);
-  set('statApproved', a);
-  set('statRejected', r);
-}
-
-function updatePendingBadge() {
-  const el = document.getElementById('pendingBadge');
-  if (el) el.textContent = allOrders.filter(o => String(o.STATUS).toUpperCase() === 'PENDING').length;
-}
-
-// ═══════════════════════════════════════════════════════════════
-// DONUT CHART (safe null check)
-// ═══════════════════════════════════════════════════════════════
-function updateDonut() {
-  const t = allOrders.length || 1;
-  const a = allOrders.filter(o => String(o.STATUS).toUpperCase() === 'APPROVED').length;
-  const p = allOrders.filter(o => String(o.STATUS).toUpperCase() === 'PENDING').length;
-  const r = allOrders.filter(o => String(o.STATUS).toUpperCase() === 'REJECTED').length;
-  const c = 2 * Math.PI * 40;
-  const aL = a / t * c;
-  const pL = p / t * c;
-  const rL = r / t * c;
-
-  const dA = document.getElementById('donutApproved');
-  const dP = document.getElementById('donutPending');
-  const dR = document.getElementById('donutRejected');
-  const dT = document.getElementById('donutTotal');
-  const lA = document.getElementById('legendApproved');
-  const lP = document.getElementById('legendPending');
-  const lR = document.getElementById('legendRejected');
-
-  if (dA) dA.setAttribute('stroke-dasharray', `${aL} ${c - aL}`);
-  if (dP) {
-    dP.setAttribute('stroke-dasharray', `${pL} ${c - pL}`);
-    dP.setAttribute('stroke-dashoffset', `-${aL}`);
-  }
-  if (dR) {
-    dR.setAttribute('stroke-dasharray', `${rL} ${c - rL}`);
-    dR.setAttribute('stroke-dashoffset', `-${aL + pL}`);
-  }
-  if (dT) dT.textContent = allOrders.length;
-  if (lA) lA.textContent = a;
-  if (lP) lP.textContent = p;
-  if (lR) lR.textContent = r;
-}
-
-// ═══════════════════════════════════════════════════════════════
-// BAR CHART & ACTIVITY
-// ═══════════════════════════════════════════════════════════════
-function updateBarChart() {
-  const c = {};
-  allOrders.forEach(o => {
-    if (o.ID_CABANG !== undefined && o.ID_CABANG !== null)
-      c[o.ID_CABANG] = (c[o.ID_CABANG] || 0) + 1;
-  });
-  const mx = Math.max(...Object.values(c), 1);
-  const nm = ['Eltari', 'Oesapa', 'TDM', 'Kefa'];
-  const el = document.getElementById('barChart');
-  if (!el) return;
-  el.innerHTML = ['CB001', 'CB002', 'CB003', 'CB004'].map((id, i) =>
-    `<div class="bar-item">
-      <div class="bar-fill" style="height:${Math.max(c[id] || 0, 0) / mx * 90 + 4}%"></div>
-      <div class="bar-label">${nm[i]}</div>
-    </div>`
-  ).join('');
-}
-
-function updateActivity() {
-  const f = document.getElementById('activityFeed');
-  if (!f) return;
-  if (!allOrders.length) {
-    f.innerHTML = '<div class="empty-state"><div class="empty-icon">⚡</div><p>Belum ada aktivitas</p></div>';
-    return;
-  }
-  const s = [...allOrders].sort((a, b) => parseAnyDate(String(b.TANGGAL_ORDER)) - parseAnyDate(String(a.TANGGAL_ORDER))).slice(0, 6);
-  const cst = (id) => ({ PENDING: 'orange', APPROVED: 'green', REJECTED: 'red' })[id] || 'blue';
-  const em = (st) => ({ PENDING: '⏳', APPROVED: '✅', REJECTED: '❌' })[st] || '📦';
-
-  f.innerHTML = s.map(o => {
-    const cb = CABANG_INFO[o.ID_CABANG] || { pic: '-', icon: '🏪' };
-    const st = String(o.STATUS || 'PENDING').toUpperCase();
-    return `<div class="activity-item">
-      <div class="activity-dot ${cst(st)}"></div>
-      <div class="activity-content">
-        <div class="activity-text">${em(st)} <strong>${o.ORDER_ID}</strong> dari ${cb.pic} | ${o.ID_CABANG}</div>
-        <div class="activity-time">🕐 ${formatTanggalDisplay(String(o.TANGGAL_ORDER || ''))} WITA</div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-// ═══════════════════════════════════════════════════════════════
-// RENDER TABLE ORDER
-// ═══════════════════════════════════════════════════════════════
-function renderPendingOrders() {
-  const pend = allOrders.filter(o => String(o.STATUS).toUpperCase() === 'PENDING');
-  const tb = document.getElementById('pendingOrdersBody');
-  if (!tb) return;
-  if (!pend.length) {
-    tb.innerHTML = '<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">✅</div><p>Semua order sudah diproses!</p></div></td></tr>';
-    return;
-  }
-  tb.innerHTML = pend.map(o => {
-    const cb = CABANG_INFO[o.ID_CABANG] || { pic: '-', icon: '🏪' };
-    const it = o.DETAIL?.length || '?';
-    return `<tr>
-      <td><span class="order-id">${o.ORDER_ID}</span></td>
-      <td><span class="cabang-badge">${cb.icon} ${cb.pic}</span></td>
-      <td style="text-align:center;font-size:12px;">${it}</td>
-      <td><div class="action-btns">
-        <button class="btn-approve" onclick="quickApprove('${o.ORDER_ID}')">✅ Setujui</button>
-        <button class="btn-reject" onclick="quickReject('${o.ORDER_ID}')">❌ Tolak</button>
-        <button class="btn-detail" onclick="showDetail('${o.ORDER_ID}')">✏️ Kelola</button>
-      </div></td>
-    </tr>`;
-  }).join('');
-}
-
-function renderAllOrders() {
-  const tb = document.getElementById('allOrdersBody');
-  if (!tb) return;
-  if (!filteredOrders.length) {
-    tb.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">📭</div><p>Tidak ada order</p></div></td></tr>';
-    return;
-  }
-  tb.innerHTML = filteredOrders.map((o, i) => {
-    const cb = CABANG_INFO[o.ID_CABANG] || { pic: '-', icon: '🏪' };
-    const st = String(o.STATUS || 'PENDING').toUpperCase();
-    const cls = { PENDING: 'pending', APPROVED: 'approved', REJECTED: 'rejected' }[st] || 'pending';
-    const em = { PENDING: '⏳', APPROVED: '✅', REJECTED: '❌' }[st] || '⏳';
-    return `<tr>
-      <td style="color:var(--muted);font-size:12px;">${i + 1}</td>
-      <td><span class="order-id">${o.ORDER_ID}</span></td>
-      <td><span class="cabang-badge">${cb.icon} ${cb.pic}</span></td>
-      <td style="font-size:12px;">${formatTanggalDisplay(String(o.TANGGAL_ORDER || ''))}</td>
-      <td><span class="status-badge ${cls}">${em} ${st}</span></td>
-      <td><div class="action-btns">
-        ${st === 'PENDING' ? `<button class="btn-approve" onclick="quickApprove('${o.ORDER_ID}')">✅</button><button class="btn-reject" onclick="quickReject('${o.ORDER_ID}')">❌</button>` : ''}
-        <button class="btn-detail" onclick="showDetail('${o.ORDER_ID}')">✏️ Kelola</button>
-      </div></td>
-    </tr>`;
-  }).join('');
-}
-
-function filterOrders(st, btn) {
-  currentFilter = st;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-  applyFilters(document.getElementById('orderSearch').value);
-}
-
-function applyFilters(sr) {
-  const s = String(sr || '').toLowerCase();
-  filteredOrders = allOrders.filter(o => {
-    const ms = currentFilter === 'ALL' || String(o.STATUS).toUpperCase() === currentFilter;
-    const mq = !s || o.ORDER_ID.toLowerCase().includes(s) || String(o.ID_CABANG || '').toLowerCase().includes(s);
-    return ms && mq;
-  });
-  renderAllOrders();
-}
-
-function searchOrders(v) {
-  applyFilters(v);
-}
-
-// ═══════════════════════════════════════════════════════════════
-// KATALOG
-// ═══════════════════════════════════════════════════════════════
-function renderKatalog(f = '') {
-  const tb = document.getElementById('katalogBody');
-  if (!tb) return;
-  const fs = String(f || '').toLowerCase();
-  const d = allKatalog.filter(b =>
-    !fs ||
-    String(b.KODE_BARANG || '').toLowerCase().includes(fs) ||
-    String(b.NAMA_BARANG || '').toLowerCase().includes(fs)
-  );
-  if (!d.length) {
-    tb.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📚</div><p>Tidak ada barang</p></div></td></tr>';
-    return;
-  }
-  tb.innerHTML = d.map((b, i) => {
-    const s = parseInt(b.STOK) || 0;
-    return `<tr>
-      <td style="color:var(--muted);font-size:12px;">${i + 1}</td>
-      <td><span class="order-id">${b.KODE_BARANG}</span></td>
-      <td>${b.NAMA_BARANG}</td>
-      <td><span style="background:var(--dark3);padding:3px 10px;border-radius:20px;font-size:11px;">${b.KATEGORI || '-'}</span></td>
-      <td>${b.SATUAN || '-'}</td>
-      <td style="color:var(--orange);font-weight:700;">${formatRp(b.HARGA)}</td>
-      <td style="color:${s <= 5 ? 'var(--red)' : 'var(--green)'};font-weight:700;">${s}</td>
-    </tr>`;
-  }).join('');
-}
-
-function searchKatalog(v) {
-  renderKatalog(v);
-}
-
-// ═══════════════════════════════════════════════════════════════
-// CABANG & LAPORAN
-// ═══════════════════════════════════════════════════════════════
-function renderCabang() {
-  const el = document.getElementById('cabangGrid');
-  if (!el) return;
-  el.innerHTML = Object.entries(CABANG_INFO).map(([id, info]) => {
-    const o = allOrders.filter(x => x.ID_CABANG === id);
-    const p = o.filter(x => String(x.STATUS) === 'PENDING').length;
-    const a = o.filter(x => String(x.STATUS) === 'APPROVED').length;
-    return `<div class="cabang-card">
-      <div class="cabang-card-header">
-        <div class="cabang-avatar">${info.icon}</div>
-        <div>
-          <div class="cabang-name">${info.nama}</div>
-          <div class="cabang-id">${id} · PIC: ${info.pic}</div>
-        </div>
-      </div>
-      <div class="cabang-stats">
-        <div class="cabang-stat"><div class="cabang-stat-val">${o.length}</div><div class="cabang-stat-lbl">Total</div></div>
-        <div class="cabang-stat"><div class="cabang-stat-val" style="color:var(--yellow)">${p}</div><div class="cabang-stat-lbl">Tertunda</div></div>
-        <div class="cabang-stat"><div class="cabang-stat-val" style="color:var(--green)">${a}</div><div class="cabang-stat-lbl">Disetujui</div></div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function renderLaporan() {
-  const el = document.getElementById('laporanBody');
-  if (!el) return;
-  let gp = 0, ga = 0, gr = 0, gt = 0;
-  const rows = Object.entries(CABANG_INFO).map(([id, info]) => {
-    const o = allOrders.filter(x => x.ID_CABANG === id);
-    const p = o.filter(x => String(x.STATUS) === 'PENDING').length;
-    const a = o.filter(x => String(x.STATUS) === 'APPROVED').length;
-    const r = o.filter(x => String(x.STATUS) === 'REJECTED').length;
-    const rate = o.length ? Math.round(a / o.length * 100) : 0;
-    gt += o.length; gp += p; ga += a; gr += r;
-    return `<tr>
-      <td><span class="cabang-badge">${info.icon} ${id}</span></td>
-      <td>${info.nama}</td>
-      <td style="font-size:12px;color:var(--muted);">${info.pic}</td>
-      <td style="font-weight:700;">${o.length}</td>
-      <td style="color:var(--yellow);font-weight:700;">${p}</td>
-      <td style="color:var(--green);font-weight:700;">${a}</td>
-      <td style="color:var(--red);font-weight:700;">${r}</td>
-      <td>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <div style="flex:1;height:6px;background:var(--dark3);border-radius:3px;overflow:hidden;">
-            <div style="width:${rate}%;height:100%;background:var(--green);"></div>
-          </div>
-          <span style="font-size:12px;font-weight:700;color:var(--green);min-width:35px;">${rate}%</span>
-        </div>
-      </td>
-    </tr>`;
-  }).join('');
-  const grate = gt ? Math.round(ga / gt * 100) : 0;
-  el.innerHTML = rows + `<tr class="total-row">
-    <td colspan="3">TOTAL</td>
-    <td>${gt}</td><td>${gp}</td><td>${ga}</td><td>${gr}</td><td>${grate}% ✅</td>
-  </tr>`;
-}
-
-// ═══════════════════════════════════════════════════════════════
-// QUICK APPROVE / REJECT
-// ═══════════════════════════════════════════════════════════════
-function quickApprove(id) {
-  const order = allOrders.find(o => o.ORDER_ID === id);
-  const cb = order ? CABANG_INFO[order.ID_CABANG] : { pic: '-' };
-  showConfirm({
-    icon: '✅',
-    title: 'Setujui Pesanan?',
-    msg: `Pesanan ${id}\nCabang: ${cb.pic}\n\n✔️ SELURUH item akan disetujui\n📧 Email notifikasi otomatis dikirim ke cabang\n📦 Stok sudah dipotong saat order masuk`,
-    okText: '✅ Ya, Setujui Semua',
-    okClass: 'success',
-    onOk: () => updateOrderStatus(id, 'APPROVED', '')
-  });
-}
-
-function quickReject(id) {
-  const order = allOrders.find(o => o.ORDER_ID === id);
-  const cb = order ? CABANG_INFO[order.ID_CABANG] : { pic: '-' };
-  showPrompt({
-    icon: '❌',
-    title: 'Tolak Seluruh Pesanan',
-    msg: `Pesanan ${id} — Cabang: ${cb.pic}\n\nIsi alasan penolakan (WAJIB):`,
-    placeholder: 'Contoh: Stok habis, kualitas tidak sesuai, dll...',
-    okText: '❌ Ya, Tolak Pesanan',
-    okClass: 'danger',
-    required: true,
-    onOk: (alasan) => updateOrderStatus(id, 'REJECTED', alasan)
-  });
-}
-
-async function updateOrderStatus(id, status, alasan) {
-  showToast(`⏳ Memproses ${id}...`, 'info', 2000);
-  const data = await callAPI('updateStatus', { orderId: id, status, alasan });
-  if (data.status === 'ok') {
-    const em = status === 'APPROVED' ? '✅ Disetujui, email cabang diproses' : '❌ Ditolak, email cabang diproses';
-    showToast(em, 'success', 4000);
-
-    // Optimistic UI
-    const idx = allOrders.findIndex(o => o.ORDER_ID === id);
-    if (idx >= 0) {
-      allOrders[idx].STATUS = status;
-      allOrders[idx].TANGGAL_PROSES = new Date().toLocaleString('id-ID');
-    }
-    updateStats();
-    updatePendingBadge();
-    renderPendingOrders();
-    updateDonut();
-    updateActivity();
-    if (document.getElementById('page-orders').classList.contains('active')) {
-      applyFilters(document.getElementById('orderSearch').value);
-    }
-  } else {
-    showToast('❌ ' + (data.message || 'Gagal'), 'error', 5000);
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════
-// SHOW DETAIL + EDIT
-// ═══════════════════════════════════════════════════════════════
-function showDetail(orderId) {
-  const order = allOrders.find(o => o.ORDER_ID === orderId);
-  if (!order) return;
-  editOrderId = orderId;
-  editItems = (order.DETAIL || []).map(d => ({
-    kode: String(d.KODE_BARANG || ''),
-    nama: String(d.NAMA_BARANG || ''),
-    kategori: String(d.KATEGORI || ''),
-    qty: parseFloat(d.QTY) || 0,
-    originalQty: parseFloat(d.ORIGINAL_QTY) || parseFloat(d.QTY) || 0,
-    satuan: String(d.SATUAN || 'PCS'),
-    harga: parseFloat(d.HARGA_SATUAN) || 0,
-    itemStatus: String(d.ITEM_STATUS || 'APPROVED').toUpperCase(),
-    reason: String(d.REASON || '')
-  }));
-
-  const cb = CABANG_INFO[order.ID_CABANG] || { nama: '-', icon: '🏪', pic: '-' };
-  const sc = { PENDING: 'var(--yellow)', APPROVED: 'var(--green)', REJECTED: 'var(--red)' };
-
-  document.getElementById('modalTitle').textContent = `📦 ${orderId}`;
-  document.getElementById('modalBody').innerHTML = `
-    <div class="info-row"><span class="info-label">Cabang</span><span class="info-value">${cb.icon} ${cb.nama} (${order.ID_CABANG})</span></div>
-    <div class="info-row"><span class="info-label">PIC</span><span class="info-value">${cb.pic}</span></div>
-    <div class="info-row"><span class="info-label">Pesanan Tanggal</span><span class="info-value">${formatTanggalDisplay(String(order.TANGGAL_ORDER || ''))} WITA</span></div>
-    <div class="info-row"><span class="info-label">Status</span><span class="info-value" style="color:${sc[order.STATUS] || '#fff'};font-weight:800;">${order.STATUS}</span></div>
-    ${order.CATATAN ? `<div class="info-row"><span class="info-label">Catatan Cabang</span><span class="info-value">${order.CATATAN}</span></div>` : ''}
-
-    <div class="edit-section-title">✏️ Kelola Item Pesanan <span class="edit-section-count" id="editSectionCount">${editItems.length} item</span></div>
-    <div id="editRows"></div>
-
-    <div class="add-row">
-      <select id="addKode"><option value="">+ Pilih barang untuk ditambah…</option>${allKatalog.map(b => `<option value="${b.KODE_BARANG}">${b.KODE_BARANG} — ${b.NAMA_BARANG}</option>`).join('')}</select>
-      <input type="number" id="addQty" min="1" value="1" placeholder="Jml">
-      <button class="btn-add-item" onclick="tambahItem()">+ Tambah</button>
-    </div>
-
-    <div class="edit-total"><span>Total Disetujui:</span><span id="editTotal">Rp 0</span></div>
-    <textarea class="edit-catatan" id="editCatatan" rows="2" placeholder="Catatan admin untuk perubahan (opsional, akan dikirim ke email cabang)..."></textarea>
-
-    <div class="modal-foot">
-      <button class="mf-btn mf-save" id="btnSaveEdit" onclick="konfirmasiSimpan()">💾 Simpan Perubahan</button>
-      <button class="mf-btn mf-email" id="btnSendEmail" onclick="konfirmasiKirimEmail()">📧 Kirim Email ke Cabang</button>
-      <button class="mf-btn mf-cancel" onclick="closeModalDirect()">Tutup</button>
-    </div>
-  `;
-  renderEditRows();
-  document.getElementById('modalOverlay').classList.add('show');
-}
-
-// ═══════════════════════════════════════════════════════════════
-// RENDER EDIT ROWS
-// ═══════════════════════════════════════════════════════════════
-function renderEditRows() {
-  const wrap = document.getElementById('editRows');
-  if (!wrap) return;
-  if (!editItems.length) {
-    wrap.innerHTML = '<div class="empty-state" style="padding:24px;"><p>Tidak ada item. Tambahkan barang di bawah.</p></div>';
-    hitungTotal();
-    return;
-  }
-
-  wrap.innerHTML = editItems.map((it, idx) => {
-    const isDel = it.itemStatus === 'DELETED';
-    const isRej = it.itemStatus === 'REJECTED';
-    const isEdited = !isDel && !isRej && it.originalQty && it.originalQty !== it.qty;
-    let cls = 'approved';
-    let badge = '';
-    let needReason = false;
-    let reasonLabel = 'Keterangan perubahan (opsional)';
-    let reasonPlaceholder = 'Contoh: Qty disesuaikan stok...';
-
-    if (isDel) {
-      cls = 'deleted';
-      badge = '<span class="er-badge del-badge">🗑️ DIHAPUS</span>';
-      needReason = true;
-      reasonLabel = '📝 Alasan Penghapusan (WAJIB)';
-      reasonPlaceholder = 'Contoh: Barang tidak dalam katalog...';
-    } else if (isRej) {
-      cls = 'rejected';
-      badge = '<span class="er-badge rej-badge">🚫 DITOLAK</span>';
-      needReason = true;
-      reasonLabel = '📝 Alasan Penolakan (WAJIB)';
-      reasonPlaceholder = 'Contoh: Stok tidak cukup...';
-    } else if (isEdited) {
-      cls = 'edited';
-      badge = '<span class="er-badge edit-badge">✏️ DIEDIT</span>';
-      reasonLabel = '📝 Keterangan Perubahan Qty (opsional)';
-      reasonPlaceholder = `Qty asli: ${it.originalQty}, sekarang: ${it.qty}. Alasan...`;
-    }
-
-    const showRestore = isDel || isRej;
-
-    return `<div class="edit-row ${cls}">
-      <div class="er-top">
-        <div>
-          <div class="er-kode">${it.kode} ${badge}</div>
-          <div class="er-nama">${it.nama || '(nama tidak ada)'}</div>
-          <div class="er-harga">${formatRp(it.harga)} / ${it.satuan}</div>
-        </div>
-        <input type="number" class="er-qty" min="1" value="${it.qty}" ${(isDel || isRej) ? 'disabled' : ''} onchange="ubahQty(${idx},this.value)">
-        <div class="er-sub">${(!isDel && !isRej) ? formatRp(it.qty * it.harga) : '-'}</div>
-        <div class="er-acts">
-          ${showRestore
-            ? `<button class="er-btn restore" onclick="pulihkanItem(${idx})" title="Pulihkan">↩️</button>`
-            : `<button class="er-btn edit" onclick="editQtyManual(${idx})" title="Edit Qty & Keterangan">✏️</button>
-               <button class="er-btn rej ${isRej ? 'on' : ''}" onclick="tolakItem(${idx})" title="Tolak Item">🚫</button>
-               <button class="er-btn del ${isDel ? 'on' : ''}" onclick="hapusItem(${idx})" title="Hapus Item">🗑️</button>`
-          }
-        </div>
-      </div>
-      ${(needReason || isEdited) ? `
-        <div class="er-reason">
-          <div class="er-reason-label">${reasonLabel}</div>
-          <textarea class="${needReason && !it.reason ? 'required-empty' : ''}" placeholder="${reasonPlaceholder}" oninput="setReason(${idx},this.value)">${it.reason || ''}</textarea>
-        </div>
-      ` : ''}
-    </div>`;
-  }).join('');
-
-  document.getElementById('editSectionCount').textContent = `${editItems.length} item`;
-  hitungTotal();
-}
-
-// ═══════════════════════════════════════════════════════════════
-// AKSI PER ITEM
-// ═══════════════════════════════════════════════════════════════
-function ubahQty(idx, val) {
-  const it = editItems[idx];
-  if (!it) return;
-  const newQty = Math.max(1, parseInt(val) || 1);
-  it.qty = newQty;
-  if (it.itemStatus !== 'APPROVED') it.itemStatus = 'APPROVED';
-  renderEditRows();
-}
-
-function editQtyManual(idx) {
-  const it = editItems[idx];
-  if (!it) return;
-  showPrompt({
-    icon: '✏️',
-    title: 'Ubah Qty & Keterangan',
-    msg: `${it.kode} — ${it.nama}\nQty asli: ${it.originalQty}\nQty saat ini: ${it.qty}\n\nUbah qty & isi keterangan (opsional):`,
-    placeholder: 'Contoh: Qty disesuaikan stok...',
-    okText: '💾 Update',
-    okClass: 'info',
-    required: false,
-    defaultVal: it.reason || '',
-    showNumber: true,
-    numberVal: it.qty,
-    onOk: (result) => {
-      it.qty = Math.max(1, result.number);
-      it.reason = result.text;
-      if (it.itemStatus !== 'APPROVED') it.itemStatus = 'APPROVED';
-      renderEditRows();
-      showToast('✏️ Qty & keterangan diperbarui', 'info', 2500);
-    }
-  });
-}
-
-function tolakItem(idx) {
-  const it = editItems[idx];
-  if (!it) return;
-  if (it.itemStatus === 'REJECTED') {
-    it.itemStatus = 'APPROVED';
-    it.reason = '';
-    renderEditRows();
-    showToast('↩️ Item dipulihkan (disetujui)', 'success', 2000);
-    return;
-  }
-  showPrompt({
-    icon: '🚫',
-    title: 'Tolak Item Ini',
-    msg: `${it.kode} — ${it.nama}\nQty: ${it.qty}\n\nIsi alasan penolakan (WAJIB):`,
-    placeholder: 'Contoh: Stok tidak cukup untuk item ini...',
-    okText: '🚫 Ya, Tolak',
-    okClass: 'danger',
-    required: true,
-    defaultVal: it.reason || '',
-    onOk: (reason) => {
-      it.itemStatus = 'REJECTED';
-      it.reason = reason;
-      renderEditRows();
-      showToast('🚫 Item ditolak', 'warning', 2500);
-    }
-  });
-}
-
-function hapusItem(idx) {
-  const it = editItems[idx];
-  if (!it) return;
-  if (it.itemStatus === 'DELETED') {
-    it.itemStatus = 'APPROVED';
-    it.reason = '';
-    renderEditRows();
-    showToast('↩️ Item dipulihkan', 'success', 2000);
-    return;
-  }
-  showPrompt({
-    icon: '🗑️',
-    title: 'Hapus Item Ini',
-    msg: `${it.kode} — ${it.nama}\nQty: ${it.qty}\n\nItem akan DIHAPUS dari pesanan (tetap tampil sebagai riwayat).\nIsi alasan penghapusan (WAJIB):`,
-    placeholder: 'Contoh: Barang tidak ada di katalog master...',
-    okText: '🗑️ Ya, Hapus',
-    okClass: 'danger',
-    required: true,
-    defaultVal: it.reason || '',
-    onOk: (reason) => {
-      it.itemStatus = 'DELETED';
-      it.reason = reason;
-      renderEditRows();
-      showToast('🗑️ Item dihapus', 'warning', 2500);
-    }
-  });
-}
-
-function pulihkanItem(idx) {
-  const it = editItems[idx];
-  if (!it) return;
-  it.itemStatus = 'APPROVED';
-  it.reason = '';
-  renderEditRows();
-  showToast('↩️ Item dipulihkan menjadi DISETUJUI', 'success', 2500);
-}
-
-function setReason(idx, val) {
-  if (editItems[idx]) editItems[idx].reason = val;
-}
-
-function tambahItem() {
-  const kode = document.getElementById('addKode').value;
-  const qty = Math.max(1, parseInt(document.getElementById('addQty').value) || 1);
-  if (!kode) { showToast('⚠️ Pilih barang dulu', 'warning'); return; }
-  const b = allKatalog.find(x => String(x.KODE_BARANG).toUpperCase() === String(kode).toUpperCase());
-  if (!b) { showToast('❌ Barang tidak ditemukan', 'error'); return; }
-  const stok = parseInt(b.STOK) || 0;
-  if (stok < qty) { showToast(`⚠️ Stok hanya ${stok}`, 'warning'); return; }
-  const ada = editItems.find(x => String(x.kode).toUpperCase() === String(kode).toUpperCase() && x.itemStatus === 'APPROVED');
-  if (ada) {
-    ada.qty += qty;
-    showToast(`✅ Qty ${kode} ditambah ${qty}`, 'success', 2000);
-  } else {
-    editItems.push({
-      kode: String(b.KODE_BARANG),
-      nama: String(b.NAMA_BARANG || ''),
-      kategori: String(b.KATEGORI || ''),
-      qty,
-      originalQty: 0,
-      satuan: String(b.SATUAN || 'PCS'),
-      harga: parseFloat(b.HARGA) || 0,
-      itemStatus: 'APPROVED',
-      reason: 'Item baru ditambahkan oleh admin'
-    });
-    showToast(`✅ ${b.NAMA_BARANG} ditambahkan`, 'success', 2000);
-  }
-  document.getElementById('addKode').value = '';
-  document.getElementById('addQty').value = 1;
-  renderEditRows();
-}
-
-function hitungTotal() {
-  const t = editItems.filter(i => i.itemStatus === 'APPROVED').reduce((s, i) => s + i.qty * i.harga, 0);
-  const el = document.getElementById('editTotal');
-  if (el) el.textContent = formatRp(t);
-}
-
-// ═══════════════════════════════════════════════════════════════
-// KONFIRMASI SIMPAN (💾 SIMPAN SAJA — STATUS TETAP)
-// ═══════════════════════════════════════════════════════════════
-function konfirmasiSimpan() {
-  const aktif = editItems.filter(i => i.itemStatus === 'APPROVED').length;
-  const rej = editItems.filter(i => i.itemStatus === 'REJECTED').length;
-  const del = editItems.filter(i => i.itemStatus === 'DELETED').length;
-  const edited = editItems.filter(i => i.itemStatus === 'APPROVED' && i.originalQty && i.originalQty !== i.qty).length;
-
-  if (!aktif && !rej && !del) {
-    showToast('⚠️ Pesanan kosong, tambahkan minimal 1 item', 'warning');
-    return;
-  }
-
-  const kurang = editItems.filter(i => (i.itemStatus === 'REJECTED' || i.itemStatus === 'DELETED') && !i.reason.trim());
-  if (kurang.length > 0) {
-    showToast(`⚠️ ${kurang.length} item butuh alasan (lihat highlight merah)`, 'warning', 4000);
-    renderEditRows();
-    return;
-  }
-
-  const order = allOrders.find(o => o.ORDER_ID === editOrderId);
-  const statusLama = order ? String(order.STATUS).toUpperCase() : 'PENDING';
-
-  showConfirm({
-    icon: '💾',
-    title: 'Simpan Perubahan Saja?',
-    msg: `Order ${editOrderId}:\n\n✅ ${aktif} item disetujui\n${edited ? `✏️ ${edited} item qty diedit\n` : ''}${rej ? `🚫 ${rej} item ditolak\n` : ''}${del ? `🗑️ ${del} item dihapus\n` : ''}\n⚠️ STATUS TETAP ${statusLama}\n📧 Email BELUM dikirim ke cabang\n📦 Stok otomatis disesuaikan\n\n💡 Klik "Kirim Email ke Cabang" untuk APPROVE & kirim notifikasi`,
-    okText: '💾 Ya, Simpan Saja',
-    okClass: 'success',
-    onOk: () => doSimpanEdit(false)
-  });
-}
-
-// ═══════════════════════════════════════════════════════════════
-// KONFIRMASI KIRIM EMAIL (📧 SIMPAN + APPROVE + EMAIL)
-// ═══════════════════════════════════════════════════════════════
-function konfirmasiKirimEmail() {
-  const order = allOrders.find(o => o.ORDER_ID === editOrderId);
-  const cb = order ? CABANG_INFO[order.ID_CABANG] : { pic: '-', nama: '-' };
-  const aktif = editItems.filter(i => i.itemStatus === 'APPROVED').length;
-  const rej = editItems.filter(i => i.itemStatus === 'REJECTED').length;
-  const del = editItems.filter(i => i.itemStatus === 'DELETED').length;
-  const edited = editItems.filter(i => i.itemStatus === 'APPROVED' && i.originalQty && i.originalQty !== i.qty).length;
-
-  if (!aktif && !rej && !del) {
-    showToast('⚠️ Tidak ada item untuk dikirim', 'warning');
-    return;
-  }
-
-  const kurang = editItems.filter(i => (i.itemStatus === 'REJECTED' || i.itemStatus === 'DELETED') && !i.reason.trim());
-  if (kurang.length > 0) {
-    showToast(`⚠️ ${kurang.length} item butuh alasan (wajib) sebelum kirim email`, 'warning', 4000);
-    renderEditRows();
-    return;
-  }
-
-  const newStatus = aktif === 0 ? 'REJECTED' : 'APPROVED';
-
-  showConfirm({
-    icon: '📧',
-    title: 'Approve & Kirim Email ke Cabang?',
-    msg: `Kirim notifikasi lengkap ke:\n📮 Email cabang ${cb.pic} (${order?.ID_CABANG || '-'})\n📮 CC Admin gudang\n\nISI EMAIL:\n✅ ${aktif} item disetujui\n${edited ? `✏️ ${edited} item qty diedit (qty lama → baru)\n` : ''}${rej ? `🚫 ${rej} item ditolak + alasan\n` : ''}${del ? `🗑️ ${del} item dihapus + alasan\n` : ''}\n⚡ STATUS ORDER akan menjadi: ${newStatus}\n💾 Perubahan disimpan sekaligus`,
-    okText: '📧 Ya, Approve & Kirim Email',
-    okClass: 'info',
-    onOk: () => doSimpanEdit(true)
-  });
-}
-
-async function doSimpanEdit(kirimEmail) {
-  const btnSave = document.getElementById('btnSaveEdit');
-  const btnEmail = document.getElementById('btnSendEmail');
-  if (btnSave) { btnSave.disabled = true; btnSave.innerHTML = '<span class="mini-spin"></span> Menyimpan...'; }
-  if (btnEmail) btnEmail.disabled = true;
-
-  const payload = {
-    orderId: editOrderId,
-    catatanAdmin: document.getElementById('editCatatan').value.trim(),
-    diprosesOleh: 'Admin Dashboard',
-    kirimEmail,
-    items: editItems.map(i => ({
-      kode: i.kode,
-      nama: i.nama,
-      kategori: i.kategori,
-      qty: i.qty,
-      satuan: i.satuan,
-      harga: i.harga,
-      itemStatus: i.itemStatus,
-      reason: i.reason || '',
-      originalQty: i.originalQty
-    }))
+function debounce(fn, wait) {
+  let t;
+  return function(...args) {
+    clearTimeout(t);
+    t = setTimeout(() => fn.apply(this, args), wait);
   };
-
-  const hasil = await callAPI('editOrder', payload);
-
-  if (btnSave) { btnSave.disabled = false; btnSave.innerHTML = '💾 Simpan Perubahan'; }
-  if (btnEmail) btnEmail.disabled = false;
-
-  if (hasil.status === 'ok') {
-    showToast('✅ Perubahan disimpan!', 'success', 4000);
-    if (kirimEmail) showToast('📧 Email diproses ke cabang', 'info', 4000);
-    closeModalDirect();
-    loadAllData();
-  } else {
-    showToast('❌ ' + (hasil.message || 'Gagal menyimpan'), 'error', 6000);
-  }
 }
 
-// ═══════════════════════════════════════════════════════════════
-// MODAL
-// ═══════════════════════════════════════════════════════════════
-function closeModal(e) {
-  if (e.target === document.getElementById('modalOverlay')) closeModalDirect();
+function throttle(fn, limit) {
+  let inThrottle;
+  return function(...args) {
+    if (!inThrottle) {
+      fn.apply(this, args);
+      inThrottle = true;
+      setTimeout(() => inThrottle = false, limit);
+    }
+  };
 }
 
-function closeModalDirect() {
-  document.getElementById('modalOverlay').classList.remove('show');
-}
+// Batch DOM updates dengan requestAnimationFrame
+const rafBatch = (fn) => requestAnimationFrame(fn);
 
-// ═══════════════════════════════════════════════════════════════
-// UTILS
-// ═══════════════════════════════════════════════════════════════
 function formatRp(v) {
-  return 'Rp ' + (parseFloat(v) || 0).toLocaleString('id-ID');
+  const n = parseFloat(v) || 0;
+  return 'Rp ' + n.toLocaleString('id-ID');
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
 function formatTanggalDisplay(str) {
-  if (!str || str.trim() === '') return '-';
+  if (!str || !str.trim()) return '-';
   str = String(str).trim();
   if (/^\d{2}-\d{2}-\d{4}/.test(str)) return str.split('.')[0];
   try {
     const d = new Date(str);
     if (isNaN(d.getTime())) return str;
-    const w = new Date(d.getTime() + 8 * 3600 * 1000);
+    const w = new Date(d.getTime() + 8 * 3600000);
     const p = n => String(n).padStart(2, '0');
-    return `${p(w.getUTCDate())}-${p(w.getUTCMonth() + 1)}-${w.getUTCFullYear()} ${p(w.getUTCHours())}:${p(w.getUTCMinutes())}:${p(w.getUTCSeconds())}`;
+    return `${p(w.getUTCDate())}-${p(w.getUTCMonth()+1)}-${w.getUTCFullYear()} ${p(w.getUTCHours())}:${p(w.getUTCMinutes())}:${p(w.getUTCSeconds())}`;
   } catch (e) { return str; }
 }
 
 function parseAnyDate(str) {
-  if (!str || str.trim() === '') return new Date(0);
+  if (!str || !str.trim()) return new Date(0);
   str = String(str).trim();
   if (/^\d{2}-\d{2}-\d{4}/.test(str)) {
     const p = str.split(' ');
@@ -2966,18 +1766,782 @@ function parseAnyDate(str) {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// SESSION
+// ═══════════════════════════════════════════════════════════════
+function checkSession() {
+  const s = sessionStorage.getItem('gudanghub_session');
+  if (!s) { window.location.href = 'login.html'; return null; }
+  try {
+    const o = JSON.parse(s);
+    if (new Date(o.expires) < new Date()) {
+      sessionStorage.removeItem('gudanghub_session');
+      window.location.href = 'login.html';
+      return null;
+    }
+    if (o.role !== 'admin') { window.location.href = 'order.html'; return null; }
+    return o;
+  } catch (e) { window.location.href = 'login.html'; return null; }
+}
+
+function doLogout() {
+  showConfirm({
+    icon: '🚪', title: 'Keluar?', msg: 'Yakin ingin keluar?',
+    okText: 'Ya, Keluar', okClass: 'danger',
+    onOk: () => {
+      sessionStorage.removeItem('gudanghub_session');
+      window.location.href = 'login.html';
+    }
+  });
+}
+
+function updateClock() {
+  const w = new Date(Date.now() + 8 * 3600000);
+  const p = n => String(n).padStart(2, '0');
+  if (DOM.topbarTime) DOM.topbarTime.textContent = `${p(w.getUTCHours())}:${p(w.getUTCMinutes())}:${p(w.getUTCSeconds())} WITA`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TOAST (optimized dengan pool)
+// ═══════════════════════════════════════════════════════════════
+function showToast(msg, type = 'info', dur = 3000) {
+  const ic = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
+  const c = DOM.toastContainer;
+  if (!c) return;
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<span>${ic[type] || 'ℹ️'}</span><span style="flex:1">${escapeHtml(msg)}</span><button class="toast-close">✕</button>`;
+  t.querySelector('.toast-close').onclick = () => t.remove();
+  c.appendChild(t);
+  rafBatch(() => rafBatch(() => t.classList.add('show')));
+  setTimeout(() => {
+    t.classList.remove('show');
+    setTimeout(() => t.remove(), 300);
+  }, dur);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CONFIRM & PROMPT
+// ═══════════════════════════════════════════════════════════════
+let _confirmCb = null;
+let _promptCb = null;
+
+function showConfirm({ icon='⚠️', title='Konfirmasi', msg='Yakin?', okText='Ya', cancelText='Batal', okClass='ok', onOk=null }) {
+  DOM.confirmIcon.textContent = icon;
+  DOM.confirmTitle.textContent = title;
+  DOM.confirmMsg.textContent = msg;
+  DOM.confirmOk.textContent = okText;
+  DOM.confirmOk.className = `confirm-btn ${okClass}`;
+  DOM.confirmCancel.textContent = cancelText;
+  DOM.confirmOverlay.classList.add('show');
+  _confirmCb = onOk;
+}
+
+function showPrompt({ icon='📝', title='Alasan', msg='Isi alasan:', placeholder='Ketik alasan...', okText='Konfirmasi', okClass='danger', required=true, defaultVal='', showNumber=false, numberVal=1, onOk=null }) {
+  DOM.promptIcon.textContent = icon;
+  DOM.promptTitle.textContent = title;
+  DOM.promptMsg.textContent = msg;
+  DOM.promptInput.placeholder = placeholder;
+  DOM.promptInput.value = defaultVal;
+  if (showNumber) { DOM.promptNumber.style.display = 'block'; DOM.promptNumber.value = numberVal; }
+  else DOM.promptNumber.style.display = 'none';
+  DOM.promptOk.textContent = okText;
+  DOM.promptOk.className = `confirm-btn ${okClass}`;
+  DOM.promptOverlay.classList.add('show');
+  setTimeout(() => (showNumber ? DOM.promptNumber : DOM.promptInput).focus(), 80);
+  _promptCb = { fn: onOk, required, showNumber };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SIDEBAR
+// ═══════════════════════════════════════════════════════════════
+function toggleSidebar() {
+  DOM.sidebar.classList.toggle('open');
+  DOM.sidebarOverlay.classList.toggle('show');
+}
+
+function closeSidebar() {
+  DOM.sidebar.classList.remove('open');
+  DOM.sidebarOverlay.classList.remove('show');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════════
+const pageTitles = {
+  dashboard: '📊 Dashboard', orders: '📦 Semua Pesanan',
+  katalog: '📚 Katalog Barang', cabang: '🏬 Status Cabang', laporan: '📈 Laporan'
+};
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  $(`page-${id}`)?.classList.add('active');
+  document.querySelector(`[data-page="${id}"]`)?.classList.add('active');
+  DOM.topbarTitle.textContent = pageTitles[id] || id;
+  closeSidebar();
+
+  rafBatch(() => {
+    if (id === 'orders') { filteredOrders = [...allOrders]; renderAllOrders(); }
+    else if (id === 'katalog') renderKatalog();
+    else if (id === 'cabang') renderCabang();
+    else if (id === 'laporan') renderLaporan();
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// API CALL — SMART FALLBACK (POST dulu)
+// ═══════════════════════════════════════════════════════════════
+async function callAPI(action, payload = {}) {
+  const body = JSON.stringify({ ...payload, action });
+  try {
+    const f = new FormData();
+    f.append('payload', body);
+    const r = await fetch(API_URL, { method: 'POST', body: f, cache: 'no-store' });
+    const txt = await r.text();
+    const p = parseResp(txt);
+    if (p.status === 'ok' || (p.status === 'error' && p.message !== 'Respons kosong.')) return p;
+  } catch (e) {}
+  try {
+    const enc = encodeURIComponent(body);
+    const r = await fetch(`${API_URL}?action=${action}&payload=${enc}`, { cache: 'no-store' });
+    return parseResp(await r.text());
+  } catch (e) {}
+  return { status: 'error', message: 'Gagal terhubung ke server.' };
+}
+
+function parseResp(text) {
+  if (!text || !text.trim()) return { status: 'error', message: 'Respons kosong.' };
+  try { return JSON.parse(text); } catch (e) {}
+  try {
+    const m = text.match(/\{[\s\S]*\}/);
+    if (m) return JSON.parse(m[0]);
+  } catch (e) {}
+  return { status: 'error', message: 'Respons tidak valid.' };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// LOAD DATA — PARALEL + CACHE + SMART
+// ═══════════════════════════════════════════════════════════════
+async function loadAllData(force = false) {
+  if (isLoading) return;
+  if (!force && Date.now() - lastLoadTime < 3000) return; // anti-spam 3 detik
+
+  isLoading = true;
+  DOM.btnRefresh?.classList.add('spinning');
+
+  try {
+    const [oRes, kRes] = await Promise.all([
+      fetch(`${API_URL}?action=getOrders&t=${Date.now()}`, { cache: 'no-store' }).then(r => r.text()).then(parseResp),
+      fetch(`${API_URL}?action=getBarang&t=${Date.now()}`, { cache: 'no-store' }).then(r => r.text()).then(parseResp)
+    ]);
+
+    if (oRes.status === 'ok') allOrders = oRes.data || [];
+    if (kRes.status === 'ok') allKatalog = kRes.data || [];
+    lastLoadTime = Date.now();
+
+    // Batch render semua di RAF
+    rafBatch(() => {
+      updateStats();
+      updateDonut();
+      updateBarChart();
+      updatePendingBadge();
+      renderPendingOrders();
+      updateActivity();
+
+      const ap = document.querySelector('.page.active')?.id?.replace('page-', '');
+      if (ap === 'orders') { filteredOrders = [...allOrders]; renderAllOrders(); }
+      else if (ap === 'katalog') renderKatalog();
+      else if (ap === 'cabang') renderCabang();
+      else if (ap === 'laporan') renderLaporan();
+    });
+  } catch (err) {
+    showToast('Gagal memuat: ' + err.message, 'error');
+  } finally {
+    isLoading = false;
+    DOM.btnRefresh?.classList.remove('spinning');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════════════════════════
+function updateStats() {
+  const t = allOrders.length;
+  const p = allOrders.filter(o => String(o.STATUS).toUpperCase() === 'PENDING').length;
+  const a = allOrders.filter(o => String(o.STATUS).toUpperCase() === 'APPROVED').length;
+  const r = allOrders.filter(o => String(o.STATUS).toUpperCase() === 'REJECTED').length;
+  DOM.statTotal.textContent = t;
+  DOM.statPending.textContent = p;
+  DOM.statApproved.textContent = a;
+  DOM.statRejected.textContent = r;
+}
+
+function updatePendingBadge() {
+  const n = allOrders.filter(o => String(o.STATUS).toUpperCase() === 'PENDING').length;
+  DOM.pendingBadge.textContent = n;
+}
+
+function updateDonut() {
+  const t = allOrders.length || 1;
+  const a = allOrders.filter(o => String(o.STATUS).toUpperCase() === 'APPROVED').length;
+  const p = allOrders.filter(o => String(o.STATUS).toUpperCase() === 'PENDING').length;
+  const r = allOrders.filter(o => String(o.STATUS).toUpperCase() === 'REJECTED').length;
+  const c = 2 * Math.PI * 40;
+  const aL = a/t*c, pL = p/t*c, rL = r/t*c;
+
+  if (DOM.donutApproved) DOM.donutApproved.setAttribute('stroke-dasharray', `${aL} ${c-aL}`);
+  if (DOM.donutPending) {
+    DOM.donutPending.setAttribute('stroke-dasharray', `${pL} ${c-pL}`);
+    DOM.donutPending.setAttribute('stroke-dashoffset', `-${aL}`);
+  }
+  if (DOM.donutRejected) {
+    DOM.donutRejected.setAttribute('stroke-dasharray', `${rL} ${c-rL}`);
+    DOM.donutRejected.setAttribute('stroke-dashoffset', `-${aL+pL}`);
+  }
+  if (DOM.donutTotal) DOM.donutTotal.textContent = allOrders.length;
+  if (DOM.legendApproved) DOM.legendApproved.textContent = a;
+  if (DOM.legendPending) DOM.legendPending.textContent = p;
+  if (DOM.legendRejected) DOM.legendRejected.textContent = r;
+}
+
+function updateBarChart() {
+  const c = {};
+  for (const o of allOrders) {
+    if (o.ID_CABANG) c[o.ID_CABANG] = (c[o.ID_CABANG] || 0) + 1;
+  }
+  const mx = Math.max(...Object.values(c), 1);
+  const nm = ['Eltari', 'Oesapa', 'TDM', 'Kefa'];
+  const ids = ['CB001', 'CB002', 'CB003', 'CB004'];
+  DOM.barChart.innerHTML = ids.map((id, i) =>
+    `<div class="bar-item"><div class="bar-fill" style="height:${Math.max(c[id]||0,0)/mx*90+4}%"></div><div class="bar-label">${nm[i]}</div></div>`
+  ).join('');
+}
+
+function updateActivity() {
+  const f = DOM.activityFeed;
+  if (!allOrders.length) {
+    f.innerHTML = '<div class="empty-state"><div class="empty-icon">⚡</div><p>Belum ada aktivitas</p></div>';
+    return;
+  }
+  const s = [...allOrders].sort((a,b) => parseAnyDate(String(b.TANGGAL_ORDER)) - parseAnyDate(String(a.TANGGAL_ORDER))).slice(0, 6);
+  const cst = { PENDING: 'orange', APPROVED: 'green', REJECTED: 'red' };
+  const em = { PENDING: '⏳', APPROVED: '✅', REJECTED: '❌' };
+
+  f.innerHTML = s.map(o => {
+    const cb = CABANG_INFO[o.ID_CABANG] || { pic: '-', icon: '🏪' };
+    const st = String(o.STATUS || 'PENDING').toUpperCase();
+    return `<div class="activity-item"><div class="activity-dot ${cst[st]||'blue'}"></div><div class="activity-content"><div class="activity-text">${em[st]||'📦'} <strong>${escapeHtml(o.ORDER_ID)}</strong> dari ${escapeHtml(cb.pic)} | ${escapeHtml(o.ID_CABANG)}</div><div class="activity-time">🕐 ${formatTanggalDisplay(String(o.TANGGAL_ORDER||''))} WITA</div></div></div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER TABLES
+// ═══════════════════════════════════════════════════════════════
+function renderPendingOrders() {
+  const pend = allOrders.filter(o => String(o.STATUS).toUpperCase() === 'PENDING');
+  const tb = DOM.pendingOrdersBody;
+  if (!pend.length) {
+    tb.innerHTML = '<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">✅</div><p>Semua order sudah diproses!</p></div></td></tr>';
+    return;
+  }
+  const chunks = [];
+  for (const o of pend) {
+    const cb = CABANG_INFO[o.ID_CABANG] || { pic: '-', icon: '🏪' };
+    const it = o.DETAIL?.length || '?';
+    chunks.push(`<tr><td><span class="order-id">${escapeHtml(o.ORDER_ID)}</span></td><td><span class="cabang-badge">${cb.icon} ${escapeHtml(cb.pic)}</span></td><td style="text-align:center;font-size:12px;">${it}</td><td><div class="action-btns"><button class="btn-approve" onclick="quickApprove('${o.ORDER_ID}')">✅ Setujui</button><button class="btn-reject" onclick="quickReject('${o.ORDER_ID}')">❌ Tolak</button><button class="btn-detail" onclick="showDetail('${o.ORDER_ID}')">✏️ Kelola</button></div></td></tr>`);
+  }
+  tb.innerHTML = chunks.join('');
+}
+
+function renderAllOrders() {
+  const tb = DOM.allOrdersBody;
+  if (!filteredOrders.length) {
+    tb.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">📭</div><p>Tidak ada order</p></div></td></tr>';
+    return;
+  }
+  const cls = { PENDING: 'pending', APPROVED: 'approved', REJECTED: 'rejected' };
+  const em = { PENDING: '⏳', APPROVED: '✅', REJECTED: '❌' };
+  const chunks = [];
+  for (let i = 0; i < filteredOrders.length; i++) {
+    const o = filteredOrders[i];
+    const cb = CABANG_INFO[o.ID_CABANG] || { pic: '-', icon: '🏪' };
+    const st = String(o.STATUS || 'PENDING').toUpperCase();
+    chunks.push(`<tr><td style="color:var(--muted);font-size:12px;">${i+1}</td><td><span class="order-id">${escapeHtml(o.ORDER_ID)}</span></td><td><span class="cabang-badge">${cb.icon} ${escapeHtml(cb.pic)}</span></td><td style="font-size:12px;">${formatTanggalDisplay(String(o.TANGGAL_ORDER||''))}</td><td><span class="status-badge ${cls[st]||'pending'}">${em[st]||'⏳'} ${st}</span></td><td><div class="action-btns">${st==='PENDING'?`<button class="btn-approve" onclick="quickApprove('${o.ORDER_ID}')">✅</button><button class="btn-reject" onclick="quickReject('${o.ORDER_ID}')">❌</button>`:''}<button class="btn-detail" onclick="showDetail('${o.ORDER_ID}')">✏️ Kelola</button></div></td></tr>`);
+  }
+  tb.innerHTML = chunks.join('');
+}
+
+function filterOrders(st, btn) {
+  currentFilter = st;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  applyFilters($('orderSearch').value);
+}
+
+function applyFilters(sr) {
+  const s = String(sr || '').toLowerCase();
+  filteredOrders = allOrders.filter(o => {
+    const ms = currentFilter === 'ALL' || String(o.STATUS).toUpperCase() === currentFilter;
+    const mq = !s || o.ORDER_ID.toLowerCase().includes(s) || String(o.ID_CABANG||'').toLowerCase().includes(s);
+    return ms && mq;
+  });
+  renderAllOrders();
+}
+
+function renderKatalog(f = '') {
+  const tb = DOM.katalogBody;
+  const fs = String(f || '').toLowerCase();
+  const d = allKatalog.filter(b => !fs || String(b.KODE_BARANG||'').toLowerCase().includes(fs) || String(b.NAMA_BARANG||'').toLowerCase().includes(fs));
+  if (!d.length) {
+    tb.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📚</div><p>Tidak ada barang</p></div></td></tr>';
+    return;
+  }
+  const chunks = [];
+  for (let i = 0; i < d.length; i++) {
+    const b = d[i];
+    const s = parseInt(b.STOK) || 0;
+    chunks.push(`<tr><td style="color:var(--muted);font-size:12px;">${i+1}</td><td><span class="order-id">${escapeHtml(b.KODE_BARANG)}</span></td><td>${escapeHtml(b.NAMA_BARANG)}</td><td><span style="background:var(--dark3);padding:3px 10px;border-radius:20px;font-size:11px;">${escapeHtml(b.KATEGORI||'-')}</span></td><td>${escapeHtml(b.SATUAN||'-')}</td><td style="color:var(--orange);font-weight:700;">${formatRp(b.HARGA)}</td><td style="color:${s<=5?'var(--red)':'var(--green)'};font-weight:700;">${s}</td></tr>`);
+  }
+  tb.innerHTML = chunks.join('');
+}
+
+function renderCabang() {
+  const chunks = [];
+  for (const [id, info] of Object.entries(CABANG_INFO)) {
+    const o = allOrders.filter(x => x.ID_CABANG === id);
+    const p = o.filter(x => String(x.STATUS) === 'PENDING').length;
+    const a = o.filter(x => String(x.STATUS) === 'APPROVED').length;
+    chunks.push(`<div class="cabang-card"><div class="cabang-card-header"><div class="cabang-avatar">${info.icon}</div><div><div class="cabang-name">${info.nama}</div><div class="cabang-id">${id} · PIC: ${info.pic}</div></div></div><div class="cabang-stats"><div class="cabang-stat"><div class="cabang-stat-val">${o.length}</div><div class="cabang-stat-lbl">Total</div></div><div class="cabang-stat"><div class="cabang-stat-val" style="color:var(--yellow)">${p}</div><div class="cabang-stat-lbl">Tertunda</div></div><div class="cabang-stat"><div class="cabang-stat-val" style="color:var(--green)">${a}</div><div class="cabang-stat-lbl">Disetujui</div></div></div></div>`);
+  }
+  DOM.cabangGrid.innerHTML = chunks.join('');
+}
+
+function renderLaporan() {
+  let gp=0, ga=0, gr=0, gt=0;
+  const chunks = [];
+  for (const [id, info] of Object.entries(CABANG_INFO)) {
+    const o = allOrders.filter(x => x.ID_CABANG === id);
+    const p = o.filter(x => String(x.STATUS) === 'PENDING').length;
+    const a = o.filter(x => String(x.STATUS) === 'APPROVED').length;
+    const r = o.filter(x => String(x.STATUS) === 'REJECTED').length;
+    const rate = o.length ? Math.round(a/o.length*100) : 0;
+    gt+=o.length; gp+=p; ga+=a; gr+=r;
+    chunks.push(`<tr><td><span class="cabang-badge">${info.icon} ${id}</span></td><td>${info.nama}</td><td style="font-size:12px;color:var(--muted);">${info.pic}</td><td style="font-weight:700;">${o.length}</td><td style="color:var(--yellow);font-weight:700;">${p}</td><td style="color:var(--green);font-weight:700;">${a}</td><td style="color:var(--red);font-weight:700;">${r}</td><td><div style="display:flex;align-items:center;gap:8px;"><div style="flex:1;height:6px;background:var(--dark3);border-radius:3px;overflow:hidden;"><div style="width:${rate}%;height:100%;background:var(--green);"></div></div><span style="font-size:12px;font-weight:700;color:var(--green);min-width:35px;">${rate}%</span></div></td></tr>`);
+  }
+  const grate = gt ? Math.round(ga/gt*100) : 0;
+  DOM.laporanBody.innerHTML = chunks.join('') + `<tr class="total-row"><td colspan="3">TOTAL</td><td>${gt}</td><td>${gp}</td><td>${ga}</td><td>${gr}</td><td>${grate}% ✅</td></tr>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// APPROVE / REJECT
+// ═══════════════════════════════════════════════════════════════
+function quickApprove(id) {
+  const order = allOrders.find(o => o.ORDER_ID === id);
+  const cb = order ? CABANG_INFO[order.ID_CABANG] : { pic: '-' };
+  showConfirm({
+    icon: '✅', title: 'Setujui Pesanan?',
+    msg: `Pesanan ${id}\nCabang: ${cb.pic}\n\n✔️ SELURUH item disetujui\n📧 Email dikirim ke cabang\n📦 Stok sudah dipotong`,
+    okText: '✅ Ya, Setujui', okClass: 'success',
+    onOk: () => updateOrderStatus(id, 'APPROVED', '')
+  });
+}
+
+function quickReject(id) {
+  const order = allOrders.find(o => o.ORDER_ID === id);
+  const cb = order ? CABANG_INFO[order.ID_CABANG] : { pic: '-' };
+  showPrompt({
+    icon: '❌', title: 'Tolak Seluruh Pesanan',
+    msg: `Pesanan ${id} — Cabang: ${cb.pic}\n\nIsi alasan (WAJIB):`,
+    placeholder: 'Contoh: Stok habis...', okText: '❌ Ya, Tolak',
+    okClass: 'danger', required: true,
+    onOk: (alasan) => updateOrderStatus(id, 'REJECTED', alasan)
+  });
+}
+
+async function updateOrderStatus(id, status, alasan) {
+  // OPTIMISTIC UI — langsung update visual
+  const idx = allOrders.findIndex(o => o.ORDER_ID === id);
+  const oldStatus = idx >= 0 ? allOrders[idx].STATUS : null;
+  if (idx >= 0) {
+    allOrders[idx].STATUS = status;
+    allOrders[idx].TANGGAL_PROSES = new Date().toLocaleString('id-ID');
+    rafBatch(() => {
+      updateStats(); updatePendingBadge(); renderPendingOrders(); updateDonut(); updateActivity();
+      if ($('page-orders').classList.contains('active')) applyFilters($('orderSearch').value);
+    });
+  }
+
+  showToast(`⏳ ${status === 'APPROVED' ? 'Menyetujui' : 'Menolak'} ${id}...`, 'info', 2000);
+
+  const data = await callAPI('updateStatus', { orderId: id, status, alasan });
+
+  if (data.status === 'ok') {
+    showToast(status === 'APPROVED' ? '✅ Disetujui, email diproses' : '❌ Ditolak, email diproses', 'success', 3000);
+  } else {
+    // Rollback jika gagal
+    if (idx >= 0 && oldStatus) {
+      allOrders[idx].STATUS = oldStatus;
+      rafBatch(() => {
+        updateStats(); updatePendingBadge(); renderPendingOrders(); updateDonut();
+        if ($('page-orders').classList.contains('active')) applyFilters($('orderSearch').value);
+      });
+    }
+    showToast('❌ ' + (data.message || 'Gagal'), 'error', 5000);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SHOW DETAIL + EDIT
+// ═══════════════════════════════════════════════════════════════
+function showDetail(orderId) {
+  const order = allOrders.find(o => o.ORDER_ID === orderId);
+  if (!order) return;
+  editOrderId = orderId;
+  editItems = (order.DETAIL || []).map(d => ({
+    kode: String(d.KODE_BARANG||''),
+    nama: String(d.NAMA_BARANG||''),
+    kategori: String(d.KATEGORI||''),
+    qty: parseFloat(d.QTY)||0,
+    originalQty: parseFloat(d.ORIGINAL_QTY) || parseFloat(d.QTY) || 0,
+    satuan: String(d.SATUAN||'PCS'),
+    harga: parseFloat(d.HARGA_SATUAN)||0,
+    itemStatus: String(d.ITEM_STATUS||'APPROVED').toUpperCase(),
+    reason: String(d.REASON||'')
+  }));
+
+  const cb = CABANG_INFO[order.ID_CABANG] || { nama:'-', icon:'🏪', pic:'-' };
+  const sc = { PENDING:'var(--yellow)', APPROVED:'var(--green)', REJECTED:'var(--red)' };
+
+  DOM.modalTitle.textContent = `📦 ${orderId}`;
+  DOM.modalBody.innerHTML = `
+    <div class="info-row"><span class="info-label">Cabang</span><span class="info-value">${cb.icon} ${cb.nama} (${order.ID_CABANG})</span></div>
+    <div class="info-row"><span class="info-label">PIC</span><span class="info-value">${cb.pic}</span></div>
+    <div class="info-row"><span class="info-label">Pesanan Tanggal</span><span class="info-value">${formatTanggalDisplay(String(order.TANGGAL_ORDER||''))} WITA</span></div>
+    <div class="info-row"><span class="info-label">Status</span><span class="info-value" style="color:${sc[order.STATUS]||'#fff'};font-weight:800;">${order.STATUS}</span></div>
+    ${order.CATATAN?`<div class="info-row"><span class="info-label">Catatan Cabang</span><span class="info-value">${escapeHtml(order.CATATAN)}</span></div>`:''}
+    <div class="edit-section-title">✏️ Kelola Item Pesanan <span class="edit-section-count" id="editSectionCount">${editItems.length} item</span></div>
+    <div id="editRows"></div>
+    <div class="add-row">
+      <select id="addKode"><option value="">+ Pilih barang untuk ditambah…</option>${allKatalog.map(b=>`<option value="${escapeHtml(b.KODE_BARANG)}">${escapeHtml(b.KODE_BARANG)} — ${escapeHtml(b.NAMA_BARANG)}</option>`).join('')}</select>
+      <input type="number" id="addQty" min="1" value="1" placeholder="Jml">
+      <button class="btn-add-item" onclick="tambahItem()">+ Tambah</button>
+    </div>
+    <div class="edit-total"><span>Total Disetujui:</span><span id="editTotal">Rp 0</span></div>
+    <textarea class="edit-catatan" id="editCatatan" rows="2" placeholder="Catatan admin untuk perubahan (opsional)..."></textarea>
+    <div class="modal-foot">
+      <button class="mf-btn mf-save" id="btnSaveEdit" onclick="konfirmasiSimpan()">💾 Simpan Perubahan</button>
+      <button class="mf-btn mf-email" id="btnSendEmail" onclick="konfirmasiKirimEmail()">📧 Kirim Email ke Cabang</button>
+      <button class="mf-btn mf-cancel" onclick="closeModalDirect()">Tutup</button>
+    </div>
+  `;
+  renderEditRows();
+  DOM.modalOverlay.classList.add('show');
+}
+
+function renderEditRows() {
+  const wrap = $('editRows');
+  if (!wrap) return;
+  if (!editItems.length) {
+    wrap.innerHTML = '<div class="empty-state" style="padding:24px;"><p>Tidak ada item.</p></div>';
+    hitungTotal();
+    return;
+  }
+  const chunks = [];
+  for (let idx = 0; idx < editItems.length; idx++) {
+    const it = editItems[idx];
+    const isDel = it.itemStatus === 'DELETED';
+    const isRej = it.itemStatus === 'REJECTED';
+    const isEdited = !isDel && !isRej && it.originalQty && it.originalQty !== it.qty;
+    let cls='approved', badge='', needReason=false, reasonLabel='Keterangan (opsional)', reasonPh='...';
+
+    if (isDel) { cls='deleted'; badge='<span class="er-badge del-badge">🗑️ DIHAPUS</span>'; needReason=true; reasonLabel='📝 Alasan Penghapusan (WAJIB)'; reasonPh='Contoh: Barang tidak dalam katalog...'; }
+    else if (isRej) { cls='rejected'; badge='<span class="er-badge rej-badge">🚫 DITOLAK</span>'; needReason=true; reasonLabel='📝 Alasan Penolakan (WAJIB)'; reasonPh='Contoh: Stok tidak cukup...'; }
+    else if (isEdited) { cls='edited'; badge='<span class="er-badge edit-badge">✏️ DIEDIT</span>'; reasonLabel='📝 Keterangan Perubahan Qty (opsional)'; reasonPh=`Qty asli: ${it.originalQty}, sekarang: ${it.qty}. Alasan...`; }
+
+    const showRestore = isDel || isRej;
+
+    chunks.push(`<div class="edit-row ${cls}"><div class="er-top"><div><div class="er-kode">${escapeHtml(it.kode)} ${badge}</div><div class="er-nama">${escapeHtml(it.nama||'(nama tidak ada)')}</div><div class="er-harga">${formatRp(it.harga)} / ${escapeHtml(it.satuan)}</div></div><input type="number" class="er-qty" min="1" value="${it.qty}" ${(isDel||isRej)?'disabled':''} data-idx="${idx}"><div class="er-sub">${(!isDel&&!isRej)?formatRp(it.qty*it.harga):'-'}</div><div class="er-acts">${showRestore?`<button class="er-btn restore" onclick="pulihkanItem(${idx})" title="Pulihkan">↩️</button>`:`<button class="er-btn edit" onclick="editQtyManual(${idx})" title="Edit">✏️</button><button class="er-btn rej ${isRej?'on':''}" onclick="tolakItem(${idx})" title="Tolak">🚫</button><button class="er-btn del ${isDel?'on':''}" onclick="hapusItem(${idx})" title="Hapus">🗑️</button>`}</div></div>${(needReason||isEdited)?`<div class="er-reason"><div class="er-reason-label">${reasonLabel}</div><textarea class="${needReason&&!it.reason?'required-empty':''}" placeholder="${reasonPh}" data-reason-idx="${idx}">${escapeHtml(it.reason||'')}</textarea></div>`:''}</div>`);
+  }
+  wrap.innerHTML = chunks.join('');
+  $('editSectionCount').textContent = `${editItems.length} item`;
+
+  // Attach event handlers (delegation-style, SEKALI SAJA)
+  wrap.querySelectorAll('.er-qty').forEach(inp => {
+    inp.addEventListener('input', debouncedQty);
+  });
+  wrap.querySelectorAll('textarea[data-reason-idx]').forEach(ta => {
+    ta.addEventListener('input', reasonHandler);
+  });
+
+  hitungTotal();
+}
+
+// Debounced qty update — TIDAK laggy saat ketik cepat
+const debouncedQty = debounce(function(e) {
+  const idx = parseInt(e.target.dataset.idx);
+  const val = e.target.value;
+  ubahQty(idx, val);
+}, 250);
+
+function reasonHandler(e) {
+  const idx = parseInt(e.target.dataset.reasonIdx);
+  setReason(idx, e.target.value);
+}
+
+function ubahQty(idx, val) {
+  const it = editItems[idx];
+  if (!it) return;
+  const newQty = Math.max(1, parseInt(val) || 1);
+  if (it.qty === newQty) return;
+  it.qty = newQty;
+  if (it.itemStatus !== 'APPROVED') it.itemStatus = 'APPROVED';
+  rafBatch(() => renderEditRows());
+}
+
+function editQtyManual(idx) {
+  const it = editItems[idx];
+  if (!it) return;
+  showPrompt({
+    icon: '✏️', title: 'Ubah Qty & Keterangan',
+    msg: `${it.kode} — ${it.nama}\nQty asli: ${it.originalQty}\nQty saat ini: ${it.qty}`,
+    placeholder: 'Alasan perubahan qty (opsional)...',
+    okText: '💾 Update', okClass: 'info', required: false,
+    defaultVal: it.reason||'', showNumber: true, numberVal: it.qty,
+    onOk: (result) => {
+      it.qty = Math.max(1, result.number);
+      it.reason = result.text;
+      if (it.itemStatus !== 'APPROVED') it.itemStatus = 'APPROVED';
+      rafBatch(() => renderEditRows());
+      showToast('✏️ Qty diperbarui', 'info', 2000);
+    }
+  });
+}
+
+function tolakItem(idx) {
+  const it = editItems[idx];
+  if (!it) return;
+  if (it.itemStatus === 'REJECTED') {
+    it.itemStatus = 'APPROVED'; it.reason = '';
+    rafBatch(() => renderEditRows());
+    showToast('↩️ Item dipulihkan', 'success', 2000);
+    return;
+  }
+  showPrompt({
+    icon: '🚫', title: 'Tolak Item',
+    msg: `${it.kode} — ${it.nama}\nQty: ${it.qty}\n\nIsi alasan (WAJIB):`,
+    placeholder: 'Contoh: Stok tidak cukup...', okText: '🚫 Ya, Tolak',
+    okClass: 'danger', required: true, defaultVal: it.reason||'',
+    onOk: (reason) => {
+      it.itemStatus = 'REJECTED'; it.reason = reason;
+      rafBatch(() => renderEditRows());
+      showToast('🚫 Item ditolak', 'warning', 2000);
+    }
+  });
+}
+
+function hapusItem(idx) {
+  const it = editItems[idx];
+  if (!it) return;
+  if (it.itemStatus === 'DELETED') {
+    it.itemStatus = 'APPROVED'; it.reason = '';
+    rafBatch(() => renderEditRows());
+    showToast('↩️ Item dipulihkan', 'success', 2000);
+    return;
+  }
+  showPrompt({
+    icon: '🗑️', title: 'Hapus Item',
+    msg: `${it.kode} — ${it.nama}\nQty: ${it.qty}\n\nIsi alasan penghapusan (WAJIB):`,
+    placeholder: 'Contoh: Tidak ada di katalog...', okText: '🗑️ Ya, Hapus',
+    okClass: 'danger', required: true, defaultVal: it.reason||'',
+    onOk: (reason) => {
+      it.itemStatus = 'DELETED'; it.reason = reason;
+      rafBatch(() => renderEditRows());
+      showToast('🗑️ Item dihapus', 'warning', 2000);
+    }
+  });
+}
+
+function pulihkanItem(idx) {
+  const it = editItems[idx];
+  if (!it) return;
+  it.itemStatus = 'APPROVED'; it.reason = '';
+  rafBatch(() => renderEditRows());
+  showToast('↩️ Item dipulihkan', 'success', 2000);
+}
+
+function setReason(idx, val) {
+  if (editItems[idx]) editItems[idx].reason = val;
+}
+
+function tambahItem() {
+  const kode = $('addKode').value;
+  const qty = Math.max(1, parseInt($('addQty').value)||1);
+  if (!kode) { showToast('⚠️ Pilih barang', 'warning'); return; }
+  const b = allKatalog.find(x => String(x.KODE_BARANG).toUpperCase() === String(kode).toUpperCase());
+  if (!b) { showToast('❌ Barang tidak ditemukan', 'error'); return; }
+  const stok = parseInt(b.STOK) || 0;
+  if (stok < qty) { showToast(`⚠️ Stok hanya ${stok}`, 'warning'); return; }
+  const ada = editItems.find(x => String(x.kode).toUpperCase() === String(kode).toUpperCase() && x.itemStatus === 'APPROVED');
+  if (ada) {
+    ada.qty += qty;
+    showToast(`✅ Qty ${kode} +${qty}`, 'success', 2000);
+  } else {
+    editItems.push({
+      kode: String(b.KODE_BARANG), nama: String(b.NAMA_BARANG||''),
+      kategori: String(b.KATEGORI||''), qty, originalQty: 0,
+      satuan: String(b.SATUAN||'PCS'), harga: parseFloat(b.HARGA)||0,
+      itemStatus: 'APPROVED', reason: 'Item baru ditambahkan admin'
+    });
+    showToast(`✅ ${b.NAMA_BARANG} ditambahkan`, 'success', 2000);
+  }
+  $('addKode').value = ''; $('addQty').value = 1;
+  rafBatch(() => renderEditRows());
+}
+
+function hitungTotal() {
+  const t = editItems.filter(i => i.itemStatus === 'APPROVED').reduce((s,i) => s + i.qty*i.harga, 0);
+  const el = $('editTotal');
+  if (el) el.textContent = formatRp(t);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SIMPAN & KIRIM EMAIL
+// ═══════════════════════════════════════════════════════════════
+function konfirmasiSimpan() {
+  const aktif = editItems.filter(i => i.itemStatus === 'APPROVED').length;
+  const rej = editItems.filter(i => i.itemStatus === 'REJECTED').length;
+  const del = editItems.filter(i => i.itemStatus === 'DELETED').length;
+  const edited = editItems.filter(i => i.itemStatus === 'APPROVED' && i.originalQty && i.originalQty !== i.qty).length;
+  if (!aktif && !rej && !del) { showToast('⚠️ Pesanan kosong', 'warning'); return; }
+  const kurang = editItems.filter(i => (i.itemStatus === 'REJECTED' || i.itemStatus === 'DELETED') && !i.reason.trim());
+  if (kurang.length > 0) { showToast(`⚠️ ${kurang.length} item butuh alasan`, 'warning', 3000); renderEditRows(); return; }
+  const order = allOrders.find(o => o.ORDER_ID === editOrderId);
+  const statusLama = order ? String(order.STATUS).toUpperCase() : 'PENDING';
+  showConfirm({
+    icon: '💾', title: 'Simpan Perubahan Saja?',
+    msg: `Order ${editOrderId}:\n✅ ${aktif} disetujui${edited?`\n✏️ ${edited} diedit`:''}${rej?`\n🚫 ${rej} ditolak`:''}${del?`\n🗑️ ${del} dihapus`:''}\n\n⚠️ STATUS TETAP ${statusLama}\n📧 Email BELUM dikirim\n📦 Stok disesuaikan otomatis`,
+    okText: '💾 Ya, Simpan', okClass: 'success',
+    onOk: () => doSimpanEdit(false)
+  });
+}
+
+function konfirmasiKirimEmail() {
+  const order = allOrders.find(o => o.ORDER_ID === editOrderId);
+  const cb = order ? CABANG_INFO[order.ID_CABANG] : { pic:'-' };
+  const aktif = editItems.filter(i => i.itemStatus === 'APPROVED').length;
+  const rej = editItems.filter(i => i.itemStatus === 'REJECTED').length;
+  const del = editItems.filter(i => i.itemStatus === 'DELETED').length;
+  const edited = editItems.filter(i => i.itemStatus === 'APPROVED' && i.originalQty && i.originalQty !== i.qty).length;
+  if (!aktif && !rej && !del) { showToast('⚠️ Tidak ada item', 'warning'); return; }
+  const kurang = editItems.filter(i => (i.itemStatus === 'REJECTED' || i.itemStatus === 'DELETED') && !i.reason.trim());
+  if (kurang.length > 0) { showToast(`⚠️ ${kurang.length} item butuh alasan`, 'warning', 3000); renderEditRows(); return; }
+  const newStatus = aktif === 0 ? 'REJECTED' : 'APPROVED';
+  showConfirm({
+    icon: '📧', title: 'Approve & Kirim Email?',
+    msg: `Ke email cabang ${cb.pic}\n📧 CC Admin\n\n✅ ${aktif} disetujui${edited?`\n✏️ ${edited} diedit`:''}${rej?`\n🚫 ${rej} ditolak + alasan`:''}${del?`\n🗑️ ${del} dihapus + alasan`:''}\n\n⚡ Status jadi: ${newStatus}\n💾 Perubahan disimpan sekaligus`,
+    okText: '📧 Approve & Kirim', okClass: 'info',
+    onOk: () => doSimpanEdit(true)
+  });
+}
+
+async function doSimpanEdit(kirimEmail) {
+  const btnSave = $('btnSaveEdit');
+  const btnEmail = $('btnSendEmail');
+  if (btnSave) { btnSave.disabled = true; btnSave.innerHTML = '<span class="mini-spin"></span> Menyimpan...'; }
+  if (btnEmail) btnEmail.disabled = true;
+
+  const payload = {
+    orderId: editOrderId,
+    catatanAdmin: $('editCatatan').value.trim(),
+    diprosesOleh: 'Admin Dashboard',
+    kirimEmail,
+    items: editItems.map(i => ({
+      kode: i.kode, nama: i.nama, kategori: i.kategori,
+      qty: i.qty, satuan: i.satuan, harga: i.harga,
+      itemStatus: i.itemStatus, reason: i.reason||'',
+      originalQty: i.originalQty
+    }))
+  };
+
+  const hasil = await callAPI('editOrder', payload);
+
+  if (btnSave) { btnSave.disabled = false; btnSave.innerHTML = '💾 Simpan Perubahan'; }
+  if (btnEmail) btnEmail.disabled = false;
+
+  if (hasil.status === 'ok') {
+    showToast('✅ Disimpan!', 'success', 3000);
+    if (kirimEmail) showToast('📧 Email diproses', 'info', 3000);
+    closeModalDirect();
+    lastLoadTime = 0; // force refresh
+    loadAllData(true);
+  } else {
+    showToast('❌ ' + (hasil.message || 'Gagal'), 'error', 5000);
+  }
+}
+
+function closeModal(e) {
+  if (e.target === DOM.modalOverlay) closeModalDirect();
+}
+
+function closeModalDirect() {
+  DOM.modalOverlay.classList.remove('show');
+}
+
+// ═══════════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════════
 window.addEventListener('load', () => {
   const s = checkSession();
   if (!s) return;
-  document.getElementById('adminNama').textContent = s.nama || 'Admin';
-  document.getElementById('sidebarUserName').textContent = s.nama || 'Admin';
+
+  // Cache all DOM elements
+  ['topbarTime','btnRefresh','sidebar','sidebarOverlay','toastContainer',
+   'confirmOverlay','confirmIcon','confirmTitle','confirmMsg','confirmOk','confirmCancel',
+   'promptOverlay','promptIcon','promptTitle','promptMsg','promptInput','promptNumber','promptOk','promptCancel',
+   'topbarTitle','statTotal','statPending','statApproved','statRejected','pendingBadge',
+   'donutApproved','donutPending','donutRejected','donutTotal',
+   'legendApproved','legendPending','legendRejected',
+   'barChart','activityFeed','pendingOrdersBody','allOrdersBody','katalogBody','cabangGrid','laporanBody',
+   'modalOverlay','modalTitle','modalBody','adminNama','sidebarUserName'
+  ].forEach(id => DOM[id] = $(id));
+
+  DOM.adminNama.textContent = s.nama || 'Admin';
+  DOM.sidebarUserName.textContent = s.nama || 'Admin';
+
+  // Confirm & Prompt handlers
+  DOM.confirmCancel.onclick = () => { DOM.confirmOverlay.classList.remove('show'); _confirmCb = null; };
+  DOM.confirmOk.onclick = () => {
+    DOM.confirmOverlay.classList.remove('show');
+    if (typeof _confirmCb === 'function') _confirmCb();
+    _confirmCb = null;
+  };
+  DOM.promptCancel.onclick = () => { DOM.promptOverlay.classList.remove('show'); _promptCb = null; };
+  DOM.promptOk.onclick = () => {
+    const val = DOM.promptInput.value.trim();
+    const num = parseInt(DOM.promptNumber.value) || 1;
+    if (_promptCb && _promptCb.required && !val) { showToast('⚠️ Alasan wajib!', 'warning'); return; }
+    DOM.promptOverlay.classList.remove('show');
+    if (_promptCb && typeof _promptCb.fn === 'function') {
+      _promptCb.fn(_promptCb.showNumber ? { text: val, number: num } : val);
+    }
+    _promptCb = null;
+  };
+
+  // Debounced search
+  const debSearchOrder = debounce((v) => applyFilters(v), 200);
+  const debSearchKatalog = debounce((v) => renderKatalog(v), 200);
+  $('orderSearch')?.addEventListener('input', e => debSearchOrder(e.target.value));
+  $('katalogSearch')?.addEventListener('input', e => debSearchKatalog(e.target.value));
+
+  // Clock
   setInterval(updateClock, 1000);
   updateClock();
-  loadAllData();
-  // Auto refresh setiap 60 detik
-  setInterval(loadAllData, 60 * 1000);
+
+  // Initial load
+  loadAllData(true);
+
+  // Auto-refresh setiap 60 detik (silent, tidak block)
+  setInterval(() => loadAllData(false), 60000);
 });
 </script>
 
