@@ -4,31 +4,31 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0">
 <meta name="theme-color" content="#0c0c15">
-<meta name="description" content="GudangHub — Sistem pemesanan barang antar cabang PT Central Perabot Utama NTT">
-<title>GudangHub — Sistem Pemesanan Barang Antar Cabang</title>
+<meta name="description" content="GudangHub — Sistem order barang antar cabang PT Central Perabot Utama NTT">
+<title>GudangHub — Sistem Order Barang Antar Cabang</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/lucide@0.383.0/dist/umd/lucide.min.js" defer></script>
 <style>
-*, *::sebelum, *::setelah {
+*, *::before, *::after {
   margin: 0;
   padding: 0;
-  ukuran kotak: kotak-batas;
-  -webkit-tap-highlight-color: transparan;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
-:akar {
-  --oranye: #ff6b00;
-  --cahaya-oranye: #ff8c38;
+:root {
+  --orange: #ff6b00;
+  --orange-light: #ff8c38;
   --orange-deep: #e05a00;
-  --tinta: #0c0c15;
+  --ink: #0c0c15;
   --ink2: #14141f;
   --ink3: #1c1c2b;
-  --baris: rgba(255,255,255,0.09);
-  --baris2: rgba(255,255,255,0.05);
-  --teks: #ede8e2;
-  --dibisukan: #9a958f;
+  --line: rgba(255,255,255,0.09);
+  --line2: rgba(255,255,255,0.05);
+  --text: #ede8e2;
+  --muted: #9a958f;
   --space: clamp(56px, 9vw, 140px);
   --safe-top: env(safe-area-inset-top, 0);
   --safe-bottom: env(safe-area-inset-bottom, 0);
@@ -37,19 +37,19 @@
 }
 
 html {
-  perilaku pengguliran: halus;
-  latar belakang: var(--tinta);
+  scroll-behavior: smooth;
+  background: var(--ink);
   -webkit-text-size-adjust: 100%;
-  Sesuaikan ukuran teks: 100%;
-  overflow-x: tersembunyi;
+  text-size-adjust: 100%;
+  overflow-x: hidden;
 }
 
-tubuh {
-  latar belakang: transparan;
-  warna: var(--teks);
+body {
+  background: transparent;
+  color: var(--text);
   font-family: 'Manrope', system-ui, -apple-system, sans-serif;
-  Tinggi baris: 1,55;
-  overflow-x: tersembunyi;
+  line-height: 1.55;
+  overflow-x: hidden;
   min-height: 100dvh;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
@@ -58,70 +58,70 @@ tubuh {
   padding-right: var(--safe-right);
 }
 
-/* TEKSTUR LATAR BELAKANG */
-badan::sebelum {
-  isi: '';
-  posisi: tetap;
-  sisipan: 0;
-  indeks z: 0;
+/* BACKGROUND TEXTURE */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
   pointer-events: none;
-  gambar latar belakang:
-    gradien linier(rgba(255,255,255,0.020) 1px, transparan 1px),
-    gradien linier(90 derajat, rgba(255,255,255,0.020) 1px, transparan 1px);
-  ukuran latar belakang: 46px 46px;
-  akan berubah: bertransformasi;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.020) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.020) 1px, transparent 1px);
+  background-size: 46px 46px;
+  will-change: transform;
 }
 
-badan::setelah {
-  isi: '';
-  posisi: tetap;
-  sisipan: 0;
-  indeks z: 0;
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
   pointer-events: none;
-  latar belakang:
-    radial-gradient(60vw 60vw pada 82% 8%, rgba(255,107,0,0.06), transparan 60%),
-    gradien radial(50vw 50vw pada 12% 88%, rgba(255,107,0,0.05), transparan 60%);
+  background:
+    radial-gradient(60vw 60vw at 82% 8%, rgba(255,107,0,0.06), transparent 60%),
+    radial-gradient(50vw 50vw at 12% 88%, rgba(255,107,0,0.05), transparent 60%);
 }
 
 ::selection { background: var(--orange); color: #fff; }
 
 h1, h2, h3, h4 {
   font-family: 'Fraunces', Georgia, serif;
-  ketebalan font: 600;
-  pembungkus teks: seimbang;
-  spasi antar huruf: -0,01em;
-  Tinggi baris: 1,1;
+  font-weight: 600;
+  text-wrap: balance;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
   overflow-wrap: break-word;
-  pembungkus kata: pemisah kata;
+  word-wrap: break-word;
 }
 
-img, svg { lebar maksimum: 100%; tinggi: otomatis; tampilan: blok; }
+img, svg { max-width: 100%; height: auto; display: block; }
 
-.membungkus {
-  lebar maksimum: 1240px;
-  margin: 0 otomatis;
+.wrap {
+  max-width: 1240px;
+  margin: 0 auto;
   padding: 0 clamp(16px, 4vw, 48px);
-  lebar: 100%;
+  width: 100%;
 }
 
-a { warna: mewarisi; dekorasi teks: tidak ada; }
+a { color: inherit; text-decoration: none; }
 
 [data-lucide] { display: inline-block; vertical-align: middle; stroke-width: 1.6; }
 
 .nav, .hero, .marquee, .steps, .showcase, .team, .about, .stats, .cabang, .cta, .footer {
-  posisi: relatif;
-  indeks z: 1;
+  position: relative;
+  z-index: 1;
 }
 
-.mengungkap {
-  opasitas: 0;
-  transformasi: translasiY(20px);
-  transisi: opasitas 0.7s kubik-bezier(0.16,1,0.3,1), transformasi 0.7s kubik-bezier(0.16,1,0.3,1);
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1);
 }
 
-.ungkap.in {
-  opasitas: 1;
-  transformasi: tidak ada;
+.reveal.in {
+  opacity: 1;
+  transform: none;
 }
 
 .reveal[data-d="1"] { transition-delay: 0.08s; }
@@ -134,412 +134,412 @@ a { warna: mewarisi; dekorasi teks: tidak ada; }
 
 /* ═══════════ NAV ═══════════ */
 .nav {
-  posisi: tetap;
-  atas: 0;
-  kiri: 0;
-  kanan: 0;
-  Indeks z: 100;
-  transisi: latar belakang 0,3 detik kemudahan, warna batas 0,3 detik kemudahan, filter latar belakang 0,3 detik;
-  batas bawah: 1px solid transparan;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  transition: background 0.3s ease, border-color 0.3s ease, backdrop-filter 0.3s;
+  border-bottom: 1px solid transparent;
   padding-top: var(--safe-top);
 }
 
-.nav.gulir {
-  latar belakang: rgba(12,12,21,0.88);
+.nav.scrolled {
+  background: rgba(12,12,21,0.88);
   -webkit-backdrop-filter: blur(14px);
-  filter latar belakang: buram(14px);
+  backdrop-filter: blur(14px);
   border-bottom-color: var(--line2);
 }
 
 .nav-inner {
-  lebar maksimum: 1240px;
-  margin: 0 otomatis;
+  max-width: 1240px;
+  margin: 0 auto;
   padding: 14px clamp(16px, 4vw, 48px);
-  tampilan: fleksibel;
-  sejajarkan item: tengah;
+  display: flex;
+  align-items: center;
   gap: clamp(16px, 3vw, 40px);
 }
 
-.merek {
-  tampilan: fleksibel;
-  sejajarkan item: tengah;
-  jarak: 10px;
-  fleksibel-menyusut: 0;
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
-.merek dagang {
-  lebar: penjepit(36px, 4vw, 40px);
-  tinggi: penjepit(36px, 4vw, 40px);
-  radius batas: 12px;
-  fleksibel-menyusut: 0;
-  latar belakang: gradien linier(140 derajat, var(--oranye), var(--orange-deep));
-  tampilan: grid;
-  tempat-barang: tengah;
-  warna: #fff;
-  bayangan kotak: 0 6px 18px rgba(255,107,0,0.32);
+.brand-mark {
+  width: clamp(36px, 4vw, 40px);
+  height: clamp(36px, 4vw, 40px);
+  border-radius: 12px;
+  flex-shrink: 0;
+  background: linear-gradient(140deg, var(--orange), var(--orange-deep));
+  display: grid;
+  place-items: center;
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(255,107,0,0.32);
 }
 
-.nama-merek {
+.brand-name {
   font-family: 'Fraunces', serif;
-  ketebalan font: 600;
-  ukuran font: penjepit (18px, 2vw, 21px);
-  spasi antar huruf: -0,02em;
-  spasi putih: tidak ada pembungkus;
+  font-weight: 600;
+  font-size: clamp(18px, 2vw, 21px);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
 }
 
-.nama merek em {
-  warna: var(--oranye);
-  gaya font: normal;
+.brand-name em {
+  color: var(--orange);
+  font-style: normal;
 }
 
 .nav-links {
-  tampilan: fleksibel;
+  display: flex;
   gap: clamp(18px, 2.5vw, 30px);
-  margin-kiri: 8px;
-  fleksibel: 1;
+  margin-left: 8px;
+  flex: 1;
 }
 
 .nav-links a {
-  Ukuran font: 14,5px;
-  ketebalan font: 500;
-  warna: var(--muted);
-  transisi: warna 0,2 detik;
-  spasi putih: tidak ada pembungkus;
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--muted);
+  transition: color 0.2s;
+  white-space: nowrap;
 }
 
 .nav-links a:hover, .nav-links a:focus { color: var(--text); }
 
 .nav-cta {
-  margin-kiri: otomatis;
-  tampilan: fleksibel;
-  sejajarkan item: tengah;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
   gap: clamp(10px, 1.8vw, 22px);
-  fleksibel-menyusut: 0;
+  flex-shrink: 0;
 }
 
 .nav-call {
-  tampilan: fleksibel;
-  sejajarkan item: tengah;
-  jarak: 10px;
-  warna: var(--muted);
-  ukuran font: 13px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 13px;
 }
 
 .nav-call b {
-  tampilkan: blok;
-  warna: var(--teks);
-  ukuran font: 14px;
-  ketebalan font: 700;
-  spasi antar huruf: 0,01em;
-  spasi putih: tidak ada pembungkus;
+  display: block;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
 }
 
 .btn {
-  tampilan: inline-flex;
-  sejajarkan item: tengah;
-  jarak: 9px;
-  ketebalan font: 700;
-  Ukuran font: 14,5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-weight: 700;
+  font-size: 14.5px;
   padding: 12px 22px;
-  radius batas: 999px;
-  transisi: transformasi 0,25s kubik-bezier(0,16,1,0,3,1), bayangan kotak 0,25s, latar belakang 0,25s, warna 0,25s;
-  kursor: penunjuk;
-  batas: tidak ada;
-  spasi putih: tidak ada pembungkus;
+  border-radius: 999px;
+  transition: transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s, background 0.25s, color 0.25s;
+  cursor: pointer;
+  border: none;
+  white-space: nowrap;
   min-height: 44px;
   font-family: inherit;
-  pilihan pengguna: tidak ada;
+  user-select: none;
   -webkit-user-select: none;
 }
 
-.tombol-padat {
-  latar belakang: var(--orange);
-  warna: #fff;
-  bayangan kotak: 0 8px 22px rgba(255,107,0,0.32);
+.btn-solid {
+  background: var(--orange);
+  color: #fff;
+  box-shadow: 0 8px 22px rgba(255,107,0,0.32);
 }
 
 .btn-solid:hover, .btn-solid:focus {
-  transformasi: translasiY(-2px);
-  bayangan kotak: 0 12px 30px rgba(255,107,0,0.45);
-  latar belakang: var(--oranye-cahaya);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(255,107,0,0.45);
+  background: var(--orange-light);
 }
 
 .btn-outline {
-  latar belakang: transparan;
-  warna: var(--teks);
-  batas: 1px solid var(--line);
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--line);
 }
 
 .btn-outline:hover, .btn-outline:focus {
-  warna-batas: var(--oranye);
-  warna: var(--oranye);
+  border-color: var(--orange);
+  color: var(--orange);
 }
 
 .burger {
-  tampilan: tidak ada;
-  latar belakang: tidak ada;
-  batas: tidak ada;
-  warna: var(--teks);
-  kursor: penunjuk;
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
   padding: 8px;
   min-width: 44px;
   min-height: 44px;
-  sejajarkan item: tengah;
+  align-items: center;
   justify-content: center;
 }
 
-/* Laci menu seluler */
-.laci-seluler {
-  tampilan: tidak ada;
-  posisi: tetap;
-  atas: 0;
-  kanan: -100%;
-  lebar: min(320px, 85vw);
-  tinggi: 100dvh;
-  tinggi: 100vh;
-  latar belakang: var(--ink2);
+/* Mobile menu drawer */
+.mobile-drawer {
+  display: none;
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: min(320px, 85vw);
+  height: 100dvh;
+  height: 100vh;
+  background: var(--ink2);
   border-left: 1px solid var(--line);
-  Indeks z: 200;
-  transisi: kanan 0.3s kubik-bezier(0.4, 0, 0.2, 1);
+  z-index: 200;
+  transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   padding: calc(var(--safe-top) + 24px) 24px 24px;
-  arah-fleksibel: kolom;
-  jarak: 8px;
-  overflow-y: otomatis;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
 }
 
 .mobile-drawer.open { right: 0; }
 
-.laci-seluler a {
+.mobile-drawer a {
   padding: 14px 16px;
-  radius batas: 12px;
-  ukuran font: 16px;
-  ketebalan font: 600;
-  warna: var(--teks);
-  transisi: latar belakang 0,2 detik;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  transition: background 0.2s;
   min-height: 44px;
-  tampilan: fleksibel;
-  sejajarkan item: tengah;
+  display: flex;
+  align-items: center;
 }
 
 .mobile-drawer a:hover { background: rgba(255,255,255,0.05); }
 
-.laci-mobile .laci-tutup {
-  posisi: absolut;
-  atas: kalkulasi(var(--safe-top) + 16px);
-  kanan: 16px;
-  latar belakang: rgba(255,255,255,0.06);
-  batas: tidak ada;
-  lebar: 40px;
-  tinggi: 40px;
-  radius batas: 10px;
-  warna: var(--teks);
-  kursor: penunjuk;
-  ukuran font: 18px;
+.mobile-drawer .close-drawer {
+  position: absolute;
+  top: calc(var(--safe-top) + 16px);
+  right: 16px;
+  background: rgba(255,255,255,0.06);
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 18px;
 }
 
-.overlay laci {
-  tampilan: tidak ada;
-  posisi: tetap;
-  sisipan: 0;
-  latar belakang: rgba(0,0,0,0.6);
-  Indeks z: 150;
-  opasitas: 0;
-  transisi: opasitas 0,3 detik;
+.drawer-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 150;
+  opacity: 0;
+  transition: opacity 0.3s;
 }
 
 .drawer-overlay.show {
-  tampilkan: blok;
-  opasitas: 1;
+  display: block;
+  opacity: 1;
 }
 </style>
 <style>
-/* ═══════════ PAHLAWAN ═══════════ */
-.pahlawan {
+/* ═══════════ HERO ═══════════ */
+.hero {
   padding-top: clamp(100px, 15vw, 132px);
   padding-bottom: 0;
 }
 
 .hero-top {
-  lebar maksimum: 860px;
-  margin: 0 otomatis;
-  perataan teks: tengah;
+  max-width: 860px;
+  margin: 0 auto;
+  text-align: center;
 }
 
-.alis-pahlawan {
-  tampilan: inline-flex;
-  sejajarkan item: tengah;
-  jarak: 10px;
-  ukuran font: penjepit (11px, 1.4vw, 12.5px);
-  ketebalan font: 700;
-  spasi antar huruf: 0,14em;
-  transformasi teks: huruf besar;
-  warna: var(--oranye);
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: clamp(11px, 1.4vw, 12.5px);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--orange);
   padding: 8px 16px;
-  batas: 1px solid var(--line);
-  radius batas: 999px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
   margin-bottom: clamp(20px, 3vw, 26px);
-  latar belakang: rgba(12,12,21,0.4);
+  background: rgba(12,12,21,0.4);
 }
 
 .hero-eyebrow .dot {
-  lebar: 7px;
-  tinggi: 7px;
-  radius-batas: 50%;
-  latar belakang: var(--orange);
-  bayangan kotak: 0 0 0 4px rgba(255,107,0,0.2);
-  fleksibel-menyusut: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--orange);
+  box-shadow: 0 0 0 4px rgba(255,107,0,0.2);
+  flex-shrink: 0;
 }
 
 .hero h1 {
-  ukuran font: penjepit(32px, 7vw, 78px);
-  ketebalan font: 600;
+  font-size: clamp(32px, 7vw, 78px);
+  font-weight: 600;
   margin-bottom: clamp(16px, 2.5vw, 24px);
 }
 
 .hero h1 em { font-style: italic; color: var(--orange); }
 
 .hero-lead {
-  ukuran font: penjepit (15px, 2vw, 18.5px);
-  warna: var(--muted);
-  lebar maksimum: 54ch;
+  font-size: clamp(15px, 2vw, 18.5px);
+  color: var(--muted);
+  max-width: 54ch;
   margin: 0 auto clamp(24px, 4vw, 34px);
 }
 
-.aksi-pahlawan {
-  tampilan: fleksibel;
+.hero-actions {
+  display: flex;
   gap: clamp(10px, 1.5vw, 16px);
-  flex-wrap: bungkus;
-  sejajarkan item: tengah;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: center;
 }
 
 .hero-btn-lg {
   padding: 14px 26px;
-  ukuran font: 15px;
+  font-size: 15px;
   min-height: 48px;
 }
 
 .hero-banner {
-  posisi: relatif;
-  margin-atas: clamp(30px, 6vw, 72px);
+  position: relative;
+  margin-top: clamp(30px, 6vw, 72px);
   border-radius: clamp(18px, 3vw, 26px);
-  overflow: tersembunyi;
-  bayangan kotak: 0 30px 70px -20px rgba(0,0,0,0.75);
+  overflow: hidden;
+  box-shadow: 0 30px 70px -20px rgba(0,0,0,0.75);
 }
 
 .hero-banner img {
-  lebar: 100%;
-  tinggi: penjepit(240px, 42vw, 560px);
-  kesesuaian objek: sampul;
-  posisi-objek: tengah 62%;
-  tampilkan: blok;
-  transformasi: skala(1.04);
-  transisi: transformasi 1.2s kubik-bezier(0.16,1,0.3,1);
+  width: 100%;
+  height: clamp(240px, 42vw, 560px);
+  object-fit: cover;
+  object-position: center 62%;
+  display: block;
+  transform: scale(1.04);
+  transition: transform 1.2s cubic-bezier(0.16,1,0.3,1);
 }
 
 .hero-banner:hover img { transform: scale(1); }
 
 .hero-banner::after {
-  isi: '';
-  posisi: absolut;
-  sisipan: 0;
-  latar belakang: gradien linier(180 derajat, rgba(12,12,21,0.15) 0%, transparan 30%, rgba(12,12,21,0.6) 100%);
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(12,12,21,0.15) 0%, transparent 30%, rgba(12,12,21,0.6) 100%);
   pointer-events: none;
 }
 
-.tag pahlawan {
-  posisi: absolut;
-  kanan: penjepit(12px, 2vw, 20px);
-  atas: penjepit(12px, 2vw, 20px);
-  indeks z: 3;
-  latar belakang: var(--orange);
-  warna: #fff;
-  radius batas: 12px;
+.hero-tag {
+  position: absolute;
+  right: clamp(12px, 2vw, 20px);
+  top: clamp(12px, 2vw, 20px);
+  z-index: 3;
+  background: var(--orange);
+  color: #fff;
+  border-radius: 12px;
   padding: clamp(8px, 1.4vw, 11px) clamp(12px, 1.8vw, 17px);
-  ketebalan font: 700;
-  ukuran font: penjepit (11px, 1.4vw, 13.5px);
-  bayangan kotak: 0 14px 34px -8px rgba(255,107,0,0.6);
-  tampilan: fleksibel;
-  sejajarkan item: tengah;
-  jarak: 8px;
+  font-weight: 700;
+  font-size: clamp(11px, 1.4vw, 13.5px);
+  box-shadow: 0 14px 34px -8px rgba(255,107,0,0.6);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.lencana-pahlawan {
-  posisi: absolut;
-  kiri: penjepit(12px, 2vw, 20px);
-  bawah: penjepit(12px, 2vw, 20px);
-  indeks z: 3;
-  latar belakang: rgba(20,20,31,0.88);
+.hero-badge {
+  position: absolute;
+  left: clamp(12px, 2vw, 20px);
+  bottom: clamp(12px, 2vw, 20px);
+  z-index: 3;
+  background: rgba(20,20,31,0.88);
   -webkit-backdrop-filter: blur(10px);
-  filter latar belakang: buram(10px);
-  batas: 1px solid var(--line);
-  radius batas: 16px;
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--line);
+  border-radius: 16px;
   padding: clamp(10px, 1.5vw, 15px) clamp(14px, 2vw, 20px);
-  tampilan: fleksibel;
-  sejajarkan item: tengah;
+  display: flex;
+  align-items: center;
   gap: clamp(10px, 1.5vw, 14px);
-  bayangan kotak: 0 20px 44px -14px rgba(0,0,0,0.7);
-  lebar maksimum: hitung (100% - 40px);
+  box-shadow: 0 20px 44px -14px rgba(0,0,0,0.7);
+  max-width: calc(100% - 40px);
 }
 
 .hero-badge .hb-ic {
-  lebar: penjepit(36px, 4vw, 44px);
-  tinggi: penjepit(36px, 4vw, 44px);
-  radius batas: 11px;
-  latar belakang: rgba(255,107,0,0.16);
-  warna: var(--oranye);
-  tampilan: grid;
-  tempat-barang: tengah;
-  fleksibel-menyusut: 0;
+  width: clamp(36px, 4vw, 44px);
+  height: clamp(36px, 4vw, 44px);
+  border-radius: 11px;
+  background: rgba(255,107,0,0.16);
+  color: var(--orange);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
 }
 
 .hero-badge .hb-t {
-  ketebalan font: 700;
-  ukuran font: penjepit (13px, 1.5vw, 15px);
+  font-weight: 700;
+  font-size: clamp(13px, 1.5vw, 15px);
 }
 
 .hero-badge .hb-s {
-  ukuran font: penjepit (11px, 1.3vw, 12.5px);
-  warna: var(--muted);
+  font-size: clamp(11px, 1.3vw, 12.5px);
+  color: var(--muted);
 }
 
 .hero-meta {
-  tampilan: fleksibel;
+  display: flex;
   justify-content: center;
   gap: clamp(20px, 6vw, 72px);
-  margin-atas: clamp(30px, 5vw, 44px);
-  flex-wrap: bungkus;
+  margin-top: clamp(30px, 5vw, 44px);
+  flex-wrap: wrap;
 }
 
 .hero-meta .hm-num {
   font-family: 'Fraunces', serif;
-  ukuran font: penjepit(28px, 5vw, 42px);
-  ketebalan font: 600;
-  warna: var(--teks);
-  varian-font-numerik: angka-tabular;
+  font-size: clamp(28px, 5vw, 42px);
+  font-weight: 600;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
 }
 
 .hero-meta .hm-lbl {
-  ukuran font: penjepit (12px, 1.4vw, 13px);
-  warna: var(--muted);
-  margin-atas: 2px;
-  perataan teks: tengah;
+  font-size: clamp(12px, 1.4vw, 13px);
+  color: var(--muted);
+  margin-top: 2px;
+  text-align: center;
 }
 
 /* ═══════════ MARQUEE ═══════════ */
-tenda {
+.marquee {
   margin-top: var(--space);
-  perbatasan-atas: 1px solid var(--line2);
-  perbatasan-bawah: 1px solid var(--line2);
+  border-top: 1px solid var(--line2);
+  border-bottom: 1px solid var(--line2);
   padding: clamp(16px, 2.5vw, 22px) 0;
-  overflow: tersembunyi;
-  latar belakang: rgba(20,20,31,0.55);
+  overflow: hidden;
+  background: rgba(20,20,31,0.55);
   -webkit-backdrop-filter: blur(2px);
-  filter latar belakang: buram(2px);
+  backdrop-filter: blur(2px);
 }
 
-.jalur marquee {
-  tampilan: fleksibel;
+.marquee-track {
+  display: flex;
   gap: clamp(30px, 6vw, 56px);
   ...
 }
@@ -554,195 +554,195 @@ tenda {
 
 .marquee-item [data-lucide] { color: var(--orange); }
 
-/* ═══════════ JUDUL SEKSI ═══════════ */
-.bagian-kepala {
-  lebar maksimum: 620px;
+/* ═══════════ SECTION HEAD ═══════════ */
+.section-head {
+  max-width: 620px;
   margin-bottom: clamp(32px, 5vw, 56px);
 }
 
 .section-kicker {
-  tampilan: inline-flex;
-  sejajarkan item: tengah;
-  jarak: 9px;
-  ukuran font: penjepit (11px, 1.4vw, 12.5px);
-  ketebalan font: 700;
-  spasi antar huruf: 0,14em;
-  transformasi teks: huruf besar;
-  warna: var(--oranye);
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: clamp(11px, 1.4vw, 12.5px);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--orange);
   margin-bottom: clamp(14px, 2vw, 18px);
 }
 
 .section-kicker::before {
-  isi: '';
-  lebar: 28px;
-  tinggi: 1px;
-  latar belakang: var(--orange);
+  content: '';
+  width: 28px;
+  height: 1px;
+  background: var(--orange);
 }
 
-.bagian-judul h2 {
-  ukuran font: penjepit(26px, 5vw, 50px);
+.section-head h2 {
+  font-size: clamp(26px, 5vw, 50px);
 }
 
-.bagian-kepala p {
-  warna: var(--muted);
-  ukuran font: penjepit (15px, 1.8vw, 17px);
-  margin-atas: 16px;
+.section-head p {
+  color: var(--muted);
+  font-size: clamp(15px, 1.8vw, 17px);
+  margin-top: 16px;
 }
 
-/* ═══════════ LANGKAH-LANGKAH ═══════════ */
-.langkah { padding: var(--space) 0; }
+/* ═══════════ STEPS ═══════════ */
+.steps { padding: var(--space) 0; }
 
-.langkah-grid {
-  tampilan: grid;
+.steps-grid {
+  display: grid;
   grid-template-columns: repeat(4, 1fr);
-  celah: 0;
-  perbatasan-atas: 1px solid var(--line);
+  gap: 0;
+  border-top: 1px solid var(--line);
 }
 
-.melangkah {
+.step {
   padding: clamp(28px, 4vw, 40px) clamp(20px, 3vw, 28px) clamp(28px, 4vw, 40px) 0;
   border-right: 1px solid var(--line2);
-  posisi: relatif;
+  position: relative;
 }
 
 .step:last-child { border-right: none; padding-right: 0; }
 
-.langkah-n {
+.step-n {
   font-family: 'Fraunces', serif;
-  ukuran font: 15px;
-  warna: var(--oranye);
-  ketebalan font: 600;
+  font-size: 15px;
+  color: var(--orange);
+  font-weight: 600;
   margin-bottom: clamp(20px, 3vw, 26px);
 }
 
 .step-ic {
-  lebar: penjepit(48px, 6vw, 54px);
-  tinggi: penjepit(48px, 6vw, 54px);
-  radius batas: 14px;
-  latar belakang: var(--ink3);
-  warna: var(--oranye);
-  tampilan: grid;
-  tempat-barang: tengah;
+  width: clamp(48px, 6vw, 54px);
+  height: clamp(48px, 6vw, 54px);
+  border-radius: 14px;
+  background: var(--ink3);
+  color: var(--orange);
+  display: grid;
+  place-items: center;
   margin-bottom: clamp(18px, 2.5vw, 22px);
-  transisi: latar belakang 0,3 detik, warna 0,3 detik, transformasi 0,3 detik kubik-bezier(0,16,1,0,3,1);
+  transition: background 0.3s, color 0.3s, transform 0.3s cubic-bezier(0.16,1,0.3,1);
 }
 
 .step:hover .step-ic {
-  latar belakang: var(--orange);
-  warna: #fff;
-  transformasi: translasiY(-4px);
+  background: var(--orange);
+  color: #fff;
+  transform: translateY(-4px);
 }
 
-.langkah h3 {
-  ukuran font: penjepit (18px, 2.4vw, 21px);
+.step h3 {
+  font-size: clamp(18px, 2.4vw, 21px);
   margin-bottom: 10px;
 }
 
-.langkah p {
-  ukuran font: penjepit (13px, 1.6vw, 14.5px);
-  warna: var(--muted);
+.step p {
+  font-size: clamp(13px, 1.6vw, 14.5px);
+  color: var(--muted);
 }
 
-/* ═══════════ PAMERAN ═══════════ */
+/* ═══════════ SHOWCASE ═══════════ */
 .showcase { padding: 0 0 var(--space); }
 
-.tampilan kepala {
-  tampilan: fleksibel;
-  sejajarkan-item: ujung-fleksibel;
+.showcase-head {
+  display: flex;
+  align-items: flex-end;
   justify-content: space-between;
-  jarak: 24px;
+  gap: 24px;
   margin-bottom: clamp(28px, 4vw, 44px);
-  flex-wrap: bungkus;
+  flex-wrap: wrap;
 }
 
-.galeri {
-  tampilan: grid;
+.gallery {
+  display: grid;
   grid-template-columns: repeat(6, 1fr);
   grid-auto-rows: clamp(140px, 20vw, 200px);
   gap: clamp(10px, 1.5vw, 16px);
 }
 
-.ubin {
-  posisi: relatif;
-  radius-batas: penjepit(14px, 2vw, 20px);
-  overflow: tersembunyi;
-  batas: 1px solid var(--line2);
+.tile {
+  position: relative;
+  border-radius: clamp(14px, 2vw, 20px);
+  overflow: hidden;
+  border: 1px solid var(--line2);
 }
 
 .tile img {
-  lebar: 100%;
-  tinggi: 100%;
-  kesesuaian objek: sampul;
-  tampilkan: blok;
-  transisi: transformasi 0.7s kubik-bezier(0.16,1,0.3,1);
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.7s cubic-bezier(0.16,1,0.3,1);
 }
 
 .tile:hover img { transform: scale(1.06); }
 
 .tile::after {
-  isi: '';
-  posisi: absolut;
-  sisipan: 0;
-  latar belakang: gradien linier(200 derajat, transparan 40%, rgba(10,10,18,0.82));
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(200deg, transparent 40%, rgba(10,10,18,0.82));
 }
 
-.label-ubin {
-  posisi: absolut;
-  kiri: 20px;
-  bawah: 18px;
-  indeks z: 2;
+.tile-label {
+  position: absolute;
+  left: 20px;
+  bottom: 18px;
+  z-index: 2;
 }
 
-.label-ubin .tl-k {
-  ukuran font: 11px;
-  warna: var(--oranye);
-  ketebalan font: 700;
-  spasi antar huruf: 0,06em;
-  transformasi teks: huruf besar;
+.tile-label .tl-k {
+  font-size: 11px;
+  color: var(--orange);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
-.label-ubin .tl-n {
+.tile-label .tl-n {
   font-family: 'Fraunces', serif;
-  ukuran font: penjepit (18px, 2.4vw, 23px);
-  ketebalan font: 600;
+  font-size: clamp(18px, 2.4vw, 23px);
+  font-weight: 600;
 }
 
-.ubin-panah {
-  posisi: absolut;
-  kanan: 16px;
-  atas: 16px;
-  indeks z: 2;
-  lebar: 38px;
-  tinggi: 38px;
-  radius-batas: 50%;
-  latar belakang: rgba(255,255,255,0.1);
+.tile-arrow {
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  z-index: 2;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
   -webkit-backdrop-filter: blur(6px);
-  filter latar belakang: buram(6px);
-  tampilan: grid;
-  tempat-barang: tengah;
-  warna: #fff;
-  opasitas: 0;
-  transformasi: terjemahkan(-4px, 4px);
-  transisi: semua 0,35s kubik-bezier(0,16,1,0,3,1);
+  backdrop-filter: blur(6px);
+  display: grid;
+  place-items: center;
+  color: #fff;
+  opacity: 0;
+  transform: translate(-4px, 4px);
+  transition: all 0.35s cubic-bezier(0.16,1,0.3,1);
 }
 
 .tile:hover .tile-arrow { opacity: 1; transform: none; }
 
-.t-besar { grid-kolom: rentang 3; grid-baris: rentang 2; }
+.t-big { grid-column: span 3; grid-row: span 2; }
 .t-tall { grid-column: span 2; grid-row: span 2; }
 .t-wide { grid-column: span 3; }
 .t-sq { grid-column: span 2; }
 
-.ubin padat {
-  tampilan: fleksibel;
-  arah-fleksibel: kolom;
+.tile-solid {
+  display: flex;
+  flex-direction: column;
   justify-content: space-between;
   padding: clamp(16px, 2.5vw, 22px);
-  latar belakang: var(--ink3);
+  background: var(--ink3);
 }
 
 .tile-solid.accent {
-  latar belakang: gradien linier(150 derajat, var(--oranye), var(--orange-deep));
+  background: linear-gradient(150deg, var(--orange), var(--orange-deep));
 }
 
 .tile-solid::after { display: none; }
@@ -753,109 +753,109 @@ tenda {
 .tile-solid.accent .tl-k { opacity: 0.85; }
 .tile-solid .tl-k { color: var(--muted); }
 
-/* ═══════════ TENTANG KAMI ═══════════ */
-.tentang {
+/* ═══════════ ABOUT ═══════════ */
+.about {
   padding: var(--space) 0;
-  latar belakang: rgba(20,20,31,0.55);
+  background: rgba(20,20,31,0.55);
   -webkit-backdrop-filter: blur(2px);
-  filter latar belakang: buram(2px);
-  perbatasan-atas: 1px solid var(--line2);
-  perbatasan-bawah: 1px solid var(--line2);
+  backdrop-filter: blur(2px);
+  border-top: 1px solid var(--line2);
+  border-bottom: 1px solid var(--line2);
 }
 
-.tentang-dalam {
-  tampilan: grid;
+.about-inner {
+  display: grid;
   grid-template-columns: 1fr 1fr;
   gap: clamp(30px, 6vw, 90px);
-  sejajarkan item: tengah;
+  align-items: center;
 }
 
-.tentang-media {
-  posisi: relatif;
-  lebar maksimum: 100%;
+.about-media {
+  position: relative;
+  max-width: 100%;
 }
 
 .about-media .am-main {
-  radius-batas: penjepit(18px, 2.5vw, 24px);
-  overflow: tersembunyi;
-  Rasio aspek: 5/5,6;
-  bayangan kotak: 0 40px 80px -24px rgba(0,0,0,0.7);
+  border-radius: clamp(18px, 2.5vw, 24px);
+  overflow: hidden;
+  aspect-ratio: 5/5.6;
+  box-shadow: 0 40px 80px -24px rgba(0,0,0,0.7);
 }
 
 .about-media .am-main img {
-  lebar: 100%;
-  tinggi: 100%;
-  kesesuaian objek: sampul;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .about-media .am-float {
-  posisi: absolut;
-  kanan: penjepit(-20px, -2vw, -30px);
-  bawah: 60px;
-  lebar: 44%;
-  radius batas: 18px;
-  overflow: tersembunyi;
-  batas: 4px solid var(--ink2);
-  bayangan kotak: 0 24px 50px -14px rgba(0,0,0,0.75);
+  position: absolute;
+  right: clamp(-20px, -2vw, -30px);
+  bottom: 60px;
+  width: 44%;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 4px solid var(--ink2);
+  box-shadow: 0 24px 50px -14px rgba(0,0,0,0.75);
 }
 
 .about-media .am-float img { width: 100%; display: block; }
 
-.tentang h2 {
-  ukuran font: penjepit(26px, 4vw, 50px);
+.about h2 {
+  font-size: clamp(26px, 4vw, 50px);
   margin-bottom: 20px;
 }
 
 .about > .about-inner p.lead {
-  warna: var(--muted);
-  ukuran font: penjepit (15px, 1.8vw, 17px);
+  color: var(--muted);
+  font-size: clamp(15px, 1.8vw, 17px);
   margin-bottom: clamp(28px, 4vw, 36px);
-  lebar maksimum: 48ch;
+  max-width: 48ch;
 }
 
-.tentang-daftar {
-  tampilan: fleksibel;
-  arah-fleksibel: kolom;
+.about-list {
+  display: flex;
+  flex-direction: column;
   gap: clamp(20px, 3vw, 26px);
   margin-bottom: clamp(30px, 4vw, 40px);
 }
 
-.tentang-item {
-  tampilan: fleksibel;
-  jarak: 16px;
+.about-item {
+  display: flex;
+  gap: 16px;
 }
 
 .about-item .ai-ic {
-  lebar: 48px;
-  tinggi: 48px;
-  radius batas: 12px;
-  fleksibel-menyusut: 0;
-  latar belakang: rgba(255,107,0,0.13);
-  warna: var(--oranye);
-  tampilan: grid;
-  tempat-barang: tengah;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  flex-shrink: 0;
+  background: rgba(255,107,0,0.13);
+  color: var(--orange);
+  display: grid;
+  place-items: center;
 }
 
-.tentang-item h4 {
+.about-item h4 {
   font-family: 'Manrope', sans-serif;
-  ketebalan font: 700;
-  ukuran font: penjepit (15px, 1.8vw, 16.5px);
+  font-weight: 700;
+  font-size: clamp(15px, 1.8vw, 16.5px);
   margin-bottom: 5px;
-  spasi antar huruf: 0;
+  letter-spacing: 0;
 }
 
-.tentang-item p {
-  ukuran font: penjepit (13px, 1.6vw, 14.5px);
-  warna: var(--muted);
+.about-item p {
+  font-size: clamp(13px, 1.6vw, 14.5px);
+  color: var(--muted);
 }
 
-/* ═══════════ STATISTIK ═══════════ */
+/* ═══════════ STATS ═══════════ */
 .stats { padding: var(--space) 0; }
 
-.statistik grid {
-  tampilan: grid;
+.stats-grid {
+  display: grid;
   grid-template-columns: repeat(4, 1fr);
-  jarak: 20px;
+  gap: 20px;
 }
 
 .stat {
@@ -865,191 +865,191 @@ tenda {
 
 .stat .s-num {
   font-family: 'Fraunces', serif;
-  ukuran font: penjepit(36px, 6vw, 66px);
-  ketebalan font: 600;
-  warna: var(--teks);
-  Tinggi baris: 1;
-  varian-font-numerik: angka-tabular;
+  font-size: clamp(36px, 6vw, 66px);
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
 }
 
-.stat .s-num .suf { warna: var(--oranye); }
+.stat .s-num .suf { color: var(--orange); }
 
 .stat .s-lbl {
-  margin-atas: 12px;
-  ukuran font: penjepit (13px, 1.6vw, 15px);
-  warna: var(--muted);
+  margin-top: 12px;
+  font-size: clamp(13px, 1.6vw, 15px);
+  color: var(--muted);
 }
 
 /* ═══════════ CABANG ═══════════ */
 .cabang {
   padding: var(--space) 0;
-  latar belakang: rgba(20,20,31,0.55);
+  background: rgba(20,20,31,0.55);
   -webkit-backdrop-filter: blur(2px);
-  filter latar belakang: buram(2px);
-  perbatasan-atas: 1px solid var(--line2);
+  backdrop-filter: blur(2px);
+  border-top: 1px solid var(--line2);
 }
 
 .cabang-list { border-top: 1px solid var(--line); }
 
-.cabang-baris {
-  tampilan: grid;
+.cabang-row {
+  display: grid;
   grid-template-columns: 80px 1fr 1fr auto;
   gap: clamp(16px, 2.5vw, 24px);
-  sejajarkan item: tengah;
+  align-items: center;
   padding: clamp(20px, 3vw, 30px) 8px;
-  perbatasan-bawah: 1px solid var(--line2);
-  transisi: latar belakang 0,3 detik, padding 0,3 detik;
+  border-bottom: 1px solid var(--line2);
+  transition: background 0.3s, padding 0.3s;
 }
 
 .cabang-row:hover {
-  latar belakang: rgba(255,107,0,0.05);
+  background: rgba(255,107,0,0.05);
   padding-left: 22px;
 }
 
 .cabang-row .cr-id {
   font-family: 'Fraunces', serif;
-  ukuran font: penjepit (20px, 2.6vw, 26px);
-  warna: var(--oranye);
-  ketebalan font: 600;
+  font-size: clamp(20px, 2.6vw, 26px);
+  color: var(--orange);
+  font-weight: 600;
 }
 
 .cabang-row .cr-store {
   font-family: 'Fraunces', serif;
-  ukuran font: penjepit (16px, 2.2vw, 21px);
+  font-size: clamp(16px, 2.2vw, 21px);
 }
 
 .cabang-row .cr-pic {
-  tampilan: fleksibel;
-  sejajarkan item: tengah;
-  jarak: 10px;
-  warna: var(--muted);
-  ukuran font: penjepit (13px, 1.6vw, 15px);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: clamp(13px, 1.6vw, 15px);
 }
 
 .cabang-row .cr-pic .cr-av {
-  lebar: 40px;
-  tinggi: 40px;
-  radius-batas: 50%;
-  latar belakang: gradien linier(140 derajat, var(--oranye), var(--orange-deep));
-  tampilan: grid;
-  tempat-barang: tengah;
-  warna: #fff;
-  ketebalan font: 700;
-  font-family: 'Tali Manro';
-  ukuran font: 15px;
-  fleksibel-menyusut: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(140deg, var(--orange), var(--orange-deep));
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 700;
+  font-family: 'Manrope';
+  font-size: 15px;
+  flex-shrink: 0;
 }
 
 .cabang-row .cr-go {
-  lebar: 42px;
-  tinggi: 42px;
-  radius-batas: 50%;
-  batas: 1px solid var(--line);
-  tampilan: grid;
-  tempat-barang: tengah;
-  warna: var(--muted);
-  transisi: semua 0.3s kubik-bezier(0.16,1,0.3,1);
-  fleksibel-menyusut: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+  flex-shrink: 0;
 }
 
 .cabang-row:hover .cr-go {
-  latar belakang: var(--orange);
-  warna-batas: var(--oranye);
-  warna: #fff;
-  transformasi: putar (-45 derajat);
+  background: var(--orange);
+  border-color: var(--orange);
+  color: #fff;
+  transform: rotate(-45deg);
 }
 
 /* ═══════════ CTA ═══════════ */
 .cta { padding: var(--space) 0; }
 
 .cta-box {
-  posisi: relatif;
-  radius-batas: penjepit(20px, 3vw, 30px);
-  overflow: tersembunyi;
+  position: relative;
+  border-radius: clamp(20px, 3vw, 30px);
+  overflow: hidden;
   padding: clamp(36px, 6vw, 96px) clamp(24px, 4vw, 60px);
-  perataan teks: tengah;
+  text-align: center;
 }
 
 .cta-box img {
-  posisi: absolut;
-  sisipan: 0;
-  lebar: 100%;
-  tinggi: 100%;
-  kesesuaian objek: sampul;
-  indeks z: 0;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
 }
 
-.cta-box::setelah {
-  isi: '';
-  posisi: absolut;
-  sisipan: 0;
-  latar belakang: gradien linier(120 derajat, rgba(224,90,0,0.92), rgba(255,107,0,0.78));
-  indeks z: 1;
+.cta-box::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, rgba(224,90,0,0.92), rgba(255,107,0,0.78));
+  z-index: 1;
 }
 
 .cta-box > * { position: relative; z-index: 2; }
 
 .cta-box h2 {
-  ukuran font: penjepit(26px, 5vw, 62px);
-  warna: #fff;
+  font-size: clamp(26px, 5vw, 62px);
+  color: #fff;
   margin-bottom: clamp(14px, 2.5vw, 20px);
 }
 
 .cta-box p {
-  warna: rgba(255,255,255,0.92);
-  ukuran font: penjepit (15px, 2vw, 18px);
-  lebar maksimum: 52ch;
+  color: rgba(255,255,255,0.92);
+  font-size: clamp(15px, 2vw, 18px);
+  max-width: 52ch;
   margin: 0 auto clamp(28px, 4vw, 38px);
 }
 
 .cta-box .btn-solid {
-  latar belakang: #fff;
-  warna: var(--oranye-gelap);
-  bayangan kotak: 0 14px 34px rgba(0,0,0,0.28);
+  background: #fff;
+  color: var(--orange-deep);
+  box-shadow: 0 14px 34px rgba(0,0,0,0.28);
 }
 
 .cta-box .btn-solid:hover {
-  latar belakang: var(--tinta);
-  warna: #fff;
+  background: var(--ink);
+  color: #fff;
 }
 
 /* ═══════════ FOOTER ═══════════ */
 .footer {
   padding: clamp(48px, 8vw, 72px) 0 34px;
   padding-bottom: calc(34px + var(--safe-bottom));
-  perbatasan-atas: 1px solid var(--line2);
+  border-top: 1px solid var(--line2);
 }
 
 .footer-top {
-  tampilan: grid;
+  display: grid;
   grid-template-columns: 1.8fr 1fr 1fr 1fr;
   gap: clamp(24px, 4vw, 40px);
   padding-bottom: clamp(32px, 5vw, 48px);
 }
 
 .footer-about p {
-  warna: var(--muted);
-  Ukuran font: 14,5px;
-  lebar maksimum: 34ch;
-  margin-atas: 18px;
+  color: var(--muted);
+  font-size: 14.5px;
+  max-width: 34ch;
+  margin-top: 18px;
 }
 
 .footer-col h5 {
-  font-family: 'Tali Manro';
-  ukuran font: 12px;
-  ketebalan font: 700;
-  spasi antar huruf: 0,08em;
-  transformasi teks: huruf besar;
-  warna: var(--teks);
+  font-family: 'Manrope';
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text);
   margin-bottom: 16px;
 }
 
 .footer-col a {
-  tampilkan: blok;
-  warna: var(--muted);
-  Ukuran font: 14,5px;
+  display: block;
+  color: var(--muted);
+  font-size: 14.5px;
   margin-bottom: 12px;
-  transisi: warna 0,2 detik;
+  transition: color 0.2s;
   padding: 4px 0;
   min-height: 32px;
 }
@@ -1057,20 +1057,20 @@ tenda {
 .footer-col a:hover, .footer-col a:focus { color: var(--orange); }
 
 .footer-bottom {
-  tampilan: fleksibel;
+  display: flex;
   justify-content: space-between;
-  sejajarkan item: tengah;
+  align-items: center;
   padding-top: 24px;
-  perbatasan-atas: 1px solid var(--line2);
-  warna: var(--muted);
-  ukuran font: 13px;
-  flex-wrap: bungkus;
-  jarak: 12px;
+  border-top: 1px solid var(--line2);
+  color: var(--muted);
+  font-size: 13px;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .footer-bottom b { color: var(--orange); }
 
-/* ═══════════ TITIK BALIK RESPONSIF ═══════════ */
+/* ═══════════ RESPONSIVE BREAKPOINTS ═══════════ */
 @media (max-width: 1024px) {
   .nav-links { display: none; }
   .nav-call { display: none; }
@@ -1081,8 +1081,8 @@ tenda {
   .steps-grid { grid-template-columns: 1fr 1fr; }
   .step { border-right: none; border-bottom: 1px solid var(--line2); padding-right: 24px; }
   .step:nth-child(2n) { border-right: none; }
-  .galeri { grid-template-columns: repeat(4, 1fr); }
-  .t-besar, .t-tinggi, .t-lebar { grid-column: span 2; }
+  .gallery { grid-template-columns: repeat(4, 1fr); }
+  .t-big, .t-tall, .t-wide { grid-column: span 2; }
   .about-inner { grid-template-columns: 1fr; }
   .about-media { max-width: 460px; margin: 0 auto; }
   .about-media .am-float { right: 20px; }
@@ -1094,10 +1094,10 @@ tenda {
   .hero-meta { gap: 24px; }
   .steps-grid { grid-template-columns: 1fr; }
   .step { border-bottom: 1px solid var(--line2); padding-right: 0; }
-  .galeri { grid-template-columns: 1fr 1fr; grid-auto-rows: 150px; gap: 8px; }
-  .t-besar, .t-tinggi, .t-lebar, .t-persegi { kolom-grid: rentang 2; baris-grid: rentang 1; }
-  .t-besar, .t-tinggi { baris grid: rentang 2; }
-  .cabang-baris {
+  .gallery { grid-template-columns: 1fr 1fr; grid-auto-rows: 150px; gap: 8px; }
+  .t-big, .t-tall, .t-wide, .t-sq { grid-column: span 2; grid-row: span 1; }
+  .t-big, .t-tall { grid-row: span 2; }
+  .cabang-row {
     grid-template-columns: 60px 1fr auto;
     padding: 18px 4px;
   }
@@ -1105,17 +1105,17 @@ tenda {
   .cabang-row:hover { padding-left: 8px; }
   .footer-top { grid-template-columns: 1fr; gap: 24px; }
   .footer-bottom { flex-direction: column; text-align: center; }
-  .hero-tag { ukuran font: 11px; padding: 7px 12px; }
-  .lencana-pahlawan {
-    kiri: 12px;
-    kanan: 12px;
-    bawah: 12px;
-    lebar maksimum: tidak ada;
+  .hero-tag { font-size: 11px; padding: 7px 12px; }
+  .hero-badge {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    max-width: none;
   }
 }
 
 @media (max-width: 380px) {
-  .nama-merek { ukuran-font: 16px; }
+  .brand-name { font-size: 16px; }
   .btn { padding: 10px 16px; font-size: 13px; }
   .hero-btn-lg { padding: 12px 20px; font-size: 14px; }
   .hero-actions { flex-direction: column; width: 100%; }
@@ -1131,7 +1131,7 @@ tenda {
 
 <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
 
-<!-- LACI PONSEL -->
+<!-- MOBILE DRAWER -->
 <div class="mobile-drawer" id="mobileDrawer">
   <button class="close-drawer" onclick="closeDrawer()" aria-label="Tutup menu">✕</button>
   <a href="#cara" onclick="closeDrawer()">🔧 Cara Kerja</a>
@@ -1145,11 +1145,11 @@ tenda {
 <!-- NAV -->
 <nav class="nav" id="nav">
   <div class="nav-inner">
-    <a href="#atas" class="merek">
+    <a href="#top" class="brand">
       <span class="brand-mark">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35A2 2 0 0 1 3.26 6.5l8-3.2a2 2 0 0 1 1.48 0l8 3.2A2 2 0 0 1 22 8.35Zpath d="M6 18h12path d="M6 14h12rect width="12" height="12" x="6" y="10/svg>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35A2 2 0 0 1 3.26 6.5l8-3.2a2 2 0 0 1 1.48 0l8 3.2A2 2 0 0 1 22 8.35Z"/><path d="M6 18h12"/><path d="M6 14h12"/><rect width="12" height="12" x="6" y="10"/></svg>
       </span>
-      <span class="brand-name">GudangHub</em></span>
+      <span class="brand-name">Gudang<em>Hub</em></span>
     </a>
     <div class="nav-links">
       <a href="#cara">Cara Kerja</a>
@@ -1168,18 +1168,18 @@ tenda {
       </div>
       <a href="login.html" class="btn btn-solid">Masuk →</a>
       <button class="burger" id="burger" onclick="openDrawer()" aria-label="Menu">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12line x1="4" x2="20" y1="6" y2="6line x1="4" x2="20" y1="18" y2="18/svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
       </button>
     </div>
   </div>
 </nav>
 
-<!-- PAHLAWAN -->
+<!-- HERO -->
 <header class="hero wrap" id="top">
   <div class="hero-top">
     <span class="hero-eyebrow reveal"><span class="dot"></span> PT Central Perabot Utama</span>
     <h1 class="reveal" data-d="1">Kirim order barang <em>antar cabang</em> tanpa ribet.</h1>
-    <p class="hero-lead mengungkapkan" data-d="2">Satu sistem yang menghubungkan empat toko cabang ke gudang pusat PT Central Perabot Utama. Cabang tinggal pilih dari katalog, admin tinggal proses. Semua tercatat, real-time.</p>
+    <p class="hero-lead reveal" data-d="2">Satu sistem menghubungkan empat toko cabang ke gudang pusat PT Central Perabot Utama. Cabang tinggal pilih dari katalog, admin tinggal proses. Semua tercatat, real-time.</p>
     <div class="hero-actions reveal" data-d="3">
       <a href="login.html" class="btn btn-solid hero-btn-lg">Mulai Order →</a>
       <a href="#cara" class="btn btn-outline hero-btn-lg">Lihat Cara Kerja</a>
@@ -1192,8 +1192,8 @@ tenda {
     <div class="hero-badge">
       <span class="hb-ic">📦</span>
       <div>
-        <div class="hb-t">Pesanan disetujui</div>
-        <div class="hb-s">Pemberitahuan email otomatis</div>
+        <div class="hb-t">Order disetujui</div>
+        <div class="hb-s">Notifikasi email otomatis</div>
       </div>
     </div>
   </div>
@@ -1201,7 +1201,7 @@ tenda {
   <div class="hero-meta">
     <div class="reveal">
       <div class="hm-num" data-count="4">0</div>
-      <div class="hm-lbl">Kabang aktif</div>
+      <div class="hm-lbl">Cabang aktif</div>
     </div>
     <div class="reveal" data-d="1">
       <div class="hm-num" data-count="9">0</div>
@@ -1209,139 +1209,83 @@ tenda {
     </div>
     <div class="reveal" data-d="2">
       <div class="hm-num" data-count="500" data-suffix="+">0</div>
-      <div class="hm-lbl">Perabotan</div>
+      <div class="hm-lbl">Item furnitur</div>
     </div>
   </div>
 </header>
 
-<!-- ═══════════ MARQUEE KATEGORI — IKON SVG KUSTOM ═══════════ -->
+<!-- ═══════════ MARQUEE KATEGORI — INFINITE SEAMLESS ═══════════ -->
 <style>
 .marquee-cat {
-  posisi: relatif;
-  overflow: tersembunyi;
-  padding: clamp(20px, 3vw, 30px) 0;
+  position: relative;
+  overflow: hidden;
+  padding: clamp(18px, 2.5vw, 26px) 0;
   margin-top: var(--space);
-  latar belakang:
-    gradien linier (90 derajat,
-      rgba(20,20,31,0.7) 0%,
-      rgba(28,20,35,0.6) 50%,
-      rgba(20,20,31,0.7) 100%);
-  -webkit-backdrop-filter: blur(6px);
-  filter latar belakang: buram(6px);
-  border-top: 1px solid rgba(255,107,0,0.12);
-  border-bottom: 1px solid rgba(255,107,0,0.12);
-  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 6%, #000 94%, transparent 100%);
-  mask-image: linear-gradient(90deg, transparent 0%, #000 6%, #000 94%, transparent 100%);
-  indeks z: 1;
+  background: rgba(20,20,31,0.6);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  border-top: 1px solid var(--line2);
+  border-bottom: 1px solid var(--line2);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%);
+  z-index: 1;
 }
 
-.marquee-cat::before {
-  isi: '';
-  posisi: absolut;
-  sisipan: 0;
-  latar belakang:
-    radial-gradient(ellipse 40% 100% at 20% 50%, rgba(255,107,0,0.06), transparent 60%),
-    radial-gradient(ellipse 40% 100% at 80% 50%, rgba(255,107,0,0.05), transparent 60%);
-  pointer-events: none;
-}
-
-.trek kucing marquee {
-  tampilan: fleksibel;
-  gap: clamp(38px, 5.5vw, 58px);
-  lebar: konten maksimum;
-  animasi: marqueeCatSlide 42s linear tak terbatas;
-  akan berubah: bertransformasi;
-  sejajarkan item: tengah;
-  posisi: relatif;
-  indeks z: 2;
+.marquee-cat-track {
+  display: flex;
+  gap: clamp(40px, 6vw, 64px);
+  width: max-content;
+  animation: marqueeCatSlide 40s linear infinite;
+  will-change: transform;
+  align-items: center;
 }
 
 .marquee-cat:hover .marquee-cat-track {
-  status pemutaran animasi: dijeda;
+  animation-play-state: paused;
 }
 
 @keyframes marqueeCatSlide {
-  dari { transform: translate3d(0, 0, 0); }
-  ke { transform: translate3d(calc(-50% - 29px), 0, 0); }
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(calc(-50% - 32px), 0, 0); }
 }
 
 .mc-item {
-  tampilan: inline-flex;
-  sejajarkan item: tengah;
-  jarak: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
   font-family: 'Fraunces', Georgia, serif;
-  ukuran font: penjepit (17px, 2.2vw, 22px);
-  ketebalan font: 500;
-  warna: rgba(237,232,226,0.55);
-  spasi putih: tidak ada pembungkus;
-  transisi: warna 0,3 detik kemudahan, transformasi 0,3 detik kemudahan;
-  fleksibel-menyusut: 0;
-  spasi antar huruf: -0,01em;
-  kursor: default;
+  font-size: clamp(18px, 2.4vw, 24px);
+  color: var(--muted);
+  white-space: nowrap;
+  transition: color 0.3s ease;
+  flex-shrink: 0;
 }
 
-.mc-item:hover {
-  warna: var(--teks);
-  transformasi: translasiY(-2px);
-}
+.mc-item:hover { color: var(--text); }
 
-.mc-item .mc-icon-wrap {
-  tampilan: inline-flex;
-  sejajarkan item: tengah;
-  justify-content: center;
-  lebar: penjepit(30px, 3.4vw, 38px);
-  tinggi: penjepit(30px, 3.4vw, 38px);
-  radius batas: 10px;
-  latar belakang: rgba(255,107,0,0.08);
-  batas: 1px solid rgba(255,107,0,0.18);
-  transisi: semua kemudahan 0,3 detik;
-  fleksibel-menyusut: 0;
-  posisi: relatif;
-}
-
-.mc-item:hover .mc-icon-wrap {
-  latar belakang: rgba(255,107,0,0.16);
-  warna-batas: rgba(255,107,0,0.4);
-  transformasi: putar(-4 derajat) skala(1,08);
-  bayangan kotak: 0 0 20px rgba(255,107,0,0.35);
-}
-
-.mc-icon-wrap svg {
-  lebar: 65%;
-  tinggi: 65%;
-  stroke: var(--orange);
-  isi: tidak ada;
-  lebar goresan: 1,6;
-  stroke-linecap: bulat;
-  stroke-linejoin: round;
-  transisi: langkah 0,3 detik;
-}
-
-.mc-item:hover .mc-icon-wrap svg {
-  goresan: var(--oranye-terang);
+.mc-item .mc-icon {
+  font-size: clamp(22px, 2.6vw, 28px);
+  line-height: 1;
+  display: inline-flex;
+  filter: drop-shadow(0 0 12px rgba(255,107,0,0.35));
 }
 
 .mc-dot {
-  lebar: 4px;
-  tinggi: 4px;
-  radius-batas: 50%;
-  latar belakang: var(--orange);
-  fleksibel-menyusut: 0;
-  opasitas: 0,35;
-  bayangan kotak: 0 0 6px rgba(255,107,0,0.5);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--orange);
+  flex-shrink: 0;
+  opacity: 0.5;
+  box-shadow: 0 0 8px rgba(255,107,0,0.6);
 }
 
 @media (max-width: 600px) {
-  .trek kucing marquee {
-    jarak: 30px;
-    Durasi animasi: 30 detik;
+  .marquee-cat-track {
+    gap: 32px;
+    animation-duration: 28s;
   }
-  .mc-item { gap: 9px; }
-  .mc-item .mc-icon-wrap {
-    lebar: 28px;
-    tinggi: 28px;
-    radius batas: 8px;
-  }
+  .mc-item { gap: 10px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1352,212 +1296,56 @@ tenda {
 <div class="marquee-cat" aria-label="Kategori barang">
   <div class="marquee-cat-track">
 
-    <!-- ══════ SET 1 ══════ -->
-
-    <span class="mc-item">
-      <span class="mc-icon-wrap">
-        <!-- Kursi (Chair) -->
-        <svg viewBox="0 0 24 24"><path d="M6 20v-4M18 20v-4M6 16h12M7 16v-5c0-2 1.5-3 5-3s5 1 5 3v5M9 8V5c0-1.5 1-2.5 3-2.5s3 1 3 2.5v3/svg>
-      </span>
-      Kursi
-    </span>
+    <!-- SET 1 -->
+    <span class="mc-item"><span class="mc-icon">🪑</span> Kursi</span>
+    <span class="mc-dot"></span>
+    <span class="mc-item"><span class="mc-icon">🛏️</span> Kasur</span>
+    <span class="mc-dot"></span>
+    <span class="mc-item"><span class="mc-icon">🍽️</span> Meja</span>
+    <span class="mc-dot"></span>
+    <span class="mc-item"><span class="mc-icon">📺</span> Elektronik</span>
+    <span class="mc-dot"></span>
+    <span class="mc-item"><span class="mc-icon">🍳</span> Peralatan Dapur</span>
+    <span class="mc-dot"></span>
+    <span class="mc-item"><span class="mc-icon">🍴</span> Peralatan Makan</span>
+    <span class="mc-dot"></span>
+    <span class="mc-item"><span class="mc-icon">🚿</span> Peralatan Mandi</span>
+    <span class="mc-dot"></span>
+    <span class="mc-item"><span class="mc-icon">🗄️</span> Lemari</span>
+    <span class="mc-dot"></span>
+    <span class="mc-item"><span class="mc-icon">🗃️</span> Loker</span>
+    <span class="mc-dot"></span>
+    <span class="mc-item"><span class="mc-icon">🛋️</span> Sofa</span>
+    <span class="mc-dot"></span>
+    <span class="mc-item"><span class="mc-icon">📚</span> Rak Buku</span>
+    <span class="mc-dot"></span>
+    <span class="mc-item"><span class="mc-icon">🎨</span> Dekorasi</span>
     <span class="mc-dot"></span>
 
-    <span class="mc-item">
-      <span class="mc-icon-wrap">
-        <!-- Kasur (Tempat Tidur) -->
-        <svg viewBox="0 0 24 24"><path d="M3 18v-4c0-1 1-2 2-2h14c1 0 2 1 2 2v4M3 18h18M3 18v2M21 18v2M5 12V8c0-1 1-2 2-2h4c1 0 2 1 2 2v4/svg>
-      </span>
-      Kasur
-    </span>
+    <!-- SET 2 (DUPLIKAT UNTUK SEAMLESS LOOP) -->
+    <span class="mc-item"><span class="mc-icon">🪑</span> Kursi</span>
     <span class="mc-dot"></span>
-
-    <span class="mc-item">
-      <span class="mc-icon-wrap">
-        <!-- Meja -->
-        <svg viewBox="0 0 24 24"><path d="M3 9h18M5 9v11M19 9v11M8 20v-4M16 20v-4M4 6h16l-1 3H5z/svg>
-      </span>
-      Meja
-    </span>
+    <span class="mc-item"><span class="mc-icon">🛏️</span> Kasur</span>
     <span class="mc-dot"></span>
-
-    <span class="mc-item">
-      <span class="mc-icon-wrap">
-        <!-- Elektronik (TV/Monitor) -->
-        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2path d="M8 21h8M12 17v4M7 8h4M7 11h2/svg>
-      </span>
-      Elektronik
-    </span>
+    <span class="mc-item"><span class="mc-icon">🍽️</span> Meja</span>
     <span class="mc-dot"></span>
-
-    <span class="mc-item">
-      <span class="mc-icon-wrap">
-        <!-- Peralatan Dapur (Wajan Masak) -->
-        <svg viewBox="0 0 24 24"><path d="M3 12h13a2 2 0 0 1 2 2v2a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4v-4zpath d="M18 13l4-3M9 8V5M12 8V4M15 8V5/svg>
-      </span>
-      Peralatan Dapur
-    </span>
+    <span class="mc-item"><span class="mc-icon">📺</span> Elektronik</span>
     <span class="mc-dot"></span>
-
-    <span class="mc-item">
-      <span class="mc-icon-wrap">
-        <!-- Peralatan Makan (Garpu & Sendok) -->
-        <svg viewBox="0 0 24 24"><path d="M8 3v8c0 1-1 2-2 2s-2-1-2-2V3M6 13v8M18 3c-2 0-3 2-3 5s1 5 3 5M18 3v18/svg>
-      </span>
-      Peralatan Makan
-    </span>
+    <span class="mc-item"><span class="mc-icon">🍳</span> Peralatan Dapur</span>
     <span class="mc-dot"></span>
-
-    <span class="mc-item">
-      <span class="mc-icon-wrap">
-        <!-- Peralatan Mandi -->
-        <svg viewBox="0 0 24 24"><path d="M12 3v6M4 15c0-4 3.5-6 8-6s8 2 8 6H4zcircle cx="7" cy="19" r="0.5" fill="currentColorcircle cx="10" cy="20" r="0.5" fill="currentColorcircle cx="13" cy="19" r="0.5" fill="currentColorcircle cx="16" cy="20" r="0.5" fill="currentColorcircle cx="9" cy="17" r="0.5" fill="currentColorcircle cx="15" cy="17" r="0.5" fill="currentColor/svg>
-      </span>
-      Peralatan Mandi
-    </span>
+    <span class="mc-item"><span class="mc-icon">🍴</span> Peralatan Makan</span>
     <span class="mc-dot"></span>
-
-    <span class="mc-item">
-      <span class="mc-icon-wrap">
-        <!-- Lemari (Wardrobe) -->
-        <svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="1path d="M12 3v18M8 11v2M16 11v2/svg>
-      </span>
-      Lemari
-    </span>
+    <span class="mc-item"><span class="mc-icon">🚿</span> Peralatan Mandi</span>
     <span class="mc-dot"></span>
-
-    <span class="mc-item">
-      <span class="mc-icon-wrap">
-        <!-- Loker (Locker) -->
-        <svg viewBox="0 0 24 24"><rect x="4" y="3" width="7" height="18" rx="0.5rect x="13" y="3" width="7" height="18" rx="0.5path d="M7 8v2M16 8v2M7 15h1M16 15h1/svg>
-      </span>
-      Loker
-    </span>
+    <span class="mc-item"><span class="mc-icon">🗄️</span> Lemari</span>
     <span class="mc-dot"></span>
-
-    <span class="mc-item">
-      <span class="mc-icon-wrap">
-        <!-- Sofa -->
-        <svg viewBox="0 0 24 24"><path d="M3 16v-3a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3M3 16v3a1 1 0 0 0 1 1M21 16v3a1 1 0 0 1-1 1M6 11V8a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v3M4 20h16/svg>
-      </span>
-      Sofa
-    </span>
+    <span class="mc-item"><span class="mc-icon">🗃️</span> Loker</span>
     <span class="mc-dot"></span>
-
-    <span class="mc-item">
-      <span class="mc-icon-wrap">
-        <!-- Rak Buku (Rak Buku) -->
-        <svg viewBox="0 0 24 24"><path d="M4 3h16v18H4zM4 9h16M4 15h16M8 3v6M14 3v6M10 9v6M15 9v6/svg>
-      </span>
-      Rak Buku
-    </span>
+    <span class="mc-item"><span class="mc-icon">🛋️</span> Sofa</span>
     <span class="mc-dot"></span>
-
-    <span class="mc-item">
-      <span class="mc-icon-wrap">
-        <!-- Dekorasi (Vas & Bunga) -->
-        <svg viewBox="0 0 24 24"><path d="M8 21h8l1-9H7l1 9zM7 12h10M10 12V9M14 12V9M12 9c-2 0-2-4 0-4s2 4 0 4M10 9c-2-1-3-3-2-4M14 9c2-1 3-3 2-4/svg>
-      </span>
-      Dekorasi
-    </span>
+    <span class="mc-item"><span class="mc-icon">📚</span> Rak Buku</span>
     <span class="mc-dot"></span>
-
-    <!-- ══════ SET 2 (DUPLIKAT UNTUK SEAMLESS LOOP) ══════ -->
-
-    <span class="mc-item">
-      <span class="mc-icon-wrap">
-        <svg viewBox="0 0 24 24"><path d="M6 20v-4M18 20v-4M6 16h12M7 16v-5c0-2 1.5-3 5-3s5 1 5 3v5M9 8V5c0-1.5 1-2.5 3-2.5s3 1 3 2.5v3/svg>
-      </span>
-      Kursi
-    </span>
-    <span class="mc-dot"></span>
-
-    <span class="mc-item">
-      <span class="mc-icon-wrap">
-        <svg viewBox="0 0 24 24"><path d="M3 18v-4c0-1 1-2 2-2h14c1 0 2 1 2 2v4M3 18h18M3 18v2M21 18v2M5 12V8c0-1 1-2 2-2h4c1 0 2 1 2 2v4/svg>
-      </span>
-      Kasur
-    </span>
-    <span class="mc-dot"></span>
-
-    <span class="mc-item">
-      <span class="mc-icon-wrap">
-        <svg viewBox="0 0 24 24"><path d="M3 9h18M5 9v11M19 9v11M8 20v-4M16 20v-4M4 6h16l-1 3H5z/svg>
-      </span>
-      Meja
-    </span>
-    <span class="mc-dot"></span>
-
-    <span class="mc-item">
-      <span class="mc-icon-wrap">
-        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2path d="M8 21h8M12 17v4M7 8h4M7 11h2/svg>
-      </span>
-      Elektronik
-    </span>
-    <span class="mc-dot"></span>
-
-    <span class="mc-item">
-      <span class="mc-icon-wrap">
-        <svg viewBox="0 0 24 24"><path d="M3 12h13a2 2 0 0 1 2 2v2a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4v-4zpath d="M18 13l4-3M9 8V5M12 8V4M15 8V5/svg>
-      </span>
-      Peralatan Dapur
-    </span>
-    <span class="mc-dot"></span>
-
-    <span class="mc-item">
-      <span class="mc-icon-wrap">
-        <svg viewBox="0 0 24 24"><path d="M8 3v8c0 1-1 2-2 2s-2-1-2-2V3M6 13v8M18 3c-2 0-3 2-3 5s1 5 3 5M18 3v18/svg>
-      </span>
-      Peralatan Makan
-    </span>
-    <span class="mc-dot"></span>
-
-    <span class="mc-item">
-      <span class="mc-icon-wrap">
-        <svg viewBox="0 0 24 24"><path d="M12 3v6M4 15c0-4 3.5-6 8-6s8 2 8 6H4zcircle cx="7" cy="19" r="0.5" fill="currentColorcircle cx="10" cy="20" r="0.5" fill="currentColorcircle cx="13" cy="19" r="0.5" fill="currentColorcircle cx="16" cy="20" r="0.5" fill="currentColorcircle cx="9" cy="17" r="0.5" fill="currentColorcircle cx="15" cy="17" r="0.5" fill="currentColor/svg>
-      </span>
-      Peralatan Mandi
-    </span>
-    <span class="mc-dot"></span>
-
-    <span class="mc-item">
-      <span class="mc-icon-wrap">
-        <svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="1path d="M12 3v18M8 11v2M16 11v2/svg>
-      </span>
-      Lemari
-    </span>
-    <span class="mc-dot"></span>
-
-    <span class="mc-item">
-      <span class="mc-icon-wrap">
-        <svg viewBox="0 0 24 24"><rect x="4" y="3" width="7" height="18" rx="0.5rect x="13" y="3" width="7" height="18" rx="0.5path d="M7 8v2M16 8v2M7 15h1M16 15h1/svg>
-      </span>
-      Loker
-    </span>
-    <span class="mc-dot"></span>
-
-    <span class="mc-item">
-      <span class="mc-icon-wrap">
-        <svg viewBox="0 0 24 24"><path d="M3 16v-3a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3M3 16v3a1 1 0 0 0 1 1M21 16v3a1 1 0 0 1-1 1M6 11V8a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v3M4 20h16/svg>
-      </span>
-      Sofa
-    </span>
-    <span class="mc-dot"></span>
-
-    <span class="mc-item">
-      <span class="mc-icon-wrap">
-        <svg viewBox="0 0 24 24"><path d="M4 3h16v18H4zM4 9h16M4 15h16M8 3v6M14 3v6M10 9v6M15 9v6/svg>
-      </span>
-      Rak Buku
-    </span>
-    <span class="mc-dot"></span>
-
-    <span class="mc-item">
-      <span class="mc-icon-wrap">
-        <svg viewBox="0 0 24 24"><path d="M8 21h8l1-9H7l1 9zM7 12h10M10 12V9M14 12V9M12 9c-2 0-2-4 0-4s2 4 0 4M10 9c-2-1-3-3-2-4M14 9c2-1 3-3 2-4/svg>
-      </span>
-      Dekorasi
-    </span>
+    <span class="mc-item"><span class="mc-icon">🎨</span> Dekorasi</span>
     <span class="mc-dot"></span>
 
   </div>
@@ -1566,38 +1354,38 @@ tenda {
 <!-- CARA KERJA -->
 <section class="steps wrap" id="cara">
   <div class="section-head reveal">
-    <span class="section-kicker">Sistem Alur</span>
+    <span class="section-kicker">Alur Sistem</span>
     <h2>Dari pilih barang sampai barang jalan, empat langkah.</h2>
   </div>
   <div class="steps-grid">
     <div class="step reveal" data-d="1">
       <div class="step-n">01</div>
       <div class="step-ic">🔍</div>
-      <h3>Katalog Telusuri</h3>
+      <h3>Telusuri Katalog</h3>
       <p>Cabang buka katalog barang lengkap dengan kode, harga, dan stok terkini.</p>
     </div>
     <div class="step reveal" data-d="2">
       <div class="step-n">02</div>
       <div class="step-ic">🛒</div>
-      <h3>Tata Tertib Susun</h3>
-      <p>Tambahkan ke keranjang satu per satu, atau tempel banyak kode sekaligus melalui pesanan massal.</p>
+      <h3>Susun Order</h3>
+      <p>Tambah ke keranjang satu per satu, atau tempel banyak kode sekaligus lewat order massal.</p>
     </div>
     <div class="step reveal" data-d="3">
       <div class="step-n">03</div>
       <div class="step-ic">📋</div>
-      <h3>Proses Admin</h3>
+      <h3>Admin Proses</h3>
       <p>Gudang pusat menyetujui atau menolak dari dashboard. Status langsung berubah.</p>
     </div>
     <div class="step reveal" data-d="3">
       <div class="step-n">04</div>
       <div class="step-ic">🚚</div>
       <h3>Barang Dikirim</h3>
-      <p>Pesanan disetujui masuk antrean kirim. Cabang dapat notifikasi email otomatis.</p>
+      <p>Order approved masuk antrean kirim. Cabang dapat notifikasi email otomatis.</p>
     </div>
   </div>
 </section>
 
-<!-- PAMERAN -->
+<!-- SHOWCASE -->
 <section class="showcase wrap" id="katalog">
   <div class="showcase-head">
     <div class="section-head reveal" style="margin-bottom:0">
@@ -1606,12 +1394,12 @@ tenda {
     </div>
     <a href="login.html" class="btn btn-outline reveal" data-d="1">Buka Katalog →</a>
   </div>
-  <div class="galeri">
+  <div class="gallery">
     <div class="tile t-big reveal">
       <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=900&q=80" alt="Ruang tamu">
       <div class="tile-arrow">↗</div>
       <div class="tile-label">
-        <div class="tl-k">Tetapkan Ruang Tamu</div>
+        <div class="tl-k">Set Ruang Tamu</div>
         <div class="tl-n">Sofa & Kursi</div>
       </div>
     </div>
@@ -1656,11 +1444,11 @@ tenda {
       <span class="ts-ic" style="font-size:28px;">📚</span>
       <div class="tile-label" style="position:static">
         <div class="tl-k">Kategori</div>
-        <div class="tl-n">Rak & Prasmanan</div>
+        <div class="tl-n">Rak & Bufet</div>
       </div>
     </div>
     <div class="tile t-wide reveal" data-d="1">
-      <img src="https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?w=900&q=80" alt="Ruang pamer interior">
+      <img src="https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?w=900&q=80" alt="Interior showroom">
       <div class="tile-arrow">↗</div>
       <div class="tile-label">
         <div class="tl-k">Dapur & Dekorasi</div>
@@ -1670,7 +1458,7 @@ tenda {
   </div>
 </section>
 
-<!-- TENTANG KAMI -->
+<!-- ABOUT -->
 <section class="about" id="tentang">
   <div class="wrap about-inner">
     <div class="about-media reveal">
@@ -1678,33 +1466,33 @@ tenda {
         <img src="https://images.unsplash.com/photo-1553413077-190dd305871c?w=800&q=80" alt="Gudang">
       </div>
       <div class="am-float">
-        <img src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=500&q=80" alt="Ruang Pamer">
+        <img src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=500&q=80" alt="Showroom">
       </div>
     </div>
     <div class="about-copy">
-      <span class="section-kicker mengungkapkan">Gudang Terpusat</span>
+      <span class="section-kicker reveal">Gudang Terpusat</span>
       <h2 class="reveal" data-d="1">Semua cabang, satu sumber kebenaran.</h2>
-      <p class="lead mengungkapkan" data-d="1">GudangHub menyatukan permintaan dari seluruh toko cabang ke gudang pusat PT Central Perabot Utama. Tidak ada lagi order lewat chat yang tercecer.</p>
+      <p class="lead reveal" data-d="1">GudangHub menyatukan permintaan dari seluruh toko cabang ke gudang pusat PT Central Perabot Utama. Tidak ada lagi order lewat chat yang tercecer.</p>
       <div class="about-list">
         <div class="about-item reveal" data-d="1">
           <span class="ai-ic">🔄</span>
           <div>
-            <h4>Perintah tercatat rapi</h4>
-            <p>Setiap permintaan punya ID pesanan unik, lengkap dengan detail barang dan catatan cabang.</p>
+            <h4>Order tercatat rapi</h4>
+            <p>Setiap permintaan punya ID order unik, lengkap dengan detail barang dan catatan cabang.</p>
           </div>
         </div>
         <div class="about-item reveal" data-d="2">
           <span class="ai-ic">⚡</span>
           <div>
             <h4>Proses sekali klik</h4>
-            <p>Admin menyetujui atau menolak dari dashboard. Menunggu persetujuan, ditolak langsung sinkron.</p>
+            <p>Admin menyetujui atau menolak dari dashboard. Pending, approved, rejected langsung sinkron.</p>
           </div>
         </div>
         <div class="about-item reveal" data-d="3">
           <span class="ai-ic">📊</span>
           <div>
             <h4>Laporan per cabang</h4>
-            <p>Pantau total pesanan, tingkat persetujuan, dan aktivitas tiap toko dalam satu layar.</p>
+            <p>Pantau total order, approval rate, dan aktivitas tiap toko dalam satu layar.</p>
           </div>
         </div>
       </div>
@@ -1713,14 +1501,14 @@ tenda {
   </div>
 </section>
 
-<!-- STATISTIK -->
+<!-- STATS -->
 <section class="stats wrap">
   <div class="section-head reveal">
     <span class="section-kicker">Dalam Angka</span>
     <h2>Skala operasi GudangHub.</h2>
   </div>
   <div class="stats-grid">
-    <div class="pengungkapan statistik">
+    <div class="stat reveal">
       <div class="s-num" data-count="4">0</div>
       <div class="s-lbl">Toko cabang di NTT</div>
     </div>
@@ -1734,7 +1522,7 @@ tenda {
     </div>
     <div class="stat reveal" data-d="3">
       <div class="s-num" data-count="24"><span class="val">0</span><span class="suf">/7</span></div>
-      <div class="s-lbl">Pesan kapan saja</div>
+      <div class="s-lbl">Order kapan saja</div>
     </div>
   </div>
 </section>
@@ -1756,7 +1544,7 @@ tenda {
       <div class="cabang-row reveal" data-d="1">
         <div class="cr-id">CB002</div>
         <div class="cr-store">Perabot Mama Oesapa</div>
-        <div class="cr-pic"><span class="cr-av">Sebuah</span> PIC · Akmal</div>
+        <div class="cr-pic"><span class="cr-av">A</span> PIC · Akmal</div>
         <span class="cr-go">→</span>
       </div>
       <div class="cabang-row reveal" data-d="2">
@@ -1779,231 +1567,231 @@ tenda {
 <section class="cta wrap">
   <div class="cta-box reveal">
     <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200&q=80" alt="">
-    <h2>Siap mengelola pesanan hari ini?</h2>
-    <p>Masuk dengan akun cabang atau admin gudang, lalu mulai kirim dan proses pemesanan barang.</p>
+    <h2>Siap mengelola order hari ini?</h2>
+    <p>Masuk dengan akun cabang atau admin gudang, lalu mulai kirim dan proses order barang.</p>
     <a href="login.html" class="btn btn-solid hero-btn-lg">Masuk ke GudangHub →</a>
   </div>
 </section>
-<!-- ═══════════ TIM DI BALIK LAYAR — MARQUEE MELENGKUNG TAK TERBATAS ═══════════ -->
+<!-- ═══════════ TIM DI BALIK LAYAR — INFINITE CURVED MARQUEE ═══════════ -->
 <style>
 .tim-section {
   padding: clamp(60px, 8vw, 100px) 0 clamp(80px, 10vw, 120px);
-  latar belakang: gradien linier(180 derajat, transparan 0%, rgba(255,107,0,0.02) 50%, transparan 100%);
-  posisi: relatif;
-  overflow: tersembunyi;
+  background: linear-gradient(180deg, transparent 0%, rgba(255,107,0,0.02) 50%, transparent 100%);
+  position: relative;
+  overflow: hidden;
 }
 
 .tim-section::before {
-  isi: '';
-  posisi: absolut;
-  sisipan: 0;
-  latar belakang:
-    gradien radial (50vw 30vw pada 20% 30%, rgba (255,107,0,0.05), transparan 60%),
-    radial-gradient(45vw 35vw pada 85% 70%, rgba(255,140,56,0.04), transparan 60%);
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(50vw 30vw at 20% 30%, rgba(255,107,0,0.05), transparent 60%),
+    radial-gradient(45vw 35vw at 85% 70%, rgba(255,140,56,0.04), transparent 60%);
   pointer-events: none;
 }
 
 .tim-head {
-  perataan teks: tengah;
-  lebar maksimum: 720px;
+  text-align: center;
+  max-width: 720px;
   margin: 0 auto clamp(30px, 4vw, 50px);
-  posisi: relatif;
-  indeks z: 2;
+  position: relative;
+  z-index: 2;
   padding: 0 20px;
 }
 
 .tim-kicker {
-  tampilan: inline-flex;
-  sejajarkan item: tengah;
-  jarak: 8px;
-  ukuran font: penjepit (12px, 1.4vw, 14px);
-  ketebalan font: 700;
-  warna: var(--oranye);
-  margin-bawah: 18px;
-  spasi antar huruf: 0,02em;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: clamp(12px, 1.4vw, 14px);
+  font-weight: 700;
+  color: var(--orange);
+  margin-bottom: 18px;
+  letter-spacing: 0.02em;
 }
 
 .tim-head h2 {
   font-family: 'Fraunces', Georgia, serif;
-  ukuran font: penjepit (30px, 5.5vw, 52px);
-  ketebalan font: 700;
-  Tinggi baris: 1,1;
-  spasi antar huruf: -0,02em;
-  margin-bawah: 18px;
-  warna: var(--teks);
+  font-size: clamp(30px, 5.5vw, 52px);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: 18px;
+  color: var(--text);
   overflow-wrap: break-word;
 }
 
 .tim-head h2 em {
-  gaya huruf: miring;
-  warna: var(--oranye);
+  font-style: italic;
+  color: var(--orange);
 }
 
 .tim-head p {
-  ukuran font: penjepit (14px, 1.6vw, 16px);
-  warna: var(--muted);
-  Tinggi baris: 1,6;
-  lebar maksimum: 520px;
-  margin: 0 otomatis 26px;
+  font-size: clamp(14px, 1.6vw, 16px);
+  color: var(--muted);
+  line-height: 1.6;
+  max-width: 520px;
+  margin: 0 auto 26px;
 }
 
 .tim-cta-btn {
-  tampilan: inline-flex;
-  sejajarkan item: tengah;
-  jarak: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   padding: 12px 26px;
-  latar belakang: #fff;
-  warna: var(--tinta);
-  radius batas: 999px;
-  ketebalan font: 700;
-  ukuran font: 14px;
-  dekorasi teks: tidak ada;
-  transisi: transformasi 0,25s kubik-bezier(0,16,1,0,3,1), bayangan kotak 0,25s;
-  bayangan kotak: 0 6px 20px rgba(0,0,0,0.15);
-  kursor: penunjuk;
+  background: #fff;
+  color: var(--ink);
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: none;
+  transition: transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  cursor: pointer;
   font-family: inherit;
-  batas: tidak ada;
+  border: none;
 }
 
 .tim-cta-btn:hover {
-  transformasi: translasiY(-2px);
-  bayangan kotak: 0 10px 28px rgba(255,107,0,0.35);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(255,107,0,0.35);
 }
 
 .tim-cta-btn .arrow-round {
-  lebar: 22px;
-  tinggi: 22px;
-  radius-batas: 50%;
-  latar belakang: var(--orange);
-  warna: #fff;
-  tampilan: grid;
-  tempat-barang: tengah;
-  ukuran font: 12px;
-  transisi: transformasi 0,25 detik;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--orange);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  transition: transform 0.25s;
 }
 
 .tim-cta-btn:hover .arrow-round {
-  transformasi: terjemahkanX(3px);
+  transform: translateX(3px);
 }
 
-/* ═══════════ PANGGUNG INFINITE MARQUEE ═══════════ */
+/* ═══════════ INFINITE MARQUEE STAGE ═══════════ */
 .tim-stage {
-  posisi: relatif;
-  indeks z: 2;
+  position: relative;
+  z-index: 2;
   padding: 50px 0 30px;
-  overflow: tersembunyi;
-  perspektif: 1400px;
-  asal-perspektif: tengah tengah;
-  kursor: ambil;
+  overflow: hidden;
+  perspective: 1400px;
+  perspective-origin: center center;
+  cursor: grab;
   -webkit-user-select: none;
-  pilihan pengguna: tidak ada;
-  aksi sentuh: pan-y;
+  user-select: none;
+  touch-action: pan-y;
 }
 
-.tim-stage.dragging { kursor: meraih; }
+.tim-stage.dragging { cursor: grabbing; }
 
 .tim-track {
-  tampilan: fleksibel;
-  sejajarkan item: tengah;
-  celah: penjepit(6px, 0.8vw, 12px);
-  lebar: konten maksimum;
+  display: flex;
+  align-items: center;
+  gap: clamp(6px, 0.8vw, 12px);
+  width: max-content;
   transform-style: preserve-3d;
-  akan berubah: bertransformasi;
+  will-change: transform;
   padding: 40px 0;
 }
 
 .tim-card {
-  fleksibel-menyusut: 0;
-  posisi: relatif;
-  lebar: penjepit(150px, 16vw, 220px);
-  tinggi: penjepit(220px, 24vw, 320px);
+  flex-shrink: 0;
+  position: relative;
+  width: clamp(150px, 16vw, 220px);
+  height: clamp(220px, 24vw, 320px);
   border-radius: clamp(16px, 1.8vw, 22px);
-  overflow: tersembunyi;
-  latar belakang: var(--ink3);
-  batas: 1px solid rgba(255,255,255,0.08);
-  bayangan kotak:
+  overflow: hidden;
+  background: var(--ink3);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow:
     0 20px 40px -10px rgba(0,0,0,0.5),
-    sisipan 0 1px 0 rgba(255,255,255,0.06);
-  transform-origin: tengah tengah;
-  transisi: bayangan kotak 0,4 detik kemudahan;
-  akan berubah: bertransformasi;
-  visibilitas sisi belakang: tersembunyi;
+    inset 0 1px 0 rgba(255,255,255,0.06);
+  transform-origin: center center;
+  transition: box-shadow 0.4s ease;
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 .tim-card:hover {
-  bayangan kotak:
+  box-shadow:
     0 30px 60px -15px rgba(255,107,0,0.35),
     0 0 0 1px rgba(255,107,0,0.3);
-  Indeks z: 20;
+  z-index: 20;
 }
 
-/* Efek kilau */
+/* Shine effect */
 .tim-card::after {
-  isi: '';
-  posisi: absolut;
-  atas: 0;
-  kiri: -100%;
-  lebar: 100%;
-  tinggi: 100%;
-  latar belakang: gradien linier (90 derajat, transparan, rgba (255,255,255,0.15), transparan);
-  transisi: kiri 0.8s kubik-bezier(0.16,1,0.3,1);
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  transition: left 0.8s cubic-bezier(0.16,1,0.3,1);
   pointer-events: none;
-  indeks z: 5;
+  z-index: 5;
 }
 
 .tim-card:hover::after { left: 100%; }
 
 .tim-img {
-  lebar: 100%;
-  tinggi: 100%;
-  kesesuaian objek: sampul;
-  tampilkan: blok;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
   pointer-events: none;
   -webkit-user-drag: none;
 }
 
 .tim-img-placeholder {
-  lebar: 100%;
-  tinggi: 100%;
-  tampilan: tidak ada;
-  sejajarkan item: tengah;
+  width: 100%;
+  height: 100%;
+  display: none;
+  align-items: center;
   justify-content: center;
-  latar belakang: gradien linier(135 derajat, var(--oranye), var(--orange-deep));
-  warna: #fff;
+  background: linear-gradient(135deg, var(--orange), var(--orange-deep));
+  color: #fff;
   font-family: 'Fraunces', serif;
-  ukuran font: penjepit(50px, 6vw, 80px);
-  ketebalan font: 700;
-  bayangan teks: 0 4px 20px rgba(0,0,0,0.4);
-  posisi: relatif;
+  font-size: clamp(50px, 6vw, 80px);
+  font-weight: 700;
+  text-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  position: relative;
 }
 
-.tim-img-placeholder::sebelum {
-  isi: '';
-  posisi: absolut;
-  sisipan: 0;
-  latar belakang:
+.tim-img-placeholder::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
     radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2), transparent 60%),
     radial-gradient(circle at 70% 70%, rgba(0,0,0,0.15), transparent 60%);
 }
 
 .tim-hint {
-  perataan teks: tengah;
-  margin-atas: 16px;
-  ukuran font: 12px;
-  warna: var(--muted);
-  tampilan: fleksibel;
-  sejajarkan item: tengah;
+  text-align: center;
+  margin-top: 16px;
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
   justify-content: center;
-  jarak: 10px;
-  opasitas: 0,7;
-  posisi: relatif;
-  indeks z: 2;
+  gap: 10px;
+  opacity: 0.7;
+  position: relative;
+  z-index: 2;
 }
 
 .tim-hint .hint-icon {
-  tampilan: inline-flex;
-  warna: var(--oranye);
-  animasi: hintMove 2s ease-in-out tak terbatas;
+  display: inline-flex;
+  color: var(--orange);
+  animation: hintMove 2s ease-in-out infinite;
 }
 
 @keyframes hintMove {
@@ -2013,16 +1801,16 @@ tenda {
 
 @media (max-width: 640px) {
   .tim-card {
-    lebar: 140px;
-    tinggi: 200px;
+    width: 140px;
+    height: 200px;
   }
   .tim-track { gap: 8px; padding: 20px 0; }
 }
 
 @media (max-width: 380px) {
   .tim-card {
-    lebar: 120px;
-    tinggi: 170px;
+    width: 120px;
+    height: 170px;
   }
 }
 
@@ -2034,7 +1822,7 @@ tenda {
 <section class="tim-section" id="tim">
   <div class="wrap">
     <div class="tim-head reveal">
-      <div class="tim-kicker">Di Balik Layar</div>
+      <div class="tim-kicker">Behind the Scenes</div>
       <h2>Tim di Balik <em>GudangHub</em></h2>
       <p>Orang-orang hebat yang menjaga stok tetap jalan dan pesanan tiap cabang selalu tepat waktu.</p>
       <a href="#cabang" class="tim-cta-btn">
@@ -2046,14 +1834,14 @@ tenda {
 
   <div class="tim-stage reveal" id="timStage" data-d="1">
     <div class="tim-track" id="timTrack">
-      <!-- Kartu-kartu akan di-clone otomatis melalui JS untuk unlimited loop -->
+      <!-- Kartu-kartu akan di-clone otomatis via JS untuk infinite loop -->
       <div class="tim-card">
         <img class="tim-img" src="foto-tim-1.jpg" alt="Risty" draggable="false" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
         <div class="tim-img-placeholder">R</div>
       </div>
       <div class="tim-card">
         <img class="tim-img" src="foto-tim-2.jpg" alt="Irwan" draggable="false" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-        <div class="tim-img-placeholder">Saya</div>
+        <div class="tim-img-placeholder">I</div>
       </div>
       <div class="tim-card">
         <img class="tim-img" src="foto-tim-3.jpg" alt="Dimas" draggable="false" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
@@ -2081,115 +1869,115 @@ tenda {
 </section>
 
 <script>
-(fungsi() {
+(function() {
   const stage = document.getElementById('timStage');
   const track = document.getElementById('timTrack');
-  jika (!stage || !track) kembali;
+  if (!stage || !track) return;
 
-  // ═══════════ SETUP: Clone kartu 3x untuk buffer infinity loop ═══════════
+  // ═══════════ SETUP: Clone kartu 3x untuk buffer infinite loop ═══════════
   const originalCards = Array.from(track.children);
-  konstanta_SET_KLON = 3;
-  untuk (misalkan i = 0; i < CLONE_SETS; i++) {
+  const CLONE_SETS = 3;
+  for (let i = 0; i < CLONE_SETS; i++) {
     originalCards.forEach(card => {
       const clone = card.cloneNode(true);
-      // Pasang kembali handler onerror
+      // Re-attach onerror handler
       const img = clone.querySelector('img');
       const ph = clone.querySelector('.tim-img-placeholder');
-      jika (img && ph) {
+      if (img && ph) {
         img.onerror = function() { this.style.display = 'none'; ph.style.display = 'flex'; };
       }
-      lacak.tambahkanAnak(klon);
+      track.appendChild(clone);
     });
   }
 
-  // ═══════════ NEGARA ═══════════
-  biarkan semua kartu = [];
-  misalkan cardW = 0;
-  misalkan gapW = 0;
-  biarkan setWidth = 0; // lebar dari 1 set asli (untuk bungkus)
-  biarkan arusX = 0; // posisi X saat ini
-  misalkan kecepatan = -0,6; // kecepatan default (negatif = geser ke kiri)
-  konstanta autoSpeed ​​= -0.6;
-  biarkan isDragging = false;
-  misalkan isHovering = false;
-  biarkan dragStartX = 0;
-  biarkan dragStartTX = 0;
-  biarkan lastPointerX = 0;
-  biarkan lastPointerT = 0;
-  misalkan dragVelocity = 0;
-  biarkan rafId = null;
+  // ═══════════ STATE ═══════════
+  let allCards = [];
+  let cardW = 0;
+  let gapW = 0;
+  let setWidth = 0;     // width dari 1 set original (untuk wrap)
+  let currentX = 0;     // posisi X saat ini
+  let velocity = -0.6;  // kecepatan default (negatif = geser ke kiri)
+  const autoSpeed = -0.6;
+  let isDragging = false;
+  let isHovering = false;
+  let dragStartX = 0;
+  let dragStartTX = 0;
+  let lastPointerX = 0;
+  let lastPointerT = 0;
+  let dragVelocity = 0;
+  let rafId = null;
 
-  fungsi measure() {
-    semuaKartu = Array.dari(track.children);
-    Jika (allCards.length === 0) kembalikan;
+  function measure() {
+    allCards = Array.from(track.children);
+    if (allCards.length === 0) return;
     const style = window.getComputedStyle(track);
-    gapW = parseFloat(gaya.gap) || 0;
+    gapW = parseFloat(style.gap) || 0;
     const firstCard = allCards[0];
     cardW = firstCard.offsetWidth;
-    // Atur lebar = kartu asli (bukan yang clone)
+    // Set width = original cards (bukan yang clone)
     setWidth = originalCards.length * (cardW + gapW);
-    // Mulai dari tengah biar bisa geser bebas ke 2 arah
+    // Start dari tengah biar bisa geser bebas ke 2 arah
     currentX = -setWidth;
   }
 
-  // ═══════════ 3D MELENGKUNG — menghitung secara real-time per frame ═══════════
-  fungsi applyCurve() {
+  // ═══════════ CURVED 3D — dihitung real-time per frame ═══════════
+  function applyCurve() {
     const stageRect = stage.getBoundingClientRect();
     const stageCenter = stageRect.left + stageRect.width / 2;
     const halfWidth = stageRect.width / 2;
 
-    untuk (misalkan i = 0; i < allCards.length; i++) {
+    for (let i = 0; i < allCards.length; i++) {
       const card = allCards[i];
       const cardRect = card.getBoundingClientRect();
       const cardCenter = cardRect.left + cardRect.width / 2;
-      // Jarak dari tengah panggung (-1 = kiri jauh, 0 = tengah, 1 = kanan jauh)
-      misalkan d = (cardCenter - stageCenter) / halfWidth;
+      // Distance dari center stage (-1 = kiri jauh, 0 = tengah, 1 = kanan jauh)
+      let d = (cardCenter - stageCenter) / halfWidth;
       d = Math.max(-1.3, Math.min(1.3, d));
 
-      // Melengkung: pinggir BESAR & putar tajam, tengah KECIL
-      konstanta absD = Math.abs(d);
-      const rotY = -d * 42; // rotasi kuat (efek kipas)
-      const terjemahanZ = -absD * 40 + absD * 120; // pinggir maju
-      skala const = 0,72 + absD * 0,42; // tengah kecil (0.72), pinggir besar (1.14)
+      // Curved: pinggir BESAR & rotate tajam, tengah KECIL
+      const absD = Math.abs(d);
+      const rotY = -d * 42;              // rotasi kuat (fan effect)
+      const translateZ = -absD * 40 + absD * 120; // pinggir maju
+      const scale = 0.72 + absD * 0.42;  // tengah kecil (0.72), pinggir besar (1.14)
 
-      kartu.gaya.transform =
+      card.style.transform =
         `translateZ(${translateZ - 60}px) rotateY(${rotY}deg) scale(${scale})`;
       card.style.zIndex = String(100 - Math.round(absD * 80));
     }
   }
 
   // ═══════════ RENDER LOOP ═══════════
-  fungsi frame() {
-    Jika (setWidth <= 0) { rafId = requestAnimationFrame(frame); return; }
+  function frame() {
+    if (setWidth <= 0) { rafId = requestAnimationFrame(frame); return; }
 
-    jika (sedang menyeret) {
-      // Posisi dikontrol dengan cara menyeret
-    } kalau tidak {
-      // Peluruhan momentum setelah hambatan, lalu gabungkan ke autoSpeed
-      jika (Math.abs(kecepatan - autoSpeed) > 0,02) {
-        kecepatan += (kecepatan otomatis - kecepatan) * 0,05; // perpaduan halus
-      } kalau tidak {
-        kecepatan = autoSpeed;
+    if (isDragging) {
+      // Position controlled by drag
+    } else {
+      // Momentum decay after drag, then blend to autoSpeed
+      if (Math.abs(velocity - autoSpeed) > 0.02) {
+        velocity += (autoSpeed - velocity) * 0.05; // smooth blend
+      } else {
+        velocity = autoSpeed;
       }
-      // Jeda saat kursor diarahkan ke layar
-      jika (sedang melayang) {
-        currentX += 0; // bekukan
-      } kalau tidak {
-        arusX += kecepatan;
+      // Pause saat hover
+      if (isHovering) {
+        currentX += 0; // freeze
+      } else {
+        currentX += velocity;
       }
     }
 
-    // Pembungkus tak terbatas (tanpa sambungan)
-    selama (currentX <= -setWidth * 2) currentX += setWidth;
-    selama (currentX >= 0) currentX -= setWidth;
+    // Wrap infinite (seamless)
+    while (currentX <= -setWidth * 2) currentX += setWidth;
+    while (currentX >= 0) currentX -= setWidth;
 
     track.style.transform = `translate3d(${currentX}px, 0, 0)`;
-    terapkanKurva();
+    applyCurve();
 
     rafId = requestAnimationFrame(frame);
   }
 
-  // ═══════════ HOVER (hanya desktop, tidak memengaruhi sentuhan) ═══════════
+  // ═══════════ HOVER (desktop only, tidak affect touch) ═══════════
   stage.addEventListener('mouseenter', () => { isHovering = true; });
   stage.addEventListener('mouseleave', () => { isHovering = false; });
 
@@ -2202,87 +1990,87 @@ tenda {
     dragStartTX = currentX;
     lastPointerX = e.clientX;
     lastPointerT = performance.now();
-    Kecepatan hambatan = 0;
-    coba { stage.setPointerCapture(e.pointerId); } tangkap(_) {}
+    dragVelocity = 0;
+    try { stage.setPointerCapture(e.pointerId); } catch(_) {}
   });
 
   stage.addEventListener('pointermove', (e) => {
-    jika (!sedang menyeret) kembali;
+    if (!isDragging) return;
     const dx = e.clientX - dragStartX;
     currentX = dragStartTX + dx;
 
-    // Lacak kecepatan untuk momentum
+    // Track velocity for momentum
     const now = performance.now();
     const dt = now - lastPointerT || 16;
     dragVelocity = (e.clientX - lastPointerX) / dt * 16;
     lastPointerX = e.clientX;
-    lastPointerT = sekarang;
+    lastPointerT = now;
   });
 
   const endDrag = (e) => {
-    jika (!sedang menyeret) kembali;
+    if (!isDragging) return;
     isDragging = false;
     stage.classList.remove('dragging');
-    // Berikan momentum dari drag ke kecepatan (kalau geser ke kanan = positif, akan menyatu ke otomatis)
-    kecepatan = kecepatan hambatan * 0,7;
-    // Kecepatan penjepit agar tidak terlalu cepat
-    kecepatan = Math.max(-25, Math.min(25, kecepatan));
-    coba { stage.releasePointerCapture(e.pointerId); } tangkap(_) {}
+    // Berikan momentum dari drag ke velocity (kalau geser kanan = positif, akan blend ke auto)
+    velocity = dragVelocity * 0.7;
+    // Clamp velocity agar tidak terlalu cepat
+    velocity = Math.max(-25, Math.min(25, velocity));
+    try { stage.releasePointerCapture(e.pointerId); } catch(_) {}
   };
 
   stage.addEventListener('pointerup', endDrag);
   stage.addEventListener('pointercancel', endDrag);
 
-  // Sentuh: batalkan hover, ketuk tidak berhenti
+  // Touch: cancel hover, tap doesn't stop
   stage.addEventListener('touchstart', () => { isHovering = false; }, { passive: true });
 
-  // ═══════════ UBAH UKURAN ═══════════
-  biarkan resizeTimer;
+  // ═══════════ RESIZE ═══════════
+  let resizeTimer;
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
-      ukuran();
+      measure();
     }, 150);
-  }, { pasif: benar });
+  }, { passive: true });
 
-  // Mencegah penyeretan gambar
-  lacak.querySelectorAll('img').forEach(img => {
+  // Prevent image drag
+  track.querySelectorAll('img').forEach(img => {
     img.addEventListener('dragstart', e => e.preventDefault());
   });
 
-  // ═══════════ MULAI ═══════════
-  // Tunggu hingga gambar dimuat untuk pengukuran yang akurat
+  // ═══════════ START ═══════════
+  // Wait for images to load for accurate measure
   const images = track.querySelectorAll('img');
-  misalkan loadedCount = 0;
+  let loadedCount = 0;
   const totalImages = images.length;
 
-  fungsi startWhenReady() {
-    ukuran();
+  function startWhenReady() {
+    measure();
     if (rafId) cancelAnimationFrame(rafId);
     rafId = requestAnimationFrame(frame);
   }
 
-  jika (totalImages === 0) {
-    mulaiSaatSiap();
-  } kalau tidak {
-    gambar.forEach(img => {
-      jika (img.complete) {
+  if (totalImages === 0) {
+    startWhenReady();
+  } else {
+    images.forEach(img => {
+      if (img.complete) {
         loadedCount++;
-        jika (loadedCount === totalImages) startWhenReady();
-      } kalau tidak {
+        if (loadedCount === totalImages) startWhenReady();
+      } else {
         img.addEventListener('load', () => {
           loadedCount++;
-          jika (loadedCount === totalImages) startWhenReady();
+          if (loadedCount === totalImages) startWhenReady();
         }, { once: true });
         img.addEventListener('error', () => {
           loadedCount++;
-          jika (loadedCount === totalImages) startWhenReady();
+          if (loadedCount === totalImages) startWhenReady();
         }, { once: true });
       }
     });
-    // Fallback jika gambar lama dimuat
+    // Fallback jika gambar lama loading
     setTimeout(() => {
-      jika (!rafId) mulaiSaatSiap();
+      if (!rafId) startWhenReady();
     }, 2000);
   }
 })();
@@ -2293,13 +2081,13 @@ tenda {
   <div class="wrap">
     <div class="footer-top">
       <div class="footer-about">
-        <a href="#atas" class="merek">
+        <a href="#top" class="brand">
           <span class="brand-mark">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35A2 2 0 0 1 3.26 6.5l8-3.2a2 2 0 0 1 1.48 0l8 3.2A2 2 0 0 1 22 8.35Zpath d="M6 18h12path d="M6 14h12rect width="12" height="12" x="6" y="10/svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35A2 2 0 0 1 3.26 6.5l8-3.2a2 2 0 0 1 1.48 0l8 3.2A2 2 0 0 1 22 8.35Z"/><path d="M6 18h12"/><path d="M6 14h12"/><rect width="12" height="12" x="6" y="10"/></svg>
           </span>
-          <span class="brand-name">GudangHub</em></span>
+          <span class="brand-name">Gudang<em>Hub</em></span>
         </a>
-        <p>Sistem pemesanan barang antar cabang untuk PT Central Perabot Utama, Nusa Tenggara Timur.</p>
+        <p>Sistem order barang antar cabang untuk PT Central Perabot Utama, Nusa Tenggara Timur.</p>
       </div>
       <div class="footer-col">
         <h5>Jelajah</h5>
@@ -2312,7 +2100,7 @@ tenda {
         <h5>Sistem</h5>
         <a href="login.html">Masuk Cabang</a>
         <a href="login.html">Masuk Admin</a>
-        <a href="login.html">Dasbor</a>
+        <a href="login.html">Dashboard</a>
       </div>
       <div class="footer-col">
         <h5>Kontak</h5>
@@ -2329,78 +2117,78 @@ tenda {
 </footer>
 
 <script>
-'gunakan ketat';
+'use strict';
 
-// Laci bergerak
-fungsi openDrawer() {
+// Mobile drawer
+function openDrawer() {
   document.getElementById('mobileDrawer').classList.add('open');
   document.getElementById('drawerOverlay').classList.add('show');
   document.body.style.overflow = 'hidden';
 }
 
-fungsi tutup laci() {
+function closeDrawer() {
   document.getElementById('mobileDrawer').classList.remove('open');
   document.getElementById('drawerOverlay').classList.remove('show');
   document.body.style.overflow = '';
 }
 
-// Efek gulir navigasi
+// Nav scroll effect
 const nav = document.getElementById('nav');
 const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 20);
-pada saat menggulir();
+onScroll();
 window.addEventListener('scroll', onScroll, { passive: true });
 
-// Tampilkan saat digulir
+// Reveal on scroll
 const io = new IntersectionObserver((entries) => {
-  entri.forEach(e => {
-    jika (e.berpotongan) {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
       e.target.classList.add('in');
       io.unobserve(e.target);
     }
   });
-}, { ambang batas: 0,12, rootMargin: '0px 0px -8% 0px' });
+}, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
 
 document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 
-// Animasi penghitung
+// Counter animation
 const easeOut = t => 1 - Math.pow(1 - t, 3);
 
-fungsi runCounter(el) {
+function runCounter(el) {
   const target = parseFloat(el.dataset.count);
   const suffix = el.dataset.suffix || '';
   const valSpan = el.querySelector('.val');
-  konstanta durasi = 1400;
+  const dur = 1400;
   const start = performance.now();
 
-  fungsi tick(sekarang) {
+  function tick(now) {
     const p = Math.min((now - start) / dur, 1);
     const v = Math.round(easeOut(p) * target);
-    jika (valSpan) valSpan.textContent = v;
-    jika tidak, el.textContent = v + (p === 1 ? suffix : '');
-    jika (p < 1) mintaAnimationFrame(tick);
-    jika (!valSpan) el.textContent = target + suffix;
+    if (valSpan) valSpan.textContent = v;
+    else el.textContent = v + (p === 1 ? suffix : '');
+    if (p < 1) requestAnimationFrame(tick);
+    else if (!valSpan) el.textContent = target + suffix;
   }
   requestAnimationFrame(tick);
 }
 
 const cio = new IntersectionObserver((entries) => {
-  entri.forEach(e => {
-    jika (e.berpotongan) {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
       runCounter(e.target);
       cio.unobserve(e.target);
     }
   });
-}, { ambang batas: 0,6 });
+}, { threshold: 0.6 });
 
 document.querySelectorAll('[data-count]').forEach(el => cio.observe(el));
 
-// Tutup laci dengan menekan ESC
+// Close drawer on ESC
 document.addEventListener('keydown', (e) => {
-  jika (e.key === 'Escape') tutupDrawer();
+  if (e.key === 'Escape') closeDrawer();
 });
 
-// Memperbaiki bug 100vh pada browser seluler
-fungsi setVH() {
+// Fix 100vh bug pada mobile browser
+function setVH() {
   document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
 }
 setVH();
