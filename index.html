@@ -1020,6 +1020,453 @@ a { color: inherit; text-decoration: none; }
   background: var(--ink);
   color: #fff;
 }
+
+/* ═══════════ FOOTER ═══════════ */
+.footer {
+  padding: clamp(48px, 8vw, 72px) 0 34px;
+  padding-bottom: calc(34px + var(--safe-bottom));
+  border-top: 1px solid var(--line2);
+}
+
+.footer-top {
+  display: grid;
+  grid-template-columns: 1.8fr 1fr 1fr 1fr;
+  gap: clamp(24px, 4vw, 40px);
+  padding-bottom: clamp(32px, 5vw, 48px);
+}
+
+.footer-about p {
+  color: var(--muted);
+  font-size: 14.5px;
+  max-width: 34ch;
+  margin-top: 18px;
+}
+
+.footer-col h5 {
+  font-family: 'Manrope';
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+
+.footer-col a {
+  display: block;
+  color: var(--muted);
+  font-size: 14.5px;
+  margin-bottom: 12px;
+  transition: color 0.2s;
+  padding: 4px 0;
+  min-height: 32px;
+}
+
+.footer-col a:hover, .footer-col a:focus { color: var(--orange); }
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 24px;
+  border-top: 1px solid var(--line2);
+  color: var(--muted);
+  font-size: 13px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.footer-bottom b { color: var(--orange); }
+
+/* ═══════════ RESPONSIVE BREAKPOINTS ═══════════ */
+@media (max-width: 1024px) {
+  .nav-links { display: none; }
+  .nav-call { display: none; }
+  .burger { display: flex; }
+}
+
+@media (max-width: 900px) {
+  .steps-grid { grid-template-columns: 1fr 1fr; }
+  .step { border-right: none; border-bottom: 1px solid var(--line2); padding-right: 24px; }
+  .step:nth-child(2n) { border-right: none; }
+  .gallery { grid-template-columns: repeat(4, 1fr); }
+  .t-big, .t-tall, .t-wide { grid-column: span 2; }
+  .about-inner { grid-template-columns: 1fr; }
+  .about-media { max-width: 460px; margin: 0 auto; }
+  .about-media .am-float { right: 20px; }
+  .stats-grid { grid-template-columns: 1fr 1fr; gap: 8px 24px; }
+  .footer-top { grid-template-columns: 1fr 1fr; gap: 32px; }
+}
+
+@media (max-width: 600px) {
+  .hero-meta { gap: 24px; }
+  .steps-grid { grid-template-columns: 1fr; }
+  .step { border-bottom: 1px solid var(--line2); padding-right: 0; }
+  .gallery { grid-template-columns: 1fr 1fr; grid-auto-rows: 150px; gap: 8px; }
+  .t-big, .t-tall, .t-wide, .t-sq { grid-column: span 2; grid-row: span 1; }
+  .t-big, .t-tall { grid-row: span 2; }
+  .cabang-row {
+    grid-template-columns: 60px 1fr auto;
+    padding: 18px 4px;
+  }
+  .cabang-row .cr-pic { display: none; }
+  .cabang-row:hover { padding-left: 8px; }
+  .footer-top { grid-template-columns: 1fr; gap: 24px; }
+  .footer-bottom { flex-direction: column; text-align: center; }
+  .hero-tag { font-size: 11px; padding: 7px 12px; }
+  .hero-badge {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    max-width: none;
+  }
+}
+
+@media (max-width: 380px) {
+  .brand-name { font-size: 16px; }
+  .btn { padding: 10px 16px; font-size: 13px; }
+  .hero-btn-lg { padding: 12px 20px; font-size: 14px; }
+  .hero-actions { flex-direction: column; width: 100%; }
+  .hero-actions .btn { width: 100%; justify-content: center; }
+}
+
+@media (min-width: 1025px) {
+  .mobile-drawer { display: none !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+
+<!-- MOBILE DRAWER -->
+<div class="mobile-drawer" id="mobileDrawer">
+  <button class="close-drawer" onclick="closeDrawer()" aria-label="Tutup menu">✕</button>
+  <a href="#cara" onclick="closeDrawer()">🔧 Cara Kerja</a>
+  <a href="#katalog" onclick="closeDrawer()">📚 Katalog</a>
+  <a href="#tim" onclick="closeDrawer()">👥 Tim</a>
+  <a href="#tentang" onclick="closeDrawer()">ℹ️ Tentang</a>
+  <a href="#cabang" onclick="closeDrawer()">🏬 Cabang</a>
+  <a href="login.html" style="background: var(--orange); color: #fff; margin-top: 16px; justify-content: center; text-align: center;">Masuk →</a>
+</div>
+
+<!-- NAV -->
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="#top" class="brand">
+      <span class="brand-mark">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35A2 2 0 0 1 3.26 6.5l8-3.2a2 2 0 0 1 1.48 0l8 3.2A2 2 0 0 1 22 8.35Z"/><path d="M6 18h12"/><path d="M6 14h12"/><rect width="12" height="12" x="6" y="10"/></svg>
+      </span>
+      <span class="brand-name">Gudang<em>Hub</em></span>
+    </a>
+    <div class="nav-links">
+      <a href="#cara">Cara Kerja</a>
+      <a href="#katalog">Katalog</a>
+      <a href="#tim">Tim</a>
+      <a href="#tentang">Tentang</a>
+      <a href="#cabang">Cabang</a>
+    </div>
+    <div class="nav-cta">
+      <div class="nav-call">
+        <span style="color: var(--orange); font-size: 16px;">📞</span>
+        <div>
+          <span>Gudang Pusat</span>
+          <b>+62 812 3456 7890</b>
+        </div>
+      </div>
+      <a href="login.html" class="btn btn-solid">Masuk →</a>
+      <button class="burger" id="burger" onclick="openDrawer()" aria-label="Menu">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero wrap" id="top">
+  <div class="hero-top">
+    <span class="hero-eyebrow reveal"><span class="dot"></span> PT Central Perabot Utama</span>
+    <h1 class="reveal" data-d="1">Kirim order barang <em>antar cabang</em> tanpa ribet.</h1>
+    <p class="hero-lead reveal" data-d="2">Satu sistem menghubungkan empat toko cabang ke gudang pusat PT Central Perabot Utama. Cabang tinggal pilih dari katalog, admin tinggal proses. Semua tercatat, real-time.</p>
+    <div class="hero-actions reveal" data-d="3">
+      <a href="login.html" class="btn btn-solid hero-btn-lg">Mulai Order →</a>
+      <a href="#cara" class="btn btn-outline hero-btn-lg">Lihat Cara Kerja</a>
+    </div>
+  </div>
+
+  <div class="hero-banner reveal" data-d="2">
+    <img src="toko.jpg" alt="Toko PT Central Perabot Utama" onerror="this.src='https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=1200&q=80'">
+    <div class="hero-tag">✓ Stok Real-time</div>
+    <div class="hero-badge">
+      <span class="hb-ic">📦</span>
+      <div>
+        <div class="hb-t">Order disetujui</div>
+        <div class="hb-s">Notifikasi email otomatis</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-meta">
+    <div class="reveal">
+      <div class="hm-num" data-count="4">0</div>
+      <div class="hm-lbl">Cabang aktif</div>
+    </div>
+    <div class="reveal" data-d="1">
+      <div class="hm-num" data-count="9">0</div>
+      <div class="hm-lbl">Kategori barang</div>
+    </div>
+    <div class="reveal" data-d="2">
+      <div class="hm-num" data-count="500" data-suffix="+">0</div>
+      <div class="hm-lbl">Item furnitur</div>
+    </div>
+  </div>
+</header>
+
+<!-- MARQUEE -->
+<div class="marquee">
+  <div class="marquee-track">
+    <span class="marquee-item">🪑 Kursi</span>
+    <span class="marquee-item">🍽️ Meja</span>
+    <span class="marquee-item">🗄️ Lemari</span>
+    <span class="marquee-item">🛋️ Sofa</span>
+    <span class="marquee-item">🛏️ Kasur</span>
+    <span class="marquee-item">📚 Rak</span>
+    <span class="marquee-item">🪟 Bufet</span>
+    <span class="marquee-item">🍳 Dapur</span>
+    <span class="marquee-item">🎨 Dekorasi</span>
+    <span class="marquee-item">🪑 Kursi</span>
+    <span class="marquee-item">🍽️ Meja</span>
+    <span class="marquee-item">🗄️ Lemari</span>
+    <span class="marquee-item">🛋️ Sofa</span>
+    <span class="marquee-item">🛏️ Kasur</span>
+    <span class="marquee-item">📚 Rak</span>
+    <span class="marquee-item">🪟 Bufet</span>
+    <span class="marquee-item">🍳 Dapur</span>
+    <span class="marquee-item">🎨 Dekorasi</span>
+  </div>
+</div>
+
+<!-- CARA KERJA -->
+<section class="steps wrap" id="cara">
+  <div class="section-head reveal">
+    <span class="section-kicker">Alur Sistem</span>
+    <h2>Dari pilih barang sampai barang jalan, empat langkah.</h2>
+  </div>
+  <div class="steps-grid">
+    <div class="step reveal" data-d="1">
+      <div class="step-n">01</div>
+      <div class="step-ic">🔍</div>
+      <h3>Telusuri Katalog</h3>
+      <p>Cabang buka katalog barang lengkap dengan kode, harga, dan stok terkini.</p>
+    </div>
+    <div class="step reveal" data-d="2">
+      <div class="step-n">02</div>
+      <div class="step-ic">🛒</div>
+      <h3>Susun Order</h3>
+      <p>Tambah ke keranjang satu per satu, atau tempel banyak kode sekaligus lewat order massal.</p>
+    </div>
+    <div class="step reveal" data-d="3">
+      <div class="step-n">03</div>
+      <div class="step-ic">📋</div>
+      <h3>Admin Proses</h3>
+      <p>Gudang pusat menyetujui atau menolak dari dashboard. Status langsung berubah.</p>
+    </div>
+    <div class="step reveal" data-d="3">
+      <div class="step-n">04</div>
+      <div class="step-ic">🚚</div>
+      <h3>Barang Dikirim</h3>
+      <p>Order approved masuk antrean kirim. Cabang dapat notifikasi email otomatis.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SHOWCASE -->
+<section class="showcase wrap" id="katalog">
+  <div class="showcase-head">
+    <div class="section-head reveal" style="margin-bottom:0">
+      <span class="section-kicker">Katalog Furnitur</span>
+      <h2>Sembilan kategori, satu gudang.</h2>
+    </div>
+    <a href="login.html" class="btn btn-outline reveal" data-d="1">Buka Katalog →</a>
+  </div>
+  <div class="gallery">
+    <div class="tile t-big reveal">
+      <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=900&q=80" alt="Ruang tamu">
+      <div class="tile-arrow">↗</div>
+      <div class="tile-label">
+        <div class="tl-k">Set Ruang Tamu</div>
+        <div class="tl-n">Sofa & Kursi</div>
+      </div>
+    </div>
+    <div class="tile t-tall reveal" data-d="1">
+      <img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=700&q=80" alt="Sofa modern">
+      <div class="tile-arrow">↗</div>
+      <div class="tile-label">
+        <div class="tl-k">Populer</div>
+        <div class="tl-n">Sofa</div>
+      </div>
+    </div>
+    <div class="tile tile-solid accent reveal" data-d="2">
+      <span class="ts-ic" style="font-size:28px;">🍽️</span>
+      <div class="tile-label" style="position:static">
+        <div class="tl-k">Kategori</div>
+        <div class="tl-n">Meja</div>
+      </div>
+    </div>
+    <div class="tile tile-solid reveal" data-d="1">
+      <span class="ts-ic" style="font-size:28px;">🗄️</span>
+      <div class="tile-label" style="position:static">
+        <div class="tl-k">Kategori</div>
+        <div class="tl-n">Lemari</div>
+      </div>
+    </div>
+    <div class="tile t-sq reveal" data-d="2">
+      <img src="https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=700&q=80" alt="Kursi">
+      <div class="tile-arrow">↗</div>
+      <div class="tile-label">
+        <div class="tl-k">Kategori</div>
+        <div class="tl-n">Kursi</div>
+      </div>
+    </div>
+    <div class="tile tile-solid reveal" data-d="1">
+      <span class="ts-ic" style="font-size:28px;">🛏️</span>
+      <div class="tile-label" style="position:static">
+        <div class="tl-k">Kategori</div>
+        <div class="tl-n">Kasur</div>
+      </div>
+    </div>
+    <div class="tile tile-solid reveal" data-d="2">
+      <span class="ts-ic" style="font-size:28px;">📚</span>
+      <div class="tile-label" style="position:static">
+        <div class="tl-k">Kategori</div>
+        <div class="tl-n">Rak & Bufet</div>
+      </div>
+    </div>
+    <div class="tile t-wide reveal" data-d="1">
+      <img src="https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?w=900&q=80" alt="Interior showroom">
+      <div class="tile-arrow">↗</div>
+      <div class="tile-label">
+        <div class="tl-k">Dapur & Dekorasi</div>
+        <div class="tl-n">Pelengkap Rumah</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="about" id="tentang">
+  <div class="wrap about-inner">
+    <div class="about-media reveal">
+      <div class="am-main">
+        <img src="https://images.unsplash.com/photo-1553413077-190dd305871c?w=800&q=80" alt="Gudang">
+      </div>
+      <div class="am-float">
+        <img src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=500&q=80" alt="Showroom">
+      </div>
+    </div>
+    <div class="about-copy">
+      <span class="section-kicker reveal">Gudang Terpusat</span>
+      <h2 class="reveal" data-d="1">Semua cabang, satu sumber kebenaran.</h2>
+      <p class="lead reveal" data-d="1">GudangHub menyatukan permintaan dari seluruh toko cabang ke gudang pusat PT Central Perabot Utama. Tidak ada lagi order lewat chat yang tercecer.</p>
+      <div class="about-list">
+        <div class="about-item reveal" data-d="1">
+          <span class="ai-ic">🔄</span>
+          <div>
+            <h4>Order tercatat rapi</h4>
+            <p>Setiap permintaan punya ID order unik, lengkap dengan detail barang dan catatan cabang.</p>
+          </div>
+        </div>
+        <div class="about-item reveal" data-d="2">
+          <span class="ai-ic">⚡</span>
+          <div>
+            <h4>Proses sekali klik</h4>
+            <p>Admin menyetujui atau menolak dari dashboard. Pending, approved, rejected langsung sinkron.</p>
+          </div>
+        </div>
+        <div class="about-item reveal" data-d="3">
+          <span class="ai-ic">📊</span>
+          <div>
+            <h4>Laporan per cabang</h4>
+            <p>Pantau total order, approval rate, dan aktivitas tiap toko dalam satu layar.</p>
+          </div>
+        </div>
+      </div>
+      <a href="login.html" class="btn btn-solid reveal" data-d="1">Masuk ke Dashboard →</a>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats wrap">
+  <div class="section-head reveal">
+    <span class="section-kicker">Dalam Angka</span>
+    <h2>Skala operasi GudangHub.</h2>
+  </div>
+  <div class="stats-grid">
+    <div class="stat reveal">
+      <div class="s-num" data-count="4">0</div>
+      <div class="s-lbl">Toko cabang di NTT</div>
+    </div>
+    <div class="stat reveal" data-d="1">
+      <div class="s-num" data-count="9">0</div>
+      <div class="s-lbl">Kategori furnitur</div>
+    </div>
+    <div class="stat reveal" data-d="2">
+      <div class="s-num" data-count="500"><span class="val">0</span><span class="suf">+</span></div>
+      <div class="s-lbl">Item dalam katalog</div>
+    </div>
+    <div class="stat reveal" data-d="3">
+      <div class="s-num" data-count="24"><span class="val">0</span><span class="suf">/7</span></div>
+      <div class="s-lbl">Order kapan saja</div>
+    </div>
+  </div>
+</section>
+
+<!-- CABANG -->
+<section class="cabang" id="cabang">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="section-kicker">Jaringan Toko</span>
+      <h2>Empat cabang, terhubung penuh.</h2>
+    </div>
+    <div class="cabang-list">
+      <div class="cabang-row reveal">
+        <div class="cr-id">CB001</div>
+        <div class="cr-store">Toko Nasional Eltari</div>
+        <div class="cr-pic"><span class="cr-av">A</span> PIC · Arfa</div>
+        <span class="cr-go">→</span>
+      </div>
+      <div class="cabang-row reveal" data-d="1">
+        <div class="cr-id">CB002</div>
+        <div class="cr-store">Perabot Mama Oesapa</div>
+        <div class="cr-pic"><span class="cr-av">A</span> PIC · Akmal</div>
+        <span class="cr-go">→</span>
+      </div>
+      <div class="cabang-row reveal" data-d="2">
+        <div class="cr-id">CB003</div>
+        <div class="cr-store">Perabot Mama TDM</div>
+        <div class="cr-pic"><span class="cr-av">S</span> PIC · Shally</div>
+        <span class="cr-go">→</span>
+      </div>
+      <div class="cabang-row reveal" data-d="3">
+        <div class="cr-id">CB004</div>
+        <div class="cr-store">Perabot Mama Kefamenanu</div>
+        <div class="cr-pic"><span class="cr-av">F</span> PIC · Fajar</div>
+        <span class="cr-go">→</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta wrap">
+  <div class="cta-box reveal">
+    <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200&q=80" alt="">
+    <h2>Siap mengelola order hari ini?</h2>
+    <p>Masuk dengan akun cabang atau admin gudang, lalu mulai kirim dan proses order barang.</p>
+    <a href="login.html" class="btn btn-solid hero-btn-lg">Masuk ke GudangHub →</a>
+  </div>
+</section>
 <!-- ═══════════ TIM DI BALIK LAYAR ═══════════ -->
 <style>
 /* Tim Section */
@@ -1629,453 +2076,6 @@ a { color: inherit; text-decoration: none; }
 })();
 </script>
   
-/* ═══════════ FOOTER ═══════════ */
-.footer {
-  padding: clamp(48px, 8vw, 72px) 0 34px;
-  padding-bottom: calc(34px + var(--safe-bottom));
-  border-top: 1px solid var(--line2);
-}
-
-.footer-top {
-  display: grid;
-  grid-template-columns: 1.8fr 1fr 1fr 1fr;
-  gap: clamp(24px, 4vw, 40px);
-  padding-bottom: clamp(32px, 5vw, 48px);
-}
-
-.footer-about p {
-  color: var(--muted);
-  font-size: 14.5px;
-  max-width: 34ch;
-  margin-top: 18px;
-}
-
-.footer-col h5 {
-  font-family: 'Manrope';
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text);
-  margin-bottom: 16px;
-}
-
-.footer-col a {
-  display: block;
-  color: var(--muted);
-  font-size: 14.5px;
-  margin-bottom: 12px;
-  transition: color 0.2s;
-  padding: 4px 0;
-  min-height: 32px;
-}
-
-.footer-col a:hover, .footer-col a:focus { color: var(--orange); }
-
-.footer-bottom {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: 24px;
-  border-top: 1px solid var(--line2);
-  color: var(--muted);
-  font-size: 13px;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.footer-bottom b { color: var(--orange); }
-
-/* ═══════════ RESPONSIVE BREAKPOINTS ═══════════ */
-@media (max-width: 1024px) {
-  .nav-links { display: none; }
-  .nav-call { display: none; }
-  .burger { display: flex; }
-}
-
-@media (max-width: 900px) {
-  .steps-grid { grid-template-columns: 1fr 1fr; }
-  .step { border-right: none; border-bottom: 1px solid var(--line2); padding-right: 24px; }
-  .step:nth-child(2n) { border-right: none; }
-  .gallery { grid-template-columns: repeat(4, 1fr); }
-  .t-big, .t-tall, .t-wide { grid-column: span 2; }
-  .about-inner { grid-template-columns: 1fr; }
-  .about-media { max-width: 460px; margin: 0 auto; }
-  .about-media .am-float { right: 20px; }
-  .stats-grid { grid-template-columns: 1fr 1fr; gap: 8px 24px; }
-  .footer-top { grid-template-columns: 1fr 1fr; gap: 32px; }
-}
-
-@media (max-width: 600px) {
-  .hero-meta { gap: 24px; }
-  .steps-grid { grid-template-columns: 1fr; }
-  .step { border-bottom: 1px solid var(--line2); padding-right: 0; }
-  .gallery { grid-template-columns: 1fr 1fr; grid-auto-rows: 150px; gap: 8px; }
-  .t-big, .t-tall, .t-wide, .t-sq { grid-column: span 2; grid-row: span 1; }
-  .t-big, .t-tall { grid-row: span 2; }
-  .cabang-row {
-    grid-template-columns: 60px 1fr auto;
-    padding: 18px 4px;
-  }
-  .cabang-row .cr-pic { display: none; }
-  .cabang-row:hover { padding-left: 8px; }
-  .footer-top { grid-template-columns: 1fr; gap: 24px; }
-  .footer-bottom { flex-direction: column; text-align: center; }
-  .hero-tag { font-size: 11px; padding: 7px 12px; }
-  .hero-badge {
-    left: 12px;
-    right: 12px;
-    bottom: 12px;
-    max-width: none;
-  }
-}
-
-@media (max-width: 380px) {
-  .brand-name { font-size: 16px; }
-  .btn { padding: 10px 16px; font-size: 13px; }
-  .hero-btn-lg { padding: 12px 20px; font-size: 14px; }
-  .hero-actions { flex-direction: column; width: 100%; }
-  .hero-actions .btn { width: 100%; justify-content: center; }
-}
-
-@media (min-width: 1025px) {
-  .mobile-drawer { display: none !important; }
-}
-</style>
-</head>
-<body>
-
-<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
-
-<!-- MOBILE DRAWER -->
-<div class="mobile-drawer" id="mobileDrawer">
-  <button class="close-drawer" onclick="closeDrawer()" aria-label="Tutup menu">✕</button>
-  <a href="#cara" onclick="closeDrawer()">🔧 Cara Kerja</a>
-  <a href="#katalog" onclick="closeDrawer()">📚 Katalog</a>
-  <a href="#tim" onclick="closeDrawer()">👥 Tim</a>
-  <a href="#tentang" onclick="closeDrawer()">ℹ️ Tentang</a>
-  <a href="#cabang" onclick="closeDrawer()">🏬 Cabang</a>
-  <a href="login.html" style="background: var(--orange); color: #fff; margin-top: 16px; justify-content: center; text-align: center;">Masuk →</a>
-</div>
-
-<!-- NAV -->
-<nav class="nav" id="nav">
-  <div class="nav-inner">
-    <a href="#top" class="brand">
-      <span class="brand-mark">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35A2 2 0 0 1 3.26 6.5l8-3.2a2 2 0 0 1 1.48 0l8 3.2A2 2 0 0 1 22 8.35Z"/><path d="M6 18h12"/><path d="M6 14h12"/><rect width="12" height="12" x="6" y="10"/></svg>
-      </span>
-      <span class="brand-name">Gudang<em>Hub</em></span>
-    </a>
-    <div class="nav-links">
-      <a href="#cara">Cara Kerja</a>
-      <a href="#katalog">Katalog</a>
-      <a href="#tim">Tim</a>
-      <a href="#tentang">Tentang</a>
-      <a href="#cabang">Cabang</a>
-    </div>
-    <div class="nav-cta">
-      <div class="nav-call">
-        <span style="color: var(--orange); font-size: 16px;">📞</span>
-        <div>
-          <span>Gudang Pusat</span>
-          <b>+62 812 3456 7890</b>
-        </div>
-      </div>
-      <a href="login.html" class="btn btn-solid">Masuk →</a>
-      <button class="burger" id="burger" onclick="openDrawer()" aria-label="Menu">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
-      </button>
-    </div>
-  </div>
-</nav>
-
-<!-- HERO -->
-<header class="hero wrap" id="top">
-  <div class="hero-top">
-    <span class="hero-eyebrow reveal"><span class="dot"></span> PT Central Perabot Utama</span>
-    <h1 class="reveal" data-d="1">Kirim order barang <em>antar cabang</em> tanpa ribet.</h1>
-    <p class="hero-lead reveal" data-d="2">Satu sistem menghubungkan empat toko cabang ke gudang pusat PT Central Perabot Utama. Cabang tinggal pilih dari katalog, admin tinggal proses. Semua tercatat, real-time.</p>
-    <div class="hero-actions reveal" data-d="3">
-      <a href="login.html" class="btn btn-solid hero-btn-lg">Mulai Order →</a>
-      <a href="#cara" class="btn btn-outline hero-btn-lg">Lihat Cara Kerja</a>
-    </div>
-  </div>
-
-  <div class="hero-banner reveal" data-d="2">
-    <img src="toko.jpg" alt="Toko PT Central Perabot Utama" onerror="this.src='https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=1200&q=80'">
-    <div class="hero-tag">✓ Stok Real-time</div>
-    <div class="hero-badge">
-      <span class="hb-ic">📦</span>
-      <div>
-        <div class="hb-t">Order disetujui</div>
-        <div class="hb-s">Notifikasi email otomatis</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="hero-meta">
-    <div class="reveal">
-      <div class="hm-num" data-count="4">0</div>
-      <div class="hm-lbl">Cabang aktif</div>
-    </div>
-    <div class="reveal" data-d="1">
-      <div class="hm-num" data-count="9">0</div>
-      <div class="hm-lbl">Kategori barang</div>
-    </div>
-    <div class="reveal" data-d="2">
-      <div class="hm-num" data-count="500" data-suffix="+">0</div>
-      <div class="hm-lbl">Item furnitur</div>
-    </div>
-  </div>
-</header>
-
-<!-- MARQUEE -->
-<div class="marquee">
-  <div class="marquee-track">
-    <span class="marquee-item">🪑 Kursi</span>
-    <span class="marquee-item">🍽️ Meja</span>
-    <span class="marquee-item">🗄️ Lemari</span>
-    <span class="marquee-item">🛋️ Sofa</span>
-    <span class="marquee-item">🛏️ Kasur</span>
-    <span class="marquee-item">📚 Rak</span>
-    <span class="marquee-item">🪟 Bufet</span>
-    <span class="marquee-item">🍳 Dapur</span>
-    <span class="marquee-item">🎨 Dekorasi</span>
-    <span class="marquee-item">🪑 Kursi</span>
-    <span class="marquee-item">🍽️ Meja</span>
-    <span class="marquee-item">🗄️ Lemari</span>
-    <span class="marquee-item">🛋️ Sofa</span>
-    <span class="marquee-item">🛏️ Kasur</span>
-    <span class="marquee-item">📚 Rak</span>
-    <span class="marquee-item">🪟 Bufet</span>
-    <span class="marquee-item">🍳 Dapur</span>
-    <span class="marquee-item">🎨 Dekorasi</span>
-  </div>
-</div>
-
-<!-- CARA KERJA -->
-<section class="steps wrap" id="cara">
-  <div class="section-head reveal">
-    <span class="section-kicker">Alur Sistem</span>
-    <h2>Dari pilih barang sampai barang jalan, empat langkah.</h2>
-  </div>
-  <div class="steps-grid">
-    <div class="step reveal" data-d="1">
-      <div class="step-n">01</div>
-      <div class="step-ic">🔍</div>
-      <h3>Telusuri Katalog</h3>
-      <p>Cabang buka katalog barang lengkap dengan kode, harga, dan stok terkini.</p>
-    </div>
-    <div class="step reveal" data-d="2">
-      <div class="step-n">02</div>
-      <div class="step-ic">🛒</div>
-      <h3>Susun Order</h3>
-      <p>Tambah ke keranjang satu per satu, atau tempel banyak kode sekaligus lewat order massal.</p>
-    </div>
-    <div class="step reveal" data-d="3">
-      <div class="step-n">03</div>
-      <div class="step-ic">📋</div>
-      <h3>Admin Proses</h3>
-      <p>Gudang pusat menyetujui atau menolak dari dashboard. Status langsung berubah.</p>
-    </div>
-    <div class="step reveal" data-d="3">
-      <div class="step-n">04</div>
-      <div class="step-ic">🚚</div>
-      <h3>Barang Dikirim</h3>
-      <p>Order approved masuk antrean kirim. Cabang dapat notifikasi email otomatis.</p>
-    </div>
-  </div>
-</section>
-
-<!-- SHOWCASE -->
-<section class="showcase wrap" id="katalog">
-  <div class="showcase-head">
-    <div class="section-head reveal" style="margin-bottom:0">
-      <span class="section-kicker">Katalog Furnitur</span>
-      <h2>Sembilan kategori, satu gudang.</h2>
-    </div>
-    <a href="login.html" class="btn btn-outline reveal" data-d="1">Buka Katalog →</a>
-  </div>
-  <div class="gallery">
-    <div class="tile t-big reveal">
-      <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=900&q=80" alt="Ruang tamu">
-      <div class="tile-arrow">↗</div>
-      <div class="tile-label">
-        <div class="tl-k">Set Ruang Tamu</div>
-        <div class="tl-n">Sofa & Kursi</div>
-      </div>
-    </div>
-    <div class="tile t-tall reveal" data-d="1">
-      <img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=700&q=80" alt="Sofa modern">
-      <div class="tile-arrow">↗</div>
-      <div class="tile-label">
-        <div class="tl-k">Populer</div>
-        <div class="tl-n">Sofa</div>
-      </div>
-    </div>
-    <div class="tile tile-solid accent reveal" data-d="2">
-      <span class="ts-ic" style="font-size:28px;">🍽️</span>
-      <div class="tile-label" style="position:static">
-        <div class="tl-k">Kategori</div>
-        <div class="tl-n">Meja</div>
-      </div>
-    </div>
-    <div class="tile tile-solid reveal" data-d="1">
-      <span class="ts-ic" style="font-size:28px;">🗄️</span>
-      <div class="tile-label" style="position:static">
-        <div class="tl-k">Kategori</div>
-        <div class="tl-n">Lemari</div>
-      </div>
-    </div>
-    <div class="tile t-sq reveal" data-d="2">
-      <img src="https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=700&q=80" alt="Kursi">
-      <div class="tile-arrow">↗</div>
-      <div class="tile-label">
-        <div class="tl-k">Kategori</div>
-        <div class="tl-n">Kursi</div>
-      </div>
-    </div>
-    <div class="tile tile-solid reveal" data-d="1">
-      <span class="ts-ic" style="font-size:28px;">🛏️</span>
-      <div class="tile-label" style="position:static">
-        <div class="tl-k">Kategori</div>
-        <div class="tl-n">Kasur</div>
-      </div>
-    </div>
-    <div class="tile tile-solid reveal" data-d="2">
-      <span class="ts-ic" style="font-size:28px;">📚</span>
-      <div class="tile-label" style="position:static">
-        <div class="tl-k">Kategori</div>
-        <div class="tl-n">Rak & Bufet</div>
-      </div>
-    </div>
-    <div class="tile t-wide reveal" data-d="1">
-      <img src="https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?w=900&q=80" alt="Interior showroom">
-      <div class="tile-arrow">↗</div>
-      <div class="tile-label">
-        <div class="tl-k">Dapur & Dekorasi</div>
-        <div class="tl-n">Pelengkap Rumah</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ABOUT -->
-<section class="about" id="tentang">
-  <div class="wrap about-inner">
-    <div class="about-media reveal">
-      <div class="am-main">
-        <img src="https://images.unsplash.com/photo-1553413077-190dd305871c?w=800&q=80" alt="Gudang">
-      </div>
-      <div class="am-float">
-        <img src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=500&q=80" alt="Showroom">
-      </div>
-    </div>
-    <div class="about-copy">
-      <span class="section-kicker reveal">Gudang Terpusat</span>
-      <h2 class="reveal" data-d="1">Semua cabang, satu sumber kebenaran.</h2>
-      <p class="lead reveal" data-d="1">GudangHub menyatukan permintaan dari seluruh toko cabang ke gudang pusat PT Central Perabot Utama. Tidak ada lagi order lewat chat yang tercecer.</p>
-      <div class="about-list">
-        <div class="about-item reveal" data-d="1">
-          <span class="ai-ic">🔄</span>
-          <div>
-            <h4>Order tercatat rapi</h4>
-            <p>Setiap permintaan punya ID order unik, lengkap dengan detail barang dan catatan cabang.</p>
-          </div>
-        </div>
-        <div class="about-item reveal" data-d="2">
-          <span class="ai-ic">⚡</span>
-          <div>
-            <h4>Proses sekali klik</h4>
-            <p>Admin menyetujui atau menolak dari dashboard. Pending, approved, rejected langsung sinkron.</p>
-          </div>
-        </div>
-        <div class="about-item reveal" data-d="3">
-          <span class="ai-ic">📊</span>
-          <div>
-            <h4>Laporan per cabang</h4>
-            <p>Pantau total order, approval rate, dan aktivitas tiap toko dalam satu layar.</p>
-          </div>
-        </div>
-      </div>
-      <a href="login.html" class="btn btn-solid reveal" data-d="1">Masuk ke Dashboard →</a>
-    </div>
-  </div>
-</section>
-
-<!-- STATS -->
-<section class="stats wrap">
-  <div class="section-head reveal">
-    <span class="section-kicker">Dalam Angka</span>
-    <h2>Skala operasi GudangHub.</h2>
-  </div>
-  <div class="stats-grid">
-    <div class="stat reveal">
-      <div class="s-num" data-count="4">0</div>
-      <div class="s-lbl">Toko cabang di NTT</div>
-    </div>
-    <div class="stat reveal" data-d="1">
-      <div class="s-num" data-count="9">0</div>
-      <div class="s-lbl">Kategori furnitur</div>
-    </div>
-    <div class="stat reveal" data-d="2">
-      <div class="s-num" data-count="500"><span class="val">0</span><span class="suf">+</span></div>
-      <div class="s-lbl">Item dalam katalog</div>
-    </div>
-    <div class="stat reveal" data-d="3">
-      <div class="s-num" data-count="24"><span class="val">0</span><span class="suf">/7</span></div>
-      <div class="s-lbl">Order kapan saja</div>
-    </div>
-  </div>
-</section>
-
-<!-- CABANG -->
-<section class="cabang" id="cabang">
-  <div class="wrap">
-    <div class="section-head reveal">
-      <span class="section-kicker">Jaringan Toko</span>
-      <h2>Empat cabang, terhubung penuh.</h2>
-    </div>
-    <div class="cabang-list">
-      <div class="cabang-row reveal">
-        <div class="cr-id">CB001</div>
-        <div class="cr-store">Toko Nasional Eltari</div>
-        <div class="cr-pic"><span class="cr-av">A</span> PIC · Arfa</div>
-        <span class="cr-go">→</span>
-      </div>
-      <div class="cabang-row reveal" data-d="1">
-        <div class="cr-id">CB002</div>
-        <div class="cr-store">Perabot Mama Oesapa</div>
-        <div class="cr-pic"><span class="cr-av">A</span> PIC · Akmal</div>
-        <span class="cr-go">→</span>
-      </div>
-      <div class="cabang-row reveal" data-d="2">
-        <div class="cr-id">CB003</div>
-        <div class="cr-store">Perabot Mama TDM</div>
-        <div class="cr-pic"><span class="cr-av">S</span> PIC · Shally</div>
-        <span class="cr-go">→</span>
-      </div>
-      <div class="cabang-row reveal" data-d="3">
-        <div class="cr-id">CB004</div>
-        <div class="cr-store">Perabot Mama Kefamenanu</div>
-        <div class="cr-pic"><span class="cr-av">F</span> PIC · Fajar</div>
-        <span class="cr-go">→</span>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- CTA -->
-<section class="cta wrap">
-  <div class="cta-box reveal">
-    <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200&q=80" alt="">
-    <h2>Siap mengelola order hari ini?</h2>
-    <p>Masuk dengan akun cabang atau admin gudang, lalu mulai kirim dan proses order barang.</p>
-    <a href="login.html" class="btn btn-solid hero-btn-lg">Masuk ke GudangHub →</a>
-  </div>
-</section>
-
 <!-- FOOTER -->
 <footer class="footer">
   <div class="wrap">
