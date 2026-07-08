@@ -541,9 +541,7 @@ a { color: inherit; text-decoration: none; }
 .marquee-track {
   display: flex;
   gap: clamp(30px, 6vw, 56px);
-  width: max-content;
-  animation: slide 32s linear infinite;
-  will-change: transform;
+  ...
 }
 
 .marquee:hover .marquee-track { animation-play-state: paused; }
@@ -551,13 +549,7 @@ a { color: inherit; text-decoration: none; }
 @keyframes slide { to { transform: translateX(-50%); } }
 
 .marquee-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-family: 'Fraunces', serif;
-  font-size: clamp(16px, 2.2vw, 21px);
-  color: var(--muted);
-  white-space: nowrap;
+  ...
 }
 
 .marquee-item [data-lucide] { color: var(--orange); }
@@ -1222,27 +1214,140 @@ a { color: inherit; text-decoration: none; }
   </div>
 </header>
 
-<!-- MARQUEE -->
-<div class="marquee">
-  <div class="marquee-track">
-    <span class="marquee-item">🪑 Kursi</span>
-    <span class="marquee-item">🍽️ Meja</span>
-    <span class="marquee-item">🗄️ Lemari</span>
-    <span class="marquee-item">🛋️ Sofa</span>
-    <span class="marquee-item">🛏️ Kasur</span>
-    <span class="marquee-item">📚 Rak</span>
-    <span class="marquee-item">🪟 Bufet</span>
-    <span class="marquee-item">🍳 Dapur</span>
-    <span class="marquee-item">🎨 Dekorasi</span>
-    <span class="marquee-item">🪑 Kursi</span>
-    <span class="marquee-item">🍽️ Meja</span>
-    <span class="marquee-item">🗄️ Lemari</span>
-    <span class="marquee-item">🛋️ Sofa</span>
-    <span class="marquee-item">🛏️ Kasur</span>
-    <span class="marquee-item">📚 Rak</span>
-    <span class="marquee-item">🪟 Bufet</span>
-    <span class="marquee-item">🍳 Dapur</span>
-    <span class="marquee-item">🎨 Dekorasi</span>
+<!-- ═══════════ MARQUEE KATEGORI — INFINITE SEAMLESS ═══════════ -->
+<style>
+.marquee-cat {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(18px, 2.5vw, 26px) 0;
+  margin-top: var(--space);
+  background: rgba(20,20,31,0.6);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  border-top: 1px solid var(--line2);
+  border-bottom: 1px solid var(--line2);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%);
+  z-index: 1;
+}
+
+.marquee-cat-track {
+  display: flex;
+  gap: clamp(40px, 6vw, 64px);
+  width: max-content;
+  animation: marqueeCatSlide 40s linear infinite;
+  will-change: transform;
+  align-items: center;
+}
+
+.marquee-cat:hover .marquee-cat-track {
+  animation-play-state: paused;
+}
+
+@keyframes marqueeCatSlide {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(calc(-50% - 32px), 0, 0); }
+}
+
+.mc-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: clamp(18px, 2.4vw, 24px);
+  color: var(--muted);
+  white-space: nowrap;
+  transition: color 0.3s ease;
+  flex-shrink: 0;
+}
+
+.mc-item:hover { color: var(--text); }
+
+.mc-item .mc-icon {
+  font-size: clamp(22px, 2.6vw, 28px);
+  line-height: 1;
+  display: inline-flex;
+  filter: drop-shadow(0 0 12px rgba(255,107,0,0.35));
+}
+
+.mc-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--orange);
+  flex-shrink: 0;
+  opacity: 0.5;
+  box-shadow: 0 0 8px rgba(255,107,0,0.6);
+}
+
+@media (max-width: 600px) {
+  .marquee-cat-track {
+    gap: 32px;
+    animation-duration: 28s;
+  }
+  .mc-item { gap: 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-cat-track { animation: none; }
+}
+</style>
+
+<div class="marquee-cat" aria-label="Kategori barang">
+  <div class="marquee-cat-track">
+
+    <!-- SET 1 -->
+    <span class="mc-item"><span class="mc-icon">🪑</span> Kursi</span>
+    <span class="mc-dot"></span>
+    <span class="mc-item"><span class="mc-icon">🛏️</span> Kasur</span>
+    <span class="mc-dot"></span>
+    <span class="mc-item"><span class="mc-icon">🍽️</span> Meja</span>
+    <span class="mc-dot"></span>
+    <span class="mc-item"><span class="mc-icon">📺</span> Elektronik</span>
+    <span class="mc-dot"></span>
+    <span class="mc-item"><span class="mc-icon">🍳</span> Peralatan Dapur</span>
+    <span class="mc-dot"></span>
+    <span class="mc-item"><span class="mc-icon">🍴</span> Peralatan Makan</span>
+    <span class="mc-dot"></span>
+    <span class="mc-item"><span class="mc-icon">🚿</span> Peralatan Mandi</span>
+    <span class="mc-dot"></span>
+    <span class="mc-item"><span class="mc-icon">🗄️</span> Lemari</span>
+    <span class="mc-dot"></span>
+    <span class="mc-item"><span class="mc-icon">🗃️</span> Loker</span>
+    <span class="mc-dot"></span>
+    <span class="mc-item"><span class="mc-icon">🛋️</span> Sofa</span>
+    <span class="mc-dot"></span>
+    <span class="mc-item"><span class="mc-icon">📚</span> Rak Buku</span>
+    <span class="mc-dot"></span>
+    <span class="mc-item"><span class="mc-icon">🎨</span> Dekorasi</span>
+    <span class="mc-dot"></span>
+
+    <!-- SET 2 (DUPLIKAT UNTUK SEAMLESS LOOP) -->
+    <span class="mc-item"><span class="mc-icon">🪑</span> Kursi</span>
+    <span class="mc-dot"></span>
+    <span class="mc-item"><span class="mc-icon">🛏️</span> Kasur</span>
+    <span class="mc-dot"></span>
+    <span class="mc-item"><span class="mc-icon">🍽️</span> Meja</span>
+    <span class="mc-dot"></span>
+    <span class="mc-item"><span class="mc-icon">📺</span> Elektronik</span>
+    <span class="mc-dot"></span>
+    <span class="mc-item"><span class="mc-icon">🍳</span> Peralatan Dapur</span>
+    <span class="mc-dot"></span>
+    <span class="mc-item"><span class="mc-icon">🍴</span> Peralatan Makan</span>
+    <span class="mc-dot"></span>
+    <span class="mc-item"><span class="mc-icon">🚿</span> Peralatan Mandi</span>
+    <span class="mc-dot"></span>
+    <span class="mc-item"><span class="mc-icon">🗄️</span> Lemari</span>
+    <span class="mc-dot"></span>
+    <span class="mc-item"><span class="mc-icon">🗃️</span> Loker</span>
+    <span class="mc-dot"></span>
+    <span class="mc-item"><span class="mc-icon">🛋️</span> Sofa</span>
+    <span class="mc-dot"></span>
+    <span class="mc-item"><span class="mc-icon">📚</span> Rak Buku</span>
+    <span class="mc-dot"></span>
+    <span class="mc-item"><span class="mc-icon">🎨</span> Dekorasi</span>
+    <span class="mc-dot"></span>
+
   </div>
 </div>
 
