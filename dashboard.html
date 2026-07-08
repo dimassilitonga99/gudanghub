@@ -368,7 +368,14 @@ background-size:46px 46px}
       </div>
       <div class="grid-3-1">
         <div class="panel"><div class="panel-header"><div class="panel-title">⏳ Order Menunggu Persetujuan</div><button class="panel-action" onclick="showPage('orders')">Lihat Semua →</button></div><div class="panel-body" style="padding:0;"><div class="order-table-wrap"><table class="order-table"><thead><tr><th>ID Pesanan</th><th>Cabang</th><th>Item</th><th>Aksi</th></tr></thead><tbody id="pendingOrdersBody"><tr><td colspan="5"><div class="empty-state"><div class="empty-icon">⏳</div><p>Memuat data...</p></div></td></tr></tbody></table></div></div></div>
-        <div class="panel"><div class="panel-header"><div class="panel-title">📊 Status Order</div></div><div class="panel-body"><div class="donut-wrap"><svg width="110" height="110" viewBox="0 0 110 110"><circle cx="55" cy="55" r="40" fill="none" stroke="#1e1e3a" stroke-width="18"/><circle cx="55" cy="55" r="40" fill="none" stroke="#22c55e" stroke-width="18" stroke-dasharray="0 251.2" id="donutApproved" style="transition:stroke-dasharray 1s ease;transform:rotate(-90deg);transform-origin:center"/><circle cx="55" cy="55" r="40" fill="none" stroke="#f59e0b" stroke-width="18" stroke-dasharray="0 251.2" id="donutPending" style="transition:stroke-dasharray 1s ease 0.2s;transform:rotate(-90deg);transform-origin:center circle cx="55" cy="55" r="40" fill="none" stroke="#ef4444" stroke-width="18" stroke-dasharray="0 251.2" id="donutRejected" style="transition:stroke-dasharray 1s ease 0.4s;transform:rotate(-90deg);transform-origin:center"/><text x="55" y="50" text-anchor="middle" fill="#fff" font-size="16" font-weight="800" id="donutTotal">0</text><text x="55" y="64" text-anchor="middle" fill="#94a3b8" font-size="9">Total</text></svg><div class="donut-legend"><div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div><span class="legend-label">Disetujui</span><span class="legend-val" style="color:#22c55e" id="legendApproved">0</span></div><div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div><span class="legend-label">Tertunda</span><span class="legend-val" style="color:#f59e0b" id="legendPending">0</span></div><div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div><span class="legend-label">Ditolak</span><span class="legend-val" style="color:#ef4444" id="legendRejected">0</span></div></div></div></div></div>
+        <div class="panel"><div class="panel-header"><div class="panel-title">📊 Status Order</div></div><div class="panel-body"><div class="donut-wrap"><svg width="110" height="110" viewBox="0 0 110 110">
+  <circle cx="55" cy="55" r="40" fill="none" stroke="#1e1e3a" stroke-width="18"/>
+  <circle cx="55" cy="55" r="40" fill="none" stroke="#22c55e" stroke-width="18" stroke-dasharray="0 251.2" id="donutApproved" style="transition:stroke-dasharray 1s ease;transform:rotate(-90deg);transform-origin:center"/>
+  <circle cx="55" cy="55" r="40" fill="none" stroke="#f59e0b" stroke-width="18" stroke-dasharray="0 251.2" id="donutPending" style="transition:stroke-dasharray 1s ease 0.2s;transform:rotate(-90deg);transform-origin:center"/>
+  <circle cx="55" cy="55" r="40" fill="none" stroke="#ef4444" stroke-width="18" stroke-dasharray="0 251.2" id="donutRejected" style="transition:stroke-dasharray 1s ease 0.4s;transform:rotate(-90deg);transform-origin:center"/>
+  <text x="55" y="50" text-anchor="middle" fill="#fff" font-size="16" font-weight="800" id="donutTotal">0</text>
+  <text x="55" y="64" text-anchor="middle" fill="#94a3b8" font-size="9">Total</text>
+</svg> style="transition:stroke-dasharray 1s ease 0.4s;transform:rotate(-90deg);transform-origin:center"/><text x="55" y="50" text-anchor="middle" fill="#fff" font-size="16" font-weight="800" id="donutTotal">0</text><text x="55" y="64" text-anchor="middle" fill="#94a3b8" font-size="9">Total</text></svg><div class="donut-legend"><div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div><span class="legend-label">Disetujui</span><span class="legend-val" style="color:#22c55e" id="legendApproved">0</span></div><div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div><span class="legend-label">Tertunda</span><span class="legend-val" style="color:#f59e0b" id="legendPending">0</span></div><div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div><span class="legend-label">Ditolak</span><span class="legend-val" style="color:#ef4444" id="legendRejected">0</span></div></div></div></div></div>
       </div>
       <div class="grid-2">
         <div class="panel"><div class="panel-header"><div class="panel-title">📊 Pesanan per Cabang</div></div><div class="panel-body"><div class="bar-chart" id="barChart"></div></div></div>
@@ -649,15 +656,22 @@ function updateDonut(){
   const r=allOrders.filter(o=>String(o.STATUS).toUpperCase()==='REJECTED').length;
   const c=2*Math.PI*40;
   const aL=a/t*c,pL=p/t*c,rL=r/t*c;
-  document.getElementById('donutApproved').setAttribute('stroke-dasharray',`${aL} ${c-aL}`);
-  document.getElementById('donutPending').setAttribute('stroke-dasharray',`${pL} ${c-pL}`);
-  document.getElementById('donutPending').setAttribute('stroke-dashoffset',`-${aL}`);
-  document.getElementById('donutRejected').setAttribute('stroke-dasharray',`${rL} ${c-rL}`);
-  document.getElementById('donutRejected').setAttribute('stroke-dashoffset',`-${aL+pL}`);
-  document.getElementById('donutTotal').textContent=allOrders.length;
-  document.getElementById('legendApproved').textContent=a;
-  document.getElementById('legendPending').textContent=p;
-  document.getElementById('legendRejected').textContent=r;
+
+  const dA=document.getElementById('donutApproved');
+  const dP=document.getElementById('donutPending');
+  const dR=document.getElementById('donutRejected');
+  const dT=document.getElementById('donutTotal');
+  const lA=document.getElementById('legendApproved');
+  const lP=document.getElementById('legendPending');
+  const lR=document.getElementById('legendRejected');
+
+  if(dA) dA.setAttribute('stroke-dasharray',`${aL} ${c-aL}`);
+  if(dP){dP.setAttribute('stroke-dasharray',`${pL} ${c-pL}`);dP.setAttribute('stroke-dashoffset',`-${aL}`);}
+  if(dR){dR.setAttribute('stroke-dasharray',`${rL} ${c-rL}`);dR.setAttribute('stroke-dashoffset',`-${aL+pL}`);}
+  if(dT) dT.textContent=allOrders.length;
+  if(lA) lA.textContent=a;
+  if(lP) lP.textContent=p;
+  if(lR) lR.textContent=r;
 }
 
 function updateBarChart(){
