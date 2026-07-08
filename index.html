@@ -1174,45 +1174,762 @@ a { color: inherit; text-decoration: none; }
   </div>
 </nav>
 
-<!-- HERO -->
-<header class="hero wrap" id="top">
-  <div class="hero-top">
-    <span class="hero-eyebrow reveal"><span class="dot"></span> PT Central Perabot Utama</span>
-    <h1 class="reveal" data-d="1">Kirim order barang <em>antar cabang</em> tanpa ribet.</h1>
-    <p class="hero-lead reveal" data-d="2">Satu sistem menghubungkan empat toko cabang ke gudang pusat PT Central Perabot Utama. Cabang tinggal pilih dari katalog, admin tinggal proses. Semua tercatat, real-time.</p>
-    <div class="hero-actions reveal" data-d="3">
-      <a href="login.html" class="btn btn-solid hero-btn-lg">Mulai Order →</a>
-      <a href="#cara" class="btn btn-outline hero-btn-lg">Lihat Cara Kerja</a>
-    </div>
+<!-- ═══════════ HERO CINEMATIC — SCROLL ANIMATION ═══════════ -->
+<style>
+/* ========== HERO WRAPPER ========== */
+.hero-cinema {
+  position: relative;
+  min-height: 100dvh;
+  min-height: 100vh;
+  background: #08080d;
+  overflow: hidden;
+  padding-top: 0;
+  z-index: 2;
+}
+
+/* ========== BACKGROUND CANVAS (Particle) ========== */
+.hc-canvas-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.hc-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Gradient overlay + spotlight */
+.hc-spotlight {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at var(--mx, 50%) var(--my, 50%),
+      rgba(255,140,56,0.15) 0%,
+      rgba(255,107,0,0.06) 20%,
+      transparent 50%),
+    radial-gradient(ellipse 80% 60% at 50% 50%,
+      transparent 0%,
+      rgba(8,8,13,0.4) 60%,
+      rgba(8,8,13,0.9) 100%);
+  transition: background 0.3s ease-out;
+}
+
+/* Vignette bottom */
+.hc-vignette {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  z-index: 3;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 0%, #08080d 100%);
+}
+
+/* ========== HERO CONTENT ========== */
+.hc-inner {
+  position: relative;
+  z-index: 10;
+  min-height: 100dvh;
+  min-height: 100vh;
+  padding: calc(90px + var(--safe-top, 0px)) clamp(24px, 4vw, 60px) clamp(60px, 8vw, 100px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #f5f0e8;
+}
+
+/* Top row (Brand tag + Nav mini) */
+.hc-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  flex-wrap: wrap;
+  transform: translateY(var(--scroll-y, 0));
+  transition: transform 0.1s linear;
+}
+
+.hc-brand-tag {
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  letter-spacing: 0.15em;
+  color: #f5f0e8;
+  text-transform: uppercase;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hc-brand-tag .brand-code {
+  background: rgba(245,240,232,0.08);
+  border: 1px solid rgba(245,240,232,0.15);
+  padding: 6px 12px;
+  border-radius: 6px;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.hc-brand-tag .brand-count {
+  font-size: 10px;
+  color: rgba(245,240,232,0.4);
+  padding: 0 4px;
+  letter-spacing: 0.2em;
+}
+
+.hc-nav-mini {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: right;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+}
+
+.hc-nav-mini a {
+  color: rgba(245,240,232,0.6);
+  text-decoration: none;
+  transition: color 0.25s ease;
+  padding: 3px 0;
+  cursor: pointer;
+}
+
+.hc-nav-mini a:hover {
+  color: var(--orange);
+}
+
+/* ========== MAIN HEADING ========== */
+.hc-main {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: clamp(30px, 5vw, 80px);
+  align-items: flex-end;
+  margin: auto 0;
+  padding: clamp(40px, 8vh, 100px) 0;
+}
+
+.hc-headline {
+  transform: translateY(calc(var(--scroll-y, 0) * 0.3));
+  transition: transform 0.05s linear;
+}
+
+.hc-headline h1 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: clamp(48px, 9vw, 130px);
+  font-weight: 500;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  color: #f5f0e8;
+  margin: 0;
+  text-wrap: balance;
+}
+
+.hc-headline h1 .line {
+  display: block;
+  overflow: hidden;
+}
+
+.hc-headline h1 .word {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(100%);
+  animation: hcReveal 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.hc-headline h1 .word:nth-child(1) { animation-delay: 0.2s; }
+.hc-headline h1 .word:nth-child(2) { animation-delay: 0.4s; }
+.hc-headline h1 .word:nth-child(3) { animation-delay: 0.6s; }
+
+.hc-headline h1 em {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--orange);
+  position: relative;
+}
+
+.hc-headline .double-slash {
+  color: var(--orange);
+  font-style: normal;
+  margin-right: 8px;
+  display: inline-block;
+  transform: translateY(-4px);
+}
+
+@keyframes hcReveal {
+  from { opacity: 0; transform: translateY(100%); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ========== SIDE INFO ========== */
+.hc-side {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-bottom: 20px;
+  transform: translateY(calc(var(--scroll-y, 0) * 0.15));
+  transition: transform 0.05s linear;
+}
+
+.hc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  color: rgba(245,240,232,0.7);
+  background: rgba(245,240,232,0.05);
+  border: 1px solid rgba(245,240,232,0.1);
+  padding: 8px 16px;
+  border-radius: 999px;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  align-self: flex-start;
+  opacity: 0;
+  animation: hcFadeIn 0.8s ease 0.8s forwards;
+}
+
+.hc-badge-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--orange);
+  box-shadow: 0 0 0 0 rgba(255,107,0,0.6);
+  animation: hcPulse 2s infinite;
+}
+
+@keyframes hcPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,107,0,0.6); }
+  50% { box-shadow: 0 0 0 8px rgba(255,107,0,0); }
+}
+
+.hc-badge-num {
+  color: var(--orange);
+  font-weight: 700;
+  font-size: 10px;
+}
+
+.hc-desc {
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-size: clamp(13px, 1.5vw, 15px);
+  line-height: 1.6;
+  color: rgba(245,240,232,0.55);
+  max-width: 42ch;
+  opacity: 0;
+  animation: hcFadeIn 0.8s ease 1s forwards;
+}
+
+.hc-desc-label {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  color: rgba(245,240,232,0.35);
+  letter-spacing: 0.2em;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.hc-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  opacity: 0;
+  animation: hcFadeIn 0.8s ease 1.2s forwards;
+}
+
+.hc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 26px;
+  border-radius: 999px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border: none;
+  cursor: pointer;
+  min-height: 46px;
+}
+
+.hc-btn-primary {
+  background: #f5f0e8;
+  color: #08080d;
+}
+
+.hc-btn-primary:hover {
+  background: var(--orange);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(255,107,0,0.4);
+}
+
+.hc-btn-ghost {
+  background: transparent;
+  color: rgba(245,240,232,0.8);
+  border: 1px solid rgba(245,240,232,0.2);
+}
+
+.hc-btn-ghost:hover {
+  border-color: var(--orange);
+  color: var(--orange);
+}
+
+.hc-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--orange);
+  color: #fff;
+  font-size: 11px;
+  transition: transform 0.3s;
+}
+
+.hc-btn:hover .hc-btn-icon {
+  transform: translateX(3px);
+}
+
+.hc-btn-primary:hover .hc-btn-icon {
+  background: #fff;
+  color: var(--orange);
+}
+
+@keyframes hcFadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ========== BOTTOM (Scroll indicator + Stats mini) ========== */
+.hc-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px;
+  flex-wrap: wrap;
+  opacity: 0;
+  animation: hcFadeIn 0.8s ease 1.4s forwards;
+}
+
+.hc-scroll-hint {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: rgba(245,240,232,0.4);
+  text-transform: uppercase;
+}
+
+.hc-scroll-line {
+  width: 60px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--orange), transparent);
+  position: relative;
+  overflow: hidden;
+}
+
+.hc-scroll-line::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -30px;
+  width: 30px;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, var(--orange), transparent);
+  animation: hcScrollLine 2s ease-in-out infinite;
+}
+
+@keyframes hcScrollLine {
+  to { left: 100%; }
+}
+
+.hc-mini-stats {
+  display: flex;
+  gap: clamp(24px, 4vw, 48px);
+  align-items: flex-end;
+}
+
+.hc-mini-stat {
+  text-align: right;
+  font-family: 'Courier New', monospace;
+}
+
+.hc-mini-stat-val {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(28px, 3.5vw, 40px);
+  font-weight: 500;
+  color: var(--orange);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.hc-mini-stat-lbl {
+  font-size: 10px;
+  color: rgba(245,240,232,0.4);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-top: 6px;
+}
+
+/* ========== SCROLL PROGRESS INDICATOR ========== */
+.hc-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  width: 0%;
+  background: linear-gradient(90deg, var(--orange), var(--orange-light));
+  z-index: 999;
+  transition: width 0.1s linear;
+  box-shadow: 0 0 10px rgba(255,107,0,0.5);
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 900px) {
+  .hc-main {
+    grid-template-columns: 1fr;
+    align-items: flex-start;
+    gap: 40px;
+  }
+
+  .hc-nav-mini { display: none; }
+
+  .hc-inner {
+    padding-top: calc(80px + var(--safe-top, 0px));
+  }
+}
+
+@media (max-width: 600px) {
+  .hc-inner {
+    padding: calc(80px + var(--safe-top, 0px)) 20px 40px;
+  }
+
+  .hc-headline h1 {
+    font-size: clamp(40px, 12vw, 60px);
+  }
+
+  .hc-mini-stats { gap: 20px; }
+
+  .hc-bottom {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hc-headline h1 .word,
+  .hc-badge, .hc-desc, .hc-actions, .hc-bottom {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+</style>
+
+<!-- SCROLL PROGRESS -->
+<div class="hc-progress" id="hcProgress"></div>
+
+<!-- HERO SECTION -->
+<section class="hero-cinema" id="hero">
+
+  <!-- Canvas untuk particle animation -->
+  <div class="hc-canvas-wrap">
+    <canvas class="hc-canvas" id="hcCanvas"></canvas>
   </div>
 
-  <div class="hero-banner reveal" data-d="2">
-    <img src="toko.jpg" alt="Toko PT Central Perabot Utama" onerror="this.src='https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=1200&q=80'">
-    <div class="hero-tag">✓ Stok Real-time</div>
-    <div class="hero-badge">
-      <span class="hb-ic">📦</span>
-      <div>
-        <div class="hb-t">Order disetujui</div>
-        <div class="hb-s">Notifikasi email otomatis</div>
+  <div class="hc-spotlight" id="hcSpotlight"></div>
+  <div class="hc-vignette"></div>
+
+  <div class="hc-inner">
+
+    <!-- TOP ROW -->
+    <div class="hc-top" data-parallax="0.5">
+      <div class="hc-brand-tag">
+        <span class="brand-code">(GUDANG_HUB)</span>
+        <span class="brand-count">[ 004x ]</span>
+      </div>
+      <nav class="hc-nav-mini">
+        <a href="#cara">→ cara kerja</a>
+        <a href="#katalog">→ katalog</a>
+        <a href="#tim">→ tim</a>
+        <a href="#cabang">→ cabang</a>
+      </nav>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="hc-main">
+      <div class="hc-headline">
+        <h1>
+          <span class="line"><span class="word">DIMANA</span></span>
+          <span class="line"><span class="word">ORDER <em>ANTAR</em></span></span>
+          <span class="line"><span class="word"><span class="double-slash">//</span> CABANG</span></span>
+        </h1>
+      </div>
+
+      <aside class="hc-side">
+        <span class="hc-badge">
+          <span class="hc-badge-dot"></span>
+          <span class="hc-badge-num">( A )</span>
+          <span>SISTEM AKTIF</span>
+        </span>
+
+        <div>
+          <div class="hc-desc-label">// Deskripsi</div>
+          <p class="hc-desc">
+            Satu sistem menghubungkan empat toko cabang ke gudang pusat PT Central Perabot Utama. Cabang tinggal pilih, admin tinggal proses. Semua tercatat real-time.
+          </p>
+        </div>
+
+        <div class="hc-actions">
+          <a href="login.html" class="hc-btn hc-btn-primary">
+            Mulai Order
+            <span class="hc-btn-icon">→</span>
+          </a>
+          <a href="#cara" class="hc-btn hc-btn-ghost">
+            Lihat Cara Kerja
+          </a>
+        </div>
+      </aside>
+    </div>
+
+    <!-- BOTTOM ROW -->
+    <div class="hc-bottom">
+      <div class="hc-scroll-hint">
+        <span>SCROLL</span>
+        <div class="hc-scroll-line"></div>
+      </div>
+
+      <div class="hc-mini-stats">
+        <div class="hc-mini-stat">
+          <div class="hc-mini-stat-val" data-hc-count="4">0</div>
+          <div class="hc-mini-stat-lbl">Cabang</div>
+        </div>
+        <div class="hc-mini-stat">
+          <div class="hc-mini-stat-val" data-hc-count="9">0</div>
+          <div class="hc-mini-stat-lbl">Kategori</div>
+        </div>
+        <div class="hc-mini-stat">
+          <div class="hc-mini-stat-val" data-hc-count="500" data-hc-suffix="+">0</div>
+          <div class="hc-mini-stat-lbl">Item</div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="hero-meta">
-    <div class="reveal">
-      <div class="hm-num" data-count="4">0</div>
-      <div class="hm-lbl">Cabang aktif</div>
-    </div>
-    <div class="reveal" data-d="1">
-      <div class="hm-num" data-count="9">0</div>
-      <div class="hm-lbl">Kategori barang</div>
-    </div>
-    <div class="reveal" data-d="2">
-      <div class="hm-num" data-count="500" data-suffix="+">0</div>
-      <div class="hm-lbl">Item furnitur</div>
-    </div>
   </div>
-</header>
+</section>
+
+<script>
+(function() {
+  'use strict';
+
+  // ═══════════ PARTICLE ANIMATION (Canvas) ═══════════
+  const canvas = document.getElementById('hcCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+  let W = 0, H = 0;
+  let mouseX = 0, mouseY = 0;
+
+  function resize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = canvas.offsetWidth;
+    H = canvas.offsetHeight;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    ctx.scale(dpr, dpr);
+    initParticles();
+  }
+
+  function initParticles() {
+    particles = [];
+    const isMobile = W < 640;
+    const count = isMobile ? 40 : 80;
+    for (let i = 0; i < count; i++) {
+      particles.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: (Math.random() - 0.5) * 0.4 - 0.2, // sedikit naik
+        size: Math.random() * 2.5 + 0.5,
+        opacity: Math.random() * 0.6 + 0.2,
+        life: Math.random() * 100
+      });
+    }
+  }
+
+  function drawParticles() {
+    ctx.clearRect(0, 0, W, H);
+
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+
+      // Movement
+      p.x += p.vx;
+      p.y += p.vy;
+      p.life += 0.5;
+
+      // Wrap around
+      if (p.x < 0) p.x = W;
+      if (p.x > W) p.x = 0;
+      if (p.y < 0) p.y = H;
+      if (p.y > H) p.y = 0;
+
+      // Twinkle
+      const twinkle = Math.sin(p.life * 0.05) * 0.3 + 0.7;
+      const alpha = p.opacity * twinkle;
+
+      // Distance from mouse (interactive glow)
+      const dx = p.x - mouseX;
+      const dy = p.y - mouseY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const proximityBoost = Math.max(0, 1 - dist / 200);
+
+      // Draw glow
+      const glowSize = p.size * (2 + proximityBoost * 4);
+      const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, glowSize);
+      gradient.addColorStop(0, `rgba(255, 180, 80, ${alpha * (0.8 + proximityBoost * 0.5)})`);
+      gradient.addColorStop(0.4, `rgba(255, 140, 56, ${alpha * 0.3})`);
+      gradient.addColorStop(1, 'rgba(255, 107, 0, 0)');
+
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, glowSize, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Draw core
+      ctx.fillStyle = `rgba(255, 220, 150, ${alpha * (0.9 + proximityBoost * 0.5)})`;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    requestAnimationFrame(drawParticles);
+  }
+
+  // Mouse spotlight
+  const spotlight = document.getElementById('hcSpotlight');
+  document.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    if (spotlight) {
+      spotlight.style.setProperty('--mx', `${(e.clientX / window.innerWidth) * 100}%`);
+      spotlight.style.setProperty('--my', `${(e.clientY / window.innerHeight) * 100}%`);
+    }
+  }, { passive: true });
+
+  // ═══════════ SCROLL EFFECTS ═══════════
+  const hero = document.getElementById('hero');
+  const hcTop = hero?.querySelector('.hc-top');
+  const hcHeadline = hero?.querySelector('.hc-headline');
+  const hcSide = hero?.querySelector('.hc-side');
+  const progress = document.getElementById('hcProgress');
+
+  let ticking = false;
+
+  function updateScroll() {
+    const scrollY = window.scrollY;
+    const winH = window.innerHeight;
+    const docH = document.documentElement.scrollHeight - winH;
+    const progressPercent = (scrollY / docH) * 100;
+
+    // Progress bar
+    if (progress) progress.style.width = progressPercent + '%';
+
+    // Parallax
+    if (scrollY < winH) {
+      const parallaxRate = scrollY;
+      hero.style.setProperty('--scroll-y', `-${parallaxRate * 0.15}px`);
+
+      // Hero fade & scale
+      const fadeStart = winH * 0.3;
+      const fadeEnd = winH * 0.9;
+      const fadeAmount = Math.max(0, Math.min(1, (scrollY - fadeStart) / (fadeEnd - fadeStart)));
+
+      if (hcHeadline) {
+        hcHeadline.style.opacity = 1 - fadeAmount * 0.7;
+        hcHeadline.style.filter = `blur(${fadeAmount * 4}px)`;
+      }
+      if (hcSide) {
+        hcSide.style.opacity = 1 - fadeAmount * 0.6;
+      }
+    }
+
+    ticking = false;
+  }
+
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(updateScroll);
+      ticking = true;
+    }
+  }, { passive: true });
+
+  // ═══════════ COUNTER ANIMATION ═══════════
+  function animateCounter(el) {
+    const target = parseFloat(el.dataset.hcCount);
+    const suffix = el.dataset.hcSuffix || '';
+    const duration = 1800;
+    const start = performance.now();
+
+    function tick(now) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      el.textContent = Math.round(target * eased) + (progress === 1 ? suffix : '');
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  // Trigger counter saat visible
+  const counterObs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        animateCounter(entry.target);
+        counterObs.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  document.querySelectorAll('[data-hc-count]').forEach(el => {
+    // Delay saat first load agar animation smooth
+    setTimeout(() => counterObs.observe(el), 800);
+  });
+
+  // ═══════════ INIT ═══════════
+  window.addEventListener('load', () => {
+    resize();
+    drawParticles();
+  });
+
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(resize, 200);
+  }, { passive: true });
+
+  // Init immediately (canvas)
+  if (document.readyState === 'complete') {
+    resize();
+    drawParticles();
+  }
+})();
+</script>
 
 <!-- ═══════════ MARQUEE KATEGORI — CUSTOM SVG ICONS ═══════════ -->
 <style>
