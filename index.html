@@ -1467,10 +1467,10 @@ a { color: inherit; text-decoration: none; }
     <a href="login.html" class="btn btn-solid hero-btn-lg">Masuk ke GudangHub →</a>
   </div>
 </section>
-<!-- ═══════════ TIM DI BALIK LAYAR — CURVED FAN ═══════════ -->
+<!-- ═══════════ TIM DI BALIK LAYAR — INFINITE CURVED MARQUEE ═══════════ -->
 <style>
 .tim-section {
-  padding: clamp(60px, 8vw, 100px) 0 clamp(80px, 10vw, 140px);
+  padding: clamp(60px, 8vw, 100px) 0 clamp(80px, 10vw, 120px);
   background: linear-gradient(180deg, transparent 0%, rgba(255,107,0,0.02) 50%, transparent 100%);
   position: relative;
   overflow: hidden;
@@ -1543,10 +1543,9 @@ a { color: inherit; text-decoration: none; }
   text-decoration: none;
   transition: transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s;
   box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-  border: 1px solid rgba(0,0,0,0.05);
   cursor: pointer;
   font-family: inherit;
-  border-width: 0;
+  border: none;
 }
 
 .tim-cta-btn:hover {
@@ -1570,13 +1569,13 @@ a { color: inherit; text-decoration: none; }
   transform: translateX(3px);
 }
 
-/* ═══════════ CURVED CAROUSEL ═══════════ */
+/* ═══════════ INFINITE MARQUEE STAGE ═══════════ */
 .tim-stage {
   position: relative;
   z-index: 2;
-  padding: 40px 0 20px;
+  padding: 50px 0 30px;
   overflow: hidden;
-  perspective: 1600px;
+  perspective: 1400px;
   perspective-origin: center center;
   cursor: grab;
   -webkit-user-select: none;
@@ -1584,76 +1583,39 @@ a { color: inherit; text-decoration: none; }
   touch-action: pan-y;
 }
 
-.tim-stage.dragging {
-  cursor: grabbing;
-}
+.tim-stage.dragging { cursor: grabbing; }
 
 .tim-track {
   display: flex;
   align-items: center;
-  gap: clamp(8px, 1.2vw, 16px);
+  gap: clamp(6px, 0.8vw, 12px);
   width: max-content;
-  padding: 60px 20vw;
   transform-style: preserve-3d;
-  animation: timSlide 45s linear infinite;
   will-change: transform;
-}
-
-.tim-stage:hover .tim-track,
-.tim-stage.dragging .tim-track {
-  animation-play-state: paused;
-}
-
-@keyframes timSlide {
-  from { transform: translateX(0); }
-  to { transform: translateX(calc(-50% - 8px)); }
-}
-
-/* Setiap kartu — dengan curved 3D effect */
-.tim-item {
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 24px;
-  will-change: transform;
+  padding: 40px 0;
 }
 
 .tim-card {
+  flex-shrink: 0;
   position: relative;
-  width: clamp(140px, 15vw, 200px);
-  height: clamp(240px, 26vw, 340px);
-  border-radius: clamp(14px, 1.6vw, 20px);
+  width: clamp(150px, 16vw, 220px);
+  height: clamp(220px, 24vw, 320px);
+  border-radius: clamp(16px, 1.8vw, 22px);
   overflow: hidden;
   background: var(--ink3);
   border: 1px solid rgba(255,255,255,0.08);
   box-shadow:
     0 20px 40px -10px rgba(0,0,0,0.5),
     inset 0 1px 0 rgba(255,255,255,0.06);
-  transition: transform 0.5s cubic-bezier(0.16,1,0.3,1),
-              box-shadow 0.5s cubic-bezier(0.16,1,0.3,1);
-  transform-origin: center bottom;
+  transform-origin: center center;
+  transition: box-shadow 0.4s ease;
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
-/* CURVED EFFECT — kartu tengah kecil, tepi besar */
-/* Menggunakan pseudo-position via CSS custom property */
-.tim-track {
-  --curve-strength: 1;
-}
-
-/* Curve dengan transform pattern seperti fan */
-.tim-item:nth-child(6n+1) .tim-card { transform: perspective(1200px) rotateY(15deg) translateZ(-30px) scale(1.05); }
-.tim-item:nth-child(6n+2) .tim-card { transform: perspective(1200px) rotateY(8deg) translateZ(-15px) scale(0.92); }
-.tim-item:nth-child(6n+3) .tim-card { transform: perspective(1200px) rotateY(3deg) translateZ(-8px) scale(0.85); }
-.tim-item:nth-child(6n+4) .tim-card { transform: perspective(1200px) rotateY(-3deg) translateZ(-8px) scale(0.85); }
-.tim-item:nth-child(6n+5) .tim-card { transform: perspective(1200px) rotateY(-8deg) translateZ(-15px) scale(0.92); }
-.tim-item:nth-child(6n+0) .tim-card { transform: perspective(1200px) rotateY(-15deg) translateZ(-30px) scale(1.05); }
-
-/* Hover breaks the fan for interaction */
 .tim-card:hover {
-  transform: perspective(1200px) rotateY(0deg) translateZ(50px) scale(1.15) !important;
   box-shadow:
-    0 40px 80px -20px rgba(255,107,0,0.4),
+    0 30px 60px -15px rgba(255,107,0,0.35),
     0 0 0 1px rgba(255,107,0,0.3);
   z-index: 20;
 }
@@ -1679,17 +1641,10 @@ a { color: inherit; text-decoration: none; }
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 0.7s cubic-bezier(0.16,1,0.3,1);
-  will-change: transform;
   pointer-events: none;
   -webkit-user-drag: none;
 }
 
-.tim-card:hover .tim-img {
-  transform: scale(1.08);
-}
-
-/* Placeholder saat foto belum ada */
 .tim-img-placeholder {
   width: 100%;
   height: 100%;
@@ -1714,41 +1669,9 @@ a { color: inherit; text-decoration: none; }
     radial-gradient(circle at 70% 70%, rgba(0,0,0,0.15), transparent 60%);
 }
 
-/* Info bawah kartu (nomor + nama) */
-.tim-info {
-  text-align: center;
-  min-height: 50px;
-  transform: translateZ(0);
-}
-
-.tim-num {
-  font-size: clamp(13px, 1.4vw, 15px);
-  font-weight: 700;
-  color: var(--orange);
-  margin-bottom: 6px;
-  letter-spacing: 0.02em;
-  font-family: 'Manrope', sans-serif;
-}
-
-.tim-num-hash {
-  color: var(--orange);
-  margin-right: 2px;
-  font-weight: 700;
-}
-
-.tim-name {
-  font-family: 'Manrope', sans-serif;
-  font-size: clamp(13px, 1.4vw, 15px);
-  font-weight: 700;
-  color: var(--text);
-  letter-spacing: 0.01em;
-  white-space: nowrap;
-}
-
-/* ═══════════ HINT ═══════════ */
 .tim-hint {
   text-align: center;
-  margin-top: 20px;
+  margin-top: 16px;
   font-size: 12px;
   color: var(--muted);
   display: flex;
@@ -1762,7 +1685,6 @@ a { color: inherit; text-decoration: none; }
 
 .tim-hint .hint-icon {
   display: inline-flex;
-  gap: 3px;
   color: var(--orange);
   animation: hintMove 2s ease-in-out infinite;
 }
@@ -1772,51 +1694,23 @@ a { color: inherit; text-decoration: none; }
   50% { transform: translateX(6px); }
 }
 
-/* Responsive */
-@media (max-width: 900px) {
-  .tim-track {
-    padding: 40px 15vw;
-  }
-}
-
 @media (max-width: 640px) {
-  .tim-item:nth-child(6n+1) .tim-card,
-  .tim-item:nth-child(6n+0) .tim-card {
-    transform: perspective(1000px) rotateY(0deg) translateZ(0) scale(1);
-  }
-  .tim-item:nth-child(6n+2) .tim-card,
-  .tim-item:nth-child(6n+5) .tim-card {
-    transform: perspective(1000px) rotateY(0deg) translateZ(0) scale(0.94);
-  }
-  .tim-item:nth-child(6n+3) .tim-card,
-  .tim-item:nth-child(6n+4) .tim-card {
-    transform: perspective(1000px) rotateY(0deg) translateZ(0) scale(0.88);
-  }
-  .tim-track {
-    padding: 30px 10vw;
-    gap: 10px;
-  }
-  .tim-info { min-height: 40px; }
-}
-
-@media (max-width: 480px) {
   .tim-card {
-    width: 130px;
+    width: 140px;
     height: 200px;
   }
-  .tim-num, .tim-name {
-    font-size: 12px;
-  }
-  .tim-track {
-    padding: 20px 8vw;
-    animation-duration: 30s;
+  .tim-track { gap: 8px; padding: 20px 0; }
+}
+
+@media (max-width: 380px) {
+  .tim-card {
+    width: 120px;
+    height: 170px;
   }
 }
 
-/* Prefer reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .tim-track { animation: none; }
-  .tim-card, .tim-img { transition: none; }
+  .tim-card { transform: none !important; }
 }
 </style>
 
@@ -1835,147 +1729,37 @@ a { color: inherit; text-decoration: none; }
 
   <div class="tim-stage reveal" id="timStage" data-d="1">
     <div class="tim-track" id="timTrack">
-
-      <!-- SET 1 -->
-      <div class="tim-item">
-        <div class="tim-card">
-          <img class="tim-img" src="foto-tim-1.jpg" alt="Risty" draggable="false" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-          <div class="tim-img-placeholder">R</div>
-        </div>
-        <div class="tim-info">
-          <div class="tim-num"><span class="tim-num-hash">#</span>01</div>
-          <div class="tim-name">Risty</div>
-        </div>
+      <!-- Kartu-kartu akan di-clone otomatis via JS untuk infinite loop -->
+      <div class="tim-card">
+        <img class="tim-img" src="foto-tim-1.jpg" alt="Risty" draggable="false" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <div class="tim-img-placeholder">R</div>
       </div>
-
-      <div class="tim-item">
-        <div class="tim-card">
-          <img class="tim-img" src="foto-tim-2.jpg" alt="Irwan" draggable="false" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-          <div class="tim-img-placeholder">I</div>
-        </div>
-        <div class="tim-info">
-          <div class="tim-num"><span class="tim-num-hash">#</span>02</div>
-          <div class="tim-name">Irwan</div>
-        </div>
+      <div class="tim-card">
+        <img class="tim-img" src="foto-tim-2.jpg" alt="Irwan" draggable="false" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <div class="tim-img-placeholder">I</div>
       </div>
-
-      <div class="tim-item">
-        <div class="tim-card">
-          <img class="tim-img" src="foto-tim-3.jpg" alt="Dimas" draggable="false" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-          <div class="tim-img-placeholder">D</div>
-        </div>
-        <div class="tim-info">
-          <div class="tim-num"><span class="tim-num-hash">#</span>03</div>
-          <div class="tim-name">Dimas</div>
-        </div>
+      <div class="tim-card">
+        <img class="tim-img" src="foto-tim-3.jpg" alt="Dimas" draggable="false" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <div class="tim-img-placeholder">D</div>
       </div>
-
-      <div class="tim-item">
-        <div class="tim-card">
-          <img class="tim-img" src="foto-tim-4.jpg" alt="Safira" draggable="false" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-          <div class="tim-img-placeholder">S</div>
-        </div>
-        <div class="tim-info">
-          <div class="tim-num"><span class="tim-num-hash">#</span>04</div>
-          <div class="tim-name">Safira</div>
-        </div>
+      <div class="tim-card">
+        <img class="tim-img" src="foto-tim-4.jpg" alt="Safira" draggable="false" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <div class="tim-img-placeholder">S</div>
       </div>
-
-      <div class="tim-item">
-        <div class="tim-card">
-          <img class="tim-img" src="foto-tim-5.jpg" alt="Nanda" draggable="false" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-          <div class="tim-img-placeholder">N</div>
-        </div>
-        <div class="tim-info">
-          <div class="tim-num"><span class="tim-num-hash">#</span>05</div>
-          <div class="tim-name">Nanda</div>
-        </div>
+      <div class="tim-card">
+        <img class="tim-img" src="foto-tim-5.jpg" alt="Nanda" draggable="false" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <div class="tim-img-placeholder">N</div>
       </div>
-
-      <div class="tim-item">
-        <div class="tim-card">
-          <img class="tim-img" src="foto-tim-6.jpg" alt="Tri" draggable="false" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-          <div class="tim-img-placeholder">T</div>
-        </div>
-        <div class="tim-info">
-          <div class="tim-num"><span class="tim-num-hash">#</span>06</div>
-          <div class="tim-name">Tri</div>
-        </div>
+      <div class="tim-card">
+        <img class="tim-img" src="foto-tim-6.jpg" alt="Tri" draggable="false" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <div class="tim-img-placeholder">T</div>
       </div>
-
-      <!-- SET 2 (Duplikat untuk infinite loop) -->
-      <div class="tim-item">
-        <div class="tim-card">
-          <img class="tim-img" src="foto-tim-1.jpg" alt="Risty" draggable="false" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-          <div class="tim-img-placeholder">R</div>
-        </div>
-        <div class="tim-info">
-          <div class="tim-num"><span class="tim-num-hash">#</span>01</div>
-          <div class="tim-name">Risty</div>
-        </div>
-      </div>
-
-      <div class="tim-item">
-        <div class="tim-card">
-          <img class="tim-img" src="foto-tim-2.jpg" alt="Irwan" draggable="false" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-          <div class="tim-img-placeholder">I</div>
-        </div>
-        <div class="tim-info">
-          <div class="tim-num"><span class="tim-num-hash">#</span>02</div>
-          <div class="tim-name">Irwan</div>
-        </div>
-      </div>
-
-      <div class="tim-item">
-        <div class="tim-card">
-          <img class="tim-img" src="foto-tim-3.jpg" alt="Dimas" draggable="false" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-          <div class="tim-img-placeholder">D</div>
-        </div>
-        <div class="tim-info">
-          <div class="tim-num"><span class="tim-num-hash">#</span>03</div>
-          <div class="tim-name">Dimas</div>
-        </div>
-      </div>
-
-      <div class="tim-item">
-        <div class="tim-card">
-          <img class="tim-img" src="foto-tim-4.jpg" alt="Safira" draggable="false" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-          <div class="tim-img-placeholder">S</div>
-        </div>
-        <div class="tim-info">
-          <div class="tim-num"><span class="tim-num-hash">#</span>04</div>
-          <div class="tim-name">Safira</div>
-        </div>
-      </div>
-
-      <div class="tim-item">
-        <div class="tim-card">
-          <img class="tim-img" src="foto-tim-5.jpg" alt="Nanda" draggable="false" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-          <div class="tim-img-placeholder">N</div>
-        </div>
-        <div class="tim-info">
-          <div class="tim-num"><span class="tim-num-hash">#</span>05</div>
-          <div class="tim-name">Nanda</div>
-        </div>
-      </div>
-
-      <div class="tim-item">
-        <div class="tim-card">
-          <img class="tim-img" src="foto-tim-6.jpg" alt="Tri" draggable="false" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-          <div class="tim-img-placeholder">T</div>
-        </div>
-        <div class="tim-info">
-          <div class="tim-num"><span class="tim-num-hash">#</span>06</div>
-          <div class="tim-name">Tri</div>
-        </div>
-      </div>
-
     </div>
   </div>
 
   <div class="tim-hint">
-    <span>Geser atau tunggu untuk melihat semua tim</span>
-    <span class="hint-icon">→→→</span>
+    <span>Geser kesamping untuk menjelajah</span>
+    <span class="hint-icon">→</span>
   </div>
 </section>
 
@@ -1985,56 +1769,205 @@ a { color: inherit; text-decoration: none; }
   const track = document.getElementById('timTrack');
   if (!stage || !track) return;
 
-  let isDown = false;
-  let startX = 0;
-  let currentX = 0;
-  let dragOffset = 0;
-  let wasAnimated = true;
-
-  function getTransformX() {
-    const style = window.getComputedStyle(track);
-    const matrix = new DOMMatrix(style.transform);
-    return matrix.m41;
+  // ═══════════ SETUP: Clone kartu 3x untuk buffer infinite loop ═══════════
+  const originalCards = Array.from(track.children);
+  const CLONE_SETS = 3;
+  for (let i = 0; i < CLONE_SETS; i++) {
+    originalCards.forEach(card => {
+      const clone = card.cloneNode(true);
+      // Re-attach onerror handler
+      const img = clone.querySelector('img');
+      const ph = clone.querySelector('.tim-img-placeholder');
+      if (img && ph) {
+        img.onerror = function() { this.style.display = 'none'; ph.style.display = 'flex'; };
+      }
+      track.appendChild(clone);
+    });
   }
 
+  // ═══════════ STATE ═══════════
+  let allCards = [];
+  let cardW = 0;
+  let gapW = 0;
+  let setWidth = 0;     // width dari 1 set original (untuk wrap)
+  let currentX = 0;     // posisi X saat ini
+  let velocity = -0.6;  // kecepatan default (negatif = geser ke kiri)
+  const autoSpeed = -0.6;
+  let isDragging = false;
+  let isHovering = false;
+  let dragStartX = 0;
+  let dragStartTX = 0;
+  let lastPointerX = 0;
+  let lastPointerT = 0;
+  let dragVelocity = 0;
+  let rafId = null;
+
+  function measure() {
+    allCards = Array.from(track.children);
+    if (allCards.length === 0) return;
+    const style = window.getComputedStyle(track);
+    gapW = parseFloat(style.gap) || 0;
+    const firstCard = allCards[0];
+    cardW = firstCard.offsetWidth;
+    // Set width = original cards (bukan yang clone)
+    setWidth = originalCards.length * (cardW + gapW);
+    // Start dari tengah biar bisa geser bebas ke 2 arah
+    currentX = -setWidth;
+  }
+
+  // ═══════════ CURVED 3D — dihitung real-time per frame ═══════════
+  function applyCurve() {
+    const stageRect = stage.getBoundingClientRect();
+    const stageCenter = stageRect.left + stageRect.width / 2;
+    const halfWidth = stageRect.width / 2;
+
+    for (let i = 0; i < allCards.length; i++) {
+      const card = allCards[i];
+      const cardRect = card.getBoundingClientRect();
+      const cardCenter = cardRect.left + cardRect.width / 2;
+      // Distance dari center stage (-1 = kiri jauh, 0 = tengah, 1 = kanan jauh)
+      let d = (cardCenter - stageCenter) / halfWidth;
+      d = Math.max(-1.3, Math.min(1.3, d));
+
+      // Curved: pinggir BESAR & rotate tajam, tengah KECIL
+      const absD = Math.abs(d);
+      const rotY = -d * 42;              // rotasi kuat (fan effect)
+      const translateZ = -absD * 40 + absD * 120; // pinggir maju
+      const scale = 0.72 + absD * 0.42;  // tengah kecil (0.72), pinggir besar (1.14)
+
+      card.style.transform =
+        `translateZ(${translateZ - 60}px) rotateY(${rotY}deg) scale(${scale})`;
+      card.style.zIndex = String(100 - Math.round(absD * 80));
+    }
+  }
+
+  // ═══════════ RENDER LOOP ═══════════
+  function frame() {
+    if (setWidth <= 0) { rafId = requestAnimationFrame(frame); return; }
+
+    if (isDragging) {
+      // Position controlled by drag
+    } else {
+      // Momentum decay after drag, then blend to autoSpeed
+      if (Math.abs(velocity - autoSpeed) > 0.02) {
+        velocity += (autoSpeed - velocity) * 0.05; // smooth blend
+      } else {
+        velocity = autoSpeed;
+      }
+      // Pause saat hover
+      if (isHovering) {
+        currentX += 0; // freeze
+      } else {
+        currentX += velocity;
+      }
+    }
+
+    // Wrap infinite (seamless)
+    while (currentX <= -setWidth * 2) currentX += setWidth;
+    while (currentX >= 0) currentX -= setWidth;
+
+    track.style.transform = `translate3d(${currentX}px, 0, 0)`;
+    applyCurve();
+
+    rafId = requestAnimationFrame(frame);
+  }
+
+  // ═══════════ HOVER (desktop only, tidak affect touch) ═══════════
+  stage.addEventListener('mouseenter', () => { isHovering = true; });
+  stage.addEventListener('mouseleave', () => { isHovering = false; });
+
+  // ═══════════ DRAG ═══════════
   stage.addEventListener('pointerdown', (e) => {
-    isDown = true;
+    isDragging = true;
+    isHovering = false; // reset hover
     stage.classList.add('dragging');
-    startX = e.clientX;
-    currentX = getTransformX();
-    dragOffset = 0;
-    // Freeze at current position
-    track.style.animation = 'none';
-    track.style.transform = `translateX(${currentX}px)`;
-    try { stage.setPointerCapture(e.pointerId); } catch(_){}
+    dragStartX = e.clientX;
+    dragStartTX = currentX;
+    lastPointerX = e.clientX;
+    lastPointerT = performance.now();
+    dragVelocity = 0;
+    try { stage.setPointerCapture(e.pointerId); } catch(_) {}
   });
 
   stage.addEventListener('pointermove', (e) => {
-    if (!isDown) return;
-    dragOffset = e.clientX - startX;
-    track.style.transform = `translateX(${currentX + dragOffset}px)`;
+    if (!isDragging) return;
+    const dx = e.clientX - dragStartX;
+    currentX = dragStartTX + dx;
+
+    // Track velocity for momentum
+    const now = performance.now();
+    const dt = now - lastPointerT || 16;
+    dragVelocity = (e.clientX - lastPointerX) / dt * 16;
+    lastPointerX = e.clientX;
+    lastPointerT = now;
   });
 
   const endDrag = (e) => {
-    if (!isDown) return;
-    isDown = false;
+    if (!isDragging) return;
+    isDragging = false;
     stage.classList.remove('dragging');
-    // Resume animation after brief moment
-    setTimeout(() => {
-      track.style.animation = '';
-      track.style.transform = '';
-    }, 300);
-    try { stage.releasePointerCapture(e.pointerId); } catch(_){}
+    // Berikan momentum dari drag ke velocity (kalau geser kanan = positif, akan blend ke auto)
+    velocity = dragVelocity * 0.7;
+    // Clamp velocity agar tidak terlalu cepat
+    velocity = Math.max(-25, Math.min(25, velocity));
+    try { stage.releasePointerCapture(e.pointerId); } catch(_) {}
   };
 
   stage.addEventListener('pointerup', endDrag);
   stage.addEventListener('pointercancel', endDrag);
-  stage.addEventListener('pointerleave', endDrag);
+
+  // Touch: cancel hover, tap doesn't stop
+  stage.addEventListener('touchstart', () => { isHovering = false; }, { passive: true });
+
+  // ═══════════ RESIZE ═══════════
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      measure();
+    }, 150);
+  }, { passive: true });
 
   // Prevent image drag
   track.querySelectorAll('img').forEach(img => {
     img.addEventListener('dragstart', e => e.preventDefault());
   });
+
+  // ═══════════ START ═══════════
+  // Wait for images to load for accurate measure
+  const images = track.querySelectorAll('img');
+  let loadedCount = 0;
+  const totalImages = images.length;
+
+  function startWhenReady() {
+    measure();
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(frame);
+  }
+
+  if (totalImages === 0) {
+    startWhenReady();
+  } else {
+    images.forEach(img => {
+      if (img.complete) {
+        loadedCount++;
+        if (loadedCount === totalImages) startWhenReady();
+      } else {
+        img.addEventListener('load', () => {
+          loadedCount++;
+          if (loadedCount === totalImages) startWhenReady();
+        }, { once: true });
+        img.addEventListener('error', () => {
+          loadedCount++;
+          if (loadedCount === totalImages) startWhenReady();
+        }, { once: true });
+      }
+    });
+    // Fallback jika gambar lama loading
+    setTimeout(() => {
+      if (!rafId) startWhenReady();
+    }, 2000);
+  }
 })();
 </script>
   
