@@ -2812,7 +2812,7 @@ function hitungTotal() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// KONFIRMASI SIMPAN & KIRIM EMAIL (tombol terpisah)
+// KONFIRMASI SIMPAN (💾 SIMPAN SAJA — STATUS TETAP)
 // ═══════════════════════════════════════════════════════════════
 function konfirmasiSimpan() {
   const aktif = editItems.filter(i => i.itemStatus === 'APPROVED').length;
@@ -2832,16 +2832,22 @@ function konfirmasiSimpan() {
     return;
   }
 
+  const order = allOrders.find(o => o.ORDER_ID === editOrderId);
+  const statusLama = order ? String(order.STATUS).toUpperCase() : 'PENDING';
+
   showConfirm({
     icon: '💾',
-    title: 'Simpan Semua Perubahan?',
-    msg: `Order ${editOrderId}:\n\n✅ ${aktif} item disetujui\n${edited ? `✏️ ${edited} item qty diedit\n` : ''}${rej ? `🚫 ${rej} item ditolak\n` : ''}${del ? `🗑️ ${del} item dihapus\n` : ''}\n💾 SIMPAN saja (tanpa kirim email)\n📦 Stok akan otomatis disesuaikan`,
-    okText: '💾 Ya, Simpan',
+    title: 'Simpan Perubahan Saja?',
+    msg: `Order ${editOrderId}:\n\n✅ ${aktif} item disetujui\n${edited ? `✏️ ${edited} item qty diedit\n` : ''}${rej ? `🚫 ${rej} item ditolak\n` : ''}${del ? `🗑️ ${del} item dihapus\n` : ''}\n⚠️ STATUS TETAP ${statusLama}\n📧 Email BELUM dikirim ke cabang\n📦 Stok otomatis disesuaikan\n\n💡 Klik "Kirim Email ke Cabang" untuk APPROVE & kirim notifikasi`,
+    okText: '💾 Ya, Simpan Saja',
     okClass: 'success',
     onOk: () => doSimpanEdit(false)
   });
 }
 
+// ═══════════════════════════════════════════════════════════════
+// KONFIRMASI KIRIM EMAIL (📧 SIMPAN + APPROVE + EMAIL)
+// ═══════════════════════════════════════════════════════════════
 function konfirmasiKirimEmail() {
   const order = allOrders.find(o => o.ORDER_ID === editOrderId);
   const cb = order ? CABANG_INFO[order.ID_CABANG] : { pic: '-', nama: '-' };
@@ -2862,11 +2868,13 @@ function konfirmasiKirimEmail() {
     return;
   }
 
+  const newStatus = aktif === 0 ? 'REJECTED' : 'APPROVED';
+
   showConfirm({
     icon: '📧',
-    title: 'Kirim Email ke Cabang?',
-    msg: `Kirim notifikasi lengkap ke:\n📮 Email cabang ${cb.pic} (${order?.ID_CABANG || '-'})\n📮 CC Admin gudang\n\nISI EMAIL:\n✅ ${aktif} item disetujui\n${edited ? `✏️ ${edited} item qty diedit (qty lama → baru)\n` : ''}${rej ? `🚫 ${rej} item ditolak + alasan\n` : ''}${del ? `🗑️ ${del} item dihapus + alasan\n` : ''}\n💾 Perubahan juga akan DISIMPAN sekaligus`,
-    okText: '📧 Ya, Simpan & Kirim Email',
+    title: 'Approve & Kirim Email ke Cabang?',
+    msg: `Kirim notifikasi lengkap ke:\n📮 Email cabang ${cb.pic} (${order?.ID_CABANG || '-'})\n📮 CC Admin gudang\n\nISI EMAIL:\n✅ ${aktif} item disetujui\n${edited ? `✏️ ${edited} item qty diedit (qty lama → baru)\n` : ''}${rej ? `🚫 ${rej} item ditolak + alasan\n` : ''}${del ? `🗑️ ${del} item dihapus + alasan\n` : ''}\n⚡ STATUS ORDER akan menjadi: ${newStatus}\n💾 Perubahan disimpan sekaligus`,
+    okText: '📧 Ya, Approve & Kirim Email',
     okClass: 'info',
     onOk: () => doSimpanEdit(true)
   });
