@@ -9,8 +9,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,400;9..144,0,500;9..144,0,600;9..144,0,700;9..144,1,400;9..144,1,500&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <style>
 *, *::before, *::after {
   margin: 0;
@@ -78,268 +76,6 @@ a { color: inherit; text-decoration: none; }
   width: 100%;
   position: relative;
   z-index: 2;
-}
-
-/* ═══════════ FLYING TRUCK — TANPA BINGKAI, MENYATU DENGAN WEB ═══════════ */
-.flying-truck {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: clamp(240px, 26vw, 420px);
-  height: auto;
-  z-index: 4;
-  pointer-events: none;
-  will-change: transform, opacity;
-  opacity: 0;
-  transform-origin: center center;
-  /* NO FRAME - fully transparent background */
-  background: transparent;
-}
-
-/* Truck wrap tanpa bingkai */
-.truck-wrap {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16/10;
-  overflow: visible;
-  animation: truckBounce 0.35s ease-in-out infinite alternate;
-  filter:
-    drop-shadow(0 25px 40px rgba(0,0,0,0.75))
-    drop-shadow(0 0 50px rgba(255,107,0,0.4));
-}
-
-@keyframes truckBounce {
-  0% { transform: translateY(0) rotate(-0.3deg); }
-  100% { transform: translateY(-2px) rotate(0.3deg); }
-}
-
-/* Video/image dengan MASK — menyatu dengan bg */
-.truck-wrap video,
-.truck-wrap img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  filter: contrast(1.15) saturate(1.2) brightness(1.05);
-  /* Mask untuk blend dengan background - fade edges */
-  -webkit-mask-image:
-    radial-gradient(ellipse 90% 90% at center,
-      #000 40%,
-      rgba(0,0,0,0.9) 60%,
-      rgba(0,0,0,0.4) 85%,
-      transparent 100%);
-  mask-image:
-    radial-gradient(ellipse 90% 90% at center,
-      #000 40%,
-      rgba(0,0,0,0.9) 60%,
-      rgba(0,0,0,0.4) 85%,
-      transparent 100%);
-}
-
-/* SPEED STRIPES (overlay di depan) */
-.truck-wrap::after {
-  content: '';
-  position: absolute;
-  top: 20%;
-  left: 0;
-  width: 100%;
-  height: 60%;
-  background: repeating-linear-gradient(
-    90deg,
-    transparent 0px,
-    transparent 60px,
-    rgba(255,220,150,0.15) 60px,
-    rgba(255,220,150,0.15) 62px
-  );
-  animation: speedStripes 0.2s linear infinite;
-  z-index: 3;
-  pointer-events: none;
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent);
-  mix-blend-mode: screen;
-}
-
-@keyframes speedStripes {
-  from { transform: translateX(0); }
-  to { transform: translateX(-62px); }
-}
-
-/* ROAD LIGHT TRAIL (jejak cahaya di bawah truck) */
-.truck-road {
-  position: absolute;
-  bottom: 5%;
-  left: -40%;
-  right: -20%;
-  height: 8px;
-  background: linear-gradient(90deg,
-    transparent 0%,
-    rgba(255,107,0,0.5) 20%,
-    rgba(255,180,80,0.9) 50%,
-    rgba(255,107,0,0.5) 80%,
-    transparent 100%);
-  border-radius: 999px;
-  filter: blur(4px);
-  opacity: 0.9;
-  animation: roadPulse 1s ease-in-out infinite alternate;
-}
-
-@keyframes roadPulse {
-  from { opacity: 0.6; transform: scaleX(0.95); }
-  to { opacity: 1; transform: scaleX(1.05); }
-}
-
-/* DUST PARTICLES di belakang roda */
-.truck-dust {
-  position: absolute;
-  bottom: 8%;
-  left: -20%;
-  width: 40%;
-  height: 30%;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.truck-dust span {
-  position: absolute;
-  bottom: 0;
-  width: 12px;
-  height: 12px;
-  background: radial-gradient(circle,
-    rgba(255,200,120,0.8),
-    rgba(255,140,56,0.4) 40%,
-    transparent 80%);
-  border-radius: 50%;
-  animation: dustFly 1.2s ease-out infinite;
-  filter: blur(2px);
-}
-
-.truck-dust span:nth-child(1) { left: 10%; animation-delay: 0s; }
-.truck-dust span:nth-child(2) { left: 30%; animation-delay: 0.2s; width: 8px; height: 8px; }
-.truck-dust span:nth-child(3) { left: 50%; animation-delay: 0.4s; width: 14px; height: 14px; }
-.truck-dust span:nth-child(4) { left: 70%; animation-delay: 0.6s; width: 7px; height: 7px; }
-.truck-dust span:nth-child(5) { left: 20%; animation-delay: 0.8s; width: 10px; height: 10px; }
-.truck-dust span:nth-child(6) { left: 45%; animation-delay: 1s; width: 9px; height: 9px; }
-
-@keyframes dustFly {
-  0% {
-    transform: translate(0, 0) scale(0.4);
-    opacity: 0.9;
-  }
-  100% {
-    transform: translate(-60px, -35px) scale(2);
-    opacity: 0;
-  }
-}
-
-/* EXHAUST SMOKE */
-.truck-smoke {
-  position: absolute;
-  top: 40%;
-  right: -10%;
-  width: 30%;
-  height: 30%;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.truck-smoke span {
-  position: absolute;
-  right: 20%;
-  top: 40%;
-  width: 20px;
-  height: 20px;
-  background: radial-gradient(circle,
-    rgba(220,220,220,0.5),
-    rgba(180,180,180,0.2) 50%,
-    transparent 80%);
-  border-radius: 50%;
-  animation: smokePuff 1.6s ease-out infinite;
-  filter: blur(4px);
-}
-
-.truck-smoke span:nth-child(1) { animation-delay: 0s; }
-.truck-smoke span:nth-child(2) { animation-delay: 0.5s; }
-.truck-smoke span:nth-child(3) { animation-delay: 1s; }
-
-@keyframes smokePuff {
-  0% {
-    transform: translate(0, 0) scale(0.5);
-    opacity: 0.7;
-  }
-  100% {
-    transform: translate(50px, -60%) scale(2.5);
-    opacity: 0;
-  }
-}
-
-/* GLOW halo di bawah truck (menyatu dengan lighting web) */
-.truck-glow {
-  position: absolute;
-  bottom: -10%;
-  left: 5%;
-  right: 5%;
-  height: 40px;
-  background: radial-gradient(ellipse,
-    rgba(255,107,0,0.7) 0%,
-    rgba(255,140,56,0.35) 30%,
-    rgba(255,107,0,0.1) 60%,
-    transparent 80%);
-  border-radius: 50%;
-  filter: blur(20px);
-  animation: glowPulse 1.2s ease-in-out infinite alternate;
-  z-index: 0;
-}
-
-@keyframes glowPulse {
-  0% { opacity: 0.7; transform: scale(1); }
-  100% { opacity: 1; transform: scale(1.2); }
-}
-
-/* HEADLIGHT flare */
-.truck-headlight {
-  position: absolute;
-  top: 55%;
-  left: -5%;
-  width: 25%;
-  height: 25%;
-  background: radial-gradient(circle,
-    rgba(255,230,180,0.7),
-    rgba(255,190,100,0.3) 30%,
-    transparent 70%);
-  border-radius: 50%;
-  transform: translateY(-50%);
-  filter: blur(10px);
-  animation: headlightFlicker 3s ease-in-out infinite;
-  z-index: 5;
-  pointer-events: none;
-  mix-blend-mode: screen;
-}
-
-@keyframes headlightFlicker {
-  0%, 100% { opacity: 0.85; }
-  50% { opacity: 1; }
-}
-
-/* Flip effect */
-.flying-truck.flipped {
-  transform: scaleX(-1);
-}
-
-.flying-truck.flipped .truck-headlight {
-  left: auto;
-  right: -5%;
-}
-
-@media (max-width: 900px) {
-  .flying-truck { width: 220px; }
-}
-
-@media (max-width: 600px) {
-  .flying-truck { display: none; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .flying-truck { display: none; }
 }
 
 /* CURSOR GLOW GLOBAL */
@@ -627,7 +363,11 @@ a { color: inherit; text-decoration: none; }
   inset: 0;
   z-index: 2;
   pointer-events: none;
-  background: radial-gradient(ellipse 80% 60% at 50% 50%, transparent 0%, rgba(8,8,13,0.4) 60%, rgba(8,8,13,0.9) 100%);
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 50%,
+      transparent 0%,
+      rgba(8,8,13,0.4) 60%,
+      rgba(8,8,13,0.9) 100%);
 }
 
 .hc-vignette {
@@ -661,7 +401,9 @@ a { color: inherit; text-decoration: none; }
   padding: clamp(40px, 8vh, 100px) 0;
 }
 
-.hc-headline { transform: translateY(calc(var(--scroll-y, 0) * 0.3)); }
+.hc-headline {
+  transform: translateY(calc(var(--scroll-y, 0) * 0.3));
+}
 
 .hc-eyebrow {
   display: inline-block;
@@ -692,7 +434,11 @@ a { color: inherit; text-decoration: none; }
   word-break: keep-all;
 }
 
-.hc-headline h1 .line { display: block; overflow: visible; padding: 6px 0; }
+.hc-headline h1 .line {
+  display: block;
+  overflow: visible;
+  padding: 6px 0;
+}
 
 .hc-headline h1 .word {
   display: inline-block;
@@ -728,11 +474,15 @@ a { color: inherit; text-decoration: none; }
   animation: hcUnderline 1s cubic-bezier(0.16,1,0.3,1) 1.2s forwards;
 }
 
-@keyframes hcUnderline { to { transform: scaleX(1); } }
+@keyframes hcUnderline {
+  to { transform: scaleX(1); }
+}
+
 @keyframes hcReveal {
   from { opacity: 0; transform: translateY(100%); }
   to { opacity: 1; transform: translateY(0); }
 }
+
 @keyframes hcFadeIn {
   from { opacity: 0; transform: translateY(15px); }
   to { opacity: 1; transform: translateY(0); }
@@ -872,7 +622,9 @@ a { color: inherit; text-decoration: none; }
   animation: hcScrollLine 2s ease-in-out infinite;
 }
 
-@keyframes hcScrollLine { to { left: 100%; } }
+@keyframes hcScrollLine {
+  to { left: 100%; }
+}
 
 .hc-mini-stats {
   display: flex;
@@ -919,7 +671,11 @@ a { color: inherit; text-decoration: none; }
   position: relative;
   overflow: hidden;
   padding: clamp(20px, 3vw, 30px) 0;
-  background: linear-gradient(90deg, rgba(16,16,26,0.9) 0%, rgba(28,20,35,0.85) 50%, rgba(16,16,26,0.9) 100%);
+  background:
+    linear-gradient(90deg,
+      rgba(16,16,26,0.9) 0%,
+      rgba(28,20,35,0.85) 50%,
+      rgba(16,16,26,0.9) 100%);
   border-top: 1px solid rgba(255,107,0,0.12);
   border-bottom: 1px solid rgba(255,107,0,0.12);
   -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 6%, #000 94%, transparent 100%);
@@ -1054,7 +810,10 @@ a { color: inherit; text-decoration: none; }
   line-height: 1.05;
 }
 
-.section-head h2 em { font-style: italic; color: var(--orange); }
+.section-head h2 em {
+  font-style: italic;
+  color: var(--orange);
+}
 
 .section-head p {
   color: var(--muted);
@@ -1126,7 +885,10 @@ a { color: inherit; text-decoration: none; }
   box-shadow: 0 12px 30px rgba(255,107,0,0.35);
 }
 
-.step h3 { font-size: clamp(18px, 2.4vw, 22px); margin-bottom: 10px; }
+.step h3 {
+  font-size: clamp(18px, 2.4vw, 22px);
+  margin-bottom: 10px;
+}
 
 .step p {
   font-size: clamp(13px, 1.6vw, 14.5px);
@@ -1172,7 +934,10 @@ a { color: inherit; text-decoration: none; }
   transition: transform 0.4s cubic-bezier(0.16,1,0.3,1), border-color 0.3s;
 }
 
-.tile:hover { transform: translateY(-4px); border-color: rgba(255,107,0,0.3); }
+.tile:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255,107,0,0.3);
+}
 
 .tile img {
   width: 100%;
@@ -1227,7 +992,10 @@ a { color: inherit; text-decoration: none; }
   font-size: 28px;
 }
 
-.tile-solid.accent { background: linear-gradient(150deg, var(--orange), var(--orange-deep)); }
+.tile-solid.accent {
+  background: linear-gradient(150deg, var(--orange), var(--orange-deep));
+}
+
 .tile-solid::after { display: none; }
 .tile-solid.accent .tl-k, .tile-solid.accent .tl-n { color: #fff; }
 .tile-solid.accent .tl-k { opacity: 0.85; }
@@ -1491,9 +1259,14 @@ a { color: inherit; text-decoration: none; }
 }
 
 .about-media:hover .am-float { transform: rotate(0deg); }
+
 .about-media .am-float img { width: 100%; display: block; }
 
-.about h2 { font-size: clamp(28px, 4.5vw, 52px); margin-bottom: 20px; }
+.about h2 {
+  font-size: clamp(28px, 4.5vw, 52px);
+  margin-bottom: 20px;
+}
+
 .about h2 em { font-style: italic; color: var(--orange); }
 
 .about > .about-inner p.lead {
@@ -1511,7 +1284,12 @@ a { color: inherit; text-decoration: none; }
   margin-bottom: clamp(30px, 4vw, 40px);
 }
 
-.about-item { display: flex; gap: 16px; transition: transform 0.3s; }
+.about-item {
+  display: flex;
+  gap: 16px;
+  transition: transform 0.3s;
+}
+
 .about-item:hover { transform: translateX(6px); }
 
 .about-item .ai-ic {
@@ -1764,7 +1542,12 @@ a { color: inherit; text-decoration: none; }
   line-height: 1.1;
 }
 
-.cta-box h2 em { font-style: italic; color: #fff; }
+.cta-box h2 em {
+  font-style: italic;
+  color: #fff;
+  position: relative;
+  display: inline-block;
+}
 
 .cta-box p {
   color: rgba(255,255,255,0.92);
@@ -1833,7 +1616,10 @@ a { color: inherit; text-decoration: none; }
   padding: 4px 0;
 }
 
-.footer-col a:hover { color: var(--orange); transform: translateX(4px); }
+.footer-col a:hover {
+  color: var(--orange);
+  transform: translateX(4px);
+}
 
 .footer-bottom {
   display: flex;
@@ -1863,7 +1649,7 @@ a { color: inherit; text-decoration: none; }
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
-  .cursor-glow, .bg-particles, .flying-truck { display: none; }
+  .cursor-glow, .bg-particles { display: none; }
 }
 </style>
 </head>
@@ -1875,27 +1661,8 @@ a { color: inherit; text-decoration: none; }
 <!-- CURSOR GLOW GLOBAL -->
 <div class="cursor-glow hide" id="cursorGlow"></div>
 
-<!-- BACKGROUND PARTICLES -->
+<!-- BACKGROUND PARTICLES GLOBAL -->
 <div class="bg-particles"><canvas id="bgCanvas"></canvas></div>
-
-<!-- ═══════════ FLYING TRUCK — TANPA BINGKAI, MENYATU DENGAN WEB ═══════════ -->
-<div class="flying-truck" id="flyingTruck">
-  <div class="truck-glow"></div>
-  <div class="truck-wrap">
-    <video autoplay loop muted playsinline preload="auto"
-           poster="https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=500&q=80">
-      <source src="https://cdn.pixabay.com/video/2020/12/21/59745-491421728_large.mp4" type="video/mp4">
-    </video>
-    <div class="truck-headlight"></div>
-  </div>
-  <div class="truck-dust">
-    <span></span><span></span><span></span><span></span><span></span><span></span>
-  </div>
-  <div class="truck-smoke">
-    <span></span><span></span><span></span>
-  </div>
-  <div class="truck-road"></div>
-</div>
 
 <!-- DRAWER OVERLAY -->
 <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
@@ -1942,6 +1709,7 @@ a { color: inherit; text-decoration: none; }
   <div class="hc-vignette"></div>
 
   <div class="hc-inner">
+
     <div class="hc-main">
       <div class="hc-headline">
         <span class="hc-eyebrow">● Sistem Kolaborasi Cabang</span>
@@ -2014,6 +1782,7 @@ a { color: inherit; text-decoration: none; }
     <span class="mc-item"><span class="mc-icon-wrap"><svg viewBox="0 0 24 24"><path d="M8 21h8l1-9H7l1 9zM7 12h10M12 9c-2 0-2-4 0-4s2 4 0 4M10 9c-2-1-3-3-2-4M14 9c2-1 3-3 2-4"/></svg></span> Dekorasi</span>
     <span class="mc-dot"></span>
 
+    <!-- SET 2 -->
     <span class="mc-item"><span class="mc-icon-wrap"><svg viewBox="0 0 24 24"><path d="M6 20v-4M18 20v-4M6 16h12M7 16v-5c0-2 1.5-3 5-3s5 1 5 3v5M9 8V5c0-1.5 1-2.5 3-2.5s3 1 3 2.5v3"/></svg></span> Kursi</span>
     <span class="mc-dot"></span>
     <span class="mc-item"><span class="mc-icon-wrap"><svg viewBox="0 0 24 24"><path d="M3 18v-4c0-1 1-2 2-2h14c1 0 2 1 2 2v4M3 18h18M3 18v2M21 18v2M5 12V8c0-1 1-2 2-2h4c1 0 2 1 2 2v4"/></svg></span> Kasur</span>
@@ -2187,10 +1956,22 @@ a { color: inherit; text-decoration: none; }
     <p>Jaringan yang tumbuh, kepercayaan yang terjaga, dan sistem yang tidak pernah tidur.</p>
   </div>
   <div class="stats-grid">
-    <div class="stat reveal"><div class="s-num" data-count="4">0</div><div class="s-lbl">Cabang aktif di NTT</div></div>
-    <div class="stat reveal" data-d="1"><div class="s-num" data-count="9">0</div><div class="s-lbl">Kategori furnitur</div></div>
-    <div class="stat reveal" data-d="2"><div class="s-num" data-count="500"><span class="val">0</span><span class="suf">+</span></div><div class="s-lbl">Item dalam katalog</div></div>
-    <div class="stat reveal" data-d="3"><div class="s-num" data-count="24"><span class="val">0</span><span class="suf">/7</span></div><div class="s-lbl">Sistem selalu siap</div></div>
+    <div class="stat reveal">
+      <div class="s-num" data-count="4">0</div>
+      <div class="s-lbl">Cabang aktif di NTT</div>
+    </div>
+    <div class="stat reveal" data-d="1">
+      <div class="s-num" data-count="9">0</div>
+      <div class="s-lbl">Kategori furnitur</div>
+    </div>
+    <div class="stat reveal" data-d="2">
+      <div class="s-num" data-count="500"><span class="val">0</span><span class="suf">+</span></div>
+      <div class="s-lbl">Item dalam katalog</div>
+    </div>
+    <div class="stat reveal" data-d="3">
+      <div class="s-num" data-count="24"><span class="val">0</span><span class="suf">/7</span></div>
+      <div class="s-lbl">Sistem selalu siap</div>
+    </div>
   </div>
 </section>
 
@@ -2637,169 +2418,6 @@ document.querySelectorAll('[data-count], [data-hc-count]').forEach(el => {
 
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeDrawer();
-});
-
-// ═══════════ 🚚 GSAP FLYING TRUCK — REAL MOVEMENT ═══════════
-window.addEventListener('load', () => {
-  if (window.innerWidth < 900) return;
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
-
-  gsap.registerPlugin(ScrollTrigger);
-
-  const truck = document.getElementById('flyingTruck');
-  if (!truck) return;
-
-  // Force video play
-  const video = truck.querySelector('video');
-  if (video) {
-    video.play().catch(() => {});
-  }
-
-  // Posisi awal
-  gsap.set(truck, {
-    x: -500,
-    y: window.innerHeight * 0.4,
-    rotation: -3,
-    opacity: 0,
-    scale: 1
-  });
-
-  const tl = gsap.timeline({
-    scrollTrigger: {
-      trigger: 'body',
-      start: 'top top',
-      end: 'bottom bottom',
-      scrub: 1.5,
-      invalidateOnRefresh: true
-    }
-  });
-
-  // Scene 1: Masuk dari kiri (Hero)
-  tl.to(truck, {
-    x: window.innerWidth * 0.05,
-    y: window.innerHeight * 0.4,
-    rotation: 0,
-    opacity: 1,
-    scale: 1,
-    duration: 1,
-    ease: 'power2.out'
-  }, 0);
-
-  // Scene 2: Meluncur ke kanan (Marquee)
-  tl.to(truck, {
-    x: window.innerWidth * 0.55,
-    y: window.innerHeight * 0.5,
-    rotation: 2,
-    duration: 1.5,
-    ease: 'power1.inOut'
-  });
-
-  // Scene 3: Naik ke kanan atas (Cara Kerja)
-  tl.to(truck, {
-    x: window.innerWidth * 0.7,
-    y: window.innerHeight * 0.3,
-    rotation: -2,
-    duration: 1.5,
-    ease: 'power1.inOut'
-  });
-
-  // Scene 4: BALIK — flip arah, ke kiri (Showcase)
-  tl.to(truck, {
-    x: -200,
-    y: window.innerHeight * 0.4,
-    rotation: 2,
-    duration: 2,
-    ease: 'power1.inOut',
-    onStart: () => truck.classList.add('flipped'),
-    onReverseComplete: () => truck.classList.remove('flipped')
-  });
-
-  // Scene 5: Meluncur diagonal ke kanan bawah (Tim)
-  tl.to(truck, {
-    x: window.innerWidth * 0.55,
-    y: window.innerHeight * 0.55,
-    rotation: -2,
-    duration: 2,
-    ease: 'power1.inOut',
-    onStart: () => truck.classList.remove('flipped'),
-    onReverseComplete: () => truck.classList.add('flipped')
-  });
-
-  // Scene 6: Balik kiri lagi (About)
-  tl.to(truck, {
-    x: -100,
-    y: window.innerHeight * 0.35,
-    rotation: 2,
-    duration: 1.5,
-    ease: 'power1.inOut',
-    onStart: () => truck.classList.add('flipped'),
-    onReverseComplete: () => truck.classList.remove('flipped')
-  });
-
-  // Scene 7: Meluncur kanan (Stats)
-  tl.to(truck, {
-    x: window.innerWidth * 0.6,
-    y: window.innerHeight * 0.5,
-    rotation: -2,
-    duration: 1.5,
-    ease: 'power1.inOut',
-    onStart: () => truck.classList.remove('flipped'),
-    onReverseComplete: () => truck.classList.add('flipped')
-  });
-
-  // Scene 8: Ke kiri untuk Cabang
-  tl.to(truck, {
-    x: -50,
-    y: window.innerHeight * 0.45,
-    rotation: 2,
-    duration: 1.5,
-    ease: 'power1.inOut',
-    onStart: () => truck.classList.add('flipped'),
-    onReverseComplete: () => truck.classList.remove('flipped')
-  });
-
-  // Scene 9: Meluncur ke kanan (CTA)
-  tl.to(truck, {
-    x: window.innerWidth * 0.7,
-    y: window.innerHeight * 0.5,
-    rotation: -2,
-    duration: 1.5,
-    ease: 'power1.inOut',
-    onStart: () => truck.classList.remove('flipped'),
-    onReverseComplete: () => truck.classList.add('flipped')
-  });
-
-  // Scene 10: Fade out ke kanan (Footer)
-  tl.to(truck, {
-    x: window.innerWidth + 300,
-    y: window.innerHeight * 0.3,
-    rotation: 3,
-    opacity: 0,
-    scale: 0.85,
-    duration: 1,
-    ease: 'power2.in'
-  });
-
-  // Floating bob
-  gsap.to(truck, {
-    y: '+=8',
-    duration: 1.5,
-    ease: 'sine.inOut',
-    repeat: -1,
-    yoyo: true
-  });
-
-  // Refresh on resize
-  let truckResizeTimer;
-  window.addEventListener('resize', () => {
-    clearTimeout(truckResizeTimer);
-    truckResizeTimer = setTimeout(() => {
-      ScrollTrigger.refresh();
-    }, 250);
-  }, { passive: true });
-
-  console.log('🚚 GSAP Truck NO FRAME - blended with web!');
 });
 </script>
 
