@@ -9,6 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,400;9..144,0,500;9..144,0,600;9..144,0,700;9..144,1,400;9..144,1,500&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <style>
 *, *::before, *::after {
   margin: 0;
@@ -76,6 +78,76 @@ a { color: inherit; text-decoration: none; }
   width: 100%;
   position: relative;
   z-index: 2;
+}
+
+/* ═══════════ FLYING TRUCK — GSAP ScrollTrigger ═══════════ */
+.flying-truck {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: clamp(180px, 20vw, 320px);
+  height: auto;
+  z-index: 4;
+  pointer-events: none;
+  will-change: transform, opacity;
+  opacity: 0;
+  filter:
+    drop-shadow(0 20px 40px rgba(255,107,0,0.35))
+    drop-shadow(0 0 30px rgba(255,140,56,0.25));
+  transform-origin: center center;
+}
+
+.flying-truck img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 12px;
+}
+
+.flying-truck::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -30%;
+  transform: translateY(-50%);
+  width: 60%;
+  height: 60%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,107,0,0.45), rgba(255,107,0,0.15) 40%, transparent 70%);
+  filter: blur(20px);
+  z-index: -1;
+  animation: truckGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes truckGlow {
+  from { opacity: 0.7; transform: translateY(-50%) scale(1); }
+  to { opacity: 1; transform: translateY(-50%) scale(1.15); }
+}
+
+.flying-truck.speeding::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -40%;
+  width: 40%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, rgba(255,180,80,0.8), transparent);
+  transform: translateY(-50%);
+  animation: speedLine 0.3s linear infinite;
+  border-radius: 999px;
+}
+
+@keyframes speedLine {
+  from { transform: translateY(-50%) translateX(0); opacity: 1; }
+  to { transform: translateY(-50%) translateX(20px); opacity: 0; }
+}
+
+@media (max-width: 900px) {
+  .flying-truck { width: clamp(140px, 30vw, 200px); }
+}
+
+@media (max-width: 600px) {
+  .flying-truck { display: none; }
 }
 
 /* CURSOR GLOW GLOBAL */
@@ -401,9 +473,7 @@ a { color: inherit; text-decoration: none; }
   padding: clamp(40px, 8vh, 100px) 0;
 }
 
-.hc-headline {
-  transform: translateY(calc(var(--scroll-y, 0) * 0.3));
-}
+.hc-headline { transform: translateY(calc(var(--scroll-y, 0) * 0.3)); }
 
 .hc-eyebrow {
   display: inline-block;
@@ -434,11 +504,7 @@ a { color: inherit; text-decoration: none; }
   word-break: keep-all;
 }
 
-.hc-headline h1 .line {
-  display: block;
-  overflow: visible;
-  padding: 6px 0;
-}
+.hc-headline h1 .line { display: block; overflow: visible; padding: 6px 0; }
 
 .hc-headline h1 .word {
   display: inline-block;
@@ -474,15 +540,11 @@ a { color: inherit; text-decoration: none; }
   animation: hcUnderline 1s cubic-bezier(0.16,1,0.3,1) 1.2s forwards;
 }
 
-@keyframes hcUnderline {
-  to { transform: scaleX(1); }
-}
-
+@keyframes hcUnderline { to { transform: scaleX(1); } }
 @keyframes hcReveal {
   from { opacity: 0; transform: translateY(100%); }
   to { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes hcFadeIn {
   from { opacity: 0; transform: translateY(15px); }
   to { opacity: 1; transform: translateY(0); }
@@ -622,9 +684,7 @@ a { color: inherit; text-decoration: none; }
   animation: hcScrollLine 2s ease-in-out infinite;
 }
 
-@keyframes hcScrollLine {
-  to { left: 100%; }
-}
+@keyframes hcScrollLine { to { left: 100%; } }
 
 .hc-mini-stats {
   display: flex;
@@ -671,11 +731,7 @@ a { color: inherit; text-decoration: none; }
   position: relative;
   overflow: hidden;
   padding: clamp(20px, 3vw, 30px) 0;
-  background:
-    linear-gradient(90deg,
-      rgba(16,16,26,0.9) 0%,
-      rgba(28,20,35,0.85) 50%,
-      rgba(16,16,26,0.9) 100%);
+  background: linear-gradient(90deg, rgba(16,16,26,0.9) 0%, rgba(28,20,35,0.85) 50%, rgba(16,16,26,0.9) 100%);
   border-top: 1px solid rgba(255,107,0,0.12);
   border-bottom: 1px solid rgba(255,107,0,0.12);
   -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 6%, #000 94%, transparent 100%);
@@ -810,10 +866,7 @@ a { color: inherit; text-decoration: none; }
   line-height: 1.05;
 }
 
-.section-head h2 em {
-  font-style: italic;
-  color: var(--orange);
-}
+.section-head h2 em { font-style: italic; color: var(--orange); }
 
 .section-head p {
   color: var(--muted);
@@ -885,10 +938,7 @@ a { color: inherit; text-decoration: none; }
   box-shadow: 0 12px 30px rgba(255,107,0,0.35);
 }
 
-.step h3 {
-  font-size: clamp(18px, 2.4vw, 22px);
-  margin-bottom: 10px;
-}
+.step h3 { font-size: clamp(18px, 2.4vw, 22px); margin-bottom: 10px; }
 
 .step p {
   font-size: clamp(13px, 1.6vw, 14.5px);
@@ -934,10 +984,7 @@ a { color: inherit; text-decoration: none; }
   transition: transform 0.4s cubic-bezier(0.16,1,0.3,1), border-color 0.3s;
 }
 
-.tile:hover {
-  transform: translateY(-4px);
-  border-color: rgba(255,107,0,0.3);
-}
+.tile:hover { transform: translateY(-4px); border-color: rgba(255,107,0,0.3); }
 
 .tile img {
   width: 100%;
@@ -992,10 +1039,7 @@ a { color: inherit; text-decoration: none; }
   font-size: 28px;
 }
 
-.tile-solid.accent {
-  background: linear-gradient(150deg, var(--orange), var(--orange-deep));
-}
-
+.tile-solid.accent { background: linear-gradient(150deg, var(--orange), var(--orange-deep)); }
 .tile-solid::after { display: none; }
 .tile-solid.accent .tl-k, .tile-solid.accent .tl-n { color: #fff; }
 .tile-solid.accent .tl-k { opacity: 0.85; }
@@ -1259,14 +1303,9 @@ a { color: inherit; text-decoration: none; }
 }
 
 .about-media:hover .am-float { transform: rotate(0deg); }
-
 .about-media .am-float img { width: 100%; display: block; }
 
-.about h2 {
-  font-size: clamp(28px, 4.5vw, 52px);
-  margin-bottom: 20px;
-}
-
+.about h2 { font-size: clamp(28px, 4.5vw, 52px); margin-bottom: 20px; }
 .about h2 em { font-style: italic; color: var(--orange); }
 
 .about > .about-inner p.lead {
@@ -1284,12 +1323,7 @@ a { color: inherit; text-decoration: none; }
   margin-bottom: clamp(30px, 4vw, 40px);
 }
 
-.about-item {
-  display: flex;
-  gap: 16px;
-  transition: transform 0.3s;
-}
-
+.about-item { display: flex; gap: 16px; transition: transform 0.3s; }
 .about-item:hover { transform: translateX(6px); }
 
 .about-item .ai-ic {
@@ -1542,12 +1576,7 @@ a { color: inherit; text-decoration: none; }
   line-height: 1.1;
 }
 
-.cta-box h2 em {
-  font-style: italic;
-  color: #fff;
-  position: relative;
-  display: inline-block;
-}
+.cta-box h2 em { font-style: italic; color: #fff; }
 
 .cta-box p {
   color: rgba(255,255,255,0.92);
@@ -1616,10 +1645,7 @@ a { color: inherit; text-decoration: none; }
   padding: 4px 0;
 }
 
-.footer-col a:hover {
-  color: var(--orange);
-  transform: translateX(4px);
-}
+.footer-col a:hover { color: var(--orange); transform: translateX(4px); }
 
 .footer-bottom {
   display: flex;
@@ -1649,7 +1675,7 @@ a { color: inherit; text-decoration: none; }
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
-  .cursor-glow, .bg-particles { display: none; }
+  .cursor-glow, .bg-particles, .flying-truck { display: none; }
 }
 </style>
 </head>
@@ -1661,8 +1687,15 @@ a { color: inherit; text-decoration: none; }
 <!-- CURSOR GLOW GLOBAL -->
 <div class="cursor-glow hide" id="cursorGlow"></div>
 
-<!-- BACKGROUND PARTICLES GLOBAL -->
+<!-- BACKGROUND PARTICLES -->
 <div class="bg-particles"><canvas id="bgCanvas"></canvas></div>
+
+<!-- ═══════════ FLYING TRUCK (GSAP ScrollTrigger) ═══════════ -->
+<div class="flying-truck" id="flyingTruck">
+  <img src="https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=500&q=80&auto=format&fit=crop"
+       alt="GudangHub Truck"
+       onerror="this.src='https://images.unsplash.com/photo-1519003722824-194d4455a60c?w=500&q=80'; this.onerror=null;">
+</div>
 
 <!-- DRAWER OVERLAY -->
 <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
@@ -1709,7 +1742,6 @@ a { color: inherit; text-decoration: none; }
   <div class="hc-vignette"></div>
 
   <div class="hc-inner">
-
     <div class="hc-main">
       <div class="hc-headline">
         <span class="hc-eyebrow">● Sistem Kolaborasi Cabang</span>
@@ -1782,7 +1814,6 @@ a { color: inherit; text-decoration: none; }
     <span class="mc-item"><span class="mc-icon-wrap"><svg viewBox="0 0 24 24"><path d="M8 21h8l1-9H7l1 9zM7 12h10M12 9c-2 0-2-4 0-4s2 4 0 4M10 9c-2-1-3-3-2-4M14 9c2-1 3-3 2-4"/></svg></span> Dekorasi</span>
     <span class="mc-dot"></span>
 
-    <!-- SET 2 -->
     <span class="mc-item"><span class="mc-icon-wrap"><svg viewBox="0 0 24 24"><path d="M6 20v-4M18 20v-4M6 16h12M7 16v-5c0-2 1.5-3 5-3s5 1 5 3v5M9 8V5c0-1.5 1-2.5 3-2.5s3 1 3 2.5v3"/></svg></span> Kursi</span>
     <span class="mc-dot"></span>
     <span class="mc-item"><span class="mc-icon-wrap"><svg viewBox="0 0 24 24"><path d="M3 18v-4c0-1 1-2 2-2h14c1 0 2 1 2 2v4M3 18h18M3 18v2M21 18v2M5 12V8c0-1 1-2 2-2h4c1 0 2 1 2 2v4"/></svg></span> Kasur</span>
@@ -1956,22 +1987,10 @@ a { color: inherit; text-decoration: none; }
     <p>Jaringan yang tumbuh, kepercayaan yang terjaga, dan sistem yang tidak pernah tidur.</p>
   </div>
   <div class="stats-grid">
-    <div class="stat reveal">
-      <div class="s-num" data-count="4">0</div>
-      <div class="s-lbl">Cabang aktif di NTT</div>
-    </div>
-    <div class="stat reveal" data-d="1">
-      <div class="s-num" data-count="9">0</div>
-      <div class="s-lbl">Kategori furnitur</div>
-    </div>
-    <div class="stat reveal" data-d="2">
-      <div class="s-num" data-count="500"><span class="val">0</span><span class="suf">+</span></div>
-      <div class="s-lbl">Item dalam katalog</div>
-    </div>
-    <div class="stat reveal" data-d="3">
-      <div class="s-num" data-count="24"><span class="val">0</span><span class="suf">/7</span></div>
-      <div class="s-lbl">Sistem selalu siap</div>
-    </div>
+    <div class="stat reveal"><div class="s-num" data-count="4">0</div><div class="s-lbl">Cabang aktif di NTT</div></div>
+    <div class="stat reveal" data-d="1"><div class="s-num" data-count="9">0</div><div class="s-lbl">Kategori furnitur</div></div>
+    <div class="stat reveal" data-d="2"><div class="s-num" data-count="500"><span class="val">0</span><span class="suf">+</span></div><div class="s-lbl">Item dalam katalog</div></div>
+    <div class="stat reveal" data-d="3"><div class="s-num" data-count="24"><span class="val">0</span><span class="suf">/7</span></div><div class="s-lbl">Sistem selalu siap</div></div>
   </div>
 </section>
 
@@ -2418,6 +2437,179 @@ document.querySelectorAll('[data-count], [data-hc-count]').forEach(el => {
 
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeDrawer();
+});
+
+// ═══════════ 🚚 GSAP FLYING TRUCK — ScrollTrigger ═══════════
+window.addEventListener('load', () => {
+  // Skip jika mobile atau reduced motion
+  if (window.innerWidth < 900) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
+    console.warn('GSAP atau ScrollTrigger tidak ter-load.');
+    return;
+  }
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const truck = document.getElementById('flyingTruck');
+  if (!truck) return;
+
+  // Set posisi awal
+  gsap.set(truck, {
+    x: -400,
+    y: window.innerHeight * 0.4,
+    rotation: -8,
+    opacity: 0,
+    scale: 1
+  });
+
+  // Timeline utama — perjalanan truck mengikuti scroll
+  const tl = gsap.timeline({
+    scrollTrigger: {
+      trigger: 'body',
+      start: 'top top',
+      end: 'bottom bottom',
+      scrub: 1.2,
+      invalidateOnRefresh: true,
+    }
+  });
+
+  // Scene 1: Fade in dari kiri
+  tl.to(truck, {
+    x: window.innerWidth * 0.05,
+    y: window.innerHeight * 0.35,
+    rotation: 0,
+    opacity: 1,
+    scale: 1,
+    duration: 1,
+    ease: 'power2.out'
+  }, 0);
+
+  // Scene 2: Meluncur ke kanan
+  tl.to(truck, {
+    x: window.innerWidth - 400,
+    y: window.innerHeight * 0.5,
+    rotation: 3,
+    scale: 1.05,
+    duration: 1.5,
+    ease: 'power1.inOut'
+  });
+
+  // Scene 3: Balik ke kiri sambil naik
+  tl.to(truck, {
+    x: -100,
+    y: window.innerHeight * 0.3,
+    rotation: -5,
+    scaleX: -1.05,
+    scaleY: 1.05,
+    duration: 1.5,
+    ease: 'power1.inOut'
+  });
+
+  // Scene 4: Meluncur diagonal kanan bawah
+  tl.to(truck, {
+    x: window.innerWidth * 0.6,
+    y: window.innerHeight * 0.55,
+    rotation: 5,
+    scaleX: 1,
+    scaleY: 1,
+    duration: 1.5,
+    ease: 'power1.inOut'
+  });
+
+  // Scene 5: Turun ke tengah kiri
+  tl.to(truck, {
+    x: window.innerWidth * 0.1,
+    y: window.innerHeight * 0.4,
+    rotation: -2,
+    scaleX: -1,
+    scaleY: 1,
+    duration: 1.2,
+    ease: 'power2.inOut'
+  });
+
+  // Scene 6: Meluncur cepat ke kanan
+  tl.to(truck, {
+    x: window.innerWidth * 0.7,
+    y: window.innerHeight * 0.5,
+    rotation: 4,
+    scaleX: 1,
+    scaleY: 1,
+    duration: 1.2,
+    ease: 'power2.inOut'
+  });
+
+  // Scene 7: Kembali ke kiri
+  tl.to(truck, {
+    x: window.innerWidth * 0.05,
+    y: window.innerHeight * 0.45,
+    rotation: -3,
+    scaleX: -1,
+    scaleY: 1,
+    duration: 1.2,
+    ease: 'power1.inOut'
+  });
+
+  // Scene 8: Meluncur pergi ke kanan
+  tl.to(truck, {
+    x: window.innerWidth * 0.8,
+    y: window.innerHeight * 0.5,
+    rotation: 6,
+    scaleX: 1.1,
+    scaleY: 1.1,
+    duration: 1.2,
+    ease: 'power2.inOut'
+  });
+
+  // Scene 9: Fade out ke kanan
+  tl.to(truck, {
+    x: window.innerWidth + 400,
+    y: window.innerHeight * 0.3,
+    rotation: 10,
+    opacity: 0,
+    scale: 0.8,
+    duration: 1,
+    ease: 'power2.in'
+  });
+
+  // Speed class: nyalakan speed line saat scroll cepat
+  let lastScrollY = window.scrollY;
+  let scrollSpeed = 0;
+  let speedTimer = null;
+
+  window.addEventListener('scroll', () => {
+    const currentY = window.scrollY;
+    scrollSpeed = Math.abs(currentY - lastScrollY);
+    lastScrollY = currentY;
+
+    if (scrollSpeed > 5) {
+      truck.classList.add('speeding');
+      clearTimeout(speedTimer);
+      speedTimer = setTimeout(() => {
+        truck.classList.remove('speeding');
+      }, 200);
+    }
+  }, { passive: true });
+
+  // Floating bob: truck naik-turun halus saat idle
+  gsap.to(truck, {
+    y: '+=15',
+    duration: 2,
+    ease: 'sine.inOut',
+    repeat: -1,
+    yoyo: true
+  });
+
+  // Refresh on resize
+  let truckResizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(truckResizeTimer);
+    truckResizeTimer = setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 250);
+  }, { passive: true });
+
+  console.log('🚚 GSAP Truck ScrollTrigger loaded!');
 });
 </script>
 
