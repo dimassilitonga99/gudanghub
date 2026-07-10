@@ -4,11 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0">
 <meta name="theme-color" content="#08080d">
-<meta name="description" content="GudangHub — Sistem order barang antar cabang PT Central Perabot Utama NTT">
-<title>GudangHub — Sistem Order Barang Antar Cabang</title>
+<meta name="description" content="GudangHub — Sistem operasional cerdas untuk order barang antar cabang PT Central Perabot Utama">
+<title>GudangHub — Kolaborasi Cabang & Gudang, Tanpa Batas Waktu</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,400;9..144,0,500;9..144,0,600;9..144,0,700;9..144,1,400;9..144,1,500&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after {
   margin: 0;
@@ -21,6 +21,7 @@
   --orange: #ff6b00;
   --orange-light: #ff8c38;
   --orange-deep: #e05a00;
+  --orange-glow: rgba(255,107,0,0.5);
   --ink: #08080d;
   --ink2: #10101a;
   --ink3: #1c1c2b;
@@ -50,6 +51,7 @@ body {
   overflow-x: hidden;
   min-height: 100dvh;
   -webkit-font-smoothing: antialiased;
+  position: relative;
   padding-left: var(--safe-left);
   padding-right: var(--safe-right);
 }
@@ -73,37 +75,79 @@ a { color: inherit; text-decoration: none; }
   margin: 0 auto;
   padding: 0 clamp(16px, 4vw, 48px);
   width: 100%;
+  position: relative;
+  z-index: 2;
 }
 
-/* SCROLL PROGRESS */
+/* ═══════════ GLOBAL CURSOR GLOW ═══════════ */
+.cursor-glow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 3;
+  background: radial-gradient(circle,
+    rgba(255,140,56,0.12) 0%,
+    rgba(255,107,0,0.06) 25%,
+    rgba(255,107,0,0.02) 50%,
+    transparent 70%);
+  transform: translate(-50%, -50%);
+  transition: opacity 0.3s ease;
+  mix-blend-mode: screen;
+  will-change: transform;
+}
+
+.cursor-glow.hide { opacity: 0; }
+
+/* ═══════════ GLOBAL PARTICLE CANVAS (background layer) ═══════════ */
+.bg-particles {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.bg-particles canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Scroll progress */
 .scroll-progress {
   position: fixed;
   top: 0;
   left: 0;
   height: 2px;
   width: 0%;
-  background: linear-gradient(90deg, var(--orange), var(--orange-light));
+  background: linear-gradient(90deg, var(--orange), var(--orange-light), var(--orange));
   z-index: 9999;
-  box-shadow: 0 0 10px rgba(255,107,0,0.5);
+  box-shadow: 0 0 12px rgba(255,107,0,0.6);
   transition: width 0.1s linear;
   pointer-events: none;
 }
 
-/* REVEAL ANIMATION */
+/* REVEAL */
 .reveal {
   opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1);
+  transform: translateY(30px);
+  transition: opacity 0.9s cubic-bezier(0.16,1,0.3,1), transform 0.9s cubic-bezier(0.16,1,0.3,1);
 }
-
-.reveal.in {
-  opacity: 1;
-  transform: none;
-}
-
+.reveal.in { opacity: 1; transform: none; }
 .reveal[data-d="1"] { transition-delay: 0.1s; }
 .reveal[data-d="2"] { transition-delay: 0.2s; }
 .reveal[data-d="3"] { transition-delay: 0.3s; }
+
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.94);
+  transition: opacity 1s cubic-bezier(0.16,1,0.3,1), transform 1s cubic-bezier(0.16,1,0.3,1);
+}
+.reveal-scale.in { opacity: 1; transform: scale(1); }
 
 /* ═══════════ NAV ═══════════ */
 .nav {
@@ -170,11 +214,7 @@ a { color: inherit; text-decoration: none; }
 
 .brand-name em { color: var(--orange); font-style: normal; }
 
-.nav-links {
-  display: flex;
-  gap: clamp(18px, 2.5vw, 30px);
-  flex: 1;
-}
+.nav-links { display: flex; gap: clamp(18px, 2.5vw, 30px); flex: 1; }
 
 .nav-links a {
   font-size: 14px;
@@ -243,7 +283,6 @@ a { color: inherit; text-decoration: none; }
   min-height: 44px;
 }
 
-/* MOBILE DRAWER */
 .drawer-overlay {
   display: none;
   position: fixed;
@@ -254,10 +293,7 @@ a { color: inherit; text-decoration: none; }
   transition: opacity 0.3s;
 }
 
-.drawer-overlay.show {
-  display: block;
-  opacity: 1;
-}
+.drawer-overlay.show { display: block; opacity: 1; }
 
 .mobile-drawer {
   position: fixed;
@@ -314,8 +350,7 @@ a { color: inherit; text-decoration: none; }
 @media (min-width: 901px) {
   .mobile-drawer, .drawer-overlay { display: none !important; }
 }
-</style>
-<style>
+
 /* ═══════════ HERO CINEMATIC ═══════════ */
 .hero-cinema {
   position: relative;
@@ -326,36 +361,16 @@ a { color: inherit; text-decoration: none; }
   z-index: 2;
 }
 
-.hc-canvas-wrap {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  overflow: hidden;
-}
-
-.hc-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
 .hc-spotlight {
   position: absolute;
   inset: 0;
   z-index: 2;
   pointer-events: none;
   background:
-    radial-gradient(circle at var(--mx, 50%) var(--my, 50%),
-      rgba(255,140,56,0.15) 0%,
-      rgba(255,107,0,0.06) 20%,
-      transparent 50%),
     radial-gradient(ellipse 80% 60% at 50% 50%,
       transparent 0%,
       rgba(8,8,13,0.4) 60%,
       rgba(8,8,13,0.9) 100%);
-  transition: background 0.3s ease-out;
 }
 
 .hc-vignette {
@@ -390,7 +405,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 .hc-brand-tag {
-  font-family: 'Courier New', monospace;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
   font-size: 13px;
   letter-spacing: 0.15em;
   color: var(--text);
@@ -421,7 +436,7 @@ a { color: inherit; text-decoration: none; }
   flex-direction: column;
   gap: 8px;
   text-align: right;
-  font-family: 'Courier New', monospace;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
   font-size: 13px;
   letter-spacing: 0.1em;
 }
@@ -436,7 +451,7 @@ a { color: inherit; text-decoration: none; }
 
 .hc-main {
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
+  grid-template-columns: 1.15fr 1fr;
   gap: clamp(30px, 5vw, 80px);
   align-items: flex-end;
   margin: auto 0;
@@ -447,11 +462,27 @@ a { color: inherit; text-decoration: none; }
   transform: translateY(calc(var(--scroll-y, 0) * 0.3));
 }
 
+.hc-eyebrow {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: clamp(11px, 1.3vw, 13px);
+  color: var(--orange);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  padding: 8px 14px;
+  border: 1px solid rgba(255,107,0,0.3);
+  border-radius: 999px;
+  background: rgba(255,107,0,0.05);
+  opacity: 0;
+  animation: hcFadeIn 0.8s ease 0.1s forwards;
+}
+
 .hc-headline h1 {
   font-family: 'Fraunces', Georgia, serif;
-  font-size: clamp(44px, 9vw, 130px);
+  font-size: clamp(38px, 8vw, 110px);
   font-weight: 500;
-  line-height: 0.95;
+  line-height: 0.98;
   letter-spacing: -0.03em;
   color: var(--text);
   margin: 0;
@@ -460,6 +491,7 @@ a { color: inherit; text-decoration: none; }
 .hc-headline h1 .line {
   display: block;
   overflow: hidden;
+  padding: 4px 0;
 }
 
 .hc-headline h1 .word {
@@ -469,26 +501,41 @@ a { color: inherit; text-decoration: none; }
   animation: hcReveal 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.hc-headline h1 .word:nth-child(1) { animation-delay: 0.2s; }
-.hc-headline h1 .word:nth-child(2) { animation-delay: 0.4s; }
-.hc-headline h1 .word:nth-child(3) { animation-delay: 0.6s; }
+.hc-headline h1 .word:nth-child(1) { animation-delay: 0.3s; }
+.hc-headline h1 .word:nth-child(2) { animation-delay: 0.5s; }
 
 .hc-headline h1 em {
   font-style: italic;
-  font-weight: 400;
+  font-weight: 500;
   color: var(--orange);
+  position: relative;
 }
 
-.hc-headline .double-slash {
-  color: var(--orange);
-  font-style: normal;
-  margin-right: 8px;
-  display: inline-block;
-  transform: translateY(-4px);
+.hc-headline h1 em::after {
+  content: '';
+  position: absolute;
+  bottom: 0.08em;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--orange), transparent);
+  opacity: 0.5;
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: hcUnderline 1s cubic-bezier(0.16,1,0.3,1) 1.2s forwards;
+}
+
+@keyframes hcUnderline {
+  to { transform: scaleX(1); }
 }
 
 @keyframes hcReveal {
   from { opacity: 0; transform: translateY(100%); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes hcFadeIn {
+  from { opacity: 0; transform: translateY(15px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -504,7 +551,7 @@ a { color: inherit; text-decoration: none; }
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  font-family: 'Courier New', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 12px;
   letter-spacing: 0.15em;
   color: rgba(245,240,232,0.7);
@@ -514,7 +561,7 @@ a { color: inherit; text-decoration: none; }
   border-radius: 999px;
   align-self: flex-start;
   opacity: 0;
-  animation: hcFadeIn 0.8s ease 0.8s forwards;
+  animation: hcFadeIn 0.8s ease 0.9s forwards;
 }
 
 .hc-badge-dot {
@@ -537,16 +584,16 @@ a { color: inherit; text-decoration: none; }
 }
 
 .hc-desc {
-  font-size: clamp(13px, 1.5vw, 15px);
-  line-height: 1.6;
-  color: rgba(245,240,232,0.55);
-  max-width: 42ch;
+  font-size: clamp(14px, 1.6vw, 16px);
+  line-height: 1.7;
+  color: rgba(245,240,232,0.65);
+  max-width: 44ch;
   opacity: 0;
-  animation: hcFadeIn 0.8s ease 1s forwards;
+  animation: hcFadeIn 0.8s ease 1.1s forwards;
 }
 
 .hc-desc-label {
-  font-family: 'Courier New', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
   color: rgba(245,240,232,0.35);
   letter-spacing: 0.2em;
@@ -559,7 +606,7 @@ a { color: inherit; text-decoration: none; }
   gap: 12px;
   flex-wrap: wrap;
   opacity: 0;
-  animation: hcFadeIn 0.8s ease 1.2s forwards;
+  animation: hcFadeIn 0.8s ease 1.3s forwards;
 }
 
 .hc-btn {
@@ -579,10 +626,7 @@ a { color: inherit; text-decoration: none; }
   font-family: inherit;
 }
 
-.hc-btn-primary {
-  background: var(--text);
-  color: var(--ink);
-}
+.hc-btn-primary { background: var(--text); color: var(--ink); }
 
 .hc-btn-primary:hover {
   background: var(--orange);
@@ -618,11 +662,6 @@ a { color: inherit; text-decoration: none; }
 .hc-btn:hover .hc-btn-icon { transform: translateX(3px); }
 .hc-btn-primary:hover .hc-btn-icon { background: #fff; color: var(--orange); }
 
-@keyframes hcFadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
 .hc-bottom {
   display: flex;
   justify-content: space-between;
@@ -630,14 +669,14 @@ a { color: inherit; text-decoration: none; }
   gap: 20px;
   flex-wrap: wrap;
   opacity: 0;
-  animation: hcFadeIn 0.8s ease 1.4s forwards;
+  animation: hcFadeIn 0.8s ease 1.5s forwards;
 }
 
 .hc-scroll-hint {
   display: flex;
   align-items: center;
   gap: 12px;
-  font-family: 'Courier New', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
   letter-spacing: 0.2em;
   color: rgba(245,240,232,0.4);
@@ -685,7 +724,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 .hc-mini-stat-lbl {
-  font-family: 'Courier New', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
   color: rgba(245,240,232,0.4);
   letter-spacing: 0.2em;
@@ -701,11 +740,13 @@ a { color: inherit; text-decoration: none; }
 
 @media (max-width: 600px) {
   .hc-inner { padding: calc(80px + var(--safe-top)) 20px 40px; }
-  .hc-headline h1 { font-size: clamp(40px, 12vw, 60px); }
+  .hc-headline h1 { font-size: clamp(40px, 12vw, 58px); }
   .hc-mini-stats { gap: 20px; }
   .hc-bottom { align-items: flex-start; flex-direction: column; gap: 24px; }
+  .cursor-glow { display: none; }
 }
-
+</style>
+<style>
 /* ═══════════ MARQUEE KATEGORI ═══════════ */
 .marquee-cat {
   position: relative;
@@ -721,7 +762,6 @@ a { color: inherit; text-decoration: none; }
   -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 6%, #000 94%, transparent 100%);
   mask-image: linear-gradient(90deg, transparent 0%, #000 6%, #000 94%, transparent 100%);
   z-index: 5;
-  position: relative;
 }
 
 .marquee-cat::before {
@@ -766,10 +806,7 @@ a { color: inherit; text-decoration: none; }
   letter-spacing: -0.01em;
 }
 
-.mc-item:hover {
-  color: var(--text);
-  transform: translateY(-2px);
-}
+.mc-item:hover { color: var(--text); transform: translateY(-2px); }
 
 .mc-icon-wrap {
   display: inline-flex;
@@ -819,41 +856,56 @@ a { color: inherit; text-decoration: none; }
 
 /* ═══════════ SECTION HEAD ═══════════ */
 .section-head {
-  max-width: 620px;
+  max-width: 720px;
   margin-bottom: clamp(32px, 5vw, 56px);
 }
 
 .section-kicker {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
-  font-size: clamp(11px, 1.4vw, 12.5px);
-  font-weight: 700;
-  letter-spacing: 0.14em;
+  gap: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: clamp(11px, 1.4vw, 13px);
+  font-weight: 500;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--orange);
   margin-bottom: clamp(14px, 2vw, 18px);
+  padding: 6px 12px;
+  border: 1px solid rgba(255,107,0,0.25);
+  border-radius: 999px;
+  background: rgba(255,107,0,0.04);
 }
 
 .section-kicker::before {
   content: '';
-  width: 28px;
-  height: 1px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
   background: var(--orange);
+  box-shadow: 0 0 8px var(--orange);
 }
 
 .section-head h2 {
-  font-size: clamp(28px, 5vw, 52px);
+  font-size: clamp(30px, 5.5vw, 56px);
+  line-height: 1.05;
+}
+
+.section-head h2 em {
+  font-style: italic;
+  color: var(--orange);
 }
 
 .section-head p {
   color: var(--muted);
   font-size: clamp(15px, 1.7vw, 17px);
-  margin-top: 16px;
+  margin-top: 18px;
+  max-width: 58ch;
+  line-height: 1.7;
 }
 
 /* ═══════════ STEPS ═══════════ */
-.steps { padding: var(--space) 0; }
+.steps { padding: var(--space) 0; position: relative; z-index: 2; }
 
 .steps-grid {
   display: grid;
@@ -865,21 +917,37 @@ a { color: inherit; text-decoration: none; }
 .step {
   padding: clamp(28px, 4vw, 40px) clamp(20px, 3vw, 28px) clamp(28px, 4vw, 40px) 0;
   border-right: 1px solid var(--line2);
+  transition: background 0.3s;
+  position: relative;
 }
 
 .step:last-child { border-right: none; padding-right: 0; }
 
+.step::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--orange);
+  transition: width 0.5s cubic-bezier(0.16,1,0.3,1);
+}
+
+.step:hover::before { width: 100%; }
+
 .step-n {
-  font-family: 'Fraunces', serif;
-  font-size: 15px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
   color: var(--orange);
-  font-weight: 600;
+  font-weight: 500;
   margin-bottom: clamp(20px, 3vw, 26px);
+  letter-spacing: 0.1em;
 }
 
 .step-ic {
-  width: clamp(48px, 6vw, 54px);
-  height: clamp(48px, 6vw, 54px);
+  width: clamp(48px, 6vw, 56px);
+  height: clamp(48px, 6vw, 56px);
   border-radius: 14px;
   background: var(--ink3);
   color: var(--orange);
@@ -888,22 +956,25 @@ a { color: inherit; text-decoration: none; }
   margin-bottom: clamp(18px, 2.5vw, 22px);
   transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
   font-size: 24px;
+  border: 1px solid rgba(255,107,0,0.15);
 }
 
 .step:hover .step-ic {
   background: var(--orange);
   color: #fff;
   transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(255,107,0,0.35);
 }
 
 .step h3 {
-  font-size: clamp(18px, 2.4vw, 21px);
+  font-size: clamp(18px, 2.4vw, 22px);
   margin-bottom: 10px;
 }
 
 .step p {
   font-size: clamp(13px, 1.6vw, 14.5px);
   color: var(--muted);
+  line-height: 1.65;
 }
 
 @media (max-width: 900px) {
@@ -918,7 +989,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ═══════════ SHOWCASE ═══════════ */
-.showcase { padding: 0 0 var(--space); }
+.showcase { padding: 0 0 var(--space); position: relative; z-index: 2; }
 
 .showcase-head {
   display: flex;
@@ -941,6 +1012,12 @@ a { color: inherit; text-decoration: none; }
   border-radius: clamp(14px, 2vw, 20px);
   overflow: hidden;
   border: 1px solid var(--line2);
+  transition: transform 0.4s cubic-bezier(0.16,1,0.3,1), border-color 0.3s;
+}
+
+.tile:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255,107,0,0.3);
 }
 
 .tile img {
@@ -967,10 +1044,11 @@ a { color: inherit; text-decoration: none; }
 }
 
 .tile-label .tl-k {
+  font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
   color: var(--orange);
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  font-weight: 500;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
@@ -978,6 +1056,7 @@ a { color: inherit; text-decoration: none; }
   font-family: 'Fraunces', serif;
   font-size: clamp(18px, 2.4vw, 23px);
   font-weight: 600;
+  margin-top: 4px;
 }
 
 .t-big { grid-column: span 3; grid-row: span 2; }
@@ -1017,9 +1096,11 @@ a { color: inherit; text-decoration: none; }
 /* ═══════════ TIM CURVED FAN ═══════════ */
 .tim-section {
   padding: clamp(60px, 8vw, 100px) 0 clamp(80px, 10vw, 120px);
-  background: linear-gradient(180deg, transparent 0%, rgba(255,107,0,0.02) 50%, transparent 100%);
+  background:
+    linear-gradient(180deg, transparent 0%, rgba(255,107,0,0.03) 50%, transparent 100%);
   position: relative;
   overflow: hidden;
+  z-index: 2;
 }
 
 .tim-section::before {
@@ -1027,7 +1108,7 @@ a { color: inherit; text-decoration: none; }
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(50vw 30vw at 20% 30%, rgba(255,107,0,0.05), transparent 60%),
+    radial-gradient(50vw 30vw at 20% 30%, rgba(255,107,0,0.06), transparent 60%),
     radial-gradient(45vw 35vw at 85% 70%, rgba(255,140,56,0.04), transparent 60%);
   pointer-events: none;
 }
@@ -1044,38 +1125,53 @@ a { color: inherit; text-decoration: none; }
 .tim-kicker {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-size: clamp(12px, 1.4vw, 14px);
-  font-weight: 700;
+  gap: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: clamp(11px, 1.4vw, 13px);
+  font-weight: 500;
   color: var(--orange);
   margin-bottom: 18px;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  border: 1px solid rgba(255,107,0,0.25);
+  border-radius: 999px;
+  background: rgba(255,107,0,0.04);
+}
+
+.tim-kicker::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--orange);
+  box-shadow: 0 0 8px var(--orange);
 }
 
 .tim-head h2 {
   font-family: 'Fraunces', Georgia, serif;
-  font-size: clamp(30px, 5.5vw, 52px);
-  font-weight: 700;
-  line-height: 1.1;
+  font-size: clamp(30px, 5.5vw, 56px);
+  font-weight: 500;
+  line-height: 1.05;
   margin-bottom: 18px;
   color: var(--text);
 }
 
-.tim-head h2 em { font-style: italic; color: var(--orange); }
+.tim-head h2 em { font-style: italic; color: var(--orange); font-weight: 500; }
 
 .tim-head p {
-  font-size: clamp(14px, 1.6vw, 16px);
+  font-size: clamp(14px, 1.7vw, 17px);
   color: var(--muted);
-  line-height: 1.6;
-  max-width: 520px;
-  margin: 0 auto 26px;
+  line-height: 1.7;
+  max-width: 540px;
+  margin: 0 auto 30px;
 }
 
 .tim-cta-btn {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 26px;
+  padding: 13px 28px;
   background: #fff;
   color: var(--ink);
   border-radius: 999px;
@@ -1091,6 +1187,8 @@ a { color: inherit; text-decoration: none; }
 .tim-cta-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 28px rgba(255,107,0,0.35);
+  background: var(--orange);
+  color: #fff;
 }
 
 .tim-cta-btn .arrow-round {
@@ -1102,7 +1200,10 @@ a { color: inherit; text-decoration: none; }
   display: grid;
   place-items: center;
   font-size: 12px;
+  transition: all 0.25s;
 }
+
+.tim-cta-btn:hover .arrow-round { background: #fff; color: var(--orange); }
 
 .tim-stage {
   position: relative;
@@ -1188,6 +1289,8 @@ a { color: inherit; text-decoration: none; }
   background: rgba(20,20,31,0.5);
   border-top: 1px solid var(--line2);
   border-bottom: 1px solid var(--line2);
+  position: relative;
+  z-index: 2;
 }
 
 .about-inner {
@@ -1204,13 +1307,25 @@ a { color: inherit; text-decoration: none; }
   overflow: hidden;
   aspect-ratio: 5/5.6;
   box-shadow: 0 40px 80px -24px rgba(0,0,0,0.7);
+  position: relative;
+}
+
+.about-media .am-main::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 60%, rgba(255,107,0,0.15));
+  z-index: 2;
 }
 
 .about-media .am-main img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 1.2s cubic-bezier(0.16,1,0.3,1);
 }
+
+.about-media:hover .am-main img { transform: scale(1.05); }
 
 .about-media .am-float {
   position: absolute;
@@ -1221,18 +1336,27 @@ a { color: inherit; text-decoration: none; }
   overflow: hidden;
   border: 4px solid var(--ink2);
   box-shadow: 0 24px 50px -14px rgba(0,0,0,0.75);
+  transform: rotate(4deg);
+  transition: transform 0.5s cubic-bezier(0.16,1,0.3,1);
 }
 
+.about-media:hover .am-float { transform: rotate(0deg); }
+
+.about-media .am-float img { width: 100%; display: block; }
+
 .about h2 {
-  font-size: clamp(26px, 4vw, 50px);
+  font-size: clamp(28px, 4.5vw, 52px);
   margin-bottom: 20px;
 }
+
+.about h2 em { font-style: italic; color: var(--orange); }
 
 .about > .about-inner p.lead {
   color: var(--muted);
   font-size: clamp(15px, 1.7vw, 17px);
   margin-bottom: clamp(28px, 4vw, 36px);
   max-width: 48ch;
+  line-height: 1.7;
 }
 
 .about-list {
@@ -1242,7 +1366,13 @@ a { color: inherit; text-decoration: none; }
   margin-bottom: clamp(30px, 4vw, 40px);
 }
 
-.about-item { display: flex; gap: 16px; }
+.about-item {
+  display: flex;
+  gap: 16px;
+  transition: transform 0.3s;
+}
+
+.about-item:hover { transform: translateX(6px); }
 
 .about-item .ai-ic {
   width: 48px;
@@ -1254,18 +1384,28 @@ a { color: inherit; text-decoration: none; }
   display: grid;
   place-items: center;
   font-size: 22px;
+  border: 1px solid rgba(255,107,0,0.2);
+  transition: all 0.3s;
+}
+
+.about-item:hover .ai-ic {
+  background: var(--orange);
+  color: #fff;
+  border-color: var(--orange);
+  box-shadow: 0 8px 20px rgba(255,107,0,0.4);
 }
 
 .about-item h4 {
   font-family: 'Manrope', sans-serif;
   font-weight: 700;
-  font-size: clamp(15px, 1.8vw, 16.5px);
-  margin-bottom: 5px;
+  font-size: clamp(15px, 1.8vw, 17px);
+  margin-bottom: 6px;
 }
 
 .about-item p {
   font-size: clamp(13px, 1.6vw, 14.5px);
   color: var(--muted);
+  line-height: 1.65;
 }
 
 @media (max-width: 900px) {
@@ -1274,7 +1414,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ═══════════ STATS ═══════════ */
-.stats { padding: var(--space) 0; }
+.stats { padding: var(--space) 0; position: relative; z-index: 2; }
 
 .stats-grid {
   display: grid;
@@ -1285,7 +1425,24 @@ a { color: inherit; text-decoration: none; }
 .stat {
   padding: clamp(24px, 3.5vw, 34px) 0;
   border-top: 2px solid var(--orange);
+  position: relative;
+  transition: transform 0.3s;
 }
+
+.stat::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--orange-light);
+  box-shadow: 0 0 10px var(--orange);
+  transition: width 0.6s cubic-bezier(0.16,1,0.3,1);
+}
+
+.stat:hover::before { width: 100%; }
+.stat:hover { transform: translateY(-4px); }
 
 .stat .s-num {
   font-family: 'Fraunces', serif;
@@ -1312,6 +1469,8 @@ a { color: inherit; text-decoration: none; }
   padding: var(--space) 0;
   background: rgba(20,20,31,0.5);
   border-top: 1px solid var(--line2);
+  position: relative;
+  z-index: 2;
 }
 
 .cabang-list { border-top: 1px solid var(--line); }
@@ -1324,23 +1483,38 @@ a { color: inherit; text-decoration: none; }
   padding: clamp(20px, 3vw, 30px) 8px;
   border-bottom: 1px solid var(--line2);
   transition: all 0.3s;
+  position: relative;
 }
 
-.cabang-row:hover {
-  background: rgba(255,107,0,0.05);
-  padding-left: 22px;
+.cabang-row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  background: linear-gradient(90deg, rgba(255,107,0,0.08), transparent);
+  transition: width 0.4s cubic-bezier(0.16,1,0.3,1);
+  pointer-events: none;
 }
+
+.cabang-row:hover { padding-left: 22px; }
+.cabang-row:hover::before { width: 100%; }
 
 .cabang-row .cr-id {
   font-family: 'Fraunces', serif;
-  font-size: clamp(20px, 2.6vw, 26px);
+  font-size: clamp(20px, 2.6vw, 28px);
   color: var(--orange);
   font-weight: 600;
+  position: relative;
+  z-index: 1;
 }
 
 .cabang-row .cr-store {
   font-family: 'Fraunces', serif;
-  font-size: clamp(16px, 2.2vw, 21px);
+  font-size: clamp(16px, 2.2vw, 22px);
+  position: relative;
+  z-index: 1;
 }
 
 .cabang-row .cr-pic {
@@ -1349,6 +1523,8 @@ a { color: inherit; text-decoration: none; }
   gap: 10px;
   color: var(--muted);
   font-size: clamp(13px, 1.6vw, 15px);
+  position: relative;
+  z-index: 1;
 }
 
 .cabang-row .cr-pic .cr-av {
@@ -1362,11 +1538,12 @@ a { color: inherit; text-decoration: none; }
   font-weight: 700;
   font-size: 15px;
   flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(255,107,0,0.3);
 }
 
 .cabang-row .cr-go {
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: 1px solid var(--line);
   display: grid;
@@ -1374,6 +1551,8 @@ a { color: inherit; text-decoration: none; }
   color: var(--muted);
   transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
   flex-shrink: 0;
+  position: relative;
+  z-index: 1;
 }
 
 .cabang-row:hover .cr-go {
@@ -1381,6 +1560,7 @@ a { color: inherit; text-decoration: none; }
   border-color: var(--orange);
   color: #fff;
   transform: rotate(-45deg);
+  box-shadow: 0 8px 20px rgba(255,107,0,0.4);
 }
 
 @media (max-width: 600px) {
@@ -1389,13 +1569,13 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ═══════════ CTA ═══════════ */
-.cta { padding: var(--space) 0; }
+.cta { padding: var(--space) 0; position: relative; z-index: 2; }
 
 .cta-box {
   position: relative;
   border-radius: clamp(20px, 3vw, 30px);
   overflow: hidden;
-  padding: clamp(36px, 6vw, 96px) clamp(24px, 4vw, 60px);
+  padding: clamp(40px, 6vw, 96px) clamp(24px, 4vw, 60px);
   text-align: center;
 }
 
@@ -1406,7 +1586,10 @@ a { color: inherit; text-decoration: none; }
   height: 100%;
   object-fit: cover;
   z-index: 0;
+  transition: transform 20s linear;
 }
+
+.cta-box:hover img { transform: scale(1.08); }
 
 .cta-box::after {
   content: '';
@@ -1418,29 +1601,57 @@ a { color: inherit; text-decoration: none; }
 
 .cta-box > * { position: relative; z-index: 2; }
 
+.cta-box .cta-eyebrow {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: rgba(255,255,255,0.85);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 999px;
+  margin-bottom: 20px;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
 .cta-box h2 {
-  font-size: clamp(26px, 5vw, 62px);
+  font-size: clamp(28px, 5vw, 60px);
   color: #fff;
   margin-bottom: clamp(14px, 2.5vw, 20px);
+  line-height: 1.1;
+}
+
+.cta-box h2 em {
+  font-style: italic;
+  color: #fff;
+  position: relative;
+  display: inline-block;
 }
 
 .cta-box p {
   color: rgba(255,255,255,0.92);
   font-size: clamp(15px, 2vw, 18px);
-  max-width: 52ch;
+  max-width: 56ch;
   margin: 0 auto clamp(28px, 4vw, 38px);
+  line-height: 1.7;
 }
 
 .cta-box .btn-solid {
   background: #fff;
   color: var(--orange-deep);
-  padding: 14px 28px;
+  padding: 15px 32px;
   font-size: 15px;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.25);
 }
 
 .cta-box .btn-solid:hover {
   background: var(--ink);
   color: #fff;
+  transform: translateY(-3px);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.4);
 }
 
 /* ═══════════ FOOTER ═══════════ */
@@ -1448,6 +1659,10 @@ a { color: inherit; text-decoration: none; }
   padding: clamp(48px, 8vw, 72px) 0 34px;
   padding-bottom: calc(34px + var(--safe-bottom));
   border-top: 1px solid var(--line2);
+  position: relative;
+  z-index: 2;
+  background:
+    linear-gradient(180deg, transparent 0%, rgba(255,107,0,0.02) 100%);
 }
 
 .footer-top {
@@ -1462,15 +1677,17 @@ a { color: inherit; text-decoration: none; }
   font-size: 14.5px;
   max-width: 34ch;
   margin-top: 18px;
+  line-height: 1.7;
 }
 
 .footer-col h5 {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--text);
-  margin-bottom: 16px;
+  color: var(--orange);
+  margin-bottom: 20px;
 }
 
 .footer-col a {
@@ -1478,11 +1695,14 @@ a { color: inherit; text-decoration: none; }
   color: var(--muted);
   font-size: 14.5px;
   margin-bottom: 12px;
-  transition: color 0.2s;
+  transition: color 0.2s, transform 0.2s;
   padding: 4px 0;
 }
 
-.footer-col a:hover { color: var(--orange); }
+.footer-col a:hover {
+  color: var(--orange);
+  transform: translateX(4px);
+}
 
 .footer-bottom {
   display: flex;
@@ -1508,7 +1728,11 @@ a { color: inherit; text-decoration: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  * { animation: none !important; transition: none !important; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+  .cursor-glow, .bg-particles { display: none; }
 }
 </style>
 </head>
@@ -1516,6 +1740,12 @@ a { color: inherit; text-decoration: none; }
 
 <!-- SCROLL PROGRESS -->
 <div class="scroll-progress" id="scrollProgress"></div>
+
+<!-- CURSOR GLOW GLOBAL (mengikuti mouse sampai bawah halaman) -->
+<div class="cursor-glow hide" id="cursorGlow"></div>
+
+<!-- BACKGROUND PARTICLES GLOBAL (mengalir sampai bawah) -->
+<div class="bg-particles"><canvas id="bgCanvas"></canvas></div>
 
 <!-- DRAWER OVERLAY -->
 <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
@@ -1525,7 +1755,7 @@ a { color: inherit; text-decoration: none; }
   <button class="close-drawer" onclick="closeDrawer()" aria-label="Tutup menu">✕</button>
   <a href="#cara" onclick="closeDrawer()">🔧 Cara Kerja</a>
   <a href="#katalog" onclick="closeDrawer()">📚 Katalog</a>
-  <a href="#tim" onclick="closeDrawer()">👥 Tim</a>
+  <a href="#tim" onclick="closeDrawer()">👥 Tim Kami</a>
   <a href="#tentang" onclick="closeDrawer()">ℹ️ Tentang</a>
   <a href="#cabang" onclick="closeDrawer()">🏬 Cabang</a>
   <a href="login.html" style="background: var(--orange); color: #fff; margin-top: 16px; justify-content: center;">Masuk →</a>
@@ -1558,53 +1788,52 @@ a { color: inherit; text-decoration: none; }
 
 <!-- ═══════════ HERO CINEMATIC ═══════════ -->
 <section class="hero-cinema" id="top">
-  <div class="hc-canvas-wrap"><canvas class="hc-canvas" id="hcCanvas"></canvas></div>
-  <div class="hc-spotlight" id="hcSpotlight"></div>
+  <div class="hc-spotlight"></div>
   <div class="hc-vignette"></div>
 
   <div class="hc-inner">
     <div class="hc-top">
       <div class="hc-brand-tag">
-        <span class="brand-code">(GUDANG_HUB)</span>
-        <span class="brand-count">[ 004x ]</span>
+        <span class="brand-code">(GUDANG_HUB / v2.6)</span>
+        <span class="brand-count">[ NTT · 004x CABANG ]</span>
       </div>
       <nav class="hc-nav-mini">
         <a href="#cara">→ cara kerja</a>
         <a href="#katalog">→ katalog</a>
-        <a href="#tim">→ tim</a>
+        <a href="#tim">→ tim kami</a>
         <a href="#cabang">→ cabang</a>
       </nav>
     </div>
 
     <div class="hc-main">
       <div class="hc-headline">
+        <span class="hc-eyebrow">● Sistem Kolaborasi Cabang</span>
         <h1>
-          <span class="line"><span class="word">DIMANA</span></span>
-          <span class="line"><span class="word">ORDER <em>ANTAR</em></span></span>
-          <span class="line"><span class="word"><span class="double-slash">//</span> CABANG</span></span>
+          <span class="line"><span class="word">Satu Jaringan,</span></span>
+          <span class="line"><span class="word"><em>Ribuan</em> Kemungkinan.</span></span>
         </h1>
       </div>
 
       <aside class="hc-side">
         <span class="hc-badge">
           <span class="hc-badge-dot"></span>
-          <span class="hc-badge-num">( A )</span>
-          <span>SISTEM AKTIF</span>
+          <span class="hc-badge-num">( LIVE )</span>
+          <span>Real-time Sync</span>
         </span>
         <div>
-          <div class="hc-desc-label">// Deskripsi</div>
-          <p class="hc-desc">Satu sistem menghubungkan empat toko cabang ke gudang pusat PT Central Perabot Utama. Cabang tinggal pilih, admin tinggal proses. Semua tercatat real-time.</p>
+          <div class="hc-desc-label">// Tentang GudangHub</div>
+          <p class="hc-desc">Platform terpadu yang menghubungkan empat cabang toko dengan gudang pusat PT Central Perabot Utama. Setiap order tercatat, setiap stok terpantau, setiap keputusan berdampak nyata.</p>
         </div>
         <div class="hc-actions">
-          <a href="login.html" class="hc-btn hc-btn-primary">Mulai Order <span class="hc-btn-icon">→</span></a>
-          <a href="#cara" class="hc-btn hc-btn-ghost">Lihat Cara Kerja</a>
+          <a href="login.html" class="hc-btn hc-btn-primary">Mulai Kelola <span class="hc-btn-icon">→</span></a>
+          <a href="#cara" class="hc-btn hc-btn-ghost">Pelajari Sistem</a>
         </div>
       </aside>
     </div>
 
     <div class="hc-bottom">
       <div class="hc-scroll-hint">
-        <span>SCROLL</span>
+        <span>Gulir ke bawah</span>
         <div class="hc-scroll-line"></div>
       </div>
       <div class="hc-mini-stats">
@@ -1653,7 +1882,7 @@ a { color: inherit; text-decoration: none; }
     <span class="mc-item"><span class="mc-icon-wrap"><svg viewBox="0 0 24 24"><path d="M8 21h8l1-9H7l1 9zM7 12h10M12 9c-2 0-2-4 0-4s2 4 0 4M10 9c-2-1-3-3-2-4M14 9c2-1 3-3 2-4"/></svg></span> Dekorasi</span>
     <span class="mc-dot"></span>
 
-    <!-- SET 2 (duplikat) -->
+    <!-- SET 2 -->
     <span class="mc-item"><span class="mc-icon-wrap"><svg viewBox="0 0 24 24"><path d="M6 20v-4M18 20v-4M6 16h12M7 16v-5c0-2 1.5-3 5-3s5 1 5 3v5M9 8V5c0-1.5 1-2.5 3-2.5s3 1 3 2.5v3"/></svg></span> Kursi</span>
     <span class="mc-dot"></span>
     <span class="mc-item"><span class="mc-icon-wrap"><svg viewBox="0 0 24 24"><path d="M3 18v-4c0-1 1-2 2-2h14c1 0 2 1 2 2v4M3 18h18M3 18v2M21 18v2M5 12V8c0-1 1-2 2-2h4c1 0 2 1 2 2v4"/></svg></span> Kasur</span>
@@ -1684,33 +1913,34 @@ a { color: inherit; text-decoration: none; }
 <!-- ═══════════ CARA KERJA ═══════════ -->
 <section class="steps wrap" id="cara">
   <div class="section-head reveal">
-    <span class="section-kicker">Alur Sistem</span>
-    <h2>Dari pilih barang sampai barang jalan, empat langkah.</h2>
+    <span class="section-kicker">Alur Operasional</span>
+    <h2>Empat langkah, satu <em>alur mulus</em>.</h2>
+    <p>Setiap proses dirancang untuk memangkas waktu dan menghilangkan kebingungan — dari toko cabang hingga rak gudang pusat.</p>
   </div>
   <div class="steps-grid">
     <div class="step reveal" data-d="1">
-      <div class="step-n">01</div>
+      <div class="step-n">/ 01</div>
       <div class="step-ic">🔍</div>
       <h3>Telusuri Katalog</h3>
-      <p>Cabang buka katalog barang lengkap dengan kode, harga, dan stok terkini.</p>
+      <p>Cabang menjelajah katalog lengkap dengan kode, harga, dan stok real-time. Semua transparan.</p>
     </div>
     <div class="step reveal" data-d="2">
-      <div class="step-n">02</div>
+      <div class="step-n">/ 02</div>
       <div class="step-ic">🛒</div>
       <h3>Susun Order</h3>
-      <p>Tambah ke keranjang satu per satu, atau tempel banyak kode sekaligus lewat order massal.</p>
+      <p>Tambahkan barang satu per satu atau kirim massal — copy-paste dari Excel pun jalan.</p>
     </div>
     <div class="step reveal" data-d="3">
-      <div class="step-n">03</div>
+      <div class="step-n">/ 03</div>
       <div class="step-ic">📋</div>
-      <h3>Admin Proses</h3>
-      <p>Gudang pusat menyetujui atau menolak dari dashboard. Status langsung berubah.</p>
+      <h3>Admin Verifikasi</h3>
+      <p>Gudang pusat meninjau, menyesuaikan, atau menolak dari dashboard. Semua ada jejaknya.</p>
     </div>
     <div class="step reveal" data-d="3">
-      <div class="step-n">04</div>
+      <div class="step-n">/ 04</div>
       <div class="step-ic">🚚</div>
-      <h3>Barang Dikirim</h3>
-      <p>Order approved masuk antrean kirim. Cabang dapat notifikasi email otomatis.</p>
+      <h3>Barang Meluncur</h3>
+      <p>Order approved masuk antrean pengiriman. Cabang dapat notifikasi email otomatis.</p>
     </div>
   </div>
 </section>
@@ -1720,42 +1950,43 @@ a { color: inherit; text-decoration: none; }
   <div class="showcase-head">
     <div class="section-head reveal" style="margin-bottom:0">
       <span class="section-kicker">Katalog Furnitur</span>
-      <h2>Sembilan kategori, satu gudang.</h2>
+      <h2>Sembilan kategori, <em>satu gudang</em>.</h2>
+      <p>Dari sofa keluarga hingga peralatan dapur profesional — semua tersedia dalam satu sistem.</p>
     </div>
     <a href="login.html" class="btn btn-outline reveal" data-d="1">Buka Katalog →</a>
   </div>
   <div class="gallery">
-    <div class="tile t-big reveal">
+    <div class="tile t-big reveal-scale">
       <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=900&q=80" alt="Ruang tamu">
-      <div class="tile-label"><div class="tl-k">Set Ruang Tamu</div><div class="tl-n">Sofa & Kursi</div></div>
+      <div class="tile-label"><div class="tl-k">/ Set Ruang Tamu</div><div class="tl-n">Sofa & Kursi</div></div>
     </div>
-    <div class="tile t-tall reveal" data-d="1">
+    <div class="tile t-tall reveal-scale" data-d="1">
       <img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=700&q=80" alt="Sofa">
-      <div class="tile-label"><div class="tl-k">Populer</div><div class="tl-n">Sofa</div></div>
+      <div class="tile-label"><div class="tl-k">/ Populer</div><div class="tl-n">Sofa</div></div>
     </div>
-    <div class="tile tile-solid accent reveal" data-d="2">
+    <div class="tile tile-solid accent reveal-scale" data-d="2">
       <span>🍽️</span>
-      <div class="tile-label" style="position:static"><div class="tl-k">Kategori</div><div class="tl-n">Meja</div></div>
+      <div class="tile-label" style="position:static"><div class="tl-k">/ Kategori</div><div class="tl-n">Meja</div></div>
     </div>
-    <div class="tile tile-solid reveal" data-d="1">
+    <div class="tile tile-solid reveal-scale" data-d="1">
       <span>🗄️</span>
-      <div class="tile-label" style="position:static"><div class="tl-k">Kategori</div><div class="tl-n">Lemari</div></div>
+      <div class="tile-label" style="position:static"><div class="tl-k">/ Kategori</div><div class="tl-n">Lemari</div></div>
     </div>
-    <div class="tile t-sq reveal" data-d="2">
+    <div class="tile t-sq reveal-scale" data-d="2">
       <img src="https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=700&q=80" alt="Kursi">
-      <div class="tile-label"><div class="tl-k">Kategori</div><div class="tl-n">Kursi</div></div>
+      <div class="tile-label"><div class="tl-k">/ Kategori</div><div class="tl-n">Kursi</div></div>
     </div>
-    <div class="tile tile-solid reveal" data-d="1">
+    <div class="tile tile-solid reveal-scale" data-d="1">
       <span>🛏️</span>
-      <div class="tile-label" style="position:static"><div class="tl-k">Kategori</div><div class="tl-n">Kasur</div></div>
+      <div class="tile-label" style="position:static"><div class="tl-k">/ Kategori</div><div class="tl-n">Kasur</div></div>
     </div>
-    <div class="tile tile-solid reveal" data-d="2">
+    <div class="tile tile-solid reveal-scale" data-d="2">
       <span>📚</span>
-      <div class="tile-label" style="position:static"><div class="tl-k">Kategori</div><div class="tl-n">Rak & Bufet</div></div>
+      <div class="tile-label" style="position:static"><div class="tl-k">/ Kategori</div><div class="tl-n">Rak & Bufet</div></div>
     </div>
-    <div class="tile t-wide reveal" data-d="1">
+    <div class="tile t-wide reveal-scale" data-d="1">
       <img src="https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?w=900&q=80" alt="Showroom">
-      <div class="tile-label"><div class="tl-k">Dapur & Dekorasi</div><div class="tl-n">Pelengkap Rumah</div></div>
+      <div class="tile-label"><div class="tl-k">/ Dapur & Dekorasi</div><div class="tl-n">Pelengkap Rumah</div></div>
     </div>
   </div>
 </section>
@@ -1764,10 +1995,10 @@ a { color: inherit; text-decoration: none; }
 <section class="tim-section" id="tim">
   <div class="wrap">
     <div class="tim-head reveal">
-      <div class="tim-kicker">Behind the Scenes</div>
-      <h2>Tim di Balik <em>GudangHub</em></h2>
-      <p>Orang-orang hebat yang menjaga stok tetap jalan dan pesanan tiap cabang selalu tepat waktu.</p>
-      <a href="#cabang" class="tim-cta-btn">Lihat Cabang Kami <span class="arrow-round">→</span></a>
+      <div class="tim-kicker">Wajah di Balik Layar</div>
+      <h2>Tim yang menjaga <em>setiap detil</em>.</h2>
+      <p>Bukan sekadar sistem. Di balik setiap order yang lancar, ada orang-orang yang berdedikasi memastikan semuanya berjalan mulus.</p>
+      <a href="#cabang" class="tim-cta-btn">Kunjungi Cabang <span class="arrow-round">→</span></a>
     </div>
   </div>
 
@@ -1795,21 +2026,21 @@ a { color: inherit; text-decoration: none; }
       </div>
     </div>
     <div class="about-copy">
-      <span class="section-kicker reveal">Gudang Terpusat</span>
-      <h2 class="reveal" data-d="1">Semua cabang, satu sumber kebenaran.</h2>
-      <p class="lead reveal" data-d="1">GudangHub menyatukan permintaan dari seluruh toko cabang ke gudang pusat PT Central Perabot Utama. Tidak ada lagi order lewat chat yang tercecer.</p>
+      <span class="section-kicker reveal">Filosofi Kami</span>
+      <h2 class="reveal" data-d="1">Satu sumber, <em>banyak dampak</em>.</h2>
+      <p class="lead reveal" data-d="1">GudangHub bukan hanya alat — ia adalah cara baru berkolaborasi. Menghilangkan pesan yang tercecer, mempercepat keputusan, dan membuat setiap orang di garis depan bekerja dengan data yang sama.</p>
       <div class="about-list">
         <div class="about-item reveal" data-d="1">
           <span class="ai-ic">🔄</span>
-          <div><h4>Order tercatat rapi</h4><p>Setiap permintaan punya ID order unik, lengkap dengan detail barang dan catatan cabang.</p></div>
+          <div><h4>Terdokumentasi Sempurna</h4><p>Setiap permintaan memiliki jejak audit — dari siapa, kapan, dan alasannya.</p></div>
         </div>
         <div class="about-item reveal" data-d="2">
           <span class="ai-ic">⚡</span>
-          <div><h4>Proses sekali klik</h4><p>Admin menyetujui atau menolak dari dashboard. Pending, approved, rejected langsung sinkron.</p></div>
+          <div><h4>Keputusan dalam Sekejap</h4><p>Admin approve, edit, atau tolak dari mana saja. Perubahan tersinkron instan.</p></div>
         </div>
         <div class="about-item reveal" data-d="3">
           <span class="ai-ic">📊</span>
-          <div><h4>Laporan per cabang</h4><p>Pantau total order, approval rate, dan aktivitas tiap toko dalam satu layar.</p></div>
+          <div><h4>Wawasan Berbasis Data</h4><p>Laporan cabang, rate persetujuan, dan pola order — semua dalam satu layar.</p></div>
         </div>
       </div>
       <a href="login.html" class="btn btn-solid reveal" data-d="1">Masuk ke Dashboard →</a>
@@ -1820,13 +2051,14 @@ a { color: inherit; text-decoration: none; }
 <!-- ═══════════ STATS ═══════════ -->
 <section class="stats wrap">
   <div class="section-head reveal">
-    <span class="section-kicker">Dalam Angka</span>
-    <h2>Skala operasi GudangHub.</h2>
+    <span class="section-kicker">Skala Operasi</span>
+    <h2>Angka yang <em>berbicara</em>.</h2>
+    <p>Jaringan yang tumbuh, kepercayaan yang terjaga, dan sistem yang tidak pernah tidur.</p>
   </div>
   <div class="stats-grid">
     <div class="stat reveal">
       <div class="s-num" data-count="4">0</div>
-      <div class="s-lbl">Toko cabang di NTT</div>
+      <div class="s-lbl">Cabang aktif di NTT</div>
     </div>
     <div class="stat reveal" data-d="1">
       <div class="s-num" data-count="9">0</div>
@@ -1838,7 +2070,7 @@ a { color: inherit; text-decoration: none; }
     </div>
     <div class="stat reveal" data-d="3">
       <div class="s-num" data-count="24"><span class="val">0</span><span class="suf">/7</span></div>
-      <div class="s-lbl">Order kapan saja</div>
+      <div class="s-lbl">Sistem selalu siap</div>
     </div>
   </div>
 </section>
@@ -1848,7 +2080,8 @@ a { color: inherit; text-decoration: none; }
   <div class="wrap">
     <div class="section-head reveal">
       <span class="section-kicker">Jaringan Toko</span>
-      <h2>Empat cabang, terhubung penuh.</h2>
+      <h2>Empat cabang, <em>satu keluarga</em>.</h2>
+      <p>Terhubung penuh dengan sistem yang sama, tapi tetap mempertahankan karakter dan pelanggan setianya masing-masing.</p>
     </div>
     <div class="cabang-list">
       <div class="cabang-row reveal">
@@ -1883,8 +2116,9 @@ a { color: inherit; text-decoration: none; }
 <section class="cta wrap">
   <div class="cta-box reveal">
     <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200&q=80" alt="">
-    <h2>Siap mengelola order hari ini?</h2>
-    <p>Masuk dengan akun cabang atau admin gudang, lalu mulai kirim dan proses order barang.</p>
+    <span class="cta-eyebrow">● Siap mulai hari ini</span>
+    <h2>Waktunya berhenti <em>menebak-nebak</em>.</h2>
+    <p>Login sekali, kendalikan seluruh alur order antar cabang. Sederhana untuk cabang, powerful untuk admin.</p>
     <a href="login.html" class="btn btn-solid">Masuk ke GudangHub →</a>
   </div>
 </section>
@@ -1900,23 +2134,23 @@ a { color: inherit; text-decoration: none; }
           </span>
           <span class="brand-name">Gudang<em>Hub</em></span>
         </a>
-        <p>Sistem order barang antar cabang untuk PT Central Perabot Utama, Nusa Tenggara Timur.</p>
+        <p>Platform kolaborasi cabang-gudang untuk PT Central Perabot Utama. Dibangun dari Kupang, untuk NTT.</p>
       </div>
       <div class="footer-col">
-        <h5>Jelajah</h5>
+        <h5>/ Jelajahi</h5>
         <a href="#cara">Cara Kerja</a>
         <a href="#katalog">Katalog</a>
-        <a href="#tim">Tim</a>
+        <a href="#tim">Tim Kami</a>
         <a href="#cabang">Cabang</a>
       </div>
       <div class="footer-col">
-        <h5>Sistem</h5>
+        <h5>/ Sistem</h5>
         <a href="login.html">Masuk Cabang</a>
         <a href="login.html">Masuk Admin</a>
         <a href="login.html">Dashboard</a>
       </div>
       <div class="footer-col">
-        <h5>Kontak</h5>
+        <h5>/ Terhubung</h5>
         <a href="#">Gudang Pusat NTT</a>
         <a href="tel:+6281234567890">+62 812 3456 7890</a>
         <a href="mailto:order@gudanghub.id">order@gudanghub.id</a>
@@ -1924,7 +2158,7 @@ a { color: inherit; text-decoration: none; }
     </div>
     <div class="footer-bottom">
       <span><b>GudangHub v2.6</b> · PT Central Perabot Utama · Waktu WITA</span>
-      <span>© 2026 GudangHub. Semua hak dilindungi.</span>
+      <span>© 2026 GudangHub. Dibangun dengan hati.</span>
     </div>
   </div>
 </footer>
@@ -1945,26 +2179,52 @@ function closeDrawer() {
   document.body.style.overflow = '';
 }
 
-// ═══════════ NAV SCROLL EFFECT ═══════════
+// ═══════════ CURSOR GLOW GLOBAL (mengikuti mouse di seluruh halaman) ═══════════
+const cursorGlow = document.getElementById('cursorGlow');
+let cursorX = 0, cursorY = 0;
+let targetX = 0, targetY = 0;
+let glowVisible = false;
+
+if (cursorGlow && window.matchMedia('(hover: hover)').matches) {
+  document.addEventListener('mousemove', (e) => {
+    targetX = e.clientX;
+    targetY = e.clientY;
+    if (!glowVisible) {
+      cursorGlow.classList.remove('hide');
+      glowVisible = true;
+    }
+  }, { passive: true });
+
+  document.addEventListener('mouseleave', () => {
+    cursorGlow.classList.add('hide');
+    glowVisible = false;
+  });
+
+  // Smooth follow
+  function updateGlow() {
+    cursorX += (targetX - cursorX) * 0.15;
+    cursorY += (targetY - cursorY) * 0.15;
+    cursorGlow.style.transform = `translate(${cursorX}px, ${cursorY}px) translate(-50%, -50%)`;
+    requestAnimationFrame(updateGlow);
+  }
+  updateGlow();
+}
+
+// ═══════════ NAV SCROLL + PROGRESS + PARALLAX ═══════════
 const nav = document.getElementById('nav');
 const progress = document.getElementById('scrollProgress');
 const hero = document.getElementById('top');
-
 let ticking = false;
 
 function onScroll() {
   const scrollY = window.scrollY;
   const winH = window.innerHeight;
   const docH = document.documentElement.scrollHeight - winH;
-  const progressPercent = docH > 0 ? (scrollY / docH) * 100 : 0;
+  const percent = docH > 0 ? (scrollY / docH) * 100 : 0;
 
-  // Progress bar
-  if (progress) progress.style.width = progressPercent + '%';
-
-  // Nav scrolled
+  if (progress) progress.style.width = percent + '%';
   nav.classList.toggle('scrolled', scrollY > 20);
 
-  // Hero parallax
   if (scrollY < winH && hero) {
     hero.style.setProperty('--scroll-y', `-${scrollY * 0.15}px`);
   }
@@ -1978,7 +2238,6 @@ window.addEventListener('scroll', () => {
     ticking = true;
   }
 }, { passive: true });
-
 onScroll();
 
 // ═══════════ REVEAL ON SCROLL ═══════════
@@ -1991,7 +2250,7 @@ const io = new IntersectionObserver((entries) => {
   });
 }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
 
-document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+document.querySelectorAll('.reveal, .reveal-scale').forEach(el => io.observe(el));
 
 // ═══════════ COUNTER ANIMATION ═══════════
 const easeOut = t => 1 - Math.pow(1 - t, 3);
@@ -2000,7 +2259,7 @@ function runCounter(el, attr = 'count', suffixAttr = 'suffix') {
   const target = parseFloat(el.dataset[attr]);
   const suffix = el.dataset[suffixAttr] || '';
   const valSpan = el.querySelector('.val');
-  const dur = 1600;
+  const dur = 1800;
   const start = performance.now();
 
   function tick(now) {
@@ -2029,9 +2288,9 @@ document.querySelectorAll('[data-count], [data-hc-count]').forEach(el => {
   setTimeout(() => cio.observe(el), 500);
 });
 
-// ═══════════ HERO PARTICLE CANVAS ═══════════
+// ═══════════ BACKGROUND PARTICLES CANVAS (mengalir sampai bawah) ═══════════
 (function() {
-  const canvas = document.getElementById('hcCanvas');
+  const canvas = document.getElementById('bgCanvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
   let particles = [];
@@ -2040,10 +2299,12 @@ document.querySelectorAll('[data-count], [data-hc-count]').forEach(el => {
 
   function resize() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    W = canvas.offsetWidth;
-    H = canvas.offsetHeight;
+    W = window.innerWidth;
+    H = window.innerHeight;
     canvas.width = W * dpr;
     canvas.height = H * dpr;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.scale(dpr, dpr);
     initParticles();
@@ -2052,75 +2313,67 @@ document.querySelectorAll('[data-count], [data-hc-count]').forEach(el => {
   function initParticles() {
     particles = [];
     const isMobile = W < 640;
-    const count = isMobile ? 40 : 80;
+    const count = isMobile ? 30 : 60;
     for (let i = 0; i < count; i++) {
       particles.push({
         x: Math.random() * W,
         y: Math.random() * H,
-        vx: (Math.random() - 0.5) * 0.4,
-        vy: (Math.random() - 0.5) * 0.4 - 0.2,
-        size: Math.random() * 2.5 + 0.5,
-        opacity: Math.random() * 0.6 + 0.2,
+        vx: (Math.random() - 0.5) * 0.35,
+        vy: (Math.random() - 0.5) * 0.35 - 0.15,
+        size: Math.random() * 2.2 + 0.4,
+        opacity: Math.random() * 0.5 + 0.15,
         life: Math.random() * 100
       });
     }
   }
 
-  function drawParticles() {
+  function draw() {
     ctx.clearRect(0, 0, W, H);
     for (let i = 0; i < particles.length; i++) {
       const p = particles[i];
       p.x += p.vx;
       p.y += p.vy;
-      p.life += 0.5;
+      p.life += 0.4;
       if (p.x < 0) p.x = W;
       if (p.x > W) p.x = 0;
       if (p.y < 0) p.y = H;
       if (p.y > H) p.y = 0;
 
-      const twinkle = Math.sin(p.life * 0.05) * 0.3 + 0.7;
+      const twinkle = Math.sin(p.life * 0.04) * 0.3 + 0.7;
       const alpha = p.opacity * twinkle;
 
       const dx = p.x - mouseX;
       const dy = p.y - mouseY;
       const dist = Math.sqrt(dx * dx + dy * dy);
-      const boost = Math.max(0, 1 - dist / 200);
+      const boost = Math.max(0, 1 - dist / 250);
 
-      const glowSize = p.size * (2 + boost * 4);
+      const glowSize = p.size * (2 + boost * 5);
       const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, glowSize);
-      gradient.addColorStop(0, `rgba(255, 180, 80, ${alpha * (0.8 + boost * 0.5)})`);
+      gradient.addColorStop(0, `rgba(255, 180, 80, ${alpha * (0.7 + boost * 0.6)})`);
       gradient.addColorStop(0.4, `rgba(255, 140, 56, ${alpha * 0.3})`);
       gradient.addColorStop(1, 'rgba(255, 107, 0, 0)');
-
       ctx.fillStyle = gradient;
       ctx.beginPath();
       ctx.arc(p.x, p.y, glowSize, 0, Math.PI * 2);
       ctx.fill();
 
-      ctx.fillStyle = `rgba(255, 220, 150, ${alpha * (0.9 + boost * 0.5)})`;
+      ctx.fillStyle = `rgba(255, 220, 150, ${alpha * (0.85 + boost * 0.5)})`;
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
       ctx.fill();
     }
-    requestAnimationFrame(drawParticles);
+    requestAnimationFrame(draw);
   }
 
-  const spotlight = document.getElementById('hcSpotlight');
   document.addEventListener('mousemove', (e) => {
-    const rect = canvas.getBoundingClientRect();
-    mouseX = e.clientX - rect.left;
-    mouseY = e.clientY - rect.top;
-    if (spotlight) {
-      spotlight.style.setProperty('--mx', `${(e.clientX / window.innerWidth) * 100}%`);
-      spotlight.style.setProperty('--my', `${(e.clientY / window.innerHeight) * 100}%`);
-    }
+    mouseX = e.clientX;
+    mouseY = e.clientY;
   }, { passive: true });
 
-  window.addEventListener('load', () => { resize(); drawParticles(); });
+  window.addEventListener('load', () => { resize(); draw(); });
   let rt;
   window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(resize, 200); }, { passive: true });
-
-  if (document.readyState === 'complete') { resize(); drawParticles(); }
+  if (document.readyState === 'complete') { resize(); draw(); }
 })();
 
 // ═══════════ TIM CURVED CAROUSEL ═══════════
@@ -2254,10 +2507,8 @@ document.querySelectorAll('[data-count], [data-hc-count]').forEach(el => {
   if (totalImages === 0) start();
   else {
     images.forEach(img => {
-      if (img.complete) {
-        loadedCount++;
-        if (loadedCount === totalImages) start();
-      } else {
+      if (img.complete) { loadedCount++; if (loadedCount === totalImages) start(); }
+      else {
         img.addEventListener('load', () => { if (++loadedCount === totalImages) start(); }, { once: true });
         img.addEventListener('error', () => { if (++loadedCount === totalImages) start(); }, { once: true });
       }
@@ -2266,7 +2517,6 @@ document.querySelectorAll('[data-count], [data-hc-count]').forEach(el => {
   }
 })();
 
-// ESC close drawer
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeDrawer();
 });
