@@ -158,7 +158,6 @@ img, svg { max-width: 100%; height: auto; display: block; }
 .btn-pass-top:hover { color: var(--orange); border-color: var(--orange); }
 .btn-logout-top:hover { color: var(--red); border-color: rgba(239,68,68,0.3); }
 
-/* ═══════════ PAGES ═══════════ */
 .page { display: none; }
 .page.active { display: block; }
 
@@ -206,7 +205,6 @@ img, svg { max-width: 100%; height: auto; display: block; }
 
 .search-box input::placeholder { color: var(--muted); }
 
-/* Filter chips */
 .filter-scroll {
   display: flex;
   gap: 8px;
@@ -451,8 +449,7 @@ img, svg { max-width: 100%; height: auto; display: block; }
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
-</style>
-<style>
+
 /* ═══════════ CART FLOATING BAR ═══════════ */
 .cart-bar {
   position: fixed;
@@ -579,15 +576,24 @@ img, svg { max-width: 100%; height: auto; display: block; }
   padding-right: calc(16px + var(--safe-right));
 }
 
+/* ═══════════ CART ITEM (baru dengan stok toko) ═══════════ */
 .cart-item {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
   gap: 10px;
-  padding: 12px 0;
+  padding: 14px 0;
   border-bottom: 1px solid var(--border2);
 }
 
 .cart-item:last-child { border-bottom: none; }
+
+.cart-item-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
 
 .ci-info {
   flex: 1;
@@ -620,10 +626,8 @@ img, svg { max-width: 100%; height: auto; display: block; }
   align-items: center;
   gap: 5px;
   background: var(--dark3);
-  color: var(--text);
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.15s;
+  border-radius: 8px;
+  padding: 2px;
   flex-shrink: 0;
 }
 
@@ -689,6 +693,124 @@ img, svg { max-width: 100%; height: auto; display: block; }
 }
 
 .ci-del:hover { color: var(--red); background: rgba(239,68,68,0.1); }
+
+/* ═══════════ STOK TOKO INPUT (BARU!) ═══════════ */
+.stok-toko-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--dark3);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  transition: all 0.2s;
+}
+
+.stok-toko-wrap.empty {
+  border-color: rgba(239,68,68,0.5);
+  background: rgba(239,68,68,0.05);
+  animation: stokPulse 2s ease-in-out infinite;
+}
+
+@keyframes stokPulse {
+  0%, 100% { border-color: rgba(239,68,68,0.5); }
+  50% { border-color: rgba(239,68,68,0.9); }
+}
+
+.stok-toko-label {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stok-toko-label .icon-stok { font-size: 14px; }
+
+.stok-toko-wrap.empty .stok-toko-label { color: var(--red); }
+
+.stok-toko-input {
+  flex: 1;
+  min-width: 0;
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.stok-toko-input:focus {
+  border-color: var(--orange);
+  box-shadow: 0 0 0 3px rgba(255,107,0,0.15);
+}
+
+.stok-toko-input::-webkit-outer-spin-button,
+.stok-toko-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.stok-toko-input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.stok-toko-satuan {
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.stok-toko-hint {
+  font-size: 10px;
+  color: var(--red);
+  padding: 0 4px;
+  font-weight: 600;
+  display: none;
+}
+
+/* Warning banner */
+.warning-banner {
+  display: none;
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.3);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  color: var(--red);
+  font-size: 12px;
+  font-weight: 600;
+  align-items: center;
+  gap: 8px;
+  animation: warnShake 0.4s ease;
+}
+
+.warning-banner.show { display: flex; }
+
+@keyframes warnShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+.warning-banner .warn-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
 
 .cart-empty {
   text-align: center;
@@ -770,8 +892,16 @@ img, svg { max-width: 100%; height: auto; display: block; }
 }
 
 .btn-submit:hover { transform: translateY(-2px); }
-.btn-submit:disabled { opacity: 0.6; cursor: not-allowed; pointer-events: none; }
-
+.btn-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+  filter: grayscale(50%);
+  transform: none;
+  box-shadow: none;
+}
+</style>
+<style>
 /* ═══════════ BOTTOM NAV ═══════════ */
 .bottom-nav {
   position: fixed;
@@ -1006,8 +1136,7 @@ img, svg { max-width: 100%; height: auto; display: block; }
   color: var(--yellow);
   margin-top: 2px;
 }
-</style>
-<style>
+
 /* ═══════════ TOAST ═══════════ */
 .toast-wrap {
   position: fixed;
@@ -1074,10 +1203,13 @@ img, svg { max-width: 100%; height: auto; display: block; }
   border: 1px solid var(--border);
   border-radius: 18px;
   padding: 24px;
-  max-width: 340px;
+  max-width: 400px;
   width: 100%;
   text-align: center;
   animation: cIn 0.2s cubic-bezier(0.16,1,0.3,1);
+  max-height: 85dvh;
+  max-height: 85vh;
+  overflow-y: auto;
 }
 
 @keyframes cIn {
@@ -1096,6 +1228,8 @@ img, svg { max-width: 100%; height: auto; display: block; }
   color: var(--muted);
   margin-bottom: 18px;
   line-height: 1.5;
+  white-space: pre-line;
+  text-align: left;
 }
 
 .modal-actions {
@@ -1130,21 +1264,20 @@ img, svg { max-width: 100%; height: auto; display: block; }
   color: #fff;
 }
 
-/* Hidden scrollbar on massal input */
 #searchInput,
 #massalInput,
 #catatanInput,
 #catatanMassal {
   -webkit-appearance: none;
   appearance: none;
-  font-size: 16px; /* iOS zoom fix */
+  font-size: 16px;
 }
 
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(255,107,0,0.3); border-radius: 2px; }
 
-/* ═══════════ RESPONSIVE ═══════════ */
+/* Responsive */
 @media (min-width: 480px) {
   .katalog-grid { grid-template-columns: repeat(3, 1fr); }
 }
@@ -1173,6 +1306,8 @@ img, svg { max-width: 100%; height: auto; display: block; }
   .btn-add { font-size: 11px; padding: 6px; }
   .qty-btn { width: 24px; height: 24px; font-size: 13px; }
   .qty-num { font-size: 12px; padding: 3px 2px; }
+  .stok-toko-label { font-size: 10px; }
+  .stok-toko-input { font-size: 13px; padding: 7px 10px; }
 }
 
 @media (max-width: 340px) {
@@ -1182,12 +1317,10 @@ img, svg { max-width: 100%; height: auto; display: block; }
   .item-emoji { font-size: 22px; }
 }
 
-/* Landscape phone fix */
 @media (max-height: 500px) and (orientation: landscape) {
   .bottom-sheet { max-height: 92dvh; max-height: 92vh; }
 }
 
-/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -1323,6 +1456,7 @@ img, svg { max-width: 100%; height: auto; display: block; }
     </div>
   </div>
 </div>
+
 <!-- ═══════════ PAGE RIWAYAT ═══════════ -->
 <div id="pageRiwayat" class="page">
   <div style="padding: 20px 16px 8px; padding-left: calc(16px + var(--safe-left)); padding-right: calc(16px + var(--safe-right));">
@@ -1340,7 +1474,7 @@ img, svg { max-width: 100%; height: auto; display: block; }
   </div>
 </div>
 
-<!-- ═══════════ CART FLOATING BAR ═══════════ -->
+<!-- CART FLOATING BAR -->
 <div class="cart-bar" id="cartBar">
   <button class="cart-btn" id="btnOpenCart">
     <span>🛒 Lihat Keranjang</span>
@@ -1348,7 +1482,7 @@ img, svg { max-width: 100%; height: auto; display: block; }
   </button>
 </div>
 
-<!-- ═══════════ BOTTOM NAV ═══════════ -->
+<!-- BOTTOM NAV -->
 <div class="bottom-nav">
   <button class="nav-tab active" id="tab-katalog" data-tab="katalog" aria-label="Katalog">
     <span class="nt-icon">📚</span>
@@ -1364,7 +1498,7 @@ img, svg { max-width: 100%; height: auto; display: block; }
   </button>
 </div>
 
-<!-- ═══════════ BOTTOM SHEET CART ═══════════ -->
+<!-- BOTTOM SHEET CART -->
 <div class="sheet-overlay" id="sheetOverlay"></div>
 <div class="bottom-sheet" id="cartSheet">
   <div class="sheet-handle"></div>
@@ -1379,6 +1513,10 @@ img, svg { max-width: 100%; height: auto; display: block; }
     </div>
   </div>
   <div class="cart-summary">
+    <div id="warningBanner" class="warning-banner">
+      <span class="warn-icon">⚠️</span>
+      <span id="warnText"></span>
+    </div>
     <div class="summary-row">
       <span>Jumlah Item</span>
       <span id="sumItem">0 item</span>
@@ -1398,7 +1536,7 @@ img, svg { max-width: 100%; height: auto; display: block; }
   </div>
 </div>
 
-<!-- ═══════════ MODAL CONFIRM ═══════════ -->
+<!-- MODAL CONFIRM -->
 <div class="modal-overlay" id="confirmModal">
   <div class="modal-box">
     <h3 id="confirmTitle">Konfirmasi</h3>
@@ -1409,14 +1547,13 @@ img, svg { max-width: 100%; height: auto; display: block; }
     </div>
   </div>
 </div>
-
 <script>
 'use strict';
 
 // ═══════════════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════════════
-const API_URL = 'https://script.google.com/macros/s/AKfycbzk8A4xuXOVGqbK6a4zffpG6u2s4jVROZwIitmCDat2fYU7qyU3VkxQJmtxtEtjQxji/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbzk8A4xuXOVGqbK6a4zfpG6u2s4jVROZwIitmCDat2fYU7qyU3VkxQJmtxtEtjQxji/exec';
 
 // State
 let semuaBarang = [];
@@ -1433,7 +1570,6 @@ let searchCache = {};
 let lastRenderedCount = 0;
 let isSubmitting = false;
 
-// Cabang info
 const CABANG_DATA = {
   CB001: { nama: 'Toko Nasional Eltari', pic: 'Arfa' },
   CB002: { nama: 'Toko Perabot Mama Oesapa', pic: 'Akmal' },
@@ -1801,14 +1937,15 @@ function addToCart(kode) {
     kat: String(b.KATEGORI || ''),
     harga: parseFloat(b.HARGA) || 0,
     satuan: String(b.SATUAN || 'PCS'),
-    qty
+    qty,
+    stokToko: ''  // stok toko wajib diisi cabang
   };
   const card = $('card-' + kode);
   const btn = $('btn-' + kode);
   if (card) card.classList.add('in-cart');
   if (btn) { btn.textContent = '✅ Di Keranjang'; btn.classList.add('added'); }
   updateCartUI();
-  showToast('✅ Ditambah ke keranjang', 'success', 2000);
+  showToast('✅ Ditambah ke keranjang. Jangan lupa isi stok toko!', 'success', 3000);
 }
 
 function removeFromCart(kode) {
@@ -1830,7 +1967,7 @@ function updateCartUI() {
   if (items.length > 0) {
     bar.classList.add('show');
     $('cartCount').textContent = `${count} item · ${formatRp(total)}`;
-    if (btn) btn.disabled = false;
+    if (btn) btn.disabled = !validateStokToko();
   } else {
     bar.classList.remove('show');
     if (btn) btn.disabled = true;
@@ -1852,31 +1989,111 @@ function closeCart() {
   document.body.style.overflow = '';
 }
 
+// ═══════════════════════════════════════════════════════════════
+// RENDER CART SHEET (dengan input STOK TOKO)
+// ═══════════════════════════════════════════════════════════════
 function renderCartSheet() {
   const items = Object.values(cart);
   const wrap = $('cartItems');
   if (!items.length) {
     wrap.innerHTML = `<div class="cart-empty"><div style="font-size:36px;margin-bottom:8px;">🛒</div><div>Keranjang kosong</div></div>`;
+    validateStokToko();
     return;
   }
   wrap.innerHTML = items.map(item => {
     const ek = esc(item.kode);
+    const stokTokoVal = item.stokToko !== undefined && item.stokToko !== '' ? item.stokToko : '';
+    const isEmpty = stokTokoVal === '' || stokTokoVal === null;
     return `
       <div class="cart-item">
-        <div class="ci-info">
-          <div class="ci-nama">${esc(item.nama)}</div>
-          <div class="ci-kode">${ek}</div>
-          <div class="ci-harga">${esc(formatRp(item.harga))} / ${esc(item.satuan)}</div>
+        <div class="cart-item-main">
+          <div class="ci-info">
+            <div class="ci-nama">${esc(item.nama)}</div>
+            <div class="ci-kode">${ek}</div>
+            <div class="ci-harga">${esc(formatRp(item.harga))} / ${esc(item.satuan)}</div>
+          </div>
+          <div class="ci-qty">
+            <button class="ci-qty-btn" data-act="ci-dec" data-kode="${ek}">−</button>
+            <input class="ci-qty-num" type="number" value="${item.qty}" min="1" data-act="ci-set" data-kode="${ek}">
+            <button class="ci-qty-btn" data-act="ci-inc" data-kode="${ek}">+</button>
+          </div>
+          <div class="ci-sub">${esc(formatRp(item.qty * item.harga))}</div>
+          <button class="ci-del" data-act="ci-del" data-kode="${ek}" aria-label="Hapus">🗑️</button>
         </div>
-        <div class="ci-qty">
-          <button class="ci-qty-btn" data-act="ci-dec" data-kode="${ek}">−</button>
-          <input class="ci-qty-num" type="number" value="${item.qty}" min="1" data-act="ci-set" data-kode="${ek}">
-          <button class="ci-qty-btn" data-act="ci-inc" data-kode="${ek}">+</button>
+
+        <div class="stok-toko-wrap ${isEmpty ? 'empty' : ''}" data-kode="${ek}">
+          <div class="stok-toko-label">
+            <span class="icon-stok">📦</span>
+            <span>Stok di Toko:</span>
+          </div>
+          <input
+            type="number"
+            class="stok-toko-input"
+            min="0"
+            step="1"
+            placeholder="Isi jumlah..."
+            value="${stokTokoVal}"
+            data-stok-kode="${ek}"
+            inputmode="numeric">
+          <span class="stok-toko-satuan">${esc(item.satuan)}</span>
         </div>
-        <div class="ci-sub">${esc(formatRp(item.qty * item.harga))}</div>
-        <button class="ci-del" data-act="ci-del" data-kode="${ek}" aria-label="Hapus">🗑️</button>
+        <div class="stok-toko-hint" style="${isEmpty ? 'display:block;' : 'display:none;'}">
+          ⚠️ Wajib isi jumlah stok yang masih ada di toko
+        </div>
       </div>`;
   }).join('');
+
+  // Bind stok toko input
+  wrap.querySelectorAll('.stok-toko-input').forEach(inp => {
+    inp.addEventListener('input', (e) => {
+      const kode = e.target.dataset.stokKode;
+      const val = e.target.value.trim();
+      if (cart[kode]) {
+        cart[kode].stokToko = val === '' ? '' : Math.max(0, parseInt(val) || 0);
+      }
+      const parentWrap = e.target.closest('.stok-toko-wrap');
+      if (parentWrap) {
+        const isEmpty = val === '' || val === null;
+        parentWrap.classList.toggle('empty', isEmpty);
+        const hint = parentWrap.nextElementSibling;
+        if (hint && hint.classList.contains('stok-toko-hint')) {
+          hint.style.display = isEmpty ? 'block' : 'none';
+        }
+      }
+      validateStokToko();
+    });
+  });
+
+  validateStokToko();
+}
+
+// Validasi semua stok toko sudah diisi
+function validateStokToko() {
+  const items = Object.values(cart);
+  const btn = $('btnSubmit');
+  const warnBanner = $('warningBanner');
+  const warnText = $('warnText');
+
+  if (!items.length) {
+    if (btn) btn.disabled = true;
+    if (warnBanner) warnBanner.classList.remove('show');
+    return false;
+  }
+
+  const belumDiisi = items.filter(i => i.stokToko === undefined || i.stokToko === '' || i.stokToko === null);
+  const semuaTerisi = belumDiisi.length === 0;
+
+  if (warnBanner) {
+    if (belumDiisi.length > 0) {
+      warnBanner.classList.add('show');
+      if (warnText) warnText.textContent = `${belumDiisi.length} barang belum diisi jumlah stok toko. Wajib diisi sebelum kirim!`;
+    } else {
+      warnBanner.classList.remove('show');
+    }
+  }
+
+  if (btn) btn.disabled = !semuaTerisi;
+  return semuaTerisi;
 }
 
 function ciQty(kode, delta) {
@@ -1895,10 +2112,9 @@ function ciQtySet(kode, val) {
   if (inp) inp.value = cart[kode].qty;
   updateCartUI();
 }
-</script>
-<script>
+
 // ═══════════════════════════════════════════════════════════════
-// SUBMIT ORDER (dari cart)
+// SUBMIT ORDER (dengan validasi stok toko)
 // ═══════════════════════════════════════════════════════════════
 function submitOrder() {
   const items = Object.values(cart);
@@ -1906,10 +2122,27 @@ function submitOrder() {
   if (!idCabang) return showToast('❌ Session tidak valid, login ulang.', 'error');
   if (isSubmitting) return;
 
+  // VALIDASI STOK TOKO
+  const belumDiisi = items.filter(i => i.stokToko === undefined || i.stokToko === '' || i.stokToko === null);
+  if (belumDiisi.length > 0) {
+    showToast(`⚠️ ${belumDiisi.length} barang belum diisi stok toko!`, 'warning', 4000);
+    const firstEmpty = document.querySelector('.stok-toko-wrap.empty');
+    if (firstEmpty) {
+      firstEmpty.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => {
+        const inp = firstEmpty.querySelector('.stok-toko-input');
+        if (inp) inp.focus();
+      }, 400);
+    }
+    return;
+  }
+
   const total = items.reduce((s, i) => s + i.qty * i.harga, 0);
+  const stokSummary = items.map(i => `• ${i.nama}\n  Minta: ${i.qty} ${i.satuan} | Stok Toko: ${i.stokToko} ${i.satuan}`).join('\n');
+
   showConfirm(
-    'Kirim Order?',
-    `${items.length} jenis barang · Total ${formatRp(total)}\n\nKirim ke gudang ${idCabang}?`,
+    'Kirim Order ke Gudang?',
+    `${items.length} jenis barang · Total ${formatRp(total)}\n\nRingkasan:\n${stokSummary}\n\nKirim ke gudang ${idCabang}?`,
     () => doSubmitOrder(items)
   );
 }
@@ -1918,18 +2151,32 @@ async function doSubmitOrder(items) {
   if (isSubmitting) return;
   isSubmitting = true;
 
-  const catatan = $('catatanInput').value.trim();
+  const catatanUser = $('catatanInput').value.trim();
   const btn = $('btnSubmit');
   btn.disabled = true;
   btn.textContent = '⏳ Mengirim order...';
 
+  // Gabung catatan user + info stok toko
+  const stokInfo = items.map(i =>
+    `${i.kode} (${i.nama}): Minta ${i.qty} ${i.satuan}, Stok Toko ${i.stokToko} ${i.satuan}`
+  ).join(' | ');
+
+  const catatanLengkap = catatanUser
+    ? `${catatanUser}\n\n[INFO STOK TOKO] ${stokInfo}`
+    : `[INFO STOK TOKO] ${stokInfo}`;
+
   const payload = {
     action: 'submitOrder',
     idCabang,
-    catatan,
+    catatan: catatanLengkap,
     items: items.map(i => ({
-      kode: i.kode, nama: i.nama, kategori: i.kat,
-      qty: i.qty, satuan: i.satuan, harga: i.harga
+      kode: i.kode,
+      nama: i.nama,
+      kategori: i.kat,
+      qty: i.qty,
+      satuan: i.satuan,
+      harga: i.harga,
+      stokToko: i.stokToko
     }))
   };
 
@@ -1948,12 +2195,12 @@ async function doSubmitOrder(items) {
   }
 
   btn.textContent = '🚀 Kirim Order ke Gudang';
-  btn.disabled = Object.keys(cart).length === 0;
+  btn.disabled = Object.keys(cart).length === 0 || !validateStokToko();
   isSubmitting = false;
 }
 
 // ═══════════════════════════════════════════════════════════════
-// ORDER MASSAL — paste kode & jumlah
+// ORDER MASSAL
 // ═══════════════════════════════════════════════════════════════
 async function pasteFromClipboard() {
   try {
@@ -1962,7 +2209,7 @@ async function pasteFromClipboard() {
     autoPreviewMassal();
     showToast('✅ Berhasil paste dari clipboard', 'success');
   } catch (e) {
-    showToast('ℹ️ Paste manual dengan Ctrl+V atau tekan lama di area teks', 'info', 4000);
+    showToast('ℹ️ Paste manual dengan Ctrl+V', 'info', 4000);
   }
 }
 
@@ -2116,13 +2363,13 @@ function updateMassalSummary() {
 function submitOrderMassal() {
   const valid = massalItems.filter(i => i.valid);
   if (!valid.length) return showToast('❌ Tidak ada barang valid!', 'error');
-  if (!idCabang) return showToast('❌ Session tidak valid, login ulang', 'error');
+  if (!idCabang) return showToast('❌ Session tidak valid', 'error');
   if (isSubmitting) return;
 
   const total = valid.reduce((s, i) => s + i.qty * i.harga, 0);
   showConfirm(
     'Kirim Order Massal?',
-    `${valid.length} barang · Total ${formatRp(total)}\n\nKirim ke gudang ${idCabang}?`,
+    `${valid.length} barang · Total ${formatRp(total)}\n\nCatatan: Untuk order massal, info stok toko tidak diperlukan.\n\nKirim ke gudang ${idCabang}?`,
     () => doSubmitMassal(valid)
   );
 }
@@ -2164,14 +2411,13 @@ async function doSubmitMassal(valid) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// KIRIM ORDER — chunked untuk payload besar
+// KIRIM ORDER (chunked)
 // ═══════════════════════════════════════════════════════════════
 async function kirimOrderKeServer(payload) {
   const jsonStr = JSON.stringify(payload);
   const encoded = encodeURIComponent(jsonStr);
   const urlGet = `${API_URL}?action=submitOrder&payload=${encoded}`;
 
-  // GET jika payload kecil
   if (urlGet.length < 7000) {
     try {
       const res = await fetch(urlGet, { method: 'GET', cache: 'no-store' });
@@ -2180,7 +2426,6 @@ async function kirimOrderKeServer(payload) {
     } catch (e) {}
   }
 
-  // POST
   try {
     const res = await fetch(API_URL, {
       method: 'POST',
@@ -2191,7 +2436,6 @@ async function kirimOrderKeServer(payload) {
     if (data.status === 'ok') return data;
   } catch (e) {}
 
-  // FormData
   try {
     const form = new FormData();
     form.append('payload', jsonStr);
@@ -2200,7 +2444,6 @@ async function kirimOrderKeServer(payload) {
     if (data.status === 'ok') return data;
   } catch (e) {}
 
-  // Chunk kalau >20 items
   const items = payload.items || [];
   if (items.length > 20) {
     const CHUNK = 20;
@@ -2221,7 +2464,7 @@ async function kirimOrderKeServer(payload) {
     if (ok > 0) return { status: 'ok', message: `${ok} dari ${total} bagian berhasil dikirim`, orderId: lastId };
   }
 
-  return { status: 'error', message: 'Gagal terhubung ke server. Cek koneksi dan pastikan API_URL benar.' };
+  return { status: 'error', message: 'Gagal terhubung ke server. Cek koneksi.' };
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -2295,27 +2538,21 @@ function formatTanggalWITA(str) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// EVENT DELEGATION (satu listener untuk banyak tombol)
+// EVENT DELEGATION
 // ═══════════════════════════════════════════════════════════════
 function bindEvents() {
-  // Logout
   $('btnLogout').addEventListener('click', doLogout);
-
-  // Search
   $('searchInput').addEventListener('input', e => debounceSearch(e.target.value));
 
-  // Filter kategori
   $('filterScroll').addEventListener('click', e => {
     const chip = e.target.closest('.filter-chip');
     if (chip) setKategori(chip.dataset.kat || '', chip);
   });
 
-  // Tab bottom nav
   document.querySelectorAll('.nav-tab').forEach(btn => {
     btn.addEventListener('click', () => showTab(btn.dataset.tab));
   });
 
-  // Katalog grid delegation
   $('katalogGrid').addEventListener('click', e => {
     const el = e.target.closest('[data-act]');
     if (!el) return;
@@ -2331,12 +2568,10 @@ function bindEvents() {
     if (el) setQtyCard(el.dataset.kode, el.value);
   });
 
-  // Cart open/close
   $('btnOpenCart').addEventListener('click', openCart);
   $('btnCloseCart').addEventListener('click', closeCart);
   $('sheetOverlay').addEventListener('click', closeCart);
 
-  // Cart items delegation
   $('cartItems').addEventListener('click', e => {
     const el = e.target.closest('[data-act]');
     if (!el) return;
@@ -2350,10 +2585,8 @@ function bindEvents() {
     if (el) ciQtySet(el.dataset.kode, el.value);
   });
 
-  // Submit
   $('btnSubmit').addEventListener('click', submitOrder);
 
-  // Massal
   $('massalInput').addEventListener('input', autoPreviewMassal);
   $('btnPasteClip').addEventListener('click', pasteFromClipboard);
   $('btnClearMassal').addEventListener('click', clearMassalInput);
@@ -2372,7 +2605,6 @@ function bindEvents() {
     if (el) massalQtySet(parseInt(el.dataset.idx), el.value);
   });
 
-  // Confirm modal
   $('confirmCancel').addEventListener('click', hideConfirm);
   $('confirmOk').addEventListener('click', () => {
     const cb = _confirmCb;
@@ -2383,7 +2615,6 @@ function bindEvents() {
     if (e.target === $('confirmModal')) hideConfirm();
   });
 
-  // ESC to close
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
       if ($('cartSheet').classList.contains('show')) closeCart();
@@ -2401,7 +2632,6 @@ window.addEventListener('load', () => {
   loadKatalog();
 });
 
-// Fix 100vh bug pada mobile browser
 function setVH() {
   document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
 }
