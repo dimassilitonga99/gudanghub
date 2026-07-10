@@ -21,7 +21,6 @@
   --orange: #ff6b00;
   --orange-light: #ff8c38;
   --orange-deep: #e05a00;
-  --orange-glow: rgba(255,107,0,0.5);
   --ink: #08080d;
   --ink2: #10101a;
   --ink3: #1c1c2b;
@@ -79,7 +78,7 @@ a { color: inherit; text-decoration: none; }
   z-index: 2;
 }
 
-/* ═══════════ GLOBAL CURSOR GLOW ═══════════ */
+/* CURSOR GLOW GLOBAL */
 .cursor-glow {
   position: fixed;
   top: 0;
@@ -102,7 +101,7 @@ a { color: inherit; text-decoration: none; }
 
 .cursor-glow.hide { opacity: 0; }
 
-/* ═══════════ GLOBAL PARTICLE CANVAS (background layer) ═══════════ */
+/* BG PARTICLES */
 .bg-particles {
   position: fixed;
   inset: 0;
@@ -117,7 +116,6 @@ a { color: inherit; text-decoration: none; }
   display: block;
 }
 
-/* Scroll progress */
 .scroll-progress {
   position: fixed;
   top: 0;
@@ -131,7 +129,6 @@ a { color: inherit; text-decoration: none; }
   pointer-events: none;
 }
 
-/* REVEAL */
 .reveal {
   opacity: 0;
   transform: translateY(30px);
@@ -389,65 +386,11 @@ a { color: inherit; text-decoration: none; }
   z-index: 10;
   min-height: 100dvh;
   min-height: 100vh;
-  padding: calc(90px + var(--safe-top)) clamp(20px, 4vw, 60px) clamp(50px, 8vw, 100px);
+  padding: calc(120px + var(--safe-top)) clamp(20px, 4vw, 60px) clamp(50px, 8vw, 100px);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
-
-.hc-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 20px;
-  flex-wrap: wrap;
-  transform: translateY(var(--scroll-y, 0));
-}
-
-.hc-brand-tag {
-  font-family: 'JetBrains Mono', 'Courier New', monospace;
-  font-size: 13px;
-  letter-spacing: 0.15em;
-  color: var(--text);
-  text-transform: uppercase;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.hc-brand-tag .brand-code {
-  background: rgba(245,240,232,0.08);
-  border: 1px solid rgba(245,240,232,0.15);
-  padding: 6px 12px;
-  border-radius: 6px;
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-}
-
-.hc-brand-tag .brand-count {
-  font-size: 10px;
-  color: rgba(245,240,232,0.4);
-  padding: 0 4px;
-  letter-spacing: 0.2em;
-}
-
-.hc-nav-mini {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  text-align: right;
-  font-family: 'JetBrains Mono', 'Courier New', monospace;
-  font-size: 13px;
-  letter-spacing: 0.1em;
-}
-
-.hc-nav-mini a {
-  color: rgba(245,240,232,0.6);
-  transition: color 0.25s;
-  padding: 3px 0;
-}
-
-.hc-nav-mini a:hover { color: var(--orange); }
 
 .hc-main {
   display: grid;
@@ -480,18 +423,21 @@ a { color: inherit; text-decoration: none; }
 
 .hc-headline h1 {
   font-family: 'Fraunces', Georgia, serif;
-  font-size: clamp(38px, 8vw, 110px);
+  font-size: clamp(38px, 7.5vw, 100px);
   font-weight: 500;
-  line-height: 0.98;
+  line-height: 1.05;
   letter-spacing: -0.03em;
   color: var(--text);
   margin: 0;
+  padding-bottom: 8px;
+  overflow-wrap: break-word;
+  word-break: keep-all;
 }
 
 .hc-headline h1 .line {
   display: block;
-  overflow: hidden;
-  padding: 4px 0;
+  overflow: visible;
+  padding: 6px 0;
 }
 
 .hc-headline h1 .word {
@@ -499,6 +445,7 @@ a { color: inherit; text-decoration: none; }
   opacity: 0;
   transform: translateY(100%);
   animation: hcReveal 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  padding-bottom: 6px;
 }
 
 .hc-headline h1 .word:nth-child(1) { animation-delay: 0.3s; }
@@ -509,12 +456,14 @@ a { color: inherit; text-decoration: none; }
   font-weight: 500;
   color: var(--orange);
   position: relative;
+  display: inline-block;
+  padding-bottom: 4px;
 }
 
 .hc-headline h1 em::after {
   content: '';
   position: absolute;
-  bottom: 0.08em;
+  bottom: 2px;
   left: 0;
   right: 0;
   height: 3px;
@@ -547,42 +496,6 @@ a { color: inherit; text-decoration: none; }
   transform: translateY(calc(var(--scroll-y, 0) * 0.15));
 }
 
-.hc-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  letter-spacing: 0.15em;
-  color: rgba(245,240,232,0.7);
-  background: rgba(245,240,232,0.05);
-  border: 1px solid rgba(245,240,232,0.1);
-  padding: 8px 16px;
-  border-radius: 999px;
-  align-self: flex-start;
-  opacity: 0;
-  animation: hcFadeIn 0.8s ease 0.9s forwards;
-}
-
-.hc-badge-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--orange);
-  animation: hcPulse 2s infinite;
-}
-
-@keyframes hcPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255,107,0,0.6); }
-  50% { box-shadow: 0 0 0 8px rgba(255,107,0,0); }
-}
-
-.hc-badge-num {
-  color: var(--orange);
-  font-weight: 700;
-  font-size: 10px;
-}
-
 .hc-desc {
   font-size: clamp(14px, 1.6vw, 16px);
   line-height: 1.7;
@@ -595,10 +508,17 @@ a { color: inherit; text-decoration: none; }
 .hc-desc-label {
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
-  color: rgba(245,240,232,0.35);
+  color: var(--orange);
   letter-spacing: 0.2em;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
   text-transform: uppercase;
+  padding: 5px 12px;
+  background: rgba(255,107,0,0.08);
+  border: 1px solid rgba(255,107,0,0.2);
+  border-radius: 999px;
+  display: inline-block;
+  opacity: 0;
+  animation: hcFadeIn 0.8s ease 0.9s forwards;
 }
 
 .hc-actions {
@@ -734,13 +654,12 @@ a { color: inherit; text-decoration: none; }
 
 @media (max-width: 900px) {
   .hc-main { grid-template-columns: 1fr; gap: 40px; align-items: flex-start; }
-  .hc-nav-mini { display: none; }
-  .hc-inner { padding-top: calc(80px + var(--safe-top)); }
+  .hc-inner { padding-top: calc(90px + var(--safe-top)); }
 }
 
 @media (max-width: 600px) {
   .hc-inner { padding: calc(80px + var(--safe-top)) 20px 40px; }
-  .hc-headline h1 { font-size: clamp(40px, 12vw, 58px); }
+  .hc-headline h1 { font-size: clamp(38px, 11vw, 56px); }
   .hc-mini-stats { gap: 20px; }
   .hc-bottom { align-items: flex-start; flex-direction: column; gap: 24px; }
   .cursor-glow { display: none; }
@@ -1096,8 +1015,7 @@ a { color: inherit; text-decoration: none; }
 /* ═══════════ TIM CURVED FAN ═══════════ */
 .tim-section {
   padding: clamp(60px, 8vw, 100px) 0 clamp(80px, 10vw, 120px);
-  background:
-    linear-gradient(180deg, transparent 0%, rgba(255,107,0,0.03) 50%, transparent 100%);
+  background: linear-gradient(180deg, transparent 0%, rgba(255,107,0,0.03) 50%, transparent 100%);
   position: relative;
   overflow: hidden;
   z-index: 2;
@@ -1661,8 +1579,7 @@ a { color: inherit; text-decoration: none; }
   border-top: 1px solid var(--line2);
   position: relative;
   z-index: 2;
-  background:
-    linear-gradient(180deg, transparent 0%, rgba(255,107,0,0.02) 100%);
+  background: linear-gradient(180deg, transparent 0%, rgba(255,107,0,0.02) 100%);
 }
 
 .footer-top {
@@ -1741,10 +1658,10 @@ a { color: inherit; text-decoration: none; }
 <!-- SCROLL PROGRESS -->
 <div class="scroll-progress" id="scrollProgress"></div>
 
-<!-- CURSOR GLOW GLOBAL (mengikuti mouse sampai bawah halaman) -->
+<!-- CURSOR GLOW GLOBAL -->
 <div class="cursor-glow hide" id="cursorGlow"></div>
 
-<!-- BACKGROUND PARTICLES GLOBAL (mengalir sampai bawah) -->
+<!-- BACKGROUND PARTICLES GLOBAL -->
 <div class="bg-particles"><canvas id="bgCanvas"></canvas></div>
 
 <!-- DRAWER OVERLAY -->
@@ -1792,37 +1709,20 @@ a { color: inherit; text-decoration: none; }
   <div class="hc-vignette"></div>
 
   <div class="hc-inner">
-    <div class="hc-top">
-      <div class="hc-brand-tag">
-        <span class="brand-code">(GUDANG_HUB / v2.6)</span>
-        <span class="brand-count">[ NTT · 004x CABANG ]</span>
-      </div>
-      <nav class="hc-nav-mini">
-        <a href="#cara">→ cara kerja</a>
-        <a href="#katalog">→ katalog</a>
-        <a href="#tim">→ tim kami</a>
-        <a href="#cabang">→ cabang</a>
-      </nav>
-    </div>
 
     <div class="hc-main">
       <div class="hc-headline">
         <span class="hc-eyebrow">● Sistem Kolaborasi Cabang</span>
         <h1>
           <span class="line"><span class="word">Satu Jaringan,</span></span>
-          <span class="line"><span class="word"><em>Ribuan</em> Kemungkinan.</span></span>
+          <span class="line"><span class="word"><em>Ribuan</em> Peluang.</span></span>
         </h1>
       </div>
 
       <aside class="hc-side">
-        <span class="hc-badge">
-          <span class="hc-badge-dot"></span>
-          <span class="hc-badge-num">( LIVE )</span>
-          <span>Real-time Sync</span>
-        </span>
         <div>
-          <div class="hc-desc-label">// Tentang GudangHub</div>
-          <p class="hc-desc">Platform terpadu yang menghubungkan empat cabang toko dengan gudang pusat PT Central Perabot Utama. Setiap order tercatat, setiap stok terpantau, setiap keputusan berdampak nyata.</p>
+          <div class="hc-desc-label">Kenapa GudangHub?</div>
+          <p class="hc-desc">Platform terpadu yang menghubungkan empat cabang toko dengan gudang pusat PT Central Perabot Utama. Setiap order tercatat rapi, setiap stok terpantau langsung, setiap keputusan berdampak nyata bagi bisnis Anda.</p>
         </div>
         <div class="hc-actions">
           <a href="login.html" class="hc-btn hc-btn-primary">Mulai Kelola <span class="hc-btn-icon">→</span></a>
@@ -2137,20 +2037,20 @@ a { color: inherit; text-decoration: none; }
         <p>Platform kolaborasi cabang-gudang untuk PT Central Perabot Utama. Dibangun dari Kupang, untuk NTT.</p>
       </div>
       <div class="footer-col">
-        <h5>/ Jelajahi</h5>
+        <h5>Jelajahi</h5>
         <a href="#cara">Cara Kerja</a>
         <a href="#katalog">Katalog</a>
         <a href="#tim">Tim Kami</a>
         <a href="#cabang">Cabang</a>
       </div>
       <div class="footer-col">
-        <h5>/ Sistem</h5>
+        <h5>Sistem</h5>
         <a href="login.html">Masuk Cabang</a>
         <a href="login.html">Masuk Admin</a>
         <a href="login.html">Dashboard</a>
       </div>
       <div class="footer-col">
-        <h5>/ Terhubung</h5>
+        <h5>Terhubung</h5>
         <a href="#">Gudang Pusat NTT</a>
         <a href="tel:+6281234567890">+62 812 3456 7890</a>
         <a href="mailto:order@gudanghub.id">order@gudanghub.id</a>
@@ -2179,7 +2079,7 @@ function closeDrawer() {
   document.body.style.overflow = '';
 }
 
-// ═══════════ CURSOR GLOW GLOBAL (mengikuti mouse di seluruh halaman) ═══════════
+// ═══════════ CURSOR GLOW GLOBAL ═══════════
 const cursorGlow = document.getElementById('cursorGlow');
 let cursorX = 0, cursorY = 0;
 let targetX = 0, targetY = 0;
@@ -2200,7 +2100,6 @@ if (cursorGlow && window.matchMedia('(hover: hover)').matches) {
     glowVisible = false;
   });
 
-  // Smooth follow
   function updateGlow() {
     cursorX += (targetX - cursorX) * 0.15;
     cursorY += (targetY - cursorY) * 0.15;
@@ -2252,7 +2151,7 @@ const io = new IntersectionObserver((entries) => {
 
 document.querySelectorAll('.reveal, .reveal-scale').forEach(el => io.observe(el));
 
-// ═══════════ COUNTER ANIMATION ═══════════
+// ═══════════ COUNTER ═══════════
 const easeOut = t => 1 - Math.pow(1 - t, 3);
 
 function runCounter(el, attr = 'count', suffixAttr = 'suffix') {
@@ -2288,7 +2187,7 @@ document.querySelectorAll('[data-count], [data-hc-count]').forEach(el => {
   setTimeout(() => cio.observe(el), 500);
 });
 
-// ═══════════ BACKGROUND PARTICLES CANVAS (mengalir sampai bawah) ═══════════
+// ═══════════ BG PARTICLES ═══════════
 (function() {
   const canvas = document.getElementById('bgCanvas');
   if (!canvas) return;
