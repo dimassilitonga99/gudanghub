@@ -80,73 +80,265 @@ a { color: inherit; text-decoration: none; }
   z-index: 2;
 }
 
-/* ═══════════ FLYING TRUCK — GSAP ScrollTrigger ═══════════ */
+/* ═══════════ FLYING TRUCK — TANPA BINGKAI, MENYATU DENGAN WEB ═══════════ */
 .flying-truck {
   position: fixed;
   top: 0;
   left: 0;
-  width: clamp(180px, 20vw, 320px);
+  width: clamp(240px, 26vw, 420px);
   height: auto;
   z-index: 4;
   pointer-events: none;
   will-change: transform, opacity;
   opacity: 0;
-  filter:
-    drop-shadow(0 20px 40px rgba(255,107,0,0.35))
-    drop-shadow(0 0 30px rgba(255,140,56,0.25));
   transform-origin: center center;
+  /* NO FRAME - fully transparent background */
+  background: transparent;
 }
 
-.flying-truck img {
+/* Truck wrap tanpa bingkai */
+.truck-wrap {
+  position: relative;
   width: 100%;
-  height: auto;
+  aspect-ratio: 16/10;
+  overflow: visible;
+  animation: truckBounce 0.35s ease-in-out infinite alternate;
+  filter:
+    drop-shadow(0 25px 40px rgba(0,0,0,0.75))
+    drop-shadow(0 0 50px rgba(255,107,0,0.4));
+}
+
+@keyframes truckBounce {
+  0% { transform: translateY(0) rotate(-0.3deg); }
+  100% { transform: translateY(-2px) rotate(0.3deg); }
+}
+
+/* Video/image dengan MASK — menyatu dengan bg */
+.truck-wrap video,
+.truck-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   display: block;
-  border-radius: 12px;
+  filter: contrast(1.15) saturate(1.2) brightness(1.05);
+  /* Mask untuk blend dengan background - fade edges */
+  -webkit-mask-image:
+    radial-gradient(ellipse 90% 90% at center,
+      #000 40%,
+      rgba(0,0,0,0.9) 60%,
+      rgba(0,0,0,0.4) 85%,
+      transparent 100%);
+  mask-image:
+    radial-gradient(ellipse 90% 90% at center,
+      #000 40%,
+      rgba(0,0,0,0.9) 60%,
+      rgba(0,0,0,0.4) 85%,
+      transparent 100%);
 }
 
-.flying-truck::before {
+/* SPEED STRIPES (overlay di depan) */
+.truck-wrap::after {
   content: '';
   position: absolute;
-  top: 50%;
-  left: -30%;
-  transform: translateY(-50%);
-  width: 60%;
+  top: 20%;
+  left: 0;
+  width: 100%;
   height: 60%;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,107,0,0.45), rgba(255,107,0,0.15) 40%, transparent 70%);
-  filter: blur(20px);
-  z-index: -1;
-  animation: truckGlow 2s ease-in-out infinite alternate;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0px,
+    transparent 60px,
+    rgba(255,220,150,0.15) 60px,
+    rgba(255,220,150,0.15) 62px
+  );
+  animation: speedStripes 0.2s linear infinite;
+  z-index: 3;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent);
+  mix-blend-mode: screen;
 }
 
-@keyframes truckGlow {
-  from { opacity: 0.7; transform: translateY(-50%) scale(1); }
-  to { opacity: 1; transform: translateY(-50%) scale(1.15); }
+@keyframes speedStripes {
+  from { transform: translateX(0); }
+  to { transform: translateX(-62px); }
 }
 
-.flying-truck.speeding::after {
-  content: '';
+/* ROAD LIGHT TRAIL (jejak cahaya di bawah truck) */
+.truck-road {
   position: absolute;
-  top: 50%;
+  bottom: 5%;
   left: -40%;
-  width: 40%;
-  height: 3px;
-  background: linear-gradient(90deg, transparent, rgba(255,180,80,0.8), transparent);
-  transform: translateY(-50%);
-  animation: speedLine 0.3s linear infinite;
+  right: -20%;
+  height: 8px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255,107,0,0.5) 20%,
+    rgba(255,180,80,0.9) 50%,
+    rgba(255,107,0,0.5) 80%,
+    transparent 100%);
   border-radius: 999px;
+  filter: blur(4px);
+  opacity: 0.9;
+  animation: roadPulse 1s ease-in-out infinite alternate;
 }
 
-@keyframes speedLine {
-  from { transform: translateY(-50%) translateX(0); opacity: 1; }
-  to { transform: translateY(-50%) translateX(20px); opacity: 0; }
+@keyframes roadPulse {
+  from { opacity: 0.6; transform: scaleX(0.95); }
+  to { opacity: 1; transform: scaleX(1.05); }
+}
+
+/* DUST PARTICLES di belakang roda */
+.truck-dust {
+  position: absolute;
+  bottom: 8%;
+  left: -20%;
+  width: 40%;
+  height: 30%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.truck-dust span {
+  position: absolute;
+  bottom: 0;
+  width: 12px;
+  height: 12px;
+  background: radial-gradient(circle,
+    rgba(255,200,120,0.8),
+    rgba(255,140,56,0.4) 40%,
+    transparent 80%);
+  border-radius: 50%;
+  animation: dustFly 1.2s ease-out infinite;
+  filter: blur(2px);
+}
+
+.truck-dust span:nth-child(1) { left: 10%; animation-delay: 0s; }
+.truck-dust span:nth-child(2) { left: 30%; animation-delay: 0.2s; width: 8px; height: 8px; }
+.truck-dust span:nth-child(3) { left: 50%; animation-delay: 0.4s; width: 14px; height: 14px; }
+.truck-dust span:nth-child(4) { left: 70%; animation-delay: 0.6s; width: 7px; height: 7px; }
+.truck-dust span:nth-child(5) { left: 20%; animation-delay: 0.8s; width: 10px; height: 10px; }
+.truck-dust span:nth-child(6) { left: 45%; animation-delay: 1s; width: 9px; height: 9px; }
+
+@keyframes dustFly {
+  0% {
+    transform: translate(0, 0) scale(0.4);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(-60px, -35px) scale(2);
+    opacity: 0;
+  }
+}
+
+/* EXHAUST SMOKE */
+.truck-smoke {
+  position: absolute;
+  top: 40%;
+  right: -10%;
+  width: 30%;
+  height: 30%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.truck-smoke span {
+  position: absolute;
+  right: 20%;
+  top: 40%;
+  width: 20px;
+  height: 20px;
+  background: radial-gradient(circle,
+    rgba(220,220,220,0.5),
+    rgba(180,180,180,0.2) 50%,
+    transparent 80%);
+  border-radius: 50%;
+  animation: smokePuff 1.6s ease-out infinite;
+  filter: blur(4px);
+}
+
+.truck-smoke span:nth-child(1) { animation-delay: 0s; }
+.truck-smoke span:nth-child(2) { animation-delay: 0.5s; }
+.truck-smoke span:nth-child(3) { animation-delay: 1s; }
+
+@keyframes smokePuff {
+  0% {
+    transform: translate(0, 0) scale(0.5);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate(50px, -60%) scale(2.5);
+    opacity: 0;
+  }
+}
+
+/* GLOW halo di bawah truck (menyatu dengan lighting web) */
+.truck-glow {
+  position: absolute;
+  bottom: -10%;
+  left: 5%;
+  right: 5%;
+  height: 40px;
+  background: radial-gradient(ellipse,
+    rgba(255,107,0,0.7) 0%,
+    rgba(255,140,56,0.35) 30%,
+    rgba(255,107,0,0.1) 60%,
+    transparent 80%);
+  border-radius: 50%;
+  filter: blur(20px);
+  animation: glowPulse 1.2s ease-in-out infinite alternate;
+  z-index: 0;
+}
+
+@keyframes glowPulse {
+  0% { opacity: 0.7; transform: scale(1); }
+  100% { opacity: 1; transform: scale(1.2); }
+}
+
+/* HEADLIGHT flare */
+.truck-headlight {
+  position: absolute;
+  top: 55%;
+  left: -5%;
+  width: 25%;
+  height: 25%;
+  background: radial-gradient(circle,
+    rgba(255,230,180,0.7),
+    rgba(255,190,100,0.3) 30%,
+    transparent 70%);
+  border-radius: 50%;
+  transform: translateY(-50%);
+  filter: blur(10px);
+  animation: headlightFlicker 3s ease-in-out infinite;
+  z-index: 5;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+@keyframes headlightFlicker {
+  0%, 100% { opacity: 0.85; }
+  50% { opacity: 1; }
+}
+
+/* Flip effect */
+.flying-truck.flipped {
+  transform: scaleX(-1);
+}
+
+.flying-truck.flipped .truck-headlight {
+  left: auto;
+  right: -5%;
 }
 
 @media (max-width: 900px) {
-  .flying-truck { width: clamp(140px, 30vw, 200px); }
+  .flying-truck { width: 220px; }
 }
 
 @media (max-width: 600px) {
+  .flying-truck { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
   .flying-truck { display: none; }
 }
 
@@ -435,11 +627,7 @@ a { color: inherit; text-decoration: none; }
   inset: 0;
   z-index: 2;
   pointer-events: none;
-  background:
-    radial-gradient(ellipse 80% 60% at 50% 50%,
-      transparent 0%,
-      rgba(8,8,13,0.4) 60%,
-      rgba(8,8,13,0.9) 100%);
+  background: radial-gradient(ellipse 80% 60% at 50% 50%, transparent 0%, rgba(8,8,13,0.4) 60%, rgba(8,8,13,0.9) 100%);
 }
 
 .hc-vignette {
@@ -1690,11 +1878,23 @@ a { color: inherit; text-decoration: none; }
 <!-- BACKGROUND PARTICLES -->
 <div class="bg-particles"><canvas id="bgCanvas"></canvas></div>
 
-<!-- ═══════════ FLYING TRUCK (GSAP ScrollTrigger) ═══════════ -->
+<!-- ═══════════ FLYING TRUCK — TANPA BINGKAI, MENYATU DENGAN WEB ═══════════ -->
 <div class="flying-truck" id="flyingTruck">
-  <img src="https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=500&q=80&auto=format&fit=crop"
-       alt="GudangHub Truck"
-       onerror="this.src='https://images.unsplash.com/photo-1519003722824-194d4455a60c?w=500&q=80'; this.onerror=null;">
+  <div class="truck-glow"></div>
+  <div class="truck-wrap">
+    <video autoplay loop muted playsinline preload="auto"
+           poster="https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=500&q=80">
+      <source src="https://cdn.pixabay.com/video/2020/12/21/59745-491421728_large.mp4" type="video/mp4">
+    </video>
+    <div class="truck-headlight"></div>
+  </div>
+  <div class="truck-dust">
+    <span></span><span></span><span></span><span></span><span></span><span></span>
+  </div>
+  <div class="truck-smoke">
+    <span></span><span></span><span></span>
+  </div>
+  <div class="truck-road"></div>
 </div>
 
 <!-- DRAWER OVERLAY -->
@@ -2439,45 +2639,46 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeDrawer();
 });
 
-// ═══════════ 🚚 GSAP FLYING TRUCK — ScrollTrigger ═══════════
+// ═══════════ 🚚 GSAP FLYING TRUCK — REAL MOVEMENT ═══════════
 window.addEventListener('load', () => {
-  // Skip jika mobile atau reduced motion
   if (window.innerWidth < 900) return;
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
-    console.warn('GSAP atau ScrollTrigger tidak ter-load.');
-    return;
-  }
+  if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
 
   gsap.registerPlugin(ScrollTrigger);
 
   const truck = document.getElementById('flyingTruck');
   if (!truck) return;
 
-  // Set posisi awal
+  // Force video play
+  const video = truck.querySelector('video');
+  if (video) {
+    video.play().catch(() => {});
+  }
+
+  // Posisi awal
   gsap.set(truck, {
-    x: -400,
+    x: -500,
     y: window.innerHeight * 0.4,
-    rotation: -8,
+    rotation: -3,
     opacity: 0,
     scale: 1
   });
 
-  // Timeline utama — perjalanan truck mengikuti scroll
   const tl = gsap.timeline({
     scrollTrigger: {
       trigger: 'body',
       start: 'top top',
       end: 'bottom bottom',
-      scrub: 1.2,
-      invalidateOnRefresh: true,
+      scrub: 1.5,
+      invalidateOnRefresh: true
     }
   });
 
-  // Scene 1: Fade in dari kiri
+  // Scene 1: Masuk dari kiri (Hero)
   tl.to(truck, {
     x: window.innerWidth * 0.05,
-    y: window.innerHeight * 0.35,
+    y: window.innerHeight * 0.4,
     rotation: 0,
     opacity: 1,
     scale: 1,
@@ -2485,116 +2686,105 @@ window.addEventListener('load', () => {
     ease: 'power2.out'
   }, 0);
 
-  // Scene 2: Meluncur ke kanan
+  // Scene 2: Meluncur ke kanan (Marquee)
   tl.to(truck, {
-    x: window.innerWidth - 400,
+    x: window.innerWidth * 0.55,
     y: window.innerHeight * 0.5,
-    rotation: 3,
-    scale: 1.05,
+    rotation: 2,
     duration: 1.5,
     ease: 'power1.inOut'
   });
 
-  // Scene 3: Balik ke kiri sambil naik
+  // Scene 3: Naik ke kanan atas (Cara Kerja)
+  tl.to(truck, {
+    x: window.innerWidth * 0.7,
+    y: window.innerHeight * 0.3,
+    rotation: -2,
+    duration: 1.5,
+    ease: 'power1.inOut'
+  });
+
+  // Scene 4: BALIK — flip arah, ke kiri (Showcase)
+  tl.to(truck, {
+    x: -200,
+    y: window.innerHeight * 0.4,
+    rotation: 2,
+    duration: 2,
+    ease: 'power1.inOut',
+    onStart: () => truck.classList.add('flipped'),
+    onReverseComplete: () => truck.classList.remove('flipped')
+  });
+
+  // Scene 5: Meluncur diagonal ke kanan bawah (Tim)
+  tl.to(truck, {
+    x: window.innerWidth * 0.55,
+    y: window.innerHeight * 0.55,
+    rotation: -2,
+    duration: 2,
+    ease: 'power1.inOut',
+    onStart: () => truck.classList.remove('flipped'),
+    onReverseComplete: () => truck.classList.add('flipped')
+  });
+
+  // Scene 6: Balik kiri lagi (About)
   tl.to(truck, {
     x: -100,
-    y: window.innerHeight * 0.3,
-    rotation: -5,
-    scaleX: -1.05,
-    scaleY: 1.05,
+    y: window.innerHeight * 0.35,
+    rotation: 2,
     duration: 1.5,
-    ease: 'power1.inOut'
+    ease: 'power1.inOut',
+    onStart: () => truck.classList.add('flipped'),
+    onReverseComplete: () => truck.classList.remove('flipped')
   });
 
-  // Scene 4: Meluncur diagonal kanan bawah
+  // Scene 7: Meluncur kanan (Stats)
   tl.to(truck, {
     x: window.innerWidth * 0.6,
-    y: window.innerHeight * 0.55,
-    rotation: 5,
-    scaleX: 1,
-    scaleY: 1,
-    duration: 1.5,
-    ease: 'power1.inOut'
-  });
-
-  // Scene 5: Turun ke tengah kiri
-  tl.to(truck, {
-    x: window.innerWidth * 0.1,
-    y: window.innerHeight * 0.4,
+    y: window.innerHeight * 0.5,
     rotation: -2,
-    scaleX: -1,
-    scaleY: 1,
-    duration: 1.2,
-    ease: 'power2.inOut'
+    duration: 1.5,
+    ease: 'power1.inOut',
+    onStart: () => truck.classList.remove('flipped'),
+    onReverseComplete: () => truck.classList.add('flipped')
   });
 
-  // Scene 6: Meluncur cepat ke kanan
+  // Scene 8: Ke kiri untuk Cabang
+  tl.to(truck, {
+    x: -50,
+    y: window.innerHeight * 0.45,
+    rotation: 2,
+    duration: 1.5,
+    ease: 'power1.inOut',
+    onStart: () => truck.classList.add('flipped'),
+    onReverseComplete: () => truck.classList.remove('flipped')
+  });
+
+  // Scene 9: Meluncur ke kanan (CTA)
   tl.to(truck, {
     x: window.innerWidth * 0.7,
     y: window.innerHeight * 0.5,
-    rotation: 4,
-    scaleX: 1,
-    scaleY: 1,
-    duration: 1.2,
-    ease: 'power2.inOut'
+    rotation: -2,
+    duration: 1.5,
+    ease: 'power1.inOut',
+    onStart: () => truck.classList.remove('flipped'),
+    onReverseComplete: () => truck.classList.add('flipped')
   });
 
-  // Scene 7: Kembali ke kiri
+  // Scene 10: Fade out ke kanan (Footer)
   tl.to(truck, {
-    x: window.innerWidth * 0.05,
-    y: window.innerHeight * 0.45,
-    rotation: -3,
-    scaleX: -1,
-    scaleY: 1,
-    duration: 1.2,
-    ease: 'power1.inOut'
-  });
-
-  // Scene 8: Meluncur pergi ke kanan
-  tl.to(truck, {
-    x: window.innerWidth * 0.8,
-    y: window.innerHeight * 0.5,
-    rotation: 6,
-    scaleX: 1.1,
-    scaleY: 1.1,
-    duration: 1.2,
-    ease: 'power2.inOut'
-  });
-
-  // Scene 9: Fade out ke kanan
-  tl.to(truck, {
-    x: window.innerWidth + 400,
+    x: window.innerWidth + 300,
     y: window.innerHeight * 0.3,
-    rotation: 10,
+    rotation: 3,
     opacity: 0,
-    scale: 0.8,
+    scale: 0.85,
     duration: 1,
     ease: 'power2.in'
   });
 
-  // Speed class: nyalakan speed line saat scroll cepat
-  let lastScrollY = window.scrollY;
-  let scrollSpeed = 0;
-  let speedTimer = null;
-
-  window.addEventListener('scroll', () => {
-    const currentY = window.scrollY;
-    scrollSpeed = Math.abs(currentY - lastScrollY);
-    lastScrollY = currentY;
-
-    if (scrollSpeed > 5) {
-      truck.classList.add('speeding');
-      clearTimeout(speedTimer);
-      speedTimer = setTimeout(() => {
-        truck.classList.remove('speeding');
-      }, 200);
-    }
-  }, { passive: true });
-
-  // Floating bob: truck naik-turun halus saat idle
+  // Floating bob
   gsap.to(truck, {
-    y: '+=15',
-    duration: 2,
+    y: '+=8',
+    duration: 1.5,
     ease: 'sine.inOut',
     repeat: -1,
     yoyo: true
@@ -2609,7 +2799,7 @@ window.addEventListener('load', () => {
     }, 250);
   }, { passive: true });
 
-  console.log('🚚 GSAP Truck ScrollTrigger loaded!');
+  console.log('🚚 GSAP Truck NO FRAME - blended with web!');
 });
 </script>
 
