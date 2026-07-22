@@ -1,0 +1,71 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   MAIN CSS ENTRY — GudangHub v3.0
+
+   Import order matters:
+   1. Tokens    → CSS custom properties
+   2. Base      → Reset + typography
+   3. Components → Reusable UI (button, card, modal, etc)
+   4. Utilities → Utility classes (last, so they can override)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@import './tokens.css';
+@import './base.css';
+@import './components.css';
+@import './utilities.css';
+
+/* ─────────────────────────────────────────────────────────────────────────
+   GLOBAL LAYOUT HELPERS
+   ───────────────────────────────────────────────────────────────────── */
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  min-height: 100vh;
+}
+
+.app-main {
+  flex: 1;
+  min-height: 0;
+}
+
+/* Page transition */
+.page {
+  animation: fadeIn 0.25s var(--ease-out);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Page loader (before JS ready) */
+.page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-toast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ink);
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.page-loader.hide {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.page-loader .spinner {
+  width: 48px;
+  height: 48px;
+  border-width: 3px;
+  color: var(--orange);
+}
