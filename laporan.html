@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0d0d1a">
+  <title>GudangHub — Laporan</title>
+
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./public/icons/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="./src/styles/main.css">
+
+  <style>
+    /* Page layout mirip dashboard */
+    body {
+      background: var(--ink);
+      min-height: 100dvh;
+    }
+
+    .topbar {
+      background: var(--ink-2);
+      border-bottom: 1px solid var(--line-soft);
+      padding: 12px 20px;
+      padding-top: calc(12px + var(--safe-top));
+      padding-right: calc(20px + var(--safe-right));
+      padding-left: calc(20px + var(--safe-left));
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: var(--z-sticky);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+    }
+
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: inherit;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .topbar-brand-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--orange), var(--orange-light));
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .topbar-title {
+      font-family: var(--font-serif);
+      font-size: 17px;
+      font-weight: 700;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .topbar-title em {
+      color: var(--orange);
+      font-style: normal;
+    }
+
+    .topbar-back {
+      display: grid;
+      min-width: 40px;
+      min-height: 40px;
+      place-items: center;
+      padding: 8px;
+      border: 1px solid var(--line-soft);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--muted);
+      text-decoration: none;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+
+    .topbar-back:hover {
+      border-color: var(--orange);
+      color: var(--orange);
+    }
+
+    .btn-print {
+      background: var(--orange-dim);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 14px;
+      color: var(--orange);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: inherit;
+      min-height: 40px;
+      flex-shrink: 0;
+    }
+
+    .btn-print:hover {
+      background: rgba(255, 107, 0, 0.2);
+    }
+
+    .content {
+      padding: 20px;
+      padding-left: calc(20px + var(--safe-left));
+      padding-right: calc(20px + var(--safe-right));
+      padding-bottom: calc(20px + var(--safe-bottom));
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Report header */
+    .report-header {
+      background: var(--card);
+      border: 1px solid var(--line-soft);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .report-title {
+      font-family: var(--font-serif);
+      font-size: clamp(22px, 3vw, 28px);
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .report-subtitle {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+
+    .report-meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line-soft);
+      font-size: 12px;
+    }
+
+    .report-meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .report-meta-label {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .report-meta-value {
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    /* Filter bar */
+    .filter-panel {
+      background: var(--card);
+      border: 1px solid var(--line-soft);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .filter-field label {
+      display: block;
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .filter-field select,
+    .filter-field input {
+      width: 100%;
+      background: var(--ink-3);
+      border: 1px solid var(--line-soft);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+      outline: none;
+      min-height: 40px;
+      transition: border-color 0.15s;
+    }
+
+    .filter-field select:focus,
+    .filter-field input:focus {
+      border-color: var(--orange);
+    }
+
+    /* Stats cards */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat-mini {
+      background: var(--card);
+      border: 1px solid var(--line-soft);
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .stat-mini-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .stat-mini-value {
+      font-size: 26px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+
+    .stat-mini-sub {
+      margin-top: 4px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    /* Panel & table */
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line-soft);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .panel-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--line-soft);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .panel-title {
+      font-family: var(--font-serif);
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .laporan-table-wrap {
+      overflow-x: auto;
+    }
+
+    .laporan-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      min-width: 700px;
+    }
+
+    .laporan-table th {
+      padding: 12px 14px;
+      text-align: left;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--line-soft);
+      background: var(--ink-3);
+      white-space: nowrap;
+    }
+
+    .laporan-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      vertical-align: middle;
+    }
+
+    .laporan-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .laporan-table .total-row {
+      background: var(--ink-3);
+      font-weight: 800;
+    }
+
+    .laporan-table .total-row td {
+      border-top: 2px solid var(--orange);
+      border-bottom: none;
+      color: var(--orange);
+    }
+
+    .badge-cabang {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: var(--ink-3);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .rate-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .rate-bar-track {
+      flex: 1;
+      height: 6px;
+      background: var(--ink-3);
+      border-radius: 3px;
+      overflow: hidden;
+      min-width: 60px;
+    }
+
+    .rate-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--success), var(--orange));
+      transition: width 0.5s ease;
+    }
+
+    .rate-value {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--success);
+      white-space: nowrap;
+      min-width: 40px;
+      text-align: right;
+    }
+
+    /* Empty state */
+    .empty-state {
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .empty-state .empty-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+      opacity: 0.5;
+    }
+
+    /* Print styles */
+    @media print {
+      body {
+        background: #fff !important;
+        color: #000 !important;
+      }
+
+      .topbar,
+      .filter-panel,
+      .btn-print,
+      .topbar-back {
+        display: none !important;
+      }
+
+      .content {
+        padding: 0;
+        max-width: 100%;
+      }
+
+      .panel,
+      .stat-mini,
+      .report-header {
+        background: #fff !important;
+        border: 1px solid #ddd !important;
+        color: #000 !important;
+        box-shadow: none !important;
+        page-break-inside: avoid;
+      }
+
+      .laporan-table {
+        min-width: unset;
+      }
+
+      .laporan-table th {
+        background: #f5f5f5 !important;
+        color: #000 !important;
+      }
+
+      .laporan-table td,
+      .laporan-table tr:hover td {
+        background: #fff !important;
+        color: #000 !important;
+      }
+
+      .laporan-table .total-row td {
+        background: #f5f5f5 !important;
+        color: #d97706 !important;
+      }
+
+      .stat-mini-value,
+      .report-title {
+        color: #000 !important;
+      }
+
+      .stat-mini-label,
+      .stat-mini-sub,
+      .report-meta-label,
+      .report-subtitle {
+        color: #666 !important;
+      }
+
+      .badge-cabang {
+        background: #f5f5f5 !important;
+        color: #000 !important;
+      }
+
+      @page {
+        margin: 1.5cm;
+        size: A4;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .content { padding: 12px; }
+      .report-header { padding: 16px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="topbar">
+    <a class="topbar-back" id="btnBack" href="./dashboard.html" title="Kembali" aria-label="Kembali">
+      ←
+    </a>
+
+    <a href="./dashboard.html" class="topbar-brand">
+      <div class="topbar-brand-icon">📈</div>
+      <div class="topbar-title">Laporan</div>
+    </a>
+
+    <button class="btn-print" id="btnPrint" type="button" title="Print / Export PDF">
+      <span>🖨️</span>
+      <span>Print / PDF</span>
+    </button>
+  </header>
+
+  <main class="content" id="reportContent">
+
+    <!-- Report Header -->
+    <section class="report-header">
+      <h1 class="report-title">Laporan Order — <span id="reportPeriod">Semua Periode</span></h1>
+      <p class="report-subtitle">PT Central Perabot Utama · Waktu WITA</p>
+
+      <div class="report-meta">
+        <div class="report-meta-item">
+          <span class="report-meta-label">Dibuat oleh</span>
+          <span class="report-meta-value" id="metaCreatedBy">-</span>
+        </div>
+        <div class="report-meta-item">
+          <span class="report-meta-label">Waktu cetak</span>
+          <span class="report-meta-value" id="metaCreatedAt">-</span>
+        </div>
+        <div class="report-meta-item">
+          <span class="report-meta-label">Total order</span>
+          <span class="report-meta-value" id="metaTotalOrder">-</span>
+        </div>
+        <div class="report-meta-item">
+          <span class="report-meta-label">Rate persetujuan</span>
+          <span class="report-meta-value" id="metaApprovalRate">-</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filters -->
+    <section class="filter-panel">
+      <div class="filter-field">
+        <label for="filterCabang">Cabang</label>
+        <select id="filterCabang">
+          <option value="">Semua Cabang</option>
+          <option value="CB001">CB001 — Toko Nasional Eltari</option>
+          <option value="CB002">CB002 — Perabot Mama Oesapa</option>
+          <option value="CB003">CB003 — Perabot Mama TDM</option>
+          <option value="CB004">CB004 — Perabot Mama Kefamenanu</option>
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label for="filterPeriod">Periode</label>
+        <select id="filterPeriod">
+          <option value="all">Semua waktu</option>
+          <option value="today">Hari ini</option>
+          <option value="week">7 hari terakhir</option>
+          <option value="month">30 hari terakhir</option>
+          <option value="quarter">3 bulan terakhir</option>
+          <option value="year">1 tahun terakhir</option>
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label for="filterStatus">Status</label>
+        <select id="filterStatus">
+          <option value="">Semua status</option>
+          <option value="PENDING">⏳ Tertunda</option>
+          <option value="APPROVED">✅ Disetujui</option>
+          <option value="REJECTED">❌ Ditolak</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Stats -->
+    <div class="stats-row" id="statsRow">
+      <div class="stat-mini">
+        <div class="stat-mini-label">📦 Total Order</div>
+        <div class="stat-mini-value" id="statTotal" style="color: var(--orange);">–</div>
+        <div class="stat-mini-sub" id="statTotalSub">Semua pesanan</div>
+      </div>
+      <div class="stat-mini">
+        <div class="stat-mini-label">✅ Disetujui</div>
+        <div class="stat-mini-value" id="statApproved" style="color: var(--success);">–</div>
+        <div class="stat-mini-sub" id="statApprovedSub">-</div>
+      </div>
+      <div class="stat-mini">
+        <div class="stat-mini-label">⏳ Tertunda</div>
+        <div class="stat-mini-value" id="statPending" style="color: var(--warning);">–</div>
+        <div class="stat-mini-sub" id="statPendingSub">-</div>
+      </div>
+      <div class="stat-mini">
+        <div class="stat-mini-label">❌ Ditolak</div>
+        <div class="stat-mini-value" id="statRejected" style="color: var(--danger);">–</div>
+        <div class="stat-mini-sub" id="statRejectedSub">-</div>
+      </div>
+    </div>
+
+    <!-- Table per Cabang -->
+    <section class="panel">
+      <header class="panel-header">
+        <div class="panel-title">📊 Rekap per Cabang</div>
+      </header>
+      <div class="laporan-table-wrap">
+        <table class="laporan-table" id="tableCabang">
+          <thead>
+            <tr>
+              <th>Cabang</th>
+              <th>Nama Toko</th>
+              <th>PIC</th>
+              <th style="text-align: right;">Total</th>
+              <th style="text-align: right;">Pending</th>
+              <th style="text-align: right;">Approved</th>
+              <th style="text-align: right;">Rejected</th>
+              <th>Rate ✅</th>
+            </tr>
+          </thead>
+          <tbody id="tableCabangBody">
+            <tr>
+              <td colspan="8" class="empty-state">
+                <div class="empty-icon">⏳</div>
+                <p>Memuat data...</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Table Order Detail -->
+    <section class="panel">
+      <header class="panel-header">
+        <div class="panel-title">📋 Detail Order</div>
+        <span id="detailCount" style="font-size: 12px; color: var(--muted);"></span>
+      </header>
+      <div class="laporan-table-wrap">
+        <table class="laporan-table" id="tableDetail">
+          <thead>
+            <tr>
+              <th style="width: 40px;">#</th>
+              <th>Order ID</th>
+              <th>Cabang</th>
+              <th>Tanggal</th>
+              <th>Status</th>
+              <th style="text-align: right;">Item</th>
+              <th style="text-align: right;">Total</th>
+            </tr>
+          </thead>
+          <tbody id="tableDetailBody">
+            <tr>
+              <td colspan="7" class="empty-state">
+                <div class="empty-icon">⏳</div>
+                <p>Memuat detail order...</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <script type="module" src="./src/js/pages/laporan.js"></script>
+</body>
+</html>
