@@ -1,133 +1,199 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   MOBILE FIXES — Fix rendering issues on Android mobile
+   MOBILE FIX v2 — Aggressive fix untuk Android glitch
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* ─────────────────────────────────────────────────────────────────────
-   FIX BACKGROUND GRID GLITCH DI MOBILE
-   ───────────────────────────────────────────────────────────────────── */
-
-/* Hilangkan background grid pattern di mobile (penyebab glitch) */
+/* ═══ 1. DISABLE SEMUA EFEK BERAT DI MOBILE ═══ */
 @media (max-width: 768px) {
-  body::before {
-    display: none !important;
+
+  /* Disable will-change (paling penting!) */
+  * {
+    will-change: auto !important;
+  }
+
+  /* Disable backdrop-filter (berat di Android) */
+  *, *::before, *::after {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  /* Disable semua box-shadow yang blur besar */
+  .stat-card,
+  .card,
+  .panel,
+  .modal,
+  .bottom-sheet {
+    box-shadow: none !important;
+  }
+
+  /* Disable shadow di button hover */
+  .btn-primary,
+  .btn-secondary,
+  .btn-danger,
+  .btn-success,
+  .btn-info,
+  .cart-button,
+  .submit-button {
+    box-shadow: none !important;
+  }
+
+  /* Disable transform animations */
+  .stat-card:hover,
+  .card:hover,
+  .card-hover:hover,
+  .item-card:hover,
+  .cabang-card:hover,
+  .notif-item:hover,
+  .history-item:hover,
+  .btn-primary:hover,
+  .btn:hover {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Disable transitions (kecuali overlay/modal) */
+  .stat-card,
+  .card,
+  .panel,
+  .item-card,
+  .btn,
+  .filter-btn,
+  .filter-chip,
+  .chip {
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease !important;
+  }
+}
+
+/* ═══ 2. FIX BACKGROUND GRID (utama!) ═══ */
+@media (max-width: 768px) {
+  html, body {
+    background: #0d0d1a !important;
     background-image: none !important;
   }
 
-  html, body {
-    background: var(--ink) !important;
+  body::before,
+  body::after {
+    display: none !important;
+    content: none !important;
+    background: none !important;
     background-image: none !important;
   }
 }
 
-/* ─────────────────────────────────────────────────────────────────────
-   FIX DASHBOARD LAYOUT DI MOBILE
-   ───────────────────────────────────────────────────────────────────── */
-
+/* ═══ 3. FIX LAYOUT DASHBOARD ═══ */
 @media (max-width: 768px) {
-  /* Fix sidebar dashboard */
+  body {
+    display: block !important;
+    padding: 0 !important;
+  }
+
   .sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    width: min(280px, 85vw) !important;
     z-index: 9999 !important;
-    box-shadow: 8px 0 30px rgba(0, 0, 0, 0.8) !important;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease !important;
+    background: #12122a !important;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
   }
 
   .sidebar-overlay {
     z-index: 9998 !important;
   }
 
-  /* Fix main content */
   .main {
     margin-left: 0 !important;
     width: 100% !important;
-    overflow-x: hidden;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
   }
 
-  /* Fix topbar */
   .topbar {
-    padding: 12px 12px !important;
-    padding-top: calc(12px + var(--safe-top)) !important;
-    gap: 8px !important;
+    padding: 10px 12px !important;
+    padding-top: calc(10px + var(--safe-top)) !important;
+    gap: 6px !important;
+    background: #12122a !important;
   }
 
-  /* Hide topbar title on very small screens */
-  .topbar-title {
-    font-size: 14px !important;
-  }
-
-  .topbar-time {
-    font-size: 10px !important;
-    padding: 4px 8px !important;
-  }
-
-  /* Content padding */
   .content {
     padding: 12px !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
   }
 }
 
-@media (max-width: 480px) {
-  /* Even smaller screens - hide time text */
-  .topbar-time span:last-child {
-    display: none !important;
-  }
-
-  /* Hide refresh text, keep only icon */
-  .btn-refresh span:last-child {
-    display: none !important;
-  }
-}
-
-/* ─────────────────────────────────────────────────────────────────────
-   FIX STATS GRID DI MOBILE (STOP OVERLAP)
-   ───────────────────────────────────────────────────────────────────── */
-
+/* ═══ 4. FIX STATS GRID (STOP OVERLAP) ═══ */
 @media (max-width: 600px) {
   .stats-grid {
     display: grid !important;
     grid-template-columns: 1fr 1fr !important;
-    gap: 10px !important;
-    margin-bottom: 16px !important;
+    gap: 8px !important;
+    margin-bottom: 14px !important;
   }
 
   .stat-card {
     padding: 12px !important;
     min-width: 0 !important;
-    overflow: hidden;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    background: #1e1e3a !important;
+    border: 1px solid rgba(255,255,255,0.05) !important;
+    border-radius: 12px !important;
+  }
+
+  .stat-header {
+    margin-bottom: 8px !important;
   }
 
   .stat-value {
     font-size: 20px !important;
+    line-height: 1 !important;
+  }
+
+  .stat-label {
+    font-size: 10px !important;
+    line-height: 1.2 !important;
   }
 
   .stat-icon {
     width: 28px !important;
     height: 28px !important;
+    border-radius: 8px !important;
   }
 
-  .stat-label {
+  .stat-change {
     font-size: 10px !important;
+    margin-top: 4px !important;
   }
 }
 
-/* ─────────────────────────────────────────────────────────────────────
-   FIX GRID LAYOUTS DI MOBILE
-   ───────────────────────────────────────────────────────────────────── */
-
+/* ═══ 5. FIX GRID LAYOUTS ═══ */
 @media (max-width: 900px) {
   .grid-3-1,
-  .grid-2 {
-    grid-template-columns: 1fr !important;
-    gap: 12px !important;
+  .grid-2,
+  .cabang-grid {
+    display: block !important;
+  }
+
+  .grid-3-1 > *,
+  .grid-2 > *,
+  .cabang-grid > * {
+    margin-bottom: 12px !important;
   }
 }
 
-/* ─────────────────────────────────────────────────────────────────────
-   FIX PANEL & TABLE DI MOBILE
-   ───────────────────────────────────────────────────────────────────── */
-
+/* ═══ 6. FIX PANEL & TABLE ═══ */
 @media (max-width: 768px) {
   .panel {
     border-radius: 12px !important;
     margin-bottom: 12px !important;
+    background: #1e1e3a !important;
+    border: 1px solid rgba(255,255,255,0.05) !important;
   }
 
   .panel-header {
@@ -138,15 +204,10 @@
     padding: 12px !important;
   }
 
-  .panel-title {
-    font-size: 13px !important;
-  }
-
-  /* Table scroll */
   .order-table-wrap,
   .laporan-table-wrap {
     overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch;
+    -webkit-overflow-scrolling: touch !important;
     width: 100% !important;
   }
 
@@ -159,17 +220,18 @@
   .order-table th,
   .order-table td {
     padding: 8px 10px !important;
+    white-space: nowrap !important;
   }
 }
 
-/* ─────────────────────────────────────────────────────────────────────
-   FIX ORDER PAGE / CATALOG DI MOBILE
-   ───────────────────────────────────────────────────────────────────── */
-
+/* ═══ 7. FIX ORDER PAGE ═══ */
 @media (max-width: 768px) {
-  /* Fix topbar order */
+  body {
+    padding-bottom: 90px !important;
+  }
+
   .branch-label {
-    max-width: 40% !important;
+    max-width: 35% !important;
     font-size: 10px !important;
     padding: 4px 8px !important;
   }
@@ -179,14 +241,18 @@
     height: 32px !important;
   }
 
+  .topbar-title {
+    font-size: 13px !important;
+  }
+
   .topbar-action {
     min-width: 32px !important;
     min-height: 32px !important;
     padding: 6px !important;
   }
 
-  /* Fix catalog grid */
   .catalog-grid {
+    display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 8px !important;
     padding: 8px 12px !important;
@@ -195,61 +261,48 @@
   .item-card {
     padding: 10px !important;
     min-width: 0 !important;
-    overflow: hidden;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    background: #1e1e3a !important;
+    border: 1px solid rgba(255,255,255,0.05) !important;
+    border-radius: 12px !important;
   }
 
   .item-icon {
-    width: 36px !important;
-    height: 36px !important;
+    width: 32px !important;
+    height: 32px !important;
     margin-bottom: 6px !important;
   }
 
   .item-name {
     font-size: 11px !important;
+    line-height: 1.3 !important;
   }
 
   .item-price {
     font-size: 12px !important;
   }
-}
 
-@media (max-width: 380px) {
-  .catalog-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 6px !important;
-  }
-
-  .topbar-title {
-    display: none !important;
+  .item-code,
+  .item-category,
+  .item-unit {
+    font-size: 9px !important;
   }
 }
 
-/* ─────────────────────────────────────────────────────────────────────
-   FIX CABANG GRID DI MOBILE
-   ───────────────────────────────────────────────────────────────────── */
-
+/* ═══ 8. FIX MODAL ═══ */
 @media (max-width: 768px) {
-  .cabang-grid {
-    grid-template-columns: 1fr !important;
-    gap: 10px !important;
-  }
-
-  .cabang-card {
+  .overlay {
     padding: 12px !important;
   }
-}
 
-/* ─────────────────────────────────────────────────────────────────────
-   FIX MODAL & OVERLAY DI MOBILE
-   ───────────────────────────────────────────────────────────────────── */
-
-@media (max-width: 768px) {
   .modal,
   .modal-lg,
   .modal-xl {
     max-width: calc(100vw - 24px) !important;
     max-height: calc(100vh - 40px) !important;
     max-height: calc(100dvh - 40px) !important;
+    border-radius: 16px !important;
   }
 
   .modal-body {
@@ -261,14 +314,12 @@
   }
 }
 
-/* ─────────────────────────────────────────────────────────────────────
-   FIX BOTTOM SHEET (CART) DI MOBILE
-   ───────────────────────────────────────────────────────────────────── */
-
+/* ═══ 9. FIX BOTTOM SHEET ═══ */
 @media (max-width: 768px) {
   .bottom-sheet {
     max-height: 85dvh !important;
     max-height: 85vh !important;
+    background: #12122a !important;
   }
 
   .cart-items {
@@ -280,66 +331,52 @@
   }
 }
 
-/* ─────────────────────────────────────────────────────────────────────
-   FIX CART FLOATING BAR DI MOBILE
-   ───────────────────────────────────────────────────────────────────── */
-
+/* ═══ 10. FIX CART FLOATING BAR ═══ */
 @media (max-width: 768px) {
   .cart-bar {
     left: 8px !important;
     right: 8px !important;
-    bottom: calc(var(--bottom-nav-height) + var(--safe-bottom) + 8px) !important;
+    bottom: 76px !important;
+    left: max(8px, var(--safe-left)) !important;
+    right: max(8px, var(--safe-right)) !important;
   }
 
   .cart-button {
     padding: 12px 16px !important;
     font-size: 13px !important;
-    min-height: 48px !important;
-  }
-
-  .cart-count {
-    font-size: 11px !important;
-    padding: 2px 8px !important;
+    min-height: 46px !important;
   }
 }
 
-/* ─────────────────────────────────────────────────────────────────────
-   FIX BOTTOM NAV DI MOBILE
-   ───────────────────────────────────────────────────────────────────── */
-
+/* ═══ 11. FIX BOTTOM NAV ═══ */
 @media (max-width: 768px) {
   .bottom-nav {
     height: calc(60px + var(--safe-bottom)) !important;
+    background: #12122a !important;
+    border-top: 1px solid rgba(255,255,255,0.05) !important;
   }
 
   .nav-tab {
     font-size: 9px !important;
   }
-
-  .nav-tab-icon svg {
-    width: 20px !important;
-    height: 20px !important;
-  }
 }
 
-/* ─────────────────────────────────────────────────────────────────────
-   FIX FILTER BAR SCROLL DI MOBILE
-   ───────────────────────────────────────────────────────────────────── */
-
+/* ═══ 12. FIX FILTER SCROLL ═══ */
 @media (max-width: 768px) {
   .filter-bar,
   .filter-scroll,
   .filter-chips {
     overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch;
+    -webkit-overflow-scrolling: touch !important;
     flex-wrap: nowrap !important;
-    scrollbar-width: none;
+    scrollbar-width: none !important;
+    padding-bottom: 4px !important;
   }
 
   .filter-bar::-webkit-scrollbar,
   .filter-scroll::-webkit-scrollbar,
   .filter-chips::-webkit-scrollbar {
-    display: none;
+    display: none !important;
   }
 
   .filter-btn,
@@ -348,129 +385,61 @@
     flex-shrink: 0 !important;
     padding: 6px 12px !important;
     font-size: 11px !important;
+    white-space: nowrap !important;
   }
-}
 
-/* ─────────────────────────────────────────────────────────────────────
-   FIX SEARCH INPUT WRAP DI MOBILE
-   ───────────────────────────────────────────────────────────────────── */
-
-@media (max-width: 768px) {
   .search-input-wrap {
     min-width: 100% !important;
     width: 100% !important;
+    flex-shrink: 0 !important;
   }
 }
 
-/* ─────────────────────────────────────────────────────────────────────
-   FIX ACTIVITY & LIST ITEMS DI MOBILE
-   ───────────────────────────────────────────────────────────────────── */
-
-@media (max-width: 768px) {
-  .activity-item {
-    gap: 10px !important;
-    padding: 10px 0 !important;
-  }
-
-  .activity-text {
-    font-size: 11px !important;
-  }
-
-  .history-item,
-  .notif-item {
-    padding: 12px !important;
-    gap: 10px !important;
-  }
-
-  .notif-icon {
-    width: 36px !important;
-    height: 36px !important;
-  }
-
-  .notif-title {
-    font-size: 13px !important;
-  }
-
-  .notif-desc {
-    font-size: 12px !important;
-  }
-}
-
-/* ─────────────────────────────────────────────────────────────────────
-   PREVENT HORIZONTAL SCROLL
-   ───────────────────────────────────────────────────────────────────── */
-
+/* ═══ 13. PREVENT HORIZONTAL SCROLL ═══ */
 html, body {
   overflow-x: hidden !important;
   max-width: 100vw !important;
+  position: relative !important;
 }
 
-* {
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-/* Kecuali table & scroll containers */
-.order-table,
-.laporan-table {
-  max-width: none;
-}
-
-.order-table-wrap,
-.laporan-table-wrap,
-.filter-scroll,
-.filter-chips,
-.marquee-track {
-  max-width: 100%;
-  overflow-x: auto;
-}
-
-/* ─────────────────────────────────────────────────────────────────────
-   FIX SIDEBAR MOBILE DRAWER
-   ───────────────────────────────────────────────────────────────────── */
-
+/* ═══ 14. DISABLE ANIMATION SPINNER YANG BERAT ═══ */
 @media (max-width: 768px) {
-  .sidebar {
-    width: min(280px, 85vw) !important;
-    transform: translateX(-100%);
+  .live-dot {
+    animation: none !important;
   }
 
-  .sidebar.open {
-    transform: translateX(0);
+  /* Keep spinner untuk loading */
+  .spinner {
+    animation: spin 0.6s linear infinite !important;
   }
 }
 
-/* ─────────────────────────────────────────────────────────────────────
-   FIX TEXT WRAPPING & OVERFLOW
-   ───────────────────────────────────────────────────────────────────── */
+/* ═══ 15. FIX LANDING PAGE DI MOBILE ═══ */
+@media (max-width: 768px) {
+  .bg-particles,
+  .cursor-glow {
+    display: none !important;
+  }
 
-.stat-value,
-.stat-label,
-.card-title,
-.panel-title,
-.item-name,
-.item-code,
-.cart-name,
-.notif-title,
-.history-id {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 0;
+  .hero-headline h1 .word {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .hero-headline h1 em::after {
+    animation: none !important;
+    transform: scaleX(1) !important;
+  }
 }
 
-/* ─────────────────────────────────────────────────────────────────────
-   FORCE HARDWARE ACCELERATION (Fix rendering glitch)
-   ───────────────────────────────────────────────────────────────────── */
-
-.sidebar,
-.topbar,
-.bottom-nav,
-.bottom-sheet,
-.cart-bar,
-.modal,
-.overlay {
-  transform: translateZ(0);
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
-  will-change: transform;
-}
+/* ═══ 16. RESET Z-INDEX YANG BENAR ═══ */
+.sidebar-overlay { z-index: 9998 !important; }
+.sidebar { z-index: 9999 !important; }
+.topbar { z-index: 100 !important; }
+.bottom-nav { z-index: 200 !important; }
+.cart-bar { z-index: 300 !important; }
+.sheet-overlay { z-index: 400 !important; }
+.bottom-sheet { z-index: 500 !important; }
+.overlay { z-index: 500 !important; }
+.toast-container { z-index: 99999 !important; }
