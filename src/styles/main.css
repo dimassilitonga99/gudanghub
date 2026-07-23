@@ -12,7 +12,7 @@
 @import './base.css';
 @import './components.css';
 @import './utilities.css';
-
+@import './mobile-fix.css';
 /* ─────────────────────────────────────────────────────────────────────────
    GLOBAL LAYOUT HELPERS
    ───────────────────────────────────────────────────────────────────── */
