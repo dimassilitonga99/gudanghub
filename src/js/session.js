@@ -2,15 +2,8 @@
    SESSION — User Authentication & Session Management
    ═══════════════════════════════════════════════════════════════════════ */
 
-import { SESSION, ROUTES, getHomeRoute } from './config.js';
+import { SESSION, ROUTES, getHomeRoute as getHomeRouteFromConfig } from './config.js';
 
-// ─────────────────────────────────────────────────────────────────────────
-// LOW-LEVEL STORAGE
-// ─────────────────────────────────────────────────────────────────────────
-
-/**
- * Baca session dari sessionStorage
- */
 export function getSession() {
   try {
     const raw = sessionStorage.getItem(SESSION.key);
@@ -20,9 +13,6 @@ export function getSession() {
   }
 }
 
-/**
- * Simpan session
- */
 export function setSession(user, token = null) {
   const now = new Date();
   const expires = new Date(now.getTime() + SESSION.durationHours * 60 * 60 * 1000);
@@ -45,9 +35,6 @@ export function setSession(user, token = null) {
   }
 }
 
-/**
- * Hapus session
- */
 export function clearSession() {
   try {
     sessionStorage.removeItem(SESSION.key);
@@ -57,17 +44,9 @@ export function clearSession() {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-// SESSION VALIDATION
-// ─────────────────────────────────────────────────────────────────────────
-
-/**
- * Cek apakah session valid (ada + belum expired)
- */
 export function isSessionValid(currentSession = null) {
   const s = currentSession || getSession();
   if (!s || !s.expires) return false;
-
   try {
     return new Date(s.expires) > new Date();
   } catch {
@@ -75,29 +54,19 @@ export function isSessionValid(currentSession = null) {
   }
 }
 
-/**
- * Cek apakah user adalah admin
- */
 export function isAdmin(currentSession = null) {
   const s = currentSession || getSession();
   return s?.role === 'admin';
 }
 
-/**
- * Cek apakah user adalah cabang
- */
 export function isCabang(currentSession = null) {
   const s = currentSession || getSession();
   return s?.role === 'cabang';
 }
 
-/**
- * Get sisa waktu session (dalam menit)
- */
 export function getSessionRemainingMinutes() {
   const s = getSession();
   if (!s || !s.expires) return 0;
-
   try {
     const diff = new Date(s.expires) - new Date();
     return Math.max(0, Math.floor(diff / 60000));
@@ -105,10 +74,6 @@ export function getSessionRemainingMinutes() {
     return 0;
   }
 }
-
-// ─────────────────────────────────────────────────────────────────────────
-// LAST USER (untuk "Remember Me")
-// ─────────────────────────────────────────────────────────────────────────
 
 export function getLastUsername() {
   try {
@@ -131,59 +96,41 @@ export function setLastUsername(username) {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-// GUARDS (untuk protect halaman)
-// ─────────────────────────────────────────────────────────────────────────
+// Re-export getHomeRoute from config
+export function getHomeRoute(role) {
+  return getHomeRouteFromConfig(role);
+}
 
-/**
- * Require valid session, else redirect to login
- * @returns session data jika valid, else null (dan sudah redirect)
- */
 export function requireAuth() {
   const s = getSession();
-
   if (!s || !isSessionValid(s)) {
     clearSession();
     redirectToLogin();
     return null;
   }
-
   return s;
 }
 
-/**
- * Require admin role
- */
 export function requireAdmin() {
   const s = requireAuth();
   if (!s) return null;
-
   if (s.role !== 'admin') {
     redirectToHome(s);
     return null;
   }
-
   return s;
 }
 
-/**
- * Require cabang role
- */
 export function requireCabang() {
   const s = requireAuth();
   if (!s) return null;
-
   if (s.role !== 'cabang') {
     redirectToHome(s);
     return null;
   }
-
   return s;
 }
 
-/**
- * Jangan tampilkan jika sudah login (buat halaman login)
- */
 export function redirectIfAuthenticated() {
   const s = getSession();
   if (s && isSessionValid(s)) {
@@ -193,28 +140,16 @@ export function redirectIfAuthenticated() {
   return false;
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-// REDIRECT HELPERS
-// ─────────────────────────────────────────────────────────────────────────
-
-/**
- * Redirect ke halaman login
- */
 export function redirectToLogin() {
   if (window.location.pathname.endsWith(ROUTES.login)) return;
   window.location.href = ROUTES.login;
 }
 
-/**
- * Redirect ke home sesuai role
- */
 export function redirectToHome(currentSession = null) {
   const s = currentSession || getSession();
   if (!s) return redirectToLogin();
 
-  const route = getHomeRoute(s.role);
-
-  // Untuk cabang, tambahkan query param cabang
+  const route = getHomeRouteFromConfig(s.role);
   const url = s.role === 'cabang' && s.idCabang
     ? `${route}?cabang=${encodeURIComponent(s.idCabang)}`
     : route;
@@ -222,9 +157,6 @@ export function redirectToHome(currentSession = null) {
   window.location.href = url;
 }
 
-/**
- * Logout & redirect
- */
 export function logout(redirectAfter = true) {
   clearSession();
   if (redirectAfter) {
@@ -232,13 +164,6 @@ export function logout(redirectAfter = true) {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-// SESSION EVENTS (untuk detect logout dari tab lain, dll)
-// ─────────────────────────────────────────────────────────────────────────
-
-/**
- * Listen untuk perubahan session (dari tab lain)
- */
 export function onSessionChange(callback) {
   const handler = (e) => {
     if (e.key === SESSION.key) {
@@ -249,24 +174,15 @@ export function onSessionChange(callback) {
   return () => window.removeEventListener('storage', handler);
 }
 
-/**
- * Auto-check session validity setiap N detik
- * Callback dipanggil ketika session expired
- */
 export function watchSessionExpiry(onExpired, intervalMs = 60000) {
   const check = () => {
     if (!isSessionValid()) {
       onExpired?.();
     }
   };
-
   const timer = setInterval(check, intervalMs);
   return () => clearInterval(timer);
 }
-
-// ─────────────────────────────────────────────────────────────────────────
-// EXPORT DEFAULT
-// ─────────────────────────────────────────────────────────────────────────
 
 export default {
   getSession,
@@ -278,6 +194,7 @@ export default {
   getSessionRemainingMinutes,
   getLastUsername,
   setLastUsername,
+  getHomeRoute,
   requireAuth,
   requireAdmin,
   requireCabang,

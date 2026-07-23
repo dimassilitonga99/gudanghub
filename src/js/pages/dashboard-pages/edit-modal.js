@@ -1,32 +1,28 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   EDIT MODAL — Kelola Order Detail (Edit/Reject/Delete/Add Items)
+   EDIT MODAL — with Lucide Icons
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, escapeHtml, formatRupiah, formatWita, toNumber, toInt } from '../../utils.js';
 import { CABANG } from '../../config.js';
 import { orders as ordersApi } from '../../api.js';
 import { toast, confirm, prompt } from '../../ui.js';
-
-// ─────────────────────────────────────────────────────────────────────────
-// STATE
-// ─────────────────────────────────────────────────────────────────────────
+import { icon, injectIcons } from '../../icons.js';
 
 let modalState = {
   orderId: '',
   order: null,
-  items: [],           // editable items array
-  originalItems: [],   // snapshot untuk detect changes
+  items: [],
+  originalItems: [],
   dashboardState: null,
 };
 
 // ─────────────────────────────────────────────────────────────────────────
-// INIT (dipanggil sekali di dashboard init)
+// INIT
 // ─────────────────────────────────────────────────────────────────────────
 
 export function initEditModal(dashboardState) {
   modalState.dashboardState = dashboardState;
 
-  // Buat modal container di body jika belum ada
   const container = $('editModalContainer');
   if (!container) return;
 
@@ -35,19 +31,17 @@ export function initEditModal(dashboardState) {
       <div class="modal modal-lg">
         <header class="modal-header">
           <div class="modal-title" id="editModalTitle">Detail Pesanan</div>
-          <button class="modal-close" id="editModalClose" type="button" aria-label="Tutup">✕</button>
+          <button class="modal-close" id="editModalClose" type="button" aria-label="Tutup">
+            <span data-icon="close" data-icon-size="16"></span>
+          </button>
         </header>
-        <div class="modal-body" id="editModalBody">
-          <!-- Diisi saat show -->
-        </div>
+        <div class="modal-body" id="editModalBody"></div>
       </div>
     </div>
   `;
 
-  // Add edit modal styles
   addEditModalStyles();
 
-  // Bind close events
   $('editModalClose')?.addEventListener('click', closeEditModal);
   $('editOverlay')?.addEventListener('click', (e) => {
     if (e.target.id === 'editOverlay') closeEditModal();
@@ -55,7 +49,7 @@ export function initEditModal(dashboardState) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// CSS INJECTION (styles khusus modal)
+// CSS INJECTION
 // ─────────────────────────────────────────────────────────────────────────
 
 function addEditModalStyles() {
@@ -64,8 +58,6 @@ function addEditModalStyles() {
   const style = document.createElement('style');
   style.id = 'editModalStyles';
   style.textContent = `
-    /* ═══════════ EDIT MODAL ═══════════ */
-
     .info-row {
       display: flex;
       justify-content: space-between;
@@ -76,7 +68,13 @@ function addEditModalStyles() {
       flex-wrap: wrap;
     }
     .info-row:last-child { border-bottom: none; }
-    .info-label { color: var(--muted); flex-shrink: 0; }
+    .info-label {
+      color: var(--muted);
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
     .info-value {
       font-weight: 600;
       text-align: right;
@@ -149,6 +147,9 @@ function addEditModalStyles() {
       color: var(--orange);
       font-weight: 700;
       word-break: break-all;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
     }
 
     .er-nama {
@@ -208,10 +209,9 @@ function addEditModalStyles() {
       border: 1px solid var(--line-soft);
       background: var(--card);
       cursor: pointer;
-      font-size: 13px;
       display: grid;
       place-items: center;
-      transition: background 0.15s, border-color 0.15s;
+      transition: background 0.15s, border-color 0.15s, transform 0.15s;
       font-family: inherit;
       flex-shrink: 0;
     }
@@ -227,7 +227,9 @@ function addEditModalStyles() {
     .er-btn.restore:hover { background: rgba(34, 197, 94, 0.15); border-color: var(--success); }
 
     .er-badge {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
       font-size: 9px;
       font-weight: 700;
       padding: 2px 8px;
@@ -253,6 +255,9 @@ function addEditModalStyles() {
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.3px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
     }
 
     .er-reason textarea {
@@ -281,7 +286,7 @@ function addEditModalStyles() {
       gap: 12px;
       flex-wrap: wrap;
     }
-    .er-stok-info span { display: inline-flex; gap: 3px; }
+    .er-stok-info span { display: inline-flex; gap: 3px; align-items: center; }
 
     .add-row {
       display: grid;
@@ -325,6 +330,9 @@ function addEditModalStyles() {
       transition: background 0.15s;
       font-family: inherit;
       min-height: 36px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .btn-add-item:hover { background: rgba(255, 107, 0, 0.2); }
@@ -430,7 +438,6 @@ function addEditModalStyles() {
       pointer-events: none;
     }
 
-    /* Responsive */
     @media (max-width: 600px) {
       .er-top {
         grid-template-columns: 1fr auto;
@@ -443,7 +450,7 @@ function addEditModalStyles() {
       .er-sub { text-align: right; padding-top: 4px; }
       .mf-save, .mf-email, .mf-cancel { min-width: 100%; }
       .add-row { grid-template-columns: 1fr; gap: 6px; }
-      .btn-add-item { width: 100%; }
+      .btn-add-item { width: 100%; justify-content: center; }
     }
   `;
   document.head.appendChild(style);
@@ -465,7 +472,6 @@ export function showEditModal(orderId, dashboardState) {
   modalState.order = order;
   modalState.dashboardState = dashboardState;
 
-  // Map DETAIL menjadi items array yang editable
   modalState.items = (order.DETAIL || []).map((d) => ({
     kode: String(d.KODE_BARANG || ''),
     nama: String(d.NAMA_BARANG || ''),
@@ -480,7 +486,6 @@ export function showEditModal(orderId, dashboardState) {
     stokToko: d.STOK_TOKO ?? '',
   }));
 
-  // Snapshot untuk detect changes
   modalState.originalItems = JSON.parse(JSON.stringify(modalState.items));
 
   renderModalContent();
@@ -501,52 +506,50 @@ export function closeEditModal() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// RENDER MODAL CONTENT
+// RENDER MODAL
 // ─────────────────────────────────────────────────────────────────────────
 
 function renderModalContent() {
   const { order } = modalState;
-  const branch = CABANG[order.ID_CABANG] || { nama: '-', pic: '-', icon: '🏪' };
+  const branch = CABANG[order.ID_CABANG] || { nama: '-', pic: '-' };
 
-  $('editModalTitle').textContent = `📦 ${order.ORDER_ID}`;
+  $('editModalTitle').innerHTML = `${icon('package', { size: 18 })} ${order.ORDER_ID}`;
 
   const body = $('editModalBody');
   if (!body) return;
 
   body.innerHTML = `
-    <!-- Info -->
     <div class="info-row">
-      <span class="info-label">Cabang</span>
-      <span class="info-value">${branch.icon} ${escapeHtml(branch.nama)} (${escapeHtml(order.ID_CABANG)})</span>
+      <span class="info-label">${icon('store', { size: 14 })} Cabang</span>
+      <span class="info-value">${escapeHtml(branch.nama)} (${escapeHtml(order.ID_CABANG)})</span>
     </div>
     <div class="info-row">
-      <span class="info-label">PIC</span>
+      <span class="info-label">${icon('user', { size: 14 })} PIC</span>
       <span class="info-value">${escapeHtml(branch.pic)}</span>
     </div>
     <div class="info-row">
-      <span class="info-label">Tanggal Order</span>
+      <span class="info-label">${icon('calendar-clock', { size: 14 })} Tanggal Order</span>
       <span class="info-value">${escapeHtml(formatWita(order.TANGGAL_ORDER))}</span>
     </div>
     <div class="info-row">
-      <span class="info-label">Status</span>
+      <span class="info-label">${icon('info', { size: 14 })} Status</span>
       <span class="info-value">${escapeHtml(order.STATUS)}</span>
     </div>
     ${order.CATATAN ? `
       <div class="info-row">
-        <span class="info-label">Catatan Cabang</span>
+        <span class="info-label">${icon('message', { size: 14 })} Catatan Cabang</span>
         <span class="info-value">${escapeHtml(order.CATATAN)}</span>
       </div>
     ` : ''}
 
-    <!-- Items -->
     <div class="edit-section-title">
-      ✏️ Kelola Item
+      ${icon('edit', { size: 16, color: 'var(--orange)' })}
+      Kelola Item
       <span class="edit-section-count" id="editSectionCount">${modalState.items.length} item</span>
     </div>
 
     <div id="editRows"></div>
 
-    <!-- Add new item -->
     <div class="add-row">
       <select id="addKode">
         <option value="">+ Pilih barang untuk ditambah...</option>
@@ -557,16 +560,17 @@ function renderModalContent() {
         `).join('')}
       </select>
       <input id="addQty" type="number" min="1" value="1" placeholder="Jml">
-      <button class="btn-add-item" id="btnTambahItem" type="button">+ Tambah</button>
+      <button class="btn-add-item" id="btnTambahItem" type="button">
+        ${icon('plus', { size: 14 })}
+        Tambah
+      </button>
     </div>
 
-    <!-- Total -->
     <div class="edit-total">
       <span>Total Disetujui:</span>
       <span id="editTotal">Rp 0</span>
     </div>
 
-    <!-- Catatan admin -->
     <textarea
       class="edit-catatan"
       id="editCatatan"
@@ -574,15 +578,17 @@ function renderModalContent() {
       placeholder="Catatan admin (opsional)..."
     ></textarea>
 
-    <!-- Footer buttons -->
     <div class="modal-foot">
       <button class="mf-btn mf-save" id="btnSaveEdit" type="button">
-        💾 Simpan Perubahan
+        ${icon('save', { size: 16 })}
+        Simpan Perubahan
       </button>
       <button class="mf-btn mf-email" id="btnSendEmail" type="button">
-        📧 Kirim Email ke Cabang
+        ${icon('send', { size: 16 })}
+        Kirim Email ke Cabang
       </button>
       <button class="mf-btn mf-cancel" id="btnCloseModal" type="button">
+        ${icon('close', { size: 16 })}
         Tutup
       </button>
     </div>
@@ -590,6 +596,9 @@ function renderModalContent() {
 
   renderEditRows();
   bindModalEvents();
+
+  // Re-inject icons di modal
+  injectIcons(body);
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -603,7 +612,7 @@ function renderEditRows() {
   if (!modalState.items.length) {
     wrapper.innerHTML = `
       <div class="empty-state">
-        <div class="empty-state-icon">📭</div>
+        <div class="empty-state-icon">${icon('package-x', { size: 48, color: 'var(--muted)' })}</div>
         <p>Tidak ada item. Tambahkan barang di bawah.</p>
       </div>
     `;
@@ -620,20 +629,35 @@ function renderEditRows() {
                     : edited ? 'edited'
                     : 'approved';
 
-    const badge = deleted ? '<span class="er-badge del-badge">🗑️ DIHAPUS</span>'
-                : rejected ? '<span class="er-badge rej-badge">🚫 DITOLAK</span>'
-                : edited ? '<span class="er-badge edit-badge">✏️ DIEDIT</span>'
+    const badge = deleted ? `<span class="er-badge del-badge">${icon('trash', { size: 10 })} DIHAPUS</span>`
+                : rejected ? `<span class="er-badge rej-badge">${icon('ban', { size: 10 })} DITOLAK</span>`
+                : edited ? `<span class="er-badge edit-badge">${icon('edit-2', { size: 10 })} DIEDIT</span>`
                 : '';
 
     const reasonRequired = deleted || rejected;
 
-    // Stok info dari input cabang (jika ada)
     const stokInfo = (item.stokGudang !== '' || item.stokToko !== '') ? `
       <div class="er-stok-info">
-        ${item.stokGudang !== '' ? `<span>🏭 Gudang: <b>${item.stokGudang}</b></span>` : ''}
-        ${item.stokToko !== '' ? `<span>📦 Toko: <b>${item.stokToko}</b></span>` : ''}
+        ${item.stokGudang !== '' ? `<span>${icon('warehouse', { size: 12 })} Gudang: <b>${item.stokGudang}</b></span>` : ''}
+        ${item.stokToko !== '' ? `<span>${icon('store', { size: 12 })} Toko: <b>${item.stokToko}</b></span>` : ''}
       </div>
     ` : '';
+
+    const actionButtons = (deleted || rejected)
+      ? `<button class="er-btn restore" type="button" data-restore-index="${index}" title="Kembalikan">
+          ${icon('refresh', { size: 14 })}
+        </button>`
+      : `
+        <button class="er-btn edit" type="button" data-edit-index="${index}" title="Edit qty">
+          ${icon('edit-2', { size: 14 })}
+        </button>
+        <button class="er-btn rej" type="button" data-reject-index="${index}" title="Tolak">
+          ${icon('ban', { size: 14 })}
+        </button>
+        <button class="er-btn del" type="button" data-delete-index="${index}" title="Hapus">
+          ${icon('trash', { size: 14 })}
+        </button>
+      `;
 
     return `
       <div class="edit-row ${className}">
@@ -659,20 +683,15 @@ function renderEditRows() {
           </div>
 
           <div class="er-acts">
-            ${deleted || rejected
-              ? `<button class="er-btn restore" type="button" data-restore-index="${index}" title="Kembalikan">↩️</button>`
-              : `
-                <button class="er-btn edit" type="button" data-edit-index="${index}" title="Edit qty">✏️</button>
-                <button class="er-btn rej" type="button" data-reject-index="${index}" title="Tolak">🚫</button>
-                <button class="er-btn del" type="button" data-delete-index="${index}" title="Hapus">🗑️</button>
-              `}
+            ${actionButtons}
           </div>
         </div>
 
         ${reasonRequired || edited ? `
           <div class="er-reason">
             <div class="er-reason-label">
-              ${reasonRequired ? '⚠️ Keterangan wajib' : '📝 Keterangan perubahan'}
+              ${icon(reasonRequired ? 'alert-circle' : 'edit-3', { size: 12 })}
+              ${reasonRequired ? 'Keterangan wajib' : 'Keterangan perubahan'}
             </div>
             <textarea
               data-reason-index="${index}"
@@ -710,7 +729,6 @@ function updateEditTotal() {
 // ─────────────────────────────────────────────────────────────────────────
 
 function bindEditRowEvents() {
-  // Qty change
   document.querySelectorAll('[data-qty-index]').forEach((input) => {
     input.addEventListener('change', () => {
       const index = toInt(input.dataset.qtyIndex);
@@ -719,34 +737,28 @@ function bindEditRowEvents() {
     });
   });
 
-  // Reason change
   document.querySelectorAll('[data-reason-index]').forEach((textarea) => {
     textarea.addEventListener('input', () => {
       const index = toInt(textarea.dataset.reasonIndex);
       modalState.items[index].reason = textarea.value;
-      // Remove empty warning
       if (textarea.value.trim()) {
         textarea.classList.remove('required-empty');
       }
     });
   });
 
-  // Edit qty
   document.querySelectorAll('[data-edit-index]').forEach((btn) => {
     btn.addEventListener('click', () => editQuantity(toInt(btn.dataset.editIndex)));
   });
 
-  // Reject item
   document.querySelectorAll('[data-reject-index]').forEach((btn) => {
     btn.addEventListener('click', () => rejectItem(toInt(btn.dataset.rejectIndex)));
   });
 
-  // Delete item
   document.querySelectorAll('[data-delete-index]').forEach((btn) => {
     btn.addEventListener('click', () => deleteItem(toInt(btn.dataset.deleteIndex)));
   });
 
-  // Restore item
   document.querySelectorAll('[data-restore-index]').forEach((btn) => {
     btn.addEventListener('click', () => restoreItem(toInt(btn.dataset.restoreIndex)));
   });
@@ -760,7 +772,7 @@ async function editQuantity(index) {
     title: 'Ubah Quantity',
     message: `${item.kode} — ${item.nama}\nQty asli: ${item.originalQty}\nQty saat ini: ${item.qty}`,
     placeholder: 'Keterangan perubahan (opsional)...',
-    okText: '💾 Update',
+    okText: 'Update',
     okVariant: 'info',
     required: false,
     defaultValue: item.reason,
@@ -780,7 +792,6 @@ async function editQuantity(index) {
 async function rejectItem(index) {
   const item = modalState.items[index];
 
-  // Kalau sudah REJECTED, restore
   if (item.itemStatus === 'REJECTED') {
     restoreItem(index);
     return;
@@ -791,7 +802,7 @@ async function rejectItem(index) {
     title: 'Tolak Item',
     message: `${item.kode} — ${item.nama}\nQty: ${item.qty}\n\nIsi alasan wajib:`,
     placeholder: 'Contoh: Stok tidak cukup...',
-    okText: '🚫 Ya, Tolak',
+    okText: 'Ya, Tolak',
     okVariant: 'danger',
     required: true,
     defaultValue: item.reason,
@@ -807,7 +818,6 @@ async function rejectItem(index) {
 async function deleteItem(index) {
   const item = modalState.items[index];
 
-  // Kalau sudah DELETED, restore
   if (item.itemStatus === 'DELETED') {
     restoreItem(index);
     return;
@@ -818,7 +828,7 @@ async function deleteItem(index) {
     title: 'Hapus Item',
     message: `${item.kode} — ${item.nama}\nQty: ${item.qty}\n\nIsi alasan wajib:`,
     placeholder: 'Contoh: Barang tidak tersedia...',
-    okText: '🗑️ Ya, Hapus',
+    okText: 'Ya, Hapus',
     okVariant: 'danger',
     required: true,
     defaultValue: item.reason,
@@ -864,7 +874,6 @@ function addNewItem() {
     return;
   }
 
-  // Cek apakah sudah ada (dan APPROVED) → tambah qty
   const existing = modalState.items.find(
     (item) =>
       item.kode.toUpperCase() === code.toUpperCase() &&
@@ -880,7 +889,7 @@ function addNewItem() {
       nama: String(product.NAMA_BARANG || ''),
       kategori: String(product.KATEGORI || ''),
       qty: quantity,
-      originalQty: 0, // 0 = item baru ditambah admin
+      originalQty: 0,
       satuan: String(product.SATUAN || 'PCS'),
       harga: toNumber(product.HARGA),
       itemStatus: 'APPROVED',
@@ -888,17 +897,16 @@ function addNewItem() {
       stokGudang: '',
       stokToko: '',
     });
-    toast.success(`✅ ${product.NAMA_BARANG} ditambahkan`);
+    toast.success(`${product.NAMA_BARANG} ditambahkan`);
   }
 
-  // Reset input
   kodeSelect.value = '';
   qtyInput.value = 1;
   renderEditRows();
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// VALIDASI
+// VALIDATION
 // ─────────────────────────────────────────────────────────────────────────
 
 function validateItems() {
@@ -909,7 +917,6 @@ function validateItems() {
       if (!item.reason || !item.reason.trim()) {
         errors.push(`${item.kode} (${item.itemStatus === 'REJECTED' ? 'ditolak' : 'dihapus'}) belum ada alasan`);
 
-        // Highlight textarea kosong
         const textarea = document.querySelector(`[data-reason-index="${index}"]`);
         if (textarea) textarea.classList.add('required-empty');
       }
@@ -929,32 +936,29 @@ async function handleSave(sendEmail) {
     return;
   }
 
-  // Validasi reason
   const errors = validateItems();
   if (errors.length > 0) {
-    toast.error(`⚠️ ${errors.length} item ditolak/dihapus wajib punya alasan.`, {
+    toast.error(`${errors.length} item ditolak/dihapus wajib punya alasan.`, {
       duration: 5000,
     });
     return;
   }
 
-  // Hitung summary
   const approved = modalState.items.filter((i) => i.itemStatus === 'APPROVED');
   const rejected = modalState.items.filter((i) => i.itemStatus === 'REJECTED');
   const deleted = modalState.items.filter((i) => i.itemStatus === 'DELETED');
   const edited = approved.filter((i) => i.originalQty && i.originalQty !== i.qty);
   const total = approved.reduce((s, i) => s + i.qty * i.harga, 0);
 
-  // Confirm
   const confirmMsg = sendEmail
-    ? `Order ${modalState.orderId}\n\nStatus akan menjadi ${approved.length === 0 ? 'REJECTED' : 'APPROVED'}.\nEmail akan dikirim ke cabang.\n\n✅ ${approved.length} disetujui (${edited.length} diedit)\n🚫 ${rejected.length} ditolak\n🗑️ ${deleted.length} dihapus\n\nTotal: ${formatRupiah(total)}`
-    : `Order ${modalState.orderId}\n\nStatus order TETAP (tidak berubah).\nEmail belum dikirim.\n\n✅ ${approved.length} disetujui (${edited.length} diedit)\n🚫 ${rejected.length} ditolak\n🗑️ ${deleted.length} dihapus\n\nTotal: ${formatRupiah(total)}`;
+    ? `Order ${modalState.orderId}\n\nStatus akan menjadi ${approved.length === 0 ? 'REJECTED' : 'APPROVED'}.\nEmail akan dikirim ke cabang.\n\n${approved.length} disetujui (${edited.length} diedit)\n${rejected.length} ditolak\n${deleted.length} dihapus\n\nTotal: ${formatRupiah(total)}`
+    : `Order ${modalState.orderId}\n\nStatus order TETAP (tidak berubah).\nEmail belum dikirim.\n\n${approved.length} disetujui (${edited.length} diedit)\n${rejected.length} ditolak\n${deleted.length} dihapus\n\nTotal: ${formatRupiah(total)}`;
 
   const ok = await confirm({
     icon: sendEmail ? '📧' : '💾',
     title: sendEmail ? 'Approve & Kirim Email?' : 'Simpan Perubahan?',
     message: confirmMsg,
-    okText: sendEmail ? '📧 Approve & Kirim' : '💾 Ya, Simpan',
+    okText: sendEmail ? 'Approve & Kirim' : 'Ya, Simpan',
     okVariant: sendEmail ? 'info' : 'success',
   });
 
@@ -1013,15 +1017,13 @@ async function submitEdit(sendEmail) {
       return;
     }
 
-    // Success
     toast.success(sendEmail
-      ? '✅ Perubahan tersimpan & email terkirim!'
-      : '✅ Perubahan tersimpan!'
+      ? 'Perubahan tersimpan & email terkirim!'
+      : 'Perubahan tersimpan!'
     );
 
     closeEditModal();
 
-    // Reload data
     const { loadData } = await import('../dashboard.js');
     await loadData(true);
 
@@ -1045,7 +1047,6 @@ function bindModalEvents() {
   $('btnSendEmail')?.addEventListener('click', () => handleSave(true));
   $('btnCloseModal')?.addEventListener('click', closeEditModal);
 
-  // Enter di add qty → tambah item
   $('addQty')?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();

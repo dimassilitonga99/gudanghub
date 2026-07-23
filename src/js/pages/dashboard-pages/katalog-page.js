@@ -1,9 +1,9 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   KATALOG PAGE — Master Barang
+   KATALOG PAGE — with Lucide Icons
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, escapeHtml, formatRupiah, debounce, toInt, unique } from '../../utils.js';
-import { getKategoriIcon } from '../../config.js';
+import { icon, kategoriIcon } from '../../icons.js';
 
 let localState = {
   searchQuery: '',
@@ -18,13 +18,16 @@ let localState = {
 export function renderKatalogPage(state) {
   return `
     <header class="page-header">
-      <h1>📚 Katalog Barang</h1>
+      <h1>
+        <span data-icon="boxes" data-icon-size="24" data-icon-color="var(--orange)"></span>
+        Katalog Barang
+      </h1>
       <p>Daftar master barang di gudang pusat</p>
     </header>
 
     <div class="filter-bar" id="katalogFilterBar">
       <div class="search-input-wrap">
-        <span class="search-icon">🔍</span>
+        <span class="search-icon" data-icon="search" data-icon-size="14"></span>
         <input
           class="search-input"
           id="katalogSearch"
@@ -39,11 +42,11 @@ export function renderKatalogPage(state) {
       <!-- Diisi oleh JS -->
     </div>
 
-    <div class="stats-grid" id="katalogStats" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 20px;">
-      ${buildKatalogStat('Total Barang', 'katalogTotal', '📦', 'var(--orange)')}
-      ${buildKatalogStat('Stok Aman', 'katalogOk', '✅', 'var(--success)')}
-      ${buildKatalogStat('Stok Menipis', 'katalogLow', '⚠️', 'var(--warning)')}
-      ${buildKatalogStat('Stok Habis', 'katalogEmpty', '❌', 'var(--danger)')}
+    <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 20px;">
+      ${buildKatalogStat('Total Barang', 'katalogTotal', 'package', 'var(--orange)')}
+      ${buildKatalogStat('Stok Aman', 'katalogOk', 'check-circle', 'var(--success)')}
+      ${buildKatalogStat('Stok Menipis', 'katalogLow', 'alert-triangle', 'var(--warning)')}
+      ${buildKatalogStat('Stok Habis', 'katalogEmpty', 'x-circle', 'var(--danger)')}
     </div>
 
     <section class="panel">
@@ -78,12 +81,14 @@ export function renderKatalogPage(state) {
   `;
 }
 
-function buildKatalogStat(label, valueId, icon, color) {
+function buildKatalogStat(label, valueId, iconName, color) {
   return `
     <article class="stat-card">
       <div class="stat-header">
         <div class="stat-label">${label}</div>
-        <div class="stat-icon" style="background: ${color}20;">${icon}</div>
+        <div class="stat-icon" style="background: ${color}20; color: ${color};">
+          <span data-icon="${iconName}" data-icon-size="18"></span>
+        </div>
       </div>
       <div class="stat-value" id="${valueId}" style="color: ${color};">–</div>
     </article>
@@ -126,19 +131,26 @@ function renderCategoryChips(state) {
   ).sort();
 
   const chips = [
-    { value: '', label: 'Semua Kategori' },
-    ...categories.map((cat) => ({ value: cat, label: cat })),
+    { value: '', label: 'Semua Kategori', iconName: 'list' },
+    ...categories.map((cat) => ({ value: cat, label: cat, iconName: null })),
   ];
 
-  container.innerHTML = chips.map((chip) => `
-    <button
-      class="filter-btn${localState.categoryFilter === chip.value ? ' active' : ''}"
-      type="button"
-      data-category="${escapeHtml(chip.value)}"
-    >
-      ${chip.value ? getKategoriIcon(chip.value) + ' ' : ''}${escapeHtml(chip.label)}
-    </button>
-  `).join('');
+  container.innerHTML = chips.map((chip) => {
+    const iconHtml = chip.iconName
+      ? `<span data-icon="${chip.iconName}" data-icon-size="14"></span>`
+      : (chip.value ? kategoriIcon(chip.value, { size: 14 }) : '');
+
+    return `
+      <button
+        class="filter-btn${localState.categoryFilter === chip.value ? ' active' : ''}"
+        type="button"
+        data-category="${escapeHtml(chip.value)}"
+      >
+        ${iconHtml}
+        ${escapeHtml(chip.label)}
+      </button>
+    `;
+  }).join('');
 }
 
 function applyKatalogFilters(state) {
@@ -165,7 +177,7 @@ function renderKatalogTable(state) {
       <tr>
         <td colspan="7">
           <div class="empty-state">
-            <div class="empty-state-icon">🔍</div>
+            <div class="empty-state-icon">${icon('search', { size: 48, color: 'var(--muted)' })}</div>
             <p>Tidak ada barang yang cocok</p>
           </div>
         </td>
@@ -183,7 +195,6 @@ function renderKatalogTable(state) {
                     : stok <= 5 ? `Sisa ${stok}`
                     : stok;
     const kategori = String(item.KATEGORI || '-');
-    const icon = getKategoriIcon(kategori);
 
     return `
       <tr>
@@ -191,7 +202,10 @@ function renderKatalogTable(state) {
         <td><span class="order-id">${escapeHtml(item.KODE_BARANG)}</span></td>
         <td>${escapeHtml(item.NAMA_BARANG)}</td>
         <td>
-          <span class="cabang-badge">${icon} ${escapeHtml(kategori)}</span>
+          <span class="cabang-badge">
+            ${kategoriIcon(kategori, { size: 14 })}
+            ${escapeHtml(kategori)}
+          </span>
         </td>
         <td>${escapeHtml(item.SATUAN || '-')}</td>
         <td style="color: var(--orange); font-weight: 700;">
@@ -210,7 +224,6 @@ function renderKatalogTable(state) {
 // ─────────────────────────────────────────────────────────────────────────
 
 function bindKatalogEvents(state) {
-  // Search
   const searchInput = $('katalogSearch');
   if (searchInput) {
     searchInput.value = localState.searchQuery;
@@ -224,17 +237,7 @@ function bindKatalogEvents(state) {
     searchInput.addEventListener('input', handleSearch);
   }
 
-  // Category filter
-  document.querySelectorAll('[data-category]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      localState.categoryFilter = btn.dataset.category;
-      renderCategoryChips(state);
-      applyKatalogFilters(state);
-      renderKatalogTable(state);
-      // Re-bind (karena chip re-rendered)
-      bindCategoryChips(state);
-    });
-  });
+  bindCategoryChips(state);
 }
 
 function bindCategoryChips(state) {

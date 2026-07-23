@@ -1,22 +1,22 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   NOTIFIKASI PAGE — Real-time notification dengan polling
+   NOTIFIKASI PAGE — with Lucide Icons
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, escapeHtml, formatWita, formatTimeAgo, parseAnyDate, sortBy, storage } from '../utils.js';
 import { orders as ordersApi } from '../api.js';
 import { requireAuth } from '../session.js';
-import { CABANG, SETTINGS, getStatusInfo } from '../config.js';
-import { toast } from '../ui.js';
+import { CABANG, SETTINGS } from '../config.js';
+import { toast, confirm } from '../ui.js';
+import { icon, injectIcons } from '../icons.js';
 
-const STORAGE_KEY = 'gudanghub_notif_read';
-
+const READ_KEY = 'gudanghub_notif_read';
 const state = {
   session: null,
-  notifications: [],
-  readIds: new Set(),
+  orders: [],
   filter: 'all',
-  refreshInterval: null,
-  lastRefresh: null,
+  readIds: new Set(),
+  pollingInterval: null,
+  lastRefreshTime: null,
 };
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -27,7 +27,11 @@ async function init() {
   state.session = requireAuth();
   if (!state.session) return;
 
-  // Set back link sesuai role
+  // Inject icons dulu
+  injectIcons();
+
+  loadReadIds();
+
   const backLink = $('btnBack');
   if (backLink) {
     if (state.session.role === 'admin') {
@@ -37,243 +41,217 @@ async function init() {
     }
   }
 
-  // Load read notifications from localStorage
-  loadReadState();
-
-  // Bind events
   bindEvents();
-
-  // Initial load
   await loadNotifications();
-
-  // Start polling
   startPolling();
 
-  // Cleanup on unload
-  window.addEventListener('beforeunload', stopPolling);
-
-  // Pause when hidden, resume when visible
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-      stopPolling();
-    } else {
-      startPolling();
-      loadNotifications(); // Refresh saat balik
-    }
-  });
+  document.addEventListener('visibilitychange', handleVisibility);
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// STORAGE (READ STATE)
+// READ STATE
 // ─────────────────────────────────────────────────────────────────────────
 
-function loadReadState() {
-  const readList = storage.get(STORAGE_KEY, []);
-  state.readIds = new Set(readList);
+function loadReadIds() {
+  const stored = storage.get(READ_KEY, []);
+  state.readIds = new Set(Array.isArray(stored) ? stored : []);
 }
 
-function saveReadState() {
-  // Simpan max 500 ID biar localStorage tidak membludak
-  const arr = Array.from(state.readIds).slice(-500);
-  storage.set(STORAGE_KEY, arr);
+function saveReadIds() {
+  const arr = [...state.readIds].slice(-200);
+  storage.set(READ_KEY, arr);
 }
 
-function markAsRead(id) {
+function isRead(id) {
+  return state.readIds.has(id);
+}
+
+function markRead(id) {
   state.readIds.add(id);
-  saveReadState();
+  saveReadIds();
 }
 
-function markAllAsRead() {
-  state.notifications.forEach((n) => state.readIds.add(n.id));
-  saveReadState();
-  renderAll();
-  toast.success('✅ Semua notifikasi ditandai sudah dibaca.');
+function markAllRead() {
+  state.orders.forEach((o) => state.readIds.add(o.ORDER_ID));
+  saveReadIds();
 }
 
 // ─────────────────────────────────────────────────────────────────────────
 // LOAD DATA
 // ─────────────────────────────────────────────────────────────────────────
 
-async function loadNotifications() {
+async function loadNotifications(silent = false) {
   try {
+    if (!silent) {
+      const list = $('notifList');
+      if (!state.orders.length && list) {
+        list.innerHTML = `
+          <div class="loading-state">
+            <div class="loading-spinner"></div>
+            <p>Memuat notifikasi...</p>
+          </div>
+        `;
+      }
+    }
+
     const result = await ordersApi.getAll({ cache: false });
+
     if (result.status !== 'ok') {
       throw new Error(result.message || 'Gagal memuat');
     }
 
     const allOrders = result.data || [];
-    const s = state.session;
 
-    // Filter berdasarkan role
-    const relevantOrders = s.role === 'admin'
+    const relevantOrders = state.session.role === 'admin'
       ? allOrders
-      : allOrders.filter((o) => String(o.ID_CABANG || '').toUpperCase() === s.idCabang);
+      : allOrders.filter((o) =>
+          String(o.ID_CABANG || '').toUpperCase() === state.session.idCabang
+        );
 
-    // Convert ke notification format
-    state.notifications = convertToNotifications(relevantOrders, s);
+    const sorted = sortBy(
+      relevantOrders.map((o) => ({
+        ...o,
+        _sortKey: parseAnyDate(o.TANGGAL_ORDER).getTime(),
+      })),
+      '_sortKey',
+      'desc'
+    );
 
-    state.lastRefresh = new Date();
+    if (state.orders.length > 0 && silent) {
+      detectNewNotifications(state.orders, sorted);
+    }
+
+    state.orders = sorted;
+    state.lastRefreshTime = new Date();
+
+    renderChipCounts();
+    renderNotifications();
     updateLastRefresh();
-    renderAll();
 
   } catch (error) {
     const list = $('notifList');
-    if (list && !state.notifications.length) {
+    if (list && !state.orders.length) {
       list.innerHTML = `
         <div class="empty-state">
-          <div class="empty-icon">⚠️</div>
-          <h3>Gagal Memuat</h3>
-          <p>${escapeHtml(error.message)}</p>
+          <div class="empty-icon">${icon('alert-triangle', { size: 48, color: 'var(--danger)' })}</div>
+          <p style="margin-bottom: 12px;">Gagal memuat notifikasi.</p>
+          <button class="btn-mark-read" id="btnRetryLoad" type="button">
+            ${icon('refresh', { size: 14 })}
+            Coba Lagi
+          </button>
         </div>
       `;
+      $('btnRetryLoad')?.addEventListener('click', () => loadNotifications(false));
     }
   }
 }
 
-/**
- * Convert order data ke format notifikasi
- */
-function convertToNotifications(orders, session) {
-  const notifs = [];
+function detectNewNotifications(oldOrders, newOrders) {
+  const oldIds = new Set(oldOrders.map((o) => o.ORDER_ID));
 
-  orders.forEach((order) => {
-    const orderId = order.ORDER_ID;
-    const status = String(order.STATUS || 'PENDING').toUpperCase();
-    const branch = CABANG[order.ID_CABANG] || { pic: order.ID_CABANG, nama: order.ID_CABANG };
-    const orderDate = parseAnyDate(order.TANGGAL_ORDER);
-    const processDate = order.TANGGAL_PROSES ? parseAnyDate(order.TANGGAL_PROSES) : null;
+  const newlyAdded = newOrders.filter((o) => !oldIds.has(o.ORDER_ID));
 
-    // Notif 1: Order baru (untuk admin) / Order terkirim (untuk cabang)
-    const newOrderId = `NEW-${orderId}`;
-    if (session.role === 'admin') {
-      notifs.push({
-        id: newOrderId,
-        type: 'new',
-        status: 'pending',
-        icon: '📦',
-        color: 'orange',
-        title: `Order baru dari ${branch.pic}`,
-        description: `<strong>${escapeHtml(orderId)}</strong> menunggu persetujuan. ${order.DETAIL?.length || 0} item.`,
-        timestamp: orderDate,
-        actionUrl: `./dashboard.html#orders`,
-        actionText: 'Lihat detail →',
-      });
-    } else {
-      notifs.push({
-        id: newOrderId,
-        type: 'submitted',
-        status: 'pending',
-        icon: '📤',
-        color: 'blue',
-        title: `Order terkirim`,
-        description: `<strong>${escapeHtml(orderId)}</strong> berhasil dikirim ke gudang pusat.`,
-        timestamp: orderDate,
-        actionUrl: `./order.html?cabang=${session.idCabang}#history`,
-        actionText: 'Lihat riwayat →',
-      });
-    }
+  if (newlyAdded.length > 0) {
+    const first = newlyAdded[0];
+    const status = String(first.STATUS || 'PENDING').toUpperCase();
+    const cabang = CABANG[first.ID_CABANG];
+    const branchName = cabang ? cabang.pic : first.ID_CABANG;
 
-    // Notif 2: Status update (kalau sudah diproses)
-    if (processDate && (status === 'APPROVED' || status === 'REJECTED')) {
-      const statusInfo = getStatusInfo(status);
-      const notifId = `STATUS-${orderId}-${status}`;
-
-      if (session.role === 'admin') {
-        // Admin: kalau approve/reject sendiri
-        notifs.push({
-          id: notifId,
-          type: 'status',
-          status: status.toLowerCase(),
-          icon: statusInfo.icon,
-          color: status === 'APPROVED' ? 'green' : 'red',
-          title: `Order ${status === 'APPROVED' ? 'disetujui' : 'ditolak'}`,
-          description: `<strong>${escapeHtml(orderId)}</strong> dari ${escapeHtml(branch.pic)}. Diproses oleh ${escapeHtml(order.DIPROSES_OLEH || 'Admin')}.`,
-          timestamp: processDate,
-          actionUrl: `./dashboard.html#orders`,
-          actionText: 'Lihat →',
-        });
+    let message = '';
+    if (state.session.role === 'admin') {
+      if (status === 'PENDING') {
+        message = `Order baru dari ${branchName}!`;
       } else {
-        // Cabang: notifikasi hasil approve/reject
-        notifs.push({
-          id: notifId,
-          type: 'status',
-          status: status.toLowerCase(),
-          icon: statusInfo.icon,
-          color: status === 'APPROVED' ? 'green' : 'red',
-          title: status === 'APPROVED'
-            ? `🎉 Order Anda disetujui!`
-            : `Order Anda ditolak`,
-          description: `<strong>${escapeHtml(orderId)}</strong> telah diproses admin.${status === 'APPROVED' ? ' Barang akan segera dikirim.' : ' Cek email untuk alasan.'}`,
-          timestamp: processDate,
-          actionUrl: `./order.html?cabang=${session.idCabang}#history`,
-          actionText: 'Lihat detail →',
-        });
+        message = `Update: ${first.ORDER_ID}`;
+      }
+    } else {
+      if (status === 'APPROVED') {
+        message = `Order ${first.ORDER_ID} disetujui!`;
+      } else if (status === 'REJECTED') {
+        message = `Order ${first.ORDER_ID} ditolak.`;
       }
     }
-  });
 
-  // Sort by timestamp desc
-  return sortBy(
-    notifs.map((n) => ({ ...n, _sortKey: n.timestamp.getTime() })),
-    '_sortKey',
-    'desc'
-  ).slice(0, 100); // max 100 notif
+    if (message) {
+      toast({
+        message: message + (newlyAdded.length > 1 ? ` (+${newlyAdded.length - 1} lainnya)` : ''),
+        type: status === 'APPROVED' ? 'success' :
+              status === 'REJECTED' ? 'danger' : 'info',
+        duration: 5000,
+      });
+
+      sendBrowserNotification(message);
+    }
+  }
+}
+
+function sendBrowserNotification(message) {
+  if (!('Notification' in window)) return;
+
+  if (Notification.permission === 'granted') {
+    new Notification('GudangHub', {
+      body: message,
+      icon: './public/icons/icon-192.png',
+      badge: './public/icons/icon-192.png',
+      tag: 'gudanghub-notif',
+    });
+  }
+}
+
+async function requestNotificationPermission() {
+  if (!('Notification' in window)) return;
+
+  if (Notification.permission === 'default') {
+    try {
+      await Notification.requestPermission();
+    } catch {}
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────
 // RENDER
 // ─────────────────────────────────────────────────────────────────────────
 
-function renderAll() {
-  renderCounts();
-  renderList();
-  updateHeaderUnread();
-}
-
-function renderCounts() {
-  const total = state.notifications.length;
-  const unread = state.notifications.filter((n) => !state.readIds.has(n.id)).length;
-  const pending = state.notifications.filter((n) => n.status === 'pending').length;
-  const approved = state.notifications.filter((n) => n.status === 'approved').length;
-  const rejected = state.notifications.filter((n) => n.status === 'rejected').length;
+function renderChipCounts() {
+  const total = state.orders.length;
+  const unread = state.orders.filter((o) => !isRead(o.ORDER_ID)).length;
+  const pending = state.orders.filter((o) => String(o.STATUS).toUpperCase() === 'PENDING').length;
+  const approved = state.orders.filter((o) => String(o.STATUS).toUpperCase() === 'APPROVED').length;
+  const rejected = state.orders.filter((o) => String(o.STATUS).toUpperCase() === 'REJECTED').length;
 
   $('countAll').textContent = total;
   $('countUnread').textContent = unread;
   $('countPending').textContent = pending;
   $('countApproved').textContent = approved;
   $('countRejected').textContent = rejected;
+
+  $('notifTotalCount').textContent = unread;
 }
 
-function updateHeaderUnread() {
-  const unread = state.notifications.filter((n) => !state.readIds.has(n.id)).length;
-  const el = $('unreadCount');
-  if (el) {
-    el.textContent = unread > 0 ? (unread > 99 ? '99+' : unread) : '';
-  }
-}
-
-function renderList() {
+function renderNotifications() {
   const list = $('notifList');
   if (!list) return;
 
-  const filtered = filterNotifications(state.notifications, state.filter);
+  let filtered = [...state.orders];
+
+  if (state.filter === 'unread') {
+    filtered = filtered.filter((o) => !isRead(o.ORDER_ID));
+  } else if (state.filter !== 'all') {
+    filtered = filtered.filter((o) =>
+      String(o.STATUS || '').toUpperCase() === state.filter
+    );
+  }
 
   if (!filtered.length) {
-    const emptyMsg = state.filter === 'unread' ? {
-      icon: '✨',
-      title: 'Semua Sudah Dibaca',
-      desc: 'Tidak ada notifikasi baru untuk saat ini.',
-    } : {
-      icon: '🔔',
-      title: 'Belum Ada Notifikasi',
-      desc: 'Notifikasi akan muncul di sini saat ada aktivitas.',
-    };
+    const emptyIcon = state.filter === 'unread' ? 'check-check' : 'bell';
+    const emptyMsg = state.filter === 'all' ? 'Belum ada notifikasi'
+                   : state.filter === 'unread' ? 'Semua notifikasi sudah dibaca!'
+                   : `Tidak ada notifikasi dengan status "${state.filter}"`;
 
     list.innerHTML = `
       <div class="empty-state">
-        <div class="empty-icon">${emptyMsg.icon}</div>
-        <h3>${emptyMsg.title}</h3>
-        <p>${emptyMsg.desc}</p>
+        <div class="empty-icon">${icon(emptyIcon, { size: 56, color: 'var(--muted)' })}</div>
+        <p>${emptyMsg}</p>
       </div>
     `;
     return;
@@ -281,72 +259,119 @@ function renderList() {
 
   list.innerHTML = filtered.map(buildNotifItem).join('');
 
-  // Bind click for each
-  list.querySelectorAll('[data-notif-id]').forEach((el) => {
-    el.addEventListener('click', (e) => {
-      const id = el.dataset.notifId;
-      const notif = state.notifications.find((n) => n.id === id);
-      if (!notif) return;
-
-      if (!state.readIds.has(id)) {
-        markAsRead(id);
-        renderAll();
-      }
-
-      // Kalau ada action URL, redirect
-      if (notif.actionUrl) {
-        // Don't prevent default kalau tag <a>
-        return;
-      }
-
-      e.preventDefault();
-    });
+  list.querySelectorAll('.notif-item').forEach((el) => {
+    el.addEventListener('click', () => handleNotifClick(el.dataset.id));
   });
 }
 
-function filterNotifications(notifs, filter) {
-  switch (filter) {
-    case 'unread':
-      return notifs.filter((n) => !state.readIds.has(n.id));
-    case 'pending':
-      return notifs.filter((n) => n.status === 'pending');
-    case 'approved':
-      return notifs.filter((n) => n.status === 'approved');
-    case 'rejected':
-      return notifs.filter((n) => n.status === 'rejected');
-    default:
-      return notifs;
+function buildNotifItem(order) {
+  const status = String(order.STATUS || 'PENDING').toUpperCase();
+  const branch = CABANG[order.ID_CABANG] || { pic: '-' };
+  const unread = !isRead(order.ORDER_ID);
+
+  const iconClass = status === 'PENDING' ? 'pending'
+                  : status === 'APPROVED' ? 'approved'
+                  : 'rejected';
+
+  const statusIconName = {
+    PENDING: 'clock',
+    APPROVED: 'check-circle',
+    REJECTED: 'x-circle',
+  }[status] || 'clock';
+
+  const statusTagClass = status === 'PENDING' ? 'status-pending'
+                       : status === 'APPROVED' ? 'status-approved'
+                       : 'status-rejected';
+
+  let title, desc, titleIconName;
+  if (state.session.role === 'admin') {
+    if (status === 'PENDING') {
+      titleIconName = 'package';
+      title = `Order Baru dari ${escapeHtml(branch.pic)}`;
+      desc = `Cabang <strong>${escapeHtml(order.ID_CABANG)}</strong> mengirim order <strong>${escapeHtml(order.ORDER_ID)}</strong> dengan ${(order.DETAIL || []).length} item. Menunggu persetujuan Anda.`;
+    } else if (status === 'APPROVED') {
+      titleIconName = 'check-circle';
+      title = `Order Disetujui`;
+      desc = `Order <strong>${escapeHtml(order.ORDER_ID)}</strong> dari ${escapeHtml(branch.pic)} telah Anda setujui.`;
+    } else {
+      titleIconName = 'x-circle';
+      title = `Order Ditolak`;
+      desc = `Order <strong>${escapeHtml(order.ORDER_ID)}</strong> dari ${escapeHtml(branch.pic)} ditolak.`;
+    }
+  } else {
+    if (status === 'PENDING') {
+      titleIconName = 'clock';
+      title = `Order Menunggu Persetujuan`;
+      desc = `Order <strong>${escapeHtml(order.ORDER_ID)}</strong> sedang menunggu review dari admin gudang.`;
+    } else if (status === 'APPROVED') {
+      titleIconName = 'check-circle';
+      title = `Order Anda Disetujui!`;
+      desc = `Admin gudang telah menyetujui order <strong>${escapeHtml(order.ORDER_ID)}</strong>. Segera cek email untuk detail.`;
+    } else {
+      titleIconName = 'x-circle';
+      title = `Order Anda Ditolak`;
+      desc = `Order <strong>${escapeHtml(order.ORDER_ID)}</strong> ditolak. Cek email untuk alasannya.`;
+    }
+  }
+
+  return `
+    <article class="notif-item ${unread ? 'unread' : ''}" data-id="${escapeHtml(order.ORDER_ID)}">
+      <div class="notif-icon ${iconClass}">
+        ${icon(statusIconName, { size: 22 })}
+      </div>
+      <div class="notif-body">
+        <div class="notif-header">
+          <div class="notif-title">
+            ${icon(titleIconName, { size: 16 })}
+            ${title}
+          </div>
+          <div class="notif-time" title="${escapeHtml(formatWita(order.TANGGAL_ORDER))}">
+            ${escapeHtml(formatTimeAgo(order.TANGGAL_ORDER))}
+          </div>
+        </div>
+        <div class="notif-desc">${desc}</div>
+        <div class="notif-meta">
+          <span class="notif-tag cabang">
+            ${icon('store', { size: 11 })}
+            ${escapeHtml(order.ID_CABANG)}
+          </span>
+          <span class="notif-tag ${statusTagClass}">
+            ${icon(statusIconName, { size: 11 })}
+            ${status}
+          </span>
+          ${order.TANGGAL_PROSES ? `
+            <span class="notif-tag cabang" style="opacity: 0.6;">
+              ${icon('clock', { size: 11 })}
+              ${escapeHtml(formatWita(order.TANGGAL_PROSES, false))}
+            </span>
+          ` : ''}
+        </div>
+      </div>
+    </article>
+  `;
+}
+
+function updateLastRefresh() {
+  const el = $('lastRefresh');
+  if (el && state.lastRefreshTime) {
+    el.textContent = 'Update: ' + formatTimeAgo(state.lastRefreshTime.toISOString());
   }
 }
 
-function buildNotifItem(notif) {
-  const isUnread = !state.readIds.has(notif.id);
-  const tag = notif.actionUrl ? 'a' : 'div';
-  const href = notif.actionUrl ? `href="${notif.actionUrl}"` : '';
+// ─────────────────────────────────────────────────────────────────────────
+// CLICK HANDLER
+// ─────────────────────────────────────────────────────────────────────────
 
-  return `
-    <${tag} ${href} class="notif-item ${isUnread ? 'unread' : ''}" data-notif-id="${escapeHtml(notif.id)}">
-      <div class="notif-icon ${notif.color}">${notif.icon}</div>
+function handleNotifClick(orderId) {
+  markRead(orderId);
+  renderChipCounts();
+  renderNotifications();
 
-      <div class="notif-content">
-        <div class="notif-header">
-          <div class="notif-title">${escapeHtml(notif.title)}</div>
-          ${isUnread ? '<span class="notif-badge new">BARU</span>' : ''}
-        </div>
-
-        <div class="notif-desc">${notif.description}</div>
-
-        <div class="notif-footer">
-          <div class="notif-time">
-            <span>🕐</span>
-            <span>${escapeHtml(formatTimeAgo(notif.timestamp))}</span>
-            <span class="notif-time-full">· ${escapeHtml(formatWita(notif.timestamp))}</span>
-          </div>
-          ${notif.actionText ? `<div class="notif-action">${escapeHtml(notif.actionText)}</div>` : ''}
-        </div>
-      </div>
-    </${tag}>
-  `;
+  if (state.session.role === 'admin') {
+    window.location.href = `./dashboard.html#orders`;
+  } else {
+    window.location.href = `./order.html?cabang=${state.session.idCabang || ''}#history`;
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -354,29 +379,30 @@ function buildNotifItem(notif) {
 // ─────────────────────────────────────────────────────────────────────────
 
 function startPolling() {
-  if (state.refreshInterval) return;
+  if (state.pollingInterval) clearInterval(state.pollingInterval);
 
-  state.refreshInterval = setInterval(() => {
+  state.pollingInterval = setInterval(() => {
     if (!document.hidden) {
-      loadNotifications();
+      loadNotifications(true);
     }
   }, SETTINGS.notifPollingMs);
+
+  setInterval(updateLastRefresh, 15000);
 }
 
 function stopPolling() {
-  if (state.refreshInterval) {
-    clearInterval(state.refreshInterval);
-    state.refreshInterval = null;
+  if (state.pollingInterval) {
+    clearInterval(state.pollingInterval);
+    state.pollingInterval = null;
   }
 }
 
-function updateLastRefresh() {
-  const el = $('lastRefresh');
-  if (el && state.lastRefresh) {
-    const time = state.lastRefresh.toLocaleTimeString('id-ID', {
-      hour: '2-digit', minute: '2-digit', second: '2-digit',
-    });
-    el.textContent = `· ${time}`;
+function handleVisibility() {
+  if (document.hidden) {
+    stopPolling();
+  } else {
+    startPolling();
+    loadNotifications(true);
   }
 }
 
@@ -385,18 +411,38 @@ function updateLastRefresh() {
 // ─────────────────────────────────────────────────────────────────────────
 
 function bindEvents() {
-  // Filter tabs
-  document.querySelectorAll('.notif-tab').forEach((tab) => {
-    tab.addEventListener('click', () => {
-      state.filter = tab.dataset.filter;
-      document.querySelectorAll('.notif-tab').forEach((t) => t.classList.remove('active'));
-      tab.classList.add('active');
-      renderList();
-    });
+  $('filterChips')?.addEventListener('click', (e) => {
+    const chip = e.target.closest('[data-filter]');
+    if (!chip) return;
+
+    state.filter = chip.dataset.filter;
+
+    document.querySelectorAll('.chip').forEach((c) => c.classList.remove('active'));
+    chip.classList.add('active');
+
+    renderNotifications();
   });
 
-  // Mark all as read
-  $('btnMarkAllRead')?.addEventListener('click', markAllAsRead);
+  $('btnMarkAllRead')?.addEventListener('click', async () => {
+    if (!state.orders.length) return;
+
+    const ok = await confirm({
+      icon: '✓',
+      title: 'Tandai Semua Dibaca?',
+      message: `${state.orders.length} notifikasi akan ditandai sebagai sudah dibaca.`,
+      okText: 'Ya, Tandai',
+      okVariant: 'primary',
+    });
+
+    if (!ok) return;
+
+    markAllRead();
+    renderChipCounts();
+    renderNotifications();
+    toast.success('Semua notifikasi ditandai dibaca.');
+  });
+
+  requestNotificationPermission();
 }
 
 if (document.readyState === 'loading') {

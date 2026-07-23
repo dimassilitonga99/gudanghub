@@ -15,8 +15,7 @@
   <link rel="stylesheet" href="./src/styles/main.css">
 
   <style>
-    /* ═══════════ DASHBOARD LAYOUT ═══════════ */
-
+    /* DASHBOARD LAYOUT */
     body {
       display: flex;
       min-height: 100dvh;
@@ -24,7 +23,6 @@
       position: relative;
     }
 
-    /* Grid background */
     body::before {
       content: '';
       position: fixed;
@@ -37,7 +35,7 @@
       background-size: 46px 46px;
     }
 
-    /* ─── SIDEBAR ─── */
+    /* SIDEBAR */
     .sidebar {
       position: fixed;
       z-index: var(--z-drawer);
@@ -71,7 +69,7 @@
       border-radius: 12px;
       display: grid;
       place-items: center;
-      font-size: 22px;
+      color: #fff;
       flex-shrink: 0;
       box-shadow: 0 0 20px rgba(255, 107, 0, 0.3);
     }
@@ -148,9 +146,10 @@
     }
 
     .nav-icon {
-      font-size: 17px;
       flex-shrink: 0;
       line-height: 1;
+      display: grid;
+      place-items: center;
     }
 
     .nav-badge {
@@ -168,7 +167,7 @@
 
     .nav-badge:empty { display: none; }
 
-    /* ─── SIDEBAR USER ─── */
+    /* SIDEBAR USER */
     .sidebar-user {
       padding: 16px;
       border-top: 1px solid var(--line-soft);
@@ -223,7 +222,6 @@
       border: none;
       color: var(--muted);
       cursor: pointer;
-      font-size: 18px;
       padding: 8px;
       min-width: 36px;
       min-height: 36px;
@@ -240,7 +238,7 @@
       outline: none;
     }
 
-    /* Sidebar overlay (mobile) */
+    /* SIDEBAR OVERLAY */
     .sidebar-overlay {
       display: none;
       position: fixed;
@@ -258,7 +256,7 @@
       opacity: 1;
     }
 
-    /* ─── MAIN ─── */
+    /* MAIN */
     .main {
       margin-left: var(--sidebar-width);
       flex: 1;
@@ -289,7 +287,6 @@
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--line-soft);
       color: var(--text);
-      font-size: 20px;
       cursor: pointer;
       padding: 6px;
       min-width: 40px;
@@ -301,6 +298,9 @@
     }
 
     .topbar-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
       font-size: 16px;
       font-weight: 700;
       flex: 1;
@@ -319,6 +319,9 @@
       font-variant-numeric: tabular-nums;
       flex-shrink: 0;
       white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .btn-refresh {
@@ -344,11 +347,10 @@
     }
 
     .btn-refresh.spinning .refresh-icon {
-      animation: spin 0.6s linear infinite;
-      display: inline-block;
+      animation: iconSpin 0.6s linear infinite;
     }
 
-    /* Notification bell */
+    /* NOTIF BELL */
     .btn-notif {
       position: relative;
       background: rgba(255, 255, 255, 0.05);
@@ -360,7 +362,6 @@
       border-radius: 10px;
       display: grid;
       place-items: center;
-      font-size: 18px;
       flex-shrink: 0;
       transition: all 0.15s;
     }
@@ -381,7 +382,7 @@
       border: 2px solid var(--ink-2);
     }
 
-    /* ─── CONTENT ─── */
+    /* CONTENT */
     .content {
       flex: 1;
       padding: 20px;
@@ -408,6 +409,9 @@
       font-weight: 800;
       font-family: var(--font-serif);
       overflow-wrap: break-word;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
     .page-header p {
@@ -416,7 +420,7 @@
       margin-top: 4px;
     }
 
-    /* ─── STATS ─── */
+    /* STATS */
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -464,7 +468,6 @@
       border-radius: 10px;
       display: grid;
       place-items: center;
-      font-size: 17px;
       flex-shrink: 0;
     }
 
@@ -484,7 +487,7 @@
       white-space: nowrap;
     }
 
-    /* ─── GRID LAYOUTS ─── */
+    /* GRID LAYOUTS */
     .grid-3-1 {
       display: grid;
       grid-template-columns: 2fr 1fr;
@@ -499,7 +502,7 @@
       margin-bottom: 20px;
     }
 
-    /* ─── PANEL ─── */
+    /* PANEL */
     .panel {
       background: var(--card);
       border: 1px solid var(--line-soft);
@@ -544,13 +547,16 @@
       font-family: inherit;
       min-height: 32px;
       white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .panel-action:hover {
       background: rgba(255, 107, 0, 0.2);
     }
 
-    /* ─── TABLE ─── */
+    /* TABLE */
     .order-table-wrap {
       overflow-x: auto;
       overscroll-behavior-x: contain;
@@ -667,6 +673,9 @@
       min-height: 30px;
       white-space: nowrap;
       border: 1px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
     }
 
     .btn-approve {
@@ -701,7 +710,7 @@
       background: rgba(255, 255, 255, 0.1);
     }
 
-    /* ─── CABANG GRID ─── */
+    /* CABANG GRID */
     .cabang-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -733,7 +742,7 @@
       border-radius: 10px;
       display: grid;
       place-items: center;
-      font-size: 16px;
+      color: #fff;
       background: linear-gradient(135deg, var(--orange), var(--orange-light));
       flex-shrink: 0;
     }
@@ -776,7 +785,7 @@
       letter-spacing: 0.05em;
     }
 
-    /* ─── DONUT & BAR CHART ─── */
+    /* CHARTS */
     .donut-wrap {
       display: flex;
       align-items: center;
@@ -857,7 +866,7 @@
       width: 100%;
     }
 
-    /* ─── ACTIVITY FEED ─── */
+    /* ACTIVITY */
     .activity-item {
       display: flex;
       gap: 12px;
@@ -890,6 +899,10 @@
     .activity-text {
       font-size: 12px;
       line-height: 1.4;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
     }
 
     .activity-text strong {
@@ -900,9 +913,12 @@
       font-size: 10px;
       color: var(--muted);
       margin-top: 3px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
 
-    /* ─── FILTER BAR ─── */
+    /* FILTER BAR */
     .filter-bar {
       display: flex;
       gap: 8px;
@@ -923,6 +939,9 @@
       font-family: inherit;
       min-height: 36px;
       white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .filter-btn:hover {
@@ -947,9 +966,10 @@
       left: 12px;
       top: 50%;
       transform: translateY(-50%);
-      font-size: 14px;
       opacity: 0.5;
       pointer-events: none;
+      display: grid;
+      place-items: center;
     }
 
     .search-input {
@@ -970,7 +990,7 @@
       border-color: var(--orange);
     }
 
-    /* ─── TOTAL ROW ─── */
+    /* TOTAL ROW */
     .total-row td {
       font-weight: 700;
       color: var(--orange);
@@ -978,7 +998,7 @@
       border-bottom: none !important;
     }
 
-    /* ─── RESPONSIVE ─── */
+    /* RESPONSIVE */
     @media (max-width: 900px) {
       .stats-grid { grid-template-columns: repeat(2, 1fr); }
       .grid-2, .grid-3-1 { grid-template-columns: 1fr; }
@@ -997,7 +1017,7 @@
         margin-left: 0;
       }
       .topbar-menu {
-        display: flex;
+        display: grid;
       }
       .content {
         padding: 14px;
@@ -1017,7 +1037,7 @@
       .content { padding: 10px; }
       .stat-card { padding: 12px; }
       .stat-label { font-size: 10px; }
-      .stat-icon { width: 32px; height: 32px; font-size: 15px; }
+      .stat-icon { width: 32px; height: 32px; }
       .stat-value { font-size: 20px; }
       .panel-body { padding: 14px; }
       .panel-header { padding: 12px 14px; }
@@ -1030,14 +1050,15 @@
 
 <body>
 
-  <!-- Sidebar overlay (mobile) -->
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
   <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar" aria-label="Navigasi utama">
 
     <div class="sidebar-logo">
-      <div class="sidebar-logo-icon">🏪</div>
+      <div class="sidebar-logo-icon">
+        <span data-icon="warehouse" data-icon-size="22"></span>
+      </div>
       <div>
         <div class="sidebar-logo-title">Gudang<em>Hub</em></div>
         <div class="sidebar-logo-sub">Admin Panel v3.0</div>
@@ -1050,18 +1071,18 @@
         <div class="nav-section-title">Menu Utama</div>
 
         <a class="nav-item active" data-page="dashboard" href="#dashboard">
-          <span class="nav-icon">📊</span>
+          <span class="nav-icon" data-icon="dashboard" data-icon-size="18"></span>
           <span>Dashboard</span>
         </a>
 
         <a class="nav-item" data-page="orders" href="#orders">
-          <span class="nav-icon">📦</span>
+          <span class="nav-icon" data-icon="package" data-icon-size="18"></span>
           <span>Semua Order</span>
           <span class="nav-badge" id="pendingBadge">0</span>
         </a>
 
         <a class="nav-item" data-page="katalog" href="#katalog">
-          <span class="nav-icon">📚</span>
+          <span class="nav-icon" data-icon="boxes" data-icon-size="18"></span>
           <span>Katalog Barang</span>
         </a>
       </div>
@@ -1070,17 +1091,17 @@
         <div class="nav-section-title">Monitoring</div>
 
         <a class="nav-item" data-page="cabang" href="#cabang">
-          <span class="nav-icon">🏬</span>
+          <span class="nav-icon" data-icon="store" data-icon-size="18"></span>
           <span>Status Cabang</span>
         </a>
 
         <a class="nav-item" href="./laporan.html">
-          <span class="nav-icon">📈</span>
+          <span class="nav-icon" data-icon="chart-bar" data-icon-size="18"></span>
           <span>Laporan</span>
         </a>
 
         <a class="nav-item" href="./notifikasi.html">
-          <span class="nav-icon">🔔</span>
+          <span class="nav-icon" data-icon="bell" data-icon-size="18"></span>
           <span>Notifikasi</span>
         </a>
       </div>
@@ -1089,22 +1110,22 @@
         <div class="nav-section-title">Sistem</div>
 
         <a class="nav-item" href="./profil.html">
-          <span class="nav-icon">👤</span>
+          <span class="nav-icon" data-icon="user-circle" data-icon-size="18"></span>
           <span>Profil</span>
         </a>
 
         <a class="nav-item" href="./settings.html">
-          <span class="nav-icon">⚙️</span>
+          <span class="nav-icon" data-icon="settings" data-icon-size="18"></span>
           <span>Settings</span>
         </a>
 
         <a class="nav-item" href="./ganti-password.html">
-          <span class="nav-icon">🔑</span>
+          <span class="nav-icon" data-icon="key" data-icon-size="18"></span>
           <span>Ganti Password</span>
         </a>
 
         <a class="nav-item" id="navGoogleSheets" href="#" target="_blank">
-          <span class="nav-icon">📄</span>
+          <span class="nav-icon" data-icon="file-sheet" data-icon-size="18"></span>
           <span>Google Sheets</span>
         </a>
       </div>
@@ -1124,7 +1145,7 @@
           title="Logout"
           aria-label="Keluar"
         >
-          🚪
+          <span data-icon="logout" data-icon-size="18"></span>
         </button>
       </div>
     </div>
@@ -1136,19 +1157,25 @@
     <!-- TOPBAR -->
     <header class="topbar">
       <button class="topbar-menu" id="topbarMenu" type="button" aria-label="Menu">
-        ☰
+        <span data-icon="menu" data-icon-size="22"></span>
       </button>
 
-      <div class="topbar-title" id="topbarTitle">📊 Dashboard</div>
-      <div class="topbar-time" id="topbarTime">--:--:--</div>
+      <div class="topbar-title" id="topbarTitle">
+        <span data-icon="dashboard" data-icon-size="20" data-icon-color="var(--orange)"></span>
+        Dashboard
+      </div>
+      <div class="topbar-time" id="topbarTime">
+        <span data-icon="clock" data-icon-size="14"></span>
+        <span id="topbarTimeText">--:--:--</span>
+      </div>
 
       <button class="btn-notif" id="btnNotif" type="button" aria-label="Notifikasi" title="Notifikasi">
-        🔔
+        <span data-icon="bell" data-icon-size="20"></span>
         <span class="notif-dot" id="notifDot" style="display: none;"></span>
       </button>
 
       <button class="btn-refresh" id="btnRefresh" type="button" aria-label="Refresh">
-        <span class="refresh-icon">🔄</span>
+        <span class="refresh-icon" data-icon="refresh" data-icon-size="16"></span>
         <span>Refresh</span>
       </button>
     </header>
@@ -1157,13 +1184,9 @@
     <div class="content" id="contentWrap"></div>
   </main>
 
-  <!-- MODAL EDIT ORDER (akan diisi oleh JS di BATCH 6c) -->
+  <!-- MODAL EDIT ORDER -->
   <div id="editModalContainer"></div>
 
   <script type="module" src="./src/js/pages/dashboard.js"></script>
-  <script type="module">
-  import { initPwa } from './src/js/pwa.js';
-  initPwa();
-</script>
 </body>
 </html>

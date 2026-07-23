@@ -13,7 +13,6 @@
   <link rel="stylesheet" href="./src/styles/main.css">
 
   <style>
-    /* Page layout mirip dashboard */
     body {
       background: var(--ink);
       min-height: 100dvh;
@@ -53,7 +52,7 @@
       background: linear-gradient(135deg, var(--orange), var(--orange-light));
       display: grid;
       place-items: center;
-      font-size: 18px;
+      color: #fff;
       flex-shrink: 0;
     }
 
@@ -123,7 +122,6 @@
       margin: 0 auto;
     }
 
-    /* Report header */
     .report-header {
       background: var(--card);
       border: 1px solid var(--line-soft);
@@ -137,6 +135,9 @@
       font-size: clamp(22px, 3vw, 28px);
       font-weight: 700;
       margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
     .report-subtitle {
@@ -166,6 +167,9 @@
       font-size: 11px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
 
     .report-meta-value {
@@ -173,7 +177,6 @@
       color: var(--text);
     }
 
-    /* Filter bar */
     .filter-panel {
       background: var(--card);
       border: 1px solid var(--line-soft);
@@ -186,7 +189,9 @@
     }
 
     .filter-field label {
-      display: block;
+      display: flex;
+      align-items: center;
+      gap: 6px;
       font-size: 11px;
       color: var(--muted);
       font-weight: 600;
@@ -215,7 +220,6 @@
       border-color: var(--orange);
     }
 
-    /* Stats cards */
     .stats-row {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -254,7 +258,6 @@
       color: var(--muted);
     }
 
-    /* Panel & table */
     .panel {
       background: var(--card);
       border: 1px solid var(--line-soft);
@@ -277,6 +280,9 @@
       font-family: var(--font-serif);
       font-size: 15px;
       font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .laporan-table-wrap {
@@ -365,7 +371,6 @@
       text-align: right;
     }
 
-    /* Empty state */
     .empty-state {
       padding: 60px 20px;
       text-align: center;
@@ -373,12 +378,13 @@
     }
 
     .empty-state .empty-icon {
-      font-size: 48px;
       margin-bottom: 12px;
       opacity: 0.5;
+      display: grid;
+      place-items: center;
     }
 
-    /* Print styles */
+    /* PRINT */
     @media print {
       body {
         background: #fff !important;
@@ -388,7 +394,8 @@
       .topbar,
       .filter-panel,
       .btn-print,
-      .topbar-back {
+      .topbar-back,
+      .lucide-icon {
         display: none !important;
       }
 
@@ -461,51 +468,69 @@
 
   <header class="topbar">
     <a class="topbar-back" id="btnBack" href="./dashboard.html" title="Kembali" aria-label="Kembali">
-      ←
+      <span data-icon="arrow-left" data-icon-size="18"></span>
     </a>
 
     <a href="./dashboard.html" class="topbar-brand">
-      <div class="topbar-brand-icon">📈</div>
+      <div class="topbar-brand-icon">
+        <span data-icon="chart-bar" data-icon-size="18"></span>
+      </div>
       <div class="topbar-title">Laporan</div>
     </a>
 
     <button class="btn-print" id="btnPrint" type="button" title="Print / Export PDF">
-      <span>🖨️</span>
+      <span data-icon="download" data-icon-size="14"></span>
       <span>Print / PDF</span>
     </button>
   </header>
 
   <main class="content" id="reportContent">
 
-    <!-- Report Header -->
     <section class="report-header">
-      <h1 class="report-title">Laporan Order — <span id="reportPeriod">Semua Periode</span></h1>
+      <h1 class="report-title">
+        <span data-icon="chart-bar" data-icon-size="26" data-icon-color="var(--orange)"></span>
+        Laporan Order — <span id="reportPeriod">Semua Periode</span>
+      </h1>
       <p class="report-subtitle">PT Central Perabot Utama · Waktu WITA</p>
 
       <div class="report-meta">
         <div class="report-meta-item">
-          <span class="report-meta-label">Dibuat oleh</span>
+          <span class="report-meta-label">
+            <span data-icon="user" data-icon-size="12"></span>
+            Dibuat oleh
+          </span>
           <span class="report-meta-value" id="metaCreatedBy">-</span>
         </div>
         <div class="report-meta-item">
-          <span class="report-meta-label">Waktu cetak</span>
+          <span class="report-meta-label">
+            <span data-icon="calendar-clock" data-icon-size="12"></span>
+            Waktu cetak
+          </span>
           <span class="report-meta-value" id="metaCreatedAt">-</span>
         </div>
         <div class="report-meta-item">
-          <span class="report-meta-label">Total order</span>
+          <span class="report-meta-label">
+            <span data-icon="package" data-icon-size="12"></span>
+            Total order
+          </span>
           <span class="report-meta-value" id="metaTotalOrder">-</span>
         </div>
         <div class="report-meta-item">
-          <span class="report-meta-label">Rate persetujuan</span>
+          <span class="report-meta-label">
+            <span data-icon="check-circle" data-icon-size="12"></span>
+            Rate persetujuan
+          </span>
           <span class="report-meta-value" id="metaApprovalRate">-</span>
         </div>
       </div>
     </section>
 
-    <!-- Filters -->
     <section class="filter-panel">
       <div class="filter-field">
-        <label for="filterCabang">Cabang</label>
+        <label for="filterCabang">
+          <span data-icon="store" data-icon-size="12"></span>
+          Cabang
+        </label>
         <select id="filterCabang">
           <option value="">Semua Cabang</option>
           <option value="CB001">CB001 — Toko Nasional Eltari</option>
@@ -516,7 +541,10 @@
       </div>
 
       <div class="filter-field">
-        <label for="filterPeriod">Periode</label>
+        <label for="filterPeriod">
+          <span data-icon="calendar" data-icon-size="12"></span>
+          Periode
+        </label>
         <select id="filterPeriod">
           <option value="all">Semua waktu</option>
           <option value="today">Hari ini</option>
@@ -528,44 +556,60 @@
       </div>
 
       <div class="filter-field">
-        <label for="filterStatus">Status</label>
+        <label for="filterStatus">
+          <span data-icon="filter" data-icon-size="12"></span>
+          Status
+        </label>
         <select id="filterStatus">
           <option value="">Semua status</option>
-          <option value="PENDING">⏳ Tertunda</option>
-          <option value="APPROVED">✅ Disetujui</option>
-          <option value="REJECTED">❌ Ditolak</option>
+          <option value="PENDING">Tertunda</option>
+          <option value="APPROVED">Disetujui</option>
+          <option value="REJECTED">Ditolak</option>
         </select>
       </div>
     </section>
 
-    <!-- Stats -->
     <div class="stats-row" id="statsRow">
       <div class="stat-mini">
-        <div class="stat-mini-label">📦 Total Order</div>
+        <div class="stat-mini-label">
+          <span data-icon="package" data-icon-size="12"></span>
+          Total Order
+        </div>
         <div class="stat-mini-value" id="statTotal" style="color: var(--orange);">–</div>
         <div class="stat-mini-sub" id="statTotalSub">Semua pesanan</div>
       </div>
       <div class="stat-mini">
-        <div class="stat-mini-label">✅ Disetujui</div>
+        <div class="stat-mini-label">
+          <span data-icon="check-circle" data-icon-size="12"></span>
+          Disetujui
+        </div>
         <div class="stat-mini-value" id="statApproved" style="color: var(--success);">–</div>
         <div class="stat-mini-sub" id="statApprovedSub">-</div>
       </div>
       <div class="stat-mini">
-        <div class="stat-mini-label">⏳ Tertunda</div>
+        <div class="stat-mini-label">
+          <span data-icon="clock" data-icon-size="12"></span>
+          Tertunda
+        </div>
         <div class="stat-mini-value" id="statPending" style="color: var(--warning);">–</div>
         <div class="stat-mini-sub" id="statPendingSub">-</div>
       </div>
       <div class="stat-mini">
-        <div class="stat-mini-label">❌ Ditolak</div>
+        <div class="stat-mini-label">
+          <span data-icon="x-circle" data-icon-size="12"></span>
+          Ditolak
+        </div>
         <div class="stat-mini-value" id="statRejected" style="color: var(--danger);">–</div>
         <div class="stat-mini-sub" id="statRejectedSub">-</div>
       </div>
     </div>
 
-    <!-- Table per Cabang -->
     <section class="panel">
       <header class="panel-header">
-        <div class="panel-title">📊 Rekap per Cabang</div>
+        <div class="panel-title">
+          <span data-icon="chart-pie" data-icon-size="16" data-icon-color="var(--orange)"></span>
+          Rekap per Cabang
+        </div>
       </header>
       <div class="laporan-table-wrap">
         <table class="laporan-table" id="tableCabang">
@@ -578,13 +622,13 @@
               <th style="text-align: right;">Pending</th>
               <th style="text-align: right;">Approved</th>
               <th style="text-align: right;">Rejected</th>
-              <th>Rate ✅</th>
+              <th>Rate</th>
             </tr>
           </thead>
           <tbody id="tableCabangBody">
             <tr>
               <td colspan="8" class="empty-state">
-                <div class="empty-icon">⏳</div>
+                <div class="empty-icon"></div>
                 <p>Memuat data...</p>
               </td>
             </tr>
@@ -593,10 +637,12 @@
       </div>
     </section>
 
-    <!-- Table Order Detail -->
     <section class="panel">
       <header class="panel-header">
-        <div class="panel-title">📋 Detail Order</div>
+        <div class="panel-title">
+          <span data-icon="list" data-icon-size="16" data-icon-color="var(--orange)"></span>
+          Detail Order
+        </div>
         <span id="detailCount" style="font-size: 12px; color: var(--muted);"></span>
       </header>
       <div class="laporan-table-wrap">
@@ -615,7 +661,7 @@
           <tbody id="tableDetailBody">
             <tr>
               <td colspan="7" class="empty-state">
-                <div class="empty-icon">⏳</div>
+                <div class="empty-icon"></div>
                 <p>Memuat detail order...</p>
               </td>
             </tr>
@@ -627,9 +673,5 @@
   </main>
 
   <script type="module" src="./src/js/pages/laporan.js"></script>
-  <script type="module">
-  import { initPwa } from './src/js/pwa.js';
-  initPwa();
-</script>
 </body>
 </html>

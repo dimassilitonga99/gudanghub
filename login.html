@@ -15,8 +15,6 @@
   <link rel="stylesheet" href="./src/styles/main.css">
 
   <style>
-    /* ═══════════ LOGIN PAGE SPECIFIC ═══════════ */
-
     body {
       display: flex;
       align-items: center;
@@ -31,7 +29,6 @@
       overflow-x: hidden;
     }
 
-    /* Animated background */
     .bg-decoration {
       position: fixed;
       inset: 0;
@@ -56,7 +53,6 @@
       fill: none;
     }
 
-    /* Main card */
     .login-card {
       position: relative;
       z-index: 2;
@@ -81,7 +77,7 @@
       80% { transform: translateX(5px); }
     }
 
-    /* Card nav */
+    /* CARD NAV */
     .card-nav {
       display: flex;
       align-items: center;
@@ -130,6 +126,9 @@
     }
 
     .card-menu a {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
       font-size: 13px;
       font-weight: 600;
       letter-spacing: 0.04em;
@@ -138,8 +137,6 @@
       transition: color 0.2s;
       padding: 8px 0;
       text-decoration: none;
-      display: flex;
-      align-items: center;
       min-height: 32px;
     }
 
@@ -148,7 +145,7 @@
       color: var(--text);
     }
 
-    /* Card body — 2 columns */
+    /* CARD BODY */
     .card-body {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -157,7 +154,6 @@
       align-items: center;
     }
 
-    /* Form side */
     .form-side {
       max-width: 380px;
       width: 100%;
@@ -185,7 +181,7 @@
       margin-bottom: 24px;
     }
 
-    /* Role selector */
+    /* ROLE SELECTOR */
     .roles {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -201,13 +197,13 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 7px;
+      gap: 8px;
       cursor: pointer;
       color: var(--muted);
       font-size: 13px;
       font-weight: 700;
       transition: all 0.2s var(--ease-out);
-      min-height: 72px;
+      min-height: 78px;
       font-family: inherit;
       text-align: center;
     }
@@ -226,11 +222,11 @@
     }
 
     .role-icon {
-      font-size: 22px;
-      line-height: 1;
+      display: grid;
+      place-items: center;
     }
 
-    /* Fields */
+    /* FIELDS */
     .field-group {
       margin-bottom: 16px;
     }
@@ -256,8 +252,9 @@
       transform: translateY(-50%);
       color: var(--muted);
       pointer-events: none;
-      font-size: 16px;
       z-index: 1;
+      display: grid;
+      place-items: center;
     }
 
     .field-input {
@@ -286,7 +283,7 @@
       box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.14);
     }
 
-    /* Toggle password */
+    /* TOGGLE PASSWORD */
     .toggle-pw {
       position: absolute;
       right: 10px;
@@ -301,7 +298,6 @@
       min-height: 36px;
       display: grid;
       place-items: center;
-      font-size: 15px;
       border-radius: 8px;
       transition: color 0.15s, background 0.15s;
     }
@@ -313,7 +309,7 @@
       outline: none;
     }
 
-    /* Row options */
+    /* ROW OPTIONS */
     .row-opts {
       display: flex;
       align-items: center;
@@ -331,7 +327,6 @@
       color: var(--muted);
       cursor: pointer;
       user-select: none;
-      -webkit-user-select: none;
     }
 
     .remember input {
@@ -354,14 +349,15 @@
     }
 
     .remember input:checked::after {
-      content: '✓';
+      content: '';
       position: absolute;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      color: #fff;
-      font-size: 11px;
-      font-weight: 900;
+      left: 5px;
+      top: 2px;
+      width: 5px;
+      height: 9px;
+      border: solid #fff;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
     }
 
     .forgot {
@@ -374,6 +370,9 @@
       font-family: inherit;
       padding: 6px 0;
       min-height: 32px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
     }
 
     .forgot:hover,
@@ -382,7 +381,7 @@
       outline: none;
     }
 
-    /* Submit button */
+    /* SUBMIT BUTTON */
     .btn-signin {
       width: 100%;
       border: none;
@@ -419,7 +418,7 @@
       opacity: 0.75;
     }
 
-    /* Message alerts */
+    /* MESSAGES */
     .msg {
       display: none;
       align-items: center;
@@ -446,11 +445,12 @@
     }
 
     .msg-icon {
-      font-size: 16px;
       flex-shrink: 0;
+      display: grid;
+      place-items: center;
     }
 
-    /* Visual side */
+    /* VISUAL SIDE */
     .visual-side {
       position: relative;
       display: flex;
@@ -479,9 +479,9 @@
     }
 
     .circle-content {
-      color: #fff;
-      font-size: clamp(80px, 12vw, 140px);
-      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      color: rgba(255, 255, 255, 0.95);
+      display: grid;
+      place-items: center;
     }
 
     .visual-taglines {
@@ -501,7 +501,7 @@
       margin-bottom: 6px;
     }
 
-    /* Social buttons */
+    /* SOCIAL BUTTONS */
     .social {
       position: absolute;
       right: -6px;
@@ -522,7 +522,6 @@
       place-items: center;
       box-shadow: 0 8px 20px -4px rgba(255, 107, 0, 0.55);
       transition: transform 0.2s, background 0.2s;
-      font-size: 16px;
       text-decoration: none;
     }
 
@@ -533,7 +532,7 @@
       outline: none;
     }
 
-    /* Card footer */
+    /* CARD FOOTER */
     .card-foot {
       text-align: center;
       padding: 0 34px 26px;
@@ -546,7 +545,7 @@
       color: var(--orange);
     }
 
-    /* ═══════════ MODAL LUPA PASSWORD ═══════════ */
+    /* MODAL LUPA PASSWORD */
     .modal-ov {
       position: fixed;
       inset: 0;
@@ -586,6 +585,9 @@
       font-size: clamp(20px, 3vw, 22px);
       font-weight: 600;
       margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
     .modal-fp h3 em {
@@ -619,6 +621,10 @@
       font-family: inherit;
       min-height: 48px;
       min-width: 120px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
 
     .btn-cancel {
@@ -634,10 +640,6 @@
     .btn-ok {
       background: linear-gradient(135deg, var(--orange), var(--orange-light));
       color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
     }
 
     .btn-ok.loading {
@@ -645,7 +647,7 @@
       opacity: 0.75;
     }
 
-    /* ═══════════ RESPONSIVE ═══════════ */
+    /* RESPONSIVE */
     @media (max-width: 820px) {
       .card-body {
         grid-template-columns: 1fr;
@@ -707,7 +709,6 @@
       .social a {
         width: 34px;
         height: 34px;
-        font-size: 14px;
       }
 
       .roles {
@@ -717,15 +718,11 @@
       .role {
         padding: 12px 8px;
         font-size: 12px;
-        min-height: 64px;
-      }
-
-      .role-icon {
-        font-size: 20px;
+        min-height: 70px;
       }
 
       .field-input {
-        font-size: 16px; /* iOS zoom fix */
+        font-size: 16px;
         padding: 13px 42px 13px 40px;
       }
 
@@ -734,26 +731,11 @@
         font-size: 15px;
       }
     }
-
-    @media (max-width: 360px) {
-      .card-nav {
-        padding: 14px 16px;
-      }
-
-      .card-brand-name {
-        font-size: 16px;
-      }
-
-      .welcome-title {
-        font-size: 22px;
-      }
-    }
   </style>
 </head>
 
 <body>
 
-  <!-- Background decoration -->
   <div class="bg-decoration" aria-hidden="true">
     <svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
       <path class="flow" d="M-50 120 C 300 40, 600 260, 1250 90"/>
@@ -764,34 +746,37 @@
     </svg>
   </div>
 
-  <!-- Login card -->
   <main class="login-card" id="loginCard">
 
-    <!-- Card nav -->
+    <!-- CARD NAV -->
     <div class="card-nav">
       <a href="./index.html" class="card-brand">
         <span class="card-brand-mark">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35A2 2 0 0 1 3.26 6.5l8-3.2a2 2 0 0 1 1.48 0l8 3.2A2 2 0 0 1 22 8.35Z"/>
-            <path d="M6 18h12"/>
-            <path d="M6 14h12"/>
-            <rect width="12" height="12" x="6" y="10"/>
-          </svg>
+          <span data-icon="warehouse" data-icon-size="20"></span>
         </span>
         <span class="card-brand-name">Gudang<em>Hub</em></span>
       </a>
 
       <nav class="card-menu" aria-label="Menu">
-        <a href="./index.html">Beranda</a>
-        <a href="./index.html#cara">Cara Kerja</a>
-        <a href="./index.html#cabang">Cabang</a>
+        <a href="./index.html">
+          <span data-icon="home" data-icon-size="14"></span>
+          Beranda
+        </a>
+        <a href="./index.html#cara">
+          <span data-icon="wrench" data-icon-size="14"></span>
+          Cara Kerja
+        </a>
+        <a href="./index.html#cabang">
+          <span data-icon="store" data-icon-size="14"></span>
+          Cabang
+        </a>
       </nav>
     </div>
 
-    <!-- Card body -->
+    <!-- CARD BODY -->
     <div class="card-body">
 
-      <!-- Form side -->
+      <!-- FORM SIDE -->
       <section class="form-side" aria-labelledby="welcome-title">
 
         <h1 class="welcome-title" id="welcome-title">
@@ -799,31 +784,31 @@
         </h1>
         <p class="welcome-sub">Pilih peran Anda dan masuk untuk mulai mengelola order.</p>
 
-        <!-- Role selector -->
+        <!-- ROLE SELECTOR -->
         <div class="roles" role="radiogroup" aria-label="Pilih peran">
           <button type="button" class="role active" id="role-admin" role="radio" aria-checked="true">
-            <span class="role-icon">🏪</span>
+            <span class="role-icon" data-icon="warehouse" data-icon-size="22"></span>
             <span>Admin Gudang</span>
           </button>
           <button type="button" class="role" id="role-cabang" role="radio" aria-checked="false">
-            <span class="role-icon">🏬</span>
+            <span class="role-icon" data-icon="store" data-icon-size="22"></span>
             <span>Cabang</span>
           </button>
         </div>
 
-        <!-- Messages -->
+        <!-- MESSAGES -->
         <div class="msg msg-err" id="errorMsg" role="alert">
-          <span class="msg-icon">⚠️</span>
+          <span class="msg-icon" data-icon="alert-circle" data-icon-size="16"></span>
           <span id="errorText"></span>
         </div>
 
-        <!-- Form -->
+        <!-- FORM -->
         <form id="loginForm" autocomplete="on" novalidate>
 
           <div class="field-group">
             <label class="field-label" for="inputUser">Username</label>
             <div class="field">
-              <span class="field-icon">👤</span>
+              <span class="field-icon" data-icon="user" data-icon-size="18"></span>
               <input
                 type="text"
                 id="inputUser"
@@ -841,7 +826,7 @@
           <div class="field-group">
             <label class="field-label" for="inputPass">Password</label>
             <div class="field">
-              <span class="field-icon">🔒</span>
+              <span class="field-icon" data-icon="lock" data-icon-size="18"></span>
               <input
                 type="password"
                 id="inputPass"
@@ -856,7 +841,7 @@
                 class="toggle-pw"
                 aria-label="Tampilkan password"
               >
-                <span id="eyeIcon">👁</span>
+                <span id="eyeIcon" data-icon="eye" data-icon-size="18"></span>
               </button>
             </div>
           </div>
@@ -867,22 +852,26 @@
               <span>Ingat saya</span>
             </label>
             <button type="button" class="forgot" id="forgotBtn">
+              <span data-icon="key" data-icon-size="13"></span>
               Lupa password?
             </button>
           </div>
 
           <button type="submit" class="btn-signin" id="btnLogin">
-            <span id="btnText">
-              <span>🔒</span> Masuk
+            <span id="btnText" style="display: inline-flex; align-items: center; gap: 8px;">
+              <span data-icon="login" data-icon-size="18"></span>
+              Masuk
             </span>
           </button>
         </form>
       </section>
 
-      <!-- Visual side -->
+      <!-- VISUAL SIDE -->
       <aside class="visual-side" aria-hidden="true">
         <div class="circle">
-          <div class="circle-content">🏭</div>
+          <div class="circle-content">
+            <span data-icon="factory" data-icon-size="120" data-icon-stroke="1.2"></span>
+          </div>
         </div>
 
         <div class="visual-taglines">
@@ -891,40 +880,51 @@
         </div>
 
         <div class="social">
-          <a href="https://wa.me/6281234567890" target="_blank" rel="noopener" aria-label="WhatsApp" title="WhatsApp">💬</a>
-          <a href="#" onclick="return false;" aria-label="Instagram" title="Instagram">📷</a>
-          <a href="#" onclick="return false;" aria-label="Facebook" title="Facebook">🔵</a>
-          <a href="mailto:silitongadimas@gmail.com" aria-label="Email" title="Email">📧</a>
+          <a href="https://wa.me/6281234567890" target="_blank" rel="noopener" aria-label="WhatsApp" title="WhatsApp">
+            <span data-icon="message" data-icon-size="16"></span>
+          </a>
+          <a href="#" onclick="return false;" aria-label="Instagram" title="Instagram">
+            <span data-icon="sparkles" data-icon-size="16"></span>
+          </a>
+          <a href="#" onclick="return false;" aria-label="Website" title="Website">
+            <span data-icon="globe" data-icon-size="16"></span>
+          </a>
+          <a href="mailto:silitongadimas@gmail.com" aria-label="Email" title="Email">
+            <span data-icon="mail" data-icon-size="16"></span>
+          </a>
         </div>
       </aside>
     </div>
 
-    <!-- Card footer -->
+    <!-- CARD FOOTER -->
     <div class="card-foot">
       <b>GudangHub v3.0</b> · PT Central Perabot Utama · Waktu WITA
     </div>
   </main>
 
-  <!-- Modal Lupa Password -->
+  <!-- MODAL LUPA PASSWORD -->
   <div class="modal-ov" id="forgotOv" role="dialog" aria-modal="true" aria-labelledby="forgot-title">
     <div class="modal-fp">
-      <h3 id="forgot-title">Lupa <em>Password</em>?</h3>
+      <h3 id="forgot-title">
+        <span data-icon="key" data-icon-size="24"></span>
+        Lupa <em>Password</em>?
+      </h3>
       <p>Masukkan username Anda. Password sementara akan dikirim ke email admin gudang. Hubungi admin untuk menerimanya, lalu ganti password setelah masuk.</p>
 
       <div class="msg msg-err" id="fErr" role="alert">
-        <span class="msg-icon">⚠️</span>
+        <span class="msg-icon" data-icon="alert-circle" data-icon-size="16"></span>
         <span id="fErrText"></span>
       </div>
 
       <div class="msg msg-ok" id="fOk" role="status">
-        <span class="msg-icon">✅</span>
+        <span class="msg-icon" data-icon="check-circle" data-icon-size="16"></span>
         <span id="fOkText"></span>
       </div>
 
       <div class="field-group" style="margin-bottom: 0;">
         <label class="field-label" for="fUser">Username</label>
         <div class="field">
-          <span class="field-icon">👤</span>
+          <span class="field-icon" data-icon="user" data-icon-size="18"></span>
           <input
             type="text"
             id="fUser"
@@ -940,11 +940,13 @@
 
       <div class="modal-actions">
         <button type="button" class="btn-cancel" id="fCancel">
+          <span data-icon="close" data-icon-size="16"></span>
           Batal
         </button>
         <button type="button" class="btn-ok" id="fBtn">
-          <span id="fBtnText">
-            <span>📧</span> Kirim ke Admin
+          <span id="fBtnText" style="display: inline-flex; align-items: center; gap: 8px;">
+            <span data-icon="send" data-icon-size="16"></span>
+            Kirim ke Admin
           </span>
         </button>
       </div>
@@ -952,9 +954,5 @@
   </div>
 
   <script type="module" src="./src/js/pages/login.js"></script>
-  <script type="module">
-  import { initPwa } from './src/js/pwa.js';
-  initPwa();
-</script>
 </body>
 </html>

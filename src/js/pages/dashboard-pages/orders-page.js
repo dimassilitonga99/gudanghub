@@ -1,12 +1,12 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   ORDERS PAGE — Semua Pesanan dengan filter & search
+   ORDERS PAGE — with Lucide Icons
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, escapeHtml, formatWita, debounce } from '../../utils.js';
 import { CABANG, getStatusInfo } from '../../config.js';
+import { icon } from '../../icons.js';
 import { showEditModal } from './edit-modal.js';
 
-// State lokal untuk filter
 let localState = {
   currentFilter: 'ALL',
   searchQuery: '',
@@ -20,18 +20,21 @@ let localState = {
 export function renderOrdersPage(state) {
   return `
     <header class="page-header">
-      <h1>📦 Semua Pesanan</h1>
+      <h1>
+        <span data-icon="package" data-icon-size="24" data-icon-color="var(--orange)"></span>
+        Semua Pesanan
+      </h1>
       <p>Kelola, edit item, dan proses seluruh pesanan dari empat cabang</p>
     </header>
 
     <div class="filter-bar">
-      ${filterBtn('ALL', 'Semua', true)}
-      ${filterBtn('PENDING', '⏳ Tertunda')}
-      ${filterBtn('APPROVED', '✅ Disetujui')}
-      ${filterBtn('REJECTED', '❌ Ditolak')}
+      ${filterBtn('ALL', 'Semua', 'list', true)}
+      ${filterBtn('PENDING', 'Tertunda', 'clock')}
+      ${filterBtn('APPROVED', 'Disetujui', 'check-circle')}
+      ${filterBtn('REJECTED', 'Ditolak', 'x-circle')}
 
       <div class="search-input-wrap">
-        <span class="search-icon">🔍</span>
+        <span class="search-icon" data-icon="search" data-icon-size="14"></span>
         <input
           class="search-input"
           id="orderSearch"
@@ -73,13 +76,14 @@ export function renderOrdersPage(state) {
   `;
 }
 
-function filterBtn(value, label, active = false) {
+function filterBtn(value, label, iconName, active = false) {
   return `
     <button
       class="filter-btn${active ? ' active' : ''}"
       type="button"
       data-filter="${value}"
     >
+      <span data-icon="${iconName}" data-icon-size="14"></span>
       ${label}
     </button>
   `;
@@ -99,12 +103,10 @@ function applyFilters(state) {
   const query = localState.searchQuery.toLowerCase().trim();
 
   localState.filteredOrders = state.allOrders.filter((order) => {
-    // Filter by status
     const statusMatch =
       localState.currentFilter === 'ALL' ||
       String(order.STATUS || '').toUpperCase() === localState.currentFilter;
 
-    // Filter by search
     const id = String(order.ORDER_ID || '').toLowerCase();
     const branch = String(order.ID_CABANG || '').toLowerCase();
     const searchMatch = !query || id.includes(query) || branch.includes(query);
@@ -122,7 +124,7 @@ function renderOrdersTable(state) {
       <tr>
         <td colspan="6">
           <div class="empty-state">
-            <div class="empty-state-icon">🔍</div>
+            <div class="empty-state-icon">${icon('search', { size: 48, color: 'var(--muted)' })}</div>
             <p>Tidak ada order yang cocok dengan filter</p>
           </div>
         </td>
@@ -131,16 +133,25 @@ function renderOrdersTable(state) {
     return;
   }
 
+  const statusIconMap = {
+    PENDING: 'clock',
+    APPROVED: 'check-circle',
+    REJECTED: 'x-circle',
+  };
+
   body.innerHTML = localState.filteredOrders.map((order, index) => {
-    const branch = CABANG[order.ID_CABANG] || { pic: '-', icon: '🏪' };
+    const branch = CABANG[order.ID_CABANG] || { pic: '-' };
     const status = String(order.STATUS || 'PENDING').toUpperCase();
-    const statusInfo = getStatusInfo(status);
     const orderId = escapeHtml(order.ORDER_ID);
 
     const actionButtons = status === 'PENDING'
       ? `
-        <button class="btn-approve" type="button" data-quick-approve="${orderId}" title="Setujui">✅</button>
-        <button class="btn-reject" type="button" data-quick-reject="${orderId}" title="Tolak">❌</button>
+        <button class="btn-approve" type="button" data-quick-approve="${orderId}" title="Setujui">
+          ${icon('check', { size: 14 })}
+        </button>
+        <button class="btn-reject" type="button" data-quick-reject="${orderId}" title="Tolak">
+          ${icon('close', { size: 14 })}
+        </button>
       `
       : '';
 
@@ -152,17 +163,26 @@ function renderOrdersTable(state) {
       <tr>
         <td>${index + 1}</td>
         <td><span class="order-id">${orderId}</span></td>
-        <td><span class="cabang-badge">${branch.icon} ${escapeHtml(branch.pic)}</span></td>
+        <td>
+          <span class="cabang-badge">
+            ${icon('store', { size: 14 })}
+            ${escapeHtml(branch.pic)}
+          </span>
+        </td>
         <td>${escapeHtml(formatWita(order.TANGGAL_ORDER))}</td>
         <td>
           <span class="status-badge ${statusClass}">
-            ${statusInfo.icon} ${status}
+            ${icon(statusIconMap[status] || 'clock', { size: 12 })}
+            ${status}
           </span>
         </td>
         <td>
           <div class="action-btns">
             ${actionButtons}
-            <button class="btn-detail" type="button" data-show-detail="${orderId}">✏️ Kelola</button>
+            <button class="btn-detail" type="button" data-show-detail="${orderId}">
+              ${icon('edit', { size: 12 })}
+              Kelola
+            </button>
           </div>
         </td>
       </tr>
@@ -177,7 +197,6 @@ function renderOrdersTable(state) {
 // ─────────────────────────────────────────────────────────────────────────
 
 function bindOrdersEvents(state) {
-  // Filter buttons
   document.querySelectorAll('.filter-btn[data-filter]').forEach((btn) => {
     btn.addEventListener('click', () => {
       localState.currentFilter = btn.dataset.filter;
@@ -188,10 +207,8 @@ function bindOrdersEvents(state) {
     });
   });
 
-  // Search input
   const searchInput = $('orderSearch');
   if (searchInput) {
-    // Restore previous search
     searchInput.value = localState.searchQuery;
 
     const handleSearch = debounce((e) => {
@@ -203,7 +220,6 @@ function bindOrdersEvents(state) {
     searchInput.addEventListener('input', handleSearch);
   }
 
-  // Restore filter button active state
   const activeBtn = document.querySelector(`.filter-btn[data-filter="${localState.currentFilter}"]`);
   if (activeBtn) {
     document.querySelectorAll('.filter-btn').forEach((b) => b.classList.remove('active'));
@@ -226,7 +242,7 @@ function bindOrderRowActions(container, state) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// QUICK ACTIONS (shared logic — reuse dari dashboard-page)
+// QUICK ACTIONS
 // ─────────────────────────────────────────────────────────────────────────
 
 async function quickApprove(orderId, state) {
@@ -241,7 +257,7 @@ async function quickApprove(orderId, state) {
     icon: '✅',
     title: 'Setujui Pesanan?',
     message: `${orderId}\nCabang: ${branch.pic}\n\nSemua item akan disetujui.\nEmail akan dikirim ke cabang.`,
-    okText: '✅ Ya, Setujui',
+    okText: 'Ya, Setujui',
     okVariant: 'success',
   });
 
@@ -255,7 +271,7 @@ async function quickApprove(orderId, state) {
     updatePendingBadge();
   }
 
-  toast.info('⏳ Memproses...');
+  toast.info('Memproses...');
 
   const result = await ordersApi.updateStatus({
     orderId,
@@ -264,7 +280,7 @@ async function quickApprove(orderId, state) {
   });
 
   if (result.status === 'ok') {
-    toast.success('✅ Order disetujui!');
+    toast.success('Order disetujui!');
     await loadData(true);
   } else {
     if (idx >= 0 && oldStatus) {
@@ -289,7 +305,7 @@ async function quickReject(orderId, state) {
     title: 'Tolak Seluruh Pesanan',
     message: `${orderId} — Cabang: ${branch.pic}\n\nIsi alasan penolakan:`,
     placeholder: 'Contoh: Stok habis...',
-    okText: '❌ Ya, Tolak',
+    okText: 'Ya, Tolak',
     okVariant: 'danger',
     required: true,
   });
@@ -304,7 +320,7 @@ async function quickReject(orderId, state) {
     updatePendingBadge();
   }
 
-  toast.info('⏳ Memproses...');
+  toast.info('Memproses...');
 
   const result = await ordersApi.updateStatus({
     orderId,
@@ -313,7 +329,7 @@ async function quickReject(orderId, state) {
   });
 
   if (result.status === 'ok') {
-    toast.success('❌ Order ditolak.');
+    toast.success('Order ditolak.');
     await loadData(true);
   } else {
     if (idx >= 0 && oldStatus) {

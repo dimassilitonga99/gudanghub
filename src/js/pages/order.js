@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   ORDER PAGE — Main Controller (Cabang)
+   ORDER PAGE — Main Controller with Lucide Icons
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, getQueryParam } from '../utils.js';
@@ -12,8 +12,8 @@ import {
 } from '../session.js';
 import { CABANG } from '../config.js';
 import { toast, confirm } from '../ui.js';
+import { icon, injectIcons } from '../icons.js';
 
-// Import page renderers (BATCH 7b)
 import { renderCatalogPage, initCatalog } from './order-pages/catalog-page.js';
 import { renderMassOrderPage, initMassOrder } from './order-pages/mass-order-page.js';
 import { renderHistoryPage, initHistory } from './order-pages/history-page.js';
@@ -30,8 +30,8 @@ export const state = {
   branchPic: '',
   allProducts: [],
   productByCode: {},
-  cart: {},           // { code: item }
-  massItems: [],      // parsed mass order items
+  cart: {},
+  massItems: [],
   isSubmitting: false,
   currentTab: 'catalog',
 };
@@ -44,26 +44,21 @@ function initSession() {
   const s = getSession();
   const urlBranch = getQueryParam('cabang');
 
-  // Cek session
   if (s && isSessionValid(s)) {
-    // Admin tidak boleh akses order.html
     if (s.role === 'admin') {
       window.location.href = './dashboard.html';
       return false;
     }
 
-    // Cabang → ambil idCabang dari session
     state.session = s;
     state.branchId = String(s.idCabang || urlBranch || '').toUpperCase();
     state.branchName = s.nama || CABANG[state.branchId]?.nama || state.branchId;
     state.branchPic = CABANG[state.branchId]?.pic || s.nama || '-';
   } else if (urlBranch) {
-    // Fallback: pakai URL param (tanpa session valid)
     state.branchId = String(urlBranch).toUpperCase();
     state.branchName = CABANG[state.branchId]?.nama || state.branchId;
     state.branchPic = CABANG[state.branchId]?.pic || '-';
   } else {
-    // Tidak ada session, tidak ada URL → login
     redirectToLogin();
     return false;
   }
@@ -73,7 +68,6 @@ function initSession() {
     return false;
   }
 
-  // Update UI
   const label = $('branchLabel');
   if (label) {
     label.textContent = `${state.branchId} · ${state.branchPic}`;
@@ -91,12 +85,10 @@ function showTab(tabName) {
 
   state.currentTab = tabName;
 
-  // Update tabs
   document.querySelectorAll('.nav-tab').forEach((tab) => {
     tab.classList.toggle('active', tab.dataset.tab === tabName);
   });
 
-  // Update pages
   document.querySelectorAll('.page').forEach((page) => {
     page.classList.remove('active');
   });
@@ -110,17 +102,17 @@ function showTab(tabName) {
   const activePage = $(pageMap[tabName]);
   if (activePage) activePage.classList.add('active');
 
-  // Scroll to top
+  // Inject icons after page switch
+  requestAnimationFrame(() => injectIcons());
+
   window.scrollTo(0, 0);
 
-  // Trigger data load untuk history (fresh setiap kali dibuka)
   if (tabName === 'history') {
     import('./order-pages/history-page.js').then(({ loadHistory }) => {
       loadHistory(state);
     });
   }
 
-  // Update URL hash
   window.location.hash = tabName;
 }
 
@@ -144,22 +136,21 @@ export async function loadCatalog() {
       if (code) state.productByCode[code] = product;
     });
 
-    // Update katalog page
     const { updateCatalog } = await import('./order-pages/catalog-page.js');
     updateCatalog(state);
 
   } catch (error) {
     toast.error('Gagal memuat katalog: ' + error.message);
 
-    // Show error state di catalog page
     const grid = document.querySelector('#catalogPage .catalog-grid');
     if (grid) {
       grid.innerHTML = `
         <div class="empty-state">
-          <div class="empty-icon">⚠️</div>
+          <div class="empty-icon">${icon('alert-triangle', { size: 48, color: 'var(--danger)' })}</div>
           <p>Gagal memuat katalog.</p>
           <button class="secondary-button" id="retryCatalogBtn" type="button" style="margin-top: 16px;">
-            🔄 Coba Lagi
+            ${icon('refresh', { size: 14 })}
+            Coba Lagi
           </button>
         </div>
       `;
@@ -191,15 +182,12 @@ async function handleLogout() {
 // ─────────────────────────────────────────────────────────────────────────
 
 function bindEvents() {
-  // Tab navigation
   document.querySelectorAll('.nav-tab').forEach((tab) => {
     tab.addEventListener('click', () => showTab(tab.dataset.tab));
   });
 
-  // Logout
   $('logoutButton')?.addEventListener('click', handleLogout);
 
-  // Hash change (browser back/forward)
   window.addEventListener('hashchange', () => {
     const hash = window.location.hash.replace('#', '');
     if (['catalog', 'massOrder', 'history'].includes(hash) && hash !== state.currentTab) {
@@ -207,11 +195,9 @@ function bindEvents() {
     }
   });
 
-  // Prevent iOS bounce scroll di bottom sheet
   const sheet = $('cartSheet');
   if (sheet) {
     sheet.addEventListener('touchmove', (e) => {
-      // Allow scroll inside cart items
       if (e.target.closest('.cart-items')) return;
       e.preventDefault();
     }, { passive: false });
@@ -223,24 +209,23 @@ function bindEvents() {
 // ─────────────────────────────────────────────────────────────────────────
 
 async function init() {
-  // Session check
   if (!initSession()) return;
 
-  // Render initial pages (empty state)
+  // Inject icons di topbar & bottom-nav
+  injectIcons();
+
+  // Render initial pages
   $('catalogPage').innerHTML = renderCatalogPage(state);
   $('massOrderPage').innerHTML = renderMassOrderPage(state);
   $('historyPage').innerHTML = renderHistoryPage(state);
 
-  // Init page-specific handlers
   initCatalog(state);
   initMassOrder(state);
   initHistory(state);
   initCart(state);
 
-  // Bind events
   bindEvents();
 
-  // Get initial tab from URL
   const initialTab = window.location.hash.replace('#', '') || 'catalog';
   const validTab = ['catalog', 'massOrder', 'history'].includes(initialTab)
     ? initialTab
@@ -248,12 +233,13 @@ async function init() {
 
   if (validTab !== 'catalog') {
     showTab(validTab);
+  } else {
+    // Inject icons di catalog page yang sudah aktif
+    requestAnimationFrame(() => injectIcons());
   }
 
-  // Load initial data
   await loadCatalog();
 
-  // Kalau initial tab adalah history, load data-nya
   if (validTab === 'history') {
     const { loadHistory } = await import('./order-pages/history-page.js');
     loadHistory(state);
@@ -266,5 +252,4 @@ if (document.readyState === 'loading') {
   init();
 }
 
-// Debug helper
 window.__gudangHubOrder = { state, loadCatalog, showTab };

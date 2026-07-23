@@ -16,13 +16,12 @@
   <link rel="stylesheet" href="./src/styles/main.css">
 
   <style>
-    /* ═══════════ ORDER PAGE LAYOUT ═══════════ */
-
+    /* ORDER PAGE LAYOUT */
     body {
       padding-bottom: calc(var(--bottom-nav-height) + var(--safe-bottom) + 100px);
     }
 
-    /* ─── TOPBAR ─── */
+    /* TOPBAR */
     .topbar {
       position: sticky;
       z-index: 200;
@@ -46,7 +45,7 @@
       flex-shrink: 0;
       border-radius: 10px;
       background: linear-gradient(135deg, var(--orange), var(--orange-light));
-      font-size: 18px;
+      color: #fff;
     }
 
     .topbar-title {
@@ -60,7 +59,7 @@
       max-width: 45%;
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 6px;
       margin-left: auto;
       padding: 5px 10px;
       overflow: hidden;
@@ -84,7 +83,6 @@
       border-radius: 8px;
       background: rgba(255, 255, 255, 0.05);
       color: var(--muted);
-      font-size: 15px;
       text-decoration: none;
       cursor: pointer;
       transition: all 0.15s;
@@ -100,7 +98,7 @@
       color: var(--danger);
     }
 
-    /* ─── PAGES ─── */
+    /* PAGES */
     .page {
       display: none;
       animation: fadeInPage 0.2s ease;
@@ -125,6 +123,9 @@
       font-family: var(--font-serif);
       font-size: 22px;
       font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
     .page-heading p {
@@ -133,7 +134,7 @@
       font-size: 12px;
     }
 
-    /* ─── SEARCH ─── */
+    /* SEARCH */
     .search-wrap {
       position: sticky;
       z-index: 100;
@@ -162,7 +163,8 @@
     .search-icon {
       flex-shrink: 0;
       opacity: 0.5;
-      font-size: 16px;
+      display: grid;
+      place-items: center;
     }
 
     .search-box input {
@@ -180,7 +182,7 @@
       color: var(--muted);
     }
 
-    /* ─── FILTER SCROLL ─── */
+    /* FILTER SCROLL */
     .filter-scroll {
       display: flex;
       gap: 8px;
@@ -209,6 +211,9 @@
       cursor: pointer;
       transition: all 0.15s;
       font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .filter-chip:hover {
@@ -221,7 +226,7 @@
       color: var(--orange);
     }
 
-    /* ─── SECTION LABEL ─── */
+    /* SECTION LABEL */
     .section-label {
       min-height: 24px;
       padding: 6px 16px 4px;
@@ -234,7 +239,7 @@
       text-transform: uppercase;
     }
 
-    /* ─── CATALOG GRID ─── */
+    /* CATALOG GRID */
     .catalog-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -272,11 +277,15 @@
     .stock-low { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
     .stock-empty { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
 
-    .item-emoji {
-      display: block;
-      margin-bottom: 6px;
-      font-size: 28px;
-      line-height: 1;
+    .item-icon {
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      margin-bottom: 8px;
+      border-radius: 10px;
+      background: var(--orange-dim);
+      color: var(--orange);
     }
 
     .item-code {
@@ -313,7 +322,7 @@
       font-variant-numeric: tabular-nums;
     }
 
-    /* ─── QUANTITY CONTROL ─── */
+    /* QUANTITY CONTROL */
     .quantity-control {
       display: flex;
       align-items: center;
@@ -330,7 +339,6 @@
       border-radius: 7px;
       background: var(--ink-3);
       color: var(--text);
-      font-size: 15px;
       cursor: pointer;
       font-family: inherit;
       transition: background 0.15s;
@@ -356,7 +364,7 @@
       font-family: inherit;
     }
 
-    /* ─── ADD BUTTON ─── */
+    /* ADD BUTTON */
     .add-button {
       width: 100%;
       min-height: 32px;
@@ -371,6 +379,10 @@
       font-family: inherit;
       cursor: pointer;
       transition: transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
     }
 
     .add-button:hover {
@@ -386,7 +398,7 @@
       opacity: 0.5;
     }
 
-    /* ─── EMPTY STATES ─── */
+    /* EMPTY STATES */
     .empty-state,
     .loading-state {
       grid-column: 1 / -1;
@@ -397,7 +409,8 @@
 
     .empty-icon {
       margin-bottom: 12px;
-      font-size: 42px;
+      display: grid;
+      place-items: center;
       opacity: 0.5;
     }
 
@@ -415,7 +428,7 @@
       to { transform: rotate(360deg); }
     }
 
-    /* ─── ORDER MASSAL ─── */
+    /* ORDER MASSAL */
     .format-box {
       margin: 14px 16px 0;
       padding: 14px;
@@ -429,6 +442,9 @@
       color: var(--orange);
       font-size: 12px;
       font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .format-example {
@@ -445,6 +461,9 @@
       margin-top: 6px;
       color: var(--muted);
       font-size: 10px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
 
     .content-section {
@@ -506,6 +525,9 @@
       cursor: pointer;
       font-family: inherit;
       transition: all 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .secondary-button:hover {
@@ -516,6 +538,7 @@
     .secondary-button.grow {
       flex: 1;
       min-width: 120px;
+      justify-content: center;
     }
 
     .preview-title {
@@ -527,7 +550,7 @@
       text-transform: uppercase;
     }
 
-    /* Mass item preview */
+    /* MASS ITEM */
     .massal-item {
       display: grid;
       grid-template-columns: auto minmax(0, 1fr) auto;
@@ -551,7 +574,8 @@
 
     .massal-icon {
       flex-shrink: 0;
-      font-size: 18px;
+      display: grid;
+      place-items: center;
     }
 
     .massal-info {
@@ -579,8 +603,20 @@
     }
 
     .massal-price { color: var(--muted); }
-    .massal-warning { margin-top: 2px; color: var(--warning); }
-    .massal-error { margin-top: 2px; color: var(--danger); }
+    .massal-warning {
+      margin-top: 2px;
+      color: var(--warning);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .massal-error {
+      margin-top: 2px;
+      color: var(--danger);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
 
     .massal-right {
       display: flex;
@@ -613,8 +649,10 @@
     }
 
     .compact-quantity button {
+      display: grid;
       width: 22px;
       height: 22px;
+      place-items: center;
       border: 0;
       border-radius: 4px;
       background: transparent;
@@ -635,7 +673,7 @@
       font-family: inherit;
     }
 
-    /* Stock input group */
+    /* STOCK INPUT */
     .stock-group {
       display: inline-flex;
       align-items: center;
@@ -651,8 +689,10 @@
       background: rgba(239, 68, 68, 0.06);
     }
 
-    .stock-group span {
-      font-size: 10px;
+    .stock-group-icon {
+      display: grid;
+      place-items: center;
+      color: var(--muted);
     }
 
     .stock-input {
@@ -673,6 +713,8 @@
     }
 
     .delete-button {
+      display: grid;
+      place-items: center;
       padding: 4px;
       border: 0;
       border-radius: 4px;
@@ -688,7 +730,7 @@
       color: var(--danger);
     }
 
-    /* Warning banner */
+    /* WARNING BANNER */
     .warning-banner {
       display: none;
       align-items: center;
@@ -707,7 +749,7 @@
       display: flex;
     }
 
-    /* Submit button */
+    /* SUBMIT BUTTON */
     .submit-button {
       display: flex;
       width: 100%;
@@ -763,7 +805,7 @@
       font-weight: 800;
     }
 
-    /* ─── HISTORY ─── */
+    /* HISTORY */
     .history-list {
       padding: 12px 16px;
       padding-right: calc(16px + var(--safe-right));
@@ -808,6 +850,9 @@
       font-size: 10px;
       font-weight: 700;
       white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
     }
 
     .status-pending { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
@@ -819,6 +864,9 @@
     .history-note {
       color: var(--muted);
       font-size: 11px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
 
     .history-items {
@@ -830,7 +878,7 @@
       margin-top: 4px;
     }
 
-    /* ─── CART FLOATING BAR ─── */
+    /* CART FLOATING BAR */
     .cart-bar {
       position: fixed;
       z-index: 300;
@@ -863,6 +911,12 @@
       box-shadow: 0 6px 20px rgba(255, 107, 0, 0.35);
     }
 
+    .cart-button-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
     .cart-count {
       padding: 3px 12px;
       border-radius: 20px;
@@ -871,7 +925,7 @@
       font-weight: 700;
     }
 
-    /* ─── BOTTOM NAV ─── */
+    /* BOTTOM NAV */
     .bottom-nav {
       position: fixed;
       z-index: 200;
@@ -909,11 +963,11 @@
     }
 
     .nav-tab-icon {
-      font-size: 20px;
-      line-height: 1;
+      display: grid;
+      place-items: center;
     }
 
-    /* ─── BOTTOM SHEET (Cart) ─── */
+    /* BOTTOM SHEET */
     .sheet-overlay {
       position: fixed;
       z-index: 400;
@@ -971,6 +1025,9 @@
       font-family: var(--font-serif);
       font-size: 16px;
       font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .sheet-close {
@@ -983,7 +1040,6 @@
       background: rgba(255, 255, 255, 0.08);
       color: var(--muted);
       cursor: pointer;
-      font-size: 14px;
       transition: all 0.15s;
     }
 
@@ -1107,6 +1163,8 @@
     }
 
     .cart-delete {
+      display: grid;
+      place-items: center;
       padding: 4px 6px;
       border: 0;
       border-radius: 6px;
@@ -1154,7 +1212,7 @@
       font-weight: 800;
     }
 
-    /* ─── RESPONSIVE ─── */
+    /* RESPONSIVE */
     @media (min-width: 480px) {
       .catalog-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1190,10 +1248,6 @@
         grid-template-columns: repeat(5, minmax(0, 1fr));
       }
 
-      .item-emoji {
-        font-size: 34px;
-      }
-
       .item-name {
         font-size: 13px;
       }
@@ -1222,9 +1276,6 @@
       .item-card {
         padding: 10px;
       }
-      .item-emoji {
-        font-size: 24px;
-      }
       .item-name {
         font-size: 11px;
       }
@@ -1239,46 +1290,47 @@
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <div class="topbar-logo">🏪</div>
+    <div class="topbar-logo">
+      <span data-icon="warehouse" data-icon-size="20"></span>
+    </div>
     <div class="topbar-title">GudangHub</div>
 
     <div class="branch-label">
-      🏬 <span id="branchLabel">Memuat...</span>
+      <span data-icon="store" data-icon-size="12"></span>
+      <span id="branchLabel">Memuat...</span>
     </div>
 
     <a class="topbar-action" href="./notifikasi.html" title="Notifikasi">
-      🔔
+      <span data-icon="bell" data-icon-size="16"></span>
     </a>
 
     <a class="topbar-action" href="./profil.html" title="Profil">
-      👤
+      <span data-icon="user-circle" data-icon-size="16"></span>
     </a>
 
     <a class="topbar-action" href="./ganti-password.html" title="Ganti Password">
-      🔑
+      <span data-icon="key" data-icon-size="16"></span>
     </a>
 
     <button class="topbar-action logout" id="logoutButton" type="button" title="Keluar">
-      🚪
+      <span data-icon="logout" data-icon-size="16"></span>
     </button>
   </header>
 
   <!-- PAGES CONTAINER -->
   <main id="pagesContainer">
-    <!-- Katalog page -->
     <div class="page active" id="catalogPage"></div>
-
-    <!-- Order Massal page -->
     <div class="page" id="massOrderPage"></div>
-
-    <!-- History page -->
     <div class="page" id="historyPage"></div>
   </main>
 
   <!-- CART FLOATING BAR -->
   <div class="cart-bar" id="cartBar">
     <button class="cart-button" id="openCartButton" type="button">
-      <span>🛒 Lihat Keranjang</span>
+      <span class="cart-button-label">
+        <span data-icon="cart" data-icon-size="18"></span>
+        Lihat Keranjang
+      </span>
       <span class="cart-count" id="cartCount">0 item</span>
     </button>
   </div>
@@ -1286,17 +1338,17 @@
   <!-- BOTTOM NAV -->
   <nav class="bottom-nav" aria-label="Navigasi order">
     <button class="nav-tab active" type="button" data-tab="catalog">
-      <span class="nav-tab-icon">📚</span>
+      <span class="nav-tab-icon" data-icon="boxes" data-icon-size="22"></span>
       <span>Katalog</span>
     </button>
 
     <button class="nav-tab" type="button" data-tab="massOrder">
-      <span class="nav-tab-icon">⚡</span>
+      <span class="nav-tab-icon" data-icon="zap" data-icon-size="22"></span>
       <span>Order Massal</span>
     </button>
 
     <button class="nav-tab" type="button" data-tab="history">
-      <span class="nav-tab-icon">📋</span>
+      <span class="nav-tab-icon" data-icon="file" data-icon-size="22"></span>
       <span>Riwayat</span>
     </button>
   </nav>
@@ -1308,20 +1360,25 @@
     <div class="sheet-handle"></div>
 
     <header class="sheet-header">
-      <div class="sheet-title">🛒 Keranjang Order</div>
-      <button class="sheet-close" id="closeCartButton" type="button" aria-label="Tutup">✕</button>
+      <div class="sheet-title">
+        <span data-icon="cart" data-icon-size="18" data-icon-color="var(--orange)"></span>
+        Keranjang Order
+      </div>
+      <button class="sheet-close" id="closeCartButton" type="button" aria-label="Tutup">
+        <span data-icon="close" data-icon-size="14"></span>
+      </button>
     </header>
 
     <div class="cart-items" id="cartItems">
       <div class="empty-state">
-        <div class="empty-icon">🛒</div>
+        <div class="empty-icon"><span data-icon="cart" data-icon-size="48" data-icon-color="var(--muted)"></span></div>
         <div>Keranjang kosong.</div>
       </div>
     </div>
 
     <div class="cart-summary">
       <div class="warning-banner" id="cartWarning">
-        <span>⚠️</span>
+        <span data-icon="alert-triangle" data-icon-size="14"></span>
         <span id="cartWarningText"></span>
       </div>
 
@@ -1343,15 +1400,12 @@
       ></textarea>
 
       <button class="submit-button" id="cartSubmitButton" type="button" disabled>
-        🚀 Kirim Order ke Gudang
+        <span data-icon="send" data-icon-size="18"></span>
+        Kirim Order ke Gudang
       </button>
     </div>
   </section>
 
   <script type="module" src="./src/js/pages/order.js"></script>
-  <script type="module">
-  import { initPwa } from './src/js/pwa.js';
-  initPwa();
-</script>
 </body>
 </html>

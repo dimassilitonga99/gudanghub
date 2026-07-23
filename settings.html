@@ -57,6 +57,9 @@
       font-size: 17px;
       font-weight: 700;
       flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
     .topbar-title em {
@@ -73,7 +76,7 @@
       margin: 0 auto;
     }
 
-    /* Setting section */
+    /* SECTION */
     .settings-section {
       background: var(--card);
       border: 1px solid var(--line-soft);
@@ -95,9 +98,9 @@
       height: 44px;
       border-radius: 12px;
       background: var(--orange-dim);
+      color: var(--orange);
       display: grid;
       place-items: center;
-      font-size: 22px;
       flex-shrink: 0;
     }
 
@@ -122,7 +125,7 @@
       padding: 20px;
     }
 
-    /* Setting item */
+    /* SETTING ITEM */
     .setting-item {
       display: flex;
       align-items: center;
@@ -151,6 +154,9 @@
       font-size: 14px;
       font-weight: 700;
       margin-bottom: 3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .setting-help {
@@ -159,7 +165,7 @@
       line-height: 1.4;
     }
 
-    /* Toggle switch */
+    /* TOGGLE */
     .toggle-switch {
       position: relative;
       display: inline-block;
@@ -206,7 +212,7 @@
       background: var(--orange);
     }
 
-    /* User management */
+    /* USERS LIST */
     .users-list {
       display: flex;
       flex-direction: column;
@@ -266,6 +272,9 @@
       font-size: 10px;
       font-weight: 700;
       text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
     }
 
     .user-tag.admin {
@@ -278,7 +287,7 @@
       color: var(--info);
     }
 
-    /* Cabang list */
+    /* CABANG LIST */
     .cabang-list {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -306,7 +315,7 @@
       background: linear-gradient(135deg, var(--orange), var(--orange-light));
       display: grid;
       place-items: center;
-      font-size: 20px;
+      color: #fff;
     }
 
     .cabang-card-title {
@@ -325,6 +334,15 @@
       font-size: 12px;
       color: var(--muted);
       line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .cabang-card-info-line {
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .cabang-card-info b {
@@ -332,7 +350,7 @@
       font-weight: 700;
     }
 
-    /* System info */
+    /* SYSTEM INFO */
     .system-info {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -353,6 +371,9 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
       margin-bottom: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
     }
 
     .info-tile-value {
@@ -362,13 +383,14 @@
       word-break: break-all;
     }
 
-    /* Danger zone */
+    /* DANGER ZONE */
     .danger-zone {
       border-color: rgba(239, 68, 68, 0.3);
     }
 
     .danger-zone .section-icon {
       background: rgba(239, 68, 68, 0.15);
+      color: var(--danger);
     }
 
     .danger-btn {
@@ -393,7 +415,6 @@
       color: #fff;
     }
 
-    /* External link */
     .link-btn {
       display: inline-flex;
       align-items: center;
@@ -424,16 +445,23 @@
 <body>
 
   <header class="topbar">
-    <a class="topbar-back" id="btnBack" href="./dashboard.html" title="Kembali">←</a>
-    <div class="topbar-title">Settings <em>Sistem</em></div>
+    <a class="topbar-back" id="btnBack" href="./dashboard.html" title="Kembali">
+      <span data-icon="arrow-left" data-icon-size="18"></span>
+    </a>
+    <div class="topbar-title">
+      <span data-icon="settings" data-icon-size="20" data-icon-color="var(--orange)"></span>
+      Settings <em>Sistem</em>
+    </div>
   </header>
 
   <main class="content">
 
-    <!-- App Preferences -->
+    <!-- APP PREFERENCES -->
     <section class="settings-section">
       <header class="section-header">
-        <div class="section-icon">🎨</div>
+        <div class="section-icon">
+          <span data-icon="palette" data-icon-size="22"></span>
+        </div>
         <div class="section-info">
           <h2 class="section-title">Preferensi Tampilan</h2>
           <p class="section-desc">Kustomisasi pengalaman aplikasi Anda</p>
@@ -443,7 +471,10 @@
 
         <div class="setting-item">
           <div class="setting-info">
-            <div class="setting-label">🌙 Dark Mode</div>
+            <div class="setting-label">
+              <span data-icon="palette" data-icon-size="16"></span>
+              Dark Mode
+            </div>
             <div class="setting-help">Tema gelap untuk mata lebih nyaman (default: ON)</div>
           </div>
           <label class="toggle-switch">
@@ -454,7 +485,10 @@
 
         <div class="setting-item">
           <div class="setting-info">
-            <div class="setting-label">🔔 Browser Notifikasi</div>
+            <div class="setting-label">
+              <span data-icon="bell-ring" data-icon-size="16"></span>
+              Browser Notifikasi
+            </div>
             <div class="setting-help">Terima notifikasi order baru meski tab tidak aktif</div>
           </div>
           <label class="toggle-switch">
@@ -465,7 +499,10 @@
 
         <div class="setting-item">
           <div class="setting-info">
-            <div class="setting-label">🔊 Suara Notifikasi</div>
+            <div class="setting-label">
+              <span data-icon="waves" data-icon-size="16"></span>
+              Suara Notifikasi
+            </div>
             <div class="setting-help">Bunyi saat ada notifikasi baru</div>
           </div>
           <label class="toggle-switch">
@@ -476,7 +513,10 @@
 
         <div class="setting-item">
           <div class="setting-info">
-            <div class="setting-label">⚡ Auto Refresh Dashboard</div>
+            <div class="setting-label">
+              <span data-icon="refresh" data-icon-size="16"></span>
+              Auto Refresh Dashboard
+            </div>
             <div class="setting-help">Refresh data otomatis setiap 1 menit</div>
           </div>
           <label class="toggle-switch">
@@ -488,10 +528,12 @@
       </div>
     </section>
 
-    <!-- User Management (admin only) -->
+    <!-- USER MANAGEMENT -->
     <section class="settings-section" id="userSection" style="display: none;">
       <header class="section-header">
-        <div class="section-icon">👥</div>
+        <div class="section-icon">
+          <span data-icon="users" data-icon-size="22"></span>
+        </div>
         <div class="section-info">
           <h2 class="section-title">Kelola User</h2>
           <p class="section-desc">Daftar akun yang terdaftar di sistem</p>
@@ -500,21 +542,27 @@
       <div class="section-body">
         <div class="users-list" id="usersList"></div>
 
-        <div style="margin-top: 16px; padding: 14px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 10px; font-size: 12px; color: var(--info); line-height: 1.6;">
-          💡 <b>Info:</b> User dikelola melalui Google Sheet (sheet <code>USERS</code>). Buka Google Sheets untuk menambah/mengedit akun.
-          <div style="margin-top: 10px;">
-            <a href="https://docs.google.com/spreadsheets" target="_blank" rel="noopener" class="link-btn">
-              📄 Buka Google Sheets
-            </a>
+        <div style="margin-top: 16px; padding: 14px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 10px; font-size: 12px; color: var(--info); line-height: 1.6; display: flex; gap: 10px; align-items: flex-start;">
+          <span data-icon="info" data-icon-size="18" style="flex-shrink: 0;"></span>
+          <div>
+            <b>Info:</b> User dikelola melalui Google Sheet (sheet <code>USERS</code>). Buka Google Sheets untuk menambah/mengedit akun.
+            <div style="margin-top: 10px;">
+              <a href="https://docs.google.com/spreadsheets" target="_blank" rel="noopener" class="link-btn">
+                <span data-icon="file-sheet" data-icon-size="14"></span>
+                Buka Google Sheets
+              </a>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Cabang Management -->
+    <!-- CABANG -->
     <section class="settings-section">
       <header class="section-header">
-        <div class="section-icon">🏬</div>
+        <div class="section-icon">
+          <span data-icon="store" data-icon-size="22"></span>
+        </div>
         <div class="section-info">
           <h2 class="section-title">Daftar Cabang</h2>
           <p class="section-desc">Cabang aktif di sistem</p>
@@ -525,10 +573,12 @@
       </div>
     </section>
 
-    <!-- System Info -->
+    <!-- SYSTEM INFO -->
     <section class="settings-section">
       <header class="section-header">
-        <div class="section-icon">ℹ️</div>
+        <div class="section-icon">
+          <span data-icon="info" data-icon-size="22"></span>
+        </div>
         <div class="section-info">
           <h2 class="section-title">Informasi Sistem</h2>
           <p class="section-desc">Detail teknis aplikasi</p>
@@ -537,37 +587,57 @@
       <div class="section-body">
         <div class="system-info">
           <div class="info-tile">
-            <div class="info-tile-label">App Version</div>
+            <div class="info-tile-label">
+              <span data-icon="tag" data-icon-size="12"></span>
+              App Version
+            </div>
             <div class="info-tile-value" style="color: var(--orange);">v3.0.0</div>
           </div>
           <div class="info-tile">
-            <div class="info-tile-label">Backend</div>
+            <div class="info-tile-label">
+              <span data-icon="database" data-icon-size="12"></span>
+              Backend
+            </div>
             <div class="info-tile-value">Google Apps Script</div>
           </div>
           <div class="info-tile">
-            <div class="info-tile-label">Timezone</div>
-            <div class="info-tile-value">Asia/Makassar (WITA)</div>
+            <div class="info-tile-label">
+              <span data-icon="globe" data-icon-size="12"></span>
+              Timezone
+            </div>
+            <div class="info-tile-value">Asia/Makassar</div>
           </div>
           <div class="info-tile">
-            <div class="info-tile-label">Storage Used</div>
+            <div class="info-tile-label">
+              <span data-icon="database" data-icon-size="12"></span>
+              Storage Used
+            </div>
             <div class="info-tile-value" id="storageUsed">-</div>
           </div>
           <div class="info-tile">
-            <div class="info-tile-label">PWA Status</div>
+            <div class="info-tile-label">
+              <span data-icon="smartphone" data-icon-size="12"></span>
+              PWA Status
+            </div>
             <div class="info-tile-value" id="pwaStatus">-</div>
           </div>
           <div class="info-tile">
-            <div class="info-tile-label">Browser</div>
+            <div class="info-tile-label">
+              <span data-icon="monitor" data-icon-size="12"></span>
+              Browser
+            </div>
             <div class="info-tile-value" id="browserInfo">-</div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Danger Zone -->
+    <!-- DANGER ZONE -->
     <section class="settings-section danger-zone">
       <header class="section-header">
-        <div class="section-icon">⚠️</div>
+        <div class="section-icon">
+          <span data-icon="alert-triangle" data-icon-size="22"></span>
+        </div>
         <div class="section-info">
           <h2 class="section-title" style="color: var(--danger);">Danger Zone</h2>
           <p class="section-desc">Aksi yang bersifat destruktif — hati-hati!</p>
@@ -577,21 +647,29 @@
 
         <div class="setting-item">
           <div class="setting-info">
-            <div class="setting-label">🗑️ Hapus Cache Lokal</div>
+            <div class="setting-label">
+              <span data-icon="trash" data-icon-size="16"></span>
+              Hapus Cache Lokal
+            </div>
             <div class="setting-help">Hapus semua data yang tersimpan di browser (setting, notifikasi dibaca, dll)</div>
           </div>
           <button type="button" class="danger-btn" id="btnClearCache">
-            🗑️ Hapus
+            <span data-icon="trash" data-icon-size="14"></span>
+            Hapus
           </button>
         </div>
 
         <div class="setting-item">
           <div class="setting-info">
-            <div class="setting-label">🔄 Reset Preferensi</div>
+            <div class="setting-label">
+              <span data-icon="refresh" data-icon-size="16"></span>
+              Reset Preferensi
+            </div>
             <div class="setting-help">Kembalikan semua setting ke default</div>
           </div>
           <button type="button" class="danger-btn" id="btnResetPrefs">
-            🔄 Reset
+            <span data-icon="refresh" data-icon-size="14"></span>
+            Reset
           </button>
         </div>
 
@@ -601,9 +679,5 @@
   </main>
 
   <script type="module" src="./src/js/pages/settings.js"></script>
-  <script type="module">
-  import { initPwa } from './src/js/pwa.js';
-  initPwa();
-</script>
 </body>
 </html>

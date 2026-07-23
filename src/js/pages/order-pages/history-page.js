@@ -1,12 +1,12 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   HISTORY PAGE — Riwayat order cabang
+   HISTORY PAGE — with Lucide Icons
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, escapeHtml, formatWita, parseAnyDate, sortBy } from '../../utils.js';
 import { orders as ordersApi } from '../../api.js';
 import { getStatusInfo } from '../../config.js';
+import { icon } from '../../icons.js';
 
-// State lokal
 let localState = {
   orders: [],
   filter: 'ALL',
@@ -20,7 +20,10 @@ let localState = {
 export function renderHistoryPage(state) {
   return `
     <header class="page-heading">
-      <h1>📋 Riwayat Order</h1>
+      <h1>
+        <span data-icon="file" data-icon-size="24" data-icon-color="var(--orange)"></span>
+        Riwayat Order
+      </h1>
       <p>
         Semua order dari cabang
         <strong id="historyBranchLabel" style="color: var(--orange);">${escapeHtml(state.branchId)}</strong>
@@ -28,15 +31,27 @@ export function renderHistoryPage(state) {
     </header>
 
     <div class="filter-scroll" id="historyFilter">
-      <button class="filter-chip active" type="button" data-history-filter="ALL">Semua</button>
-      <button class="filter-chip" type="button" data-history-filter="PENDING">⏳ Tertunda</button>
-      <button class="filter-chip" type="button" data-history-filter="APPROVED">✅ Disetujui</button>
-      <button class="filter-chip" type="button" data-history-filter="REJECTED">❌ Ditolak</button>
+      <button class="filter-chip active" type="button" data-history-filter="ALL">
+        ${icon('list', { size: 14 })}
+        Semua
+      </button>
+      <button class="filter-chip" type="button" data-history-filter="PENDING">
+        ${icon('clock', { size: 14 })}
+        Tertunda
+      </button>
+      <button class="filter-chip" type="button" data-history-filter="APPROVED">
+        ${icon('check-circle', { size: 14 })}
+        Disetujui
+      </button>
+      <button class="filter-chip" type="button" data-history-filter="REJECTED">
+        ${icon('x-circle', { size: 14 })}
+        Ditolak
+      </button>
     </div>
 
     <div class="history-list" id="historyList">
       <div class="empty-state">
-        <div class="empty-icon">📋</div>
+        <div class="empty-icon">${icon('file', { size: 48, color: 'var(--muted)' })}</div>
         <p>Klik tab Riwayat untuk memuat data.</p>
       </div>
     </div>
@@ -48,7 +63,6 @@ export function renderHistoryPage(state) {
 // ─────────────────────────────────────────────────────────────────────────
 
 export function initHistory(state) {
-  // Filter chips
   $('historyFilter')?.addEventListener('click', (e) => {
     const chip = e.target.closest('[data-history-filter]');
     if (!chip) return;
@@ -89,7 +103,6 @@ export async function loadHistory(state) {
 
     const allOrders = result.data || [];
 
-    // Filter hanya cabang ini + sort by tanggal (terbaru dulu)
     const branchOrders = allOrders
       .filter((o) => String(o.ID_CABANG || '').toUpperCase() === state.branchId)
       .map((o) => ({
@@ -103,10 +116,11 @@ export async function loadHistory(state) {
   } catch (error) {
     list.innerHTML = `
       <div class="empty-state">
-        <div class="empty-icon">⚠️</div>
+        <div class="empty-icon">${icon('alert-triangle', { size: 48, color: 'var(--danger)' })}</div>
         <p>Gagal memuat riwayat.</p>
         <button class="secondary-button" id="retryHistoryBtn" type="button" style="margin-top: 16px;">
-          🔄 Coba Lagi
+          ${icon('refresh', { size: 14 })}
+          Coba Lagi
         </button>
       </div>
     `;
@@ -124,7 +138,6 @@ function renderHistoryList(state) {
   const list = $('historyList');
   if (!list) return;
 
-  // Filter by status
   const filtered = localState.filter === 'ALL'
     ? localState.orders
     : localState.orders.filter((o) =>
@@ -138,7 +151,7 @@ function renderHistoryList(state) {
 
     list.innerHTML = `
       <div class="empty-state">
-        <div class="empty-icon">📋</div>
+        <div class="empty-icon">${icon('file', { size: 48, color: 'var(--muted)' })}</div>
         <p>${msg}</p>
       </div>
     `;
@@ -150,11 +163,16 @@ function renderHistoryList(state) {
 
 function buildHistoryItem(order) {
   const status = String(order.STATUS || 'PENDING').toUpperCase();
-  const statusInfo = getStatusInfo(status);
 
   const statusClass = status === 'PENDING' ? 'status-pending'
                     : status === 'APPROVED' ? 'status-approved'
                     : 'status-rejected';
+
+  const statusIconName = {
+    PENDING: 'clock',
+    APPROVED: 'check-circle',
+    REJECTED: 'x-circle',
+  }[status] || 'clock';
 
   const details = order.DETAIL || [];
   const itemText = details.length
@@ -163,7 +181,6 @@ function buildHistoryItem(order) {
       ).join(', ') + (details.length > 3 ? ` +${details.length - 3} lagi` : '')
     : 'detail tidak tersedia';
 
-  // Hitung total items yang disetujui
   const approvedItems = details.filter((d) =>
     String(d.ITEM_STATUS || 'APPROVED').toUpperCase() === 'APPROVED'
   );
@@ -176,28 +193,34 @@ function buildHistoryItem(order) {
       <div class="history-header">
         <div class="history-id">${escapeHtml(order.ORDER_ID)}</div>
         <span class="status-badge ${statusClass}">
-          ${statusInfo.icon} ${escapeHtml(status)}
+          ${icon(statusIconName, { size: 12 })}
+          ${escapeHtml(status)}
         </span>
       </div>
-      <div class="history-date">🕐 ${escapeHtml(formatWita(order.TANGGAL_ORDER))}</div>
-      <div class="history-items">📦 ${itemText}</div>
+      <div class="history-date">
+        ${icon('calendar-clock', { size: 12 })}
+        ${escapeHtml(formatWita(order.TANGGAL_ORDER))}
+      </div>
+      <div class="history-items">
+        ${icon('package', { size: 12 })}
+        ${itemText}
+      </div>
       ${totalHarga > 0 ? `
         <div class="history-note" style="color: var(--orange); font-weight: 700;">
-          💰 Total: Rp ${totalHarga.toLocaleString('id-ID')}
+          ${icon('trending-up', { size: 12 })}
+          Total: Rp ${totalHarga.toLocaleString('id-ID')}
         </div>
       ` : ''}
       ${order.CATATAN ? `
         <div class="history-note" style="margin-top: 4px;">
-          📝 ${escapeHtml(cleanCatatan(order.CATATAN))}
+          ${icon('message', { size: 12 })}
+          ${escapeHtml(cleanCatatan(order.CATATAN))}
         </div>
       ` : ''}
     </article>
   `;
 }
 
-/**
- * Hilangkan section [STOK AKTUAL] dari catatan untuk display
- */
 function cleanCatatan(catatan) {
   return String(catatan || '').replace(/\[STOK AKTUAL\][\s\S]*/, '').trim();
 }

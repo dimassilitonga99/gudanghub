@@ -1,13 +1,12 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   CATALOG PAGE — Katalog barang dengan filter kategori & search
+   CATALOG PAGE — with Lucide Icons
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, escapeHtml, formatRupiah, debounce, toInt, unique } from '../../utils.js';
-import { getKategoriIcon } from '../../config.js';
+import { icon, kategoriIcon, injectIcons } from '../../icons.js';
 import { toast } from '../../ui.js';
 import { addToCart, updateCartUi } from './cart.js';
 
-// State lokal
 let localState = {
   searchQuery: '',
   activeCategory: '',
@@ -17,14 +16,14 @@ let localState = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────
-// RENDER (initial HTML)
+// RENDER
 // ─────────────────────────────────────────────────────────────────────────
 
 export function renderCatalogPage(state) {
   return `
     <div class="search-wrap">
       <div class="search-box">
-        <span class="search-icon">🔍</span>
+        <span class="search-icon" data-icon="search" data-icon-size="16"></span>
         <input
           id="searchInput"
           type="search"
@@ -39,6 +38,7 @@ export function renderCatalogPage(state) {
 
     <div class="filter-scroll" id="filterScroll">
       <button class="filter-chip active" type="button" data-category="">
+        <span data-icon="list" data-icon-size="14"></span>
         Semua
       </button>
     </div>
@@ -57,11 +57,10 @@ export function renderCatalogPage(state) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// INIT (dipanggil sekali setelah render)
+// INIT
 // ─────────────────────────────────────────────────────────────────────────
 
 export function initCatalog(state) {
-  // Search
   const searchInput = $('searchInput');
   if (searchInput) {
     const handleSearch = debounce((e) => {
@@ -73,7 +72,6 @@ export function initCatalog(state) {
     searchInput.addEventListener('input', handleSearch);
   }
 
-  // Filter chip click (delegation)
   $('filterScroll')?.addEventListener('click', (e) => {
     const chip = e.target.closest('[data-category]');
     if (!chip) return;
@@ -87,7 +85,6 @@ export function initCatalog(state) {
     renderCatalog(state);
   });
 
-  // Catalog grid actions (delegation)
   $('catalogGrid')?.addEventListener('click', (e) => {
     const target = e.target.closest('[data-action]');
     if (!target) return;
@@ -106,7 +103,6 @@ export function initCatalog(state) {
     }
   });
 
-  // Qty input change
   $('catalogGrid')?.addEventListener('change', (e) => {
     const target = e.target.closest('[data-action="set-qty"]');
     if (!target) return;
@@ -116,7 +112,7 @@ export function initCatalog(state) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// UPDATE (dipanggil setelah data ready)
+// UPDATE
 // ─────────────────────────────────────────────────────────────────────────
 
 export function updateCatalog(state) {
@@ -142,12 +138,14 @@ function buildCategoryFilters(state) {
   wrapper.innerHTML = `
     <button class="filter-chip ${localState.activeCategory === '' ? 'active' : ''}"
             type="button" data-category="">
+      ${icon('list', { size: 14 })}
       Semua
     </button>
     ${categories.map((cat) => `
       <button class="filter-chip ${localState.activeCategory === cat ? 'active' : ''}"
               type="button" data-category="${escapeHtml(cat)}">
-        ${getKategoriIcon(cat)} ${escapeHtml(cat)}
+        ${kategoriIcon(cat, { size: 14 })}
+        ${escapeHtml(cat)}
       </button>
     `).join('')}
   `;
@@ -193,11 +191,12 @@ function renderCatalog(state) {
   if (!count) {
     grid.innerHTML = `
       <div class="empty-state">
-        <div class="empty-icon">🔍</div>
+        <div class="empty-icon">${icon('search', { size: 48, color: 'var(--muted)' })}</div>
         <p>Barang tidak ditemukan.</p>
         ${localState.searchQuery || localState.activeCategory ? `
           <button class="secondary-button" id="clearFilterBtn" type="button" style="margin-top: 12px;">
-            🔄 Reset Filter
+            ${icon('refresh', { size: 14 })}
+            Reset Filter
           </button>
         ` : ''}
       </div>
@@ -245,7 +244,9 @@ function buildProductCard(product, state) {
   return `
     <article class="item-card ${inCart ? 'in-cart' : ''}" id="card-${escCode}">
       <span class="item-stock-badge ${stockClass}">${stockText}</span>
-      <span class="item-emoji">${getKategoriIcon(category)}</span>
+      <div class="item-icon">
+        ${kategoriIcon(category, { size: 24 })}
+      </div>
       <div class="item-code">${escCode}</div>
       <div class="item-name">${escapeHtml(name)}</div>
       <div class="item-category">${escapeHtml(category)}</div>
@@ -253,7 +254,9 @@ function buildProductCard(product, state) {
       <div class="item-unit">per ${escapeHtml(unit)}</div>
 
       <div class="quantity-control">
-        <button class="quantity-button" type="button" data-action="decrease" data-code="${escCode}">−</button>
+        <button class="quantity-button" type="button" data-action="decrease" data-code="${escCode}">
+          ${icon('minus', { size: 14 })}
+        </button>
         <input class="quantity-input"
                id="qty-${escCode}"
                type="number"
@@ -262,7 +265,9 @@ function buildProductCard(product, state) {
                value="${quantity}"
                data-action="set-qty"
                data-code="${escCode}">
-        <button class="quantity-button" type="button" data-action="increase" data-code="${escCode}">+</button>
+        <button class="quantity-button" type="button" data-action="increase" data-code="${escCode}">
+          ${icon('plus', { size: 14 })}
+        </button>
       </div>
 
       <button class="add-button ${inCart ? 'added' : ''}"
@@ -270,7 +275,10 @@ function buildProductCard(product, state) {
               ${stock === 0 ? 'disabled' : ''}
               data-action="add"
               data-code="${escCode}">
-        ${inCart ? '✅ Di Keranjang' : '+ Tambah'}
+        ${inCart
+          ? `${icon('check', { size: 14 })} Di Keranjang`
+          : `${icon('plus', { size: 14 })} Tambah`
+        }
       </button>
     </article>
   `;
@@ -282,7 +290,8 @@ function appendLoadMoreButton(remaining) {
   wrapper.style.cssText = 'grid-column: 1 / -1; padding: 20px; text-align: center;';
   wrapper.innerHTML = `
     <button class="secondary-button" type="button" data-action="load-more">
-      Tampilkan ${remaining} lainnya ▼
+      ${icon('chevron-down', { size: 14 })}
+      Tampilkan ${remaining} lainnya
     </button>
   `;
   $('catalogGrid')?.appendChild(wrapper);
@@ -318,7 +327,7 @@ function clampQty(state, code, value) {
 
   if (stock > 0 && qty > stock) {
     qty = stock;
-    toast.info(`⚠️ Maksimal stok ${stock}.`);
+    toast.info(`Maksimal stok ${stock}.`);
   }
 
   return qty;
@@ -328,13 +337,13 @@ function addItemToCart(state, code) {
   const product = state.productByCode[String(code).toUpperCase()];
 
   if (!product) {
-    toast.error('❌ Barang tidak ditemukan.');
+    toast.error('Barang tidak ditemukan.');
     return;
   }
 
   const stock = toInt(product.STOK);
   if (stock === 0) {
-    toast.error('❌ Stok habis.');
+    toast.error('Stok habis.');
     return;
   }
 
@@ -354,7 +363,7 @@ function addItemToCart(state, code) {
 
   updateCartUi(state);
   renderCatalog(state);
-  toast.success('✅ Ditambah ke keranjang.', { duration: 1500 });
+  toast.success('Ditambah ke keranjang.', { duration: 1500 });
 }
 
 function changeQty(state, code, delta) {

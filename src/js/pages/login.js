@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   LOGIN PAGE — Logic
+   LOGIN PAGE — Logic with Lucide Icons
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, sleep } from '../utils.js';
@@ -12,6 +12,7 @@ import {
   redirectToHome,
 } from '../session.js';
 import { toast } from '../ui.js';
+import { icon, injectIcons } from '../icons.js';
 
 // ─────────────────────────────────────────────────────────────────────────
 // STATE
@@ -59,7 +60,10 @@ function togglePw() {
 
   const isPassword = input.type === 'password';
   input.type = isPassword ? 'text' : 'password';
-  eye.textContent = isPassword ? '🙈' : '👁';
+
+  // Update icon
+  eye.innerHTML = icon(isPassword ? 'eye-off' : 'eye', { size: 18 });
+
   btn?.setAttribute('aria-label', isPassword ? 'Sembunyikan password' : 'Tampilkan password');
 }
 
@@ -86,7 +90,7 @@ function hideError() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// SHAKE ANIMATION
+// SHAKE
 // ─────────────────────────────────────────────────────────────────────────
 
 function shakeCard() {
@@ -94,7 +98,7 @@ function shakeCard() {
   if (!card) return;
 
   card.classList.remove('shake');
-  void card.offsetWidth; // Trigger reflow
+  void card.offsetWidth;
   card.classList.add('shake');
 }
 
@@ -111,9 +115,11 @@ function setLoadingBtn(isLoading, text = 'Memverifikasi...') {
   btn.classList.toggle('loading', isLoading);
   btn.disabled = isLoading;
 
-  btnText.innerHTML = isLoading
-    ? `<span class="spinner spinner-sm"></span> ${text}`
-    : '<span>🔒</span> Masuk';
+  if (isLoading) {
+    btnText.innerHTML = `<span class="spinner spinner-sm"></span> ${text}`;
+  } else {
+    btnText.innerHTML = `${icon('login', { size: 18 })} Masuk`;
+  }
 }
 
 function setLoadingForgotBtn(isLoading, text = 'Mengirim...') {
@@ -125,9 +131,11 @@ function setLoadingForgotBtn(isLoading, text = 'Mengirim...') {
   btn.classList.toggle('loading', isLoading);
   btn.disabled = isLoading;
 
-  btnText.innerHTML = isLoading
-    ? `<span class="spinner spinner-sm"></span> ${text}`
-    : '<span>📧</span> Kirim ke Admin';
+  if (isLoading) {
+    btnText.innerHTML = `<span class="spinner spinner-sm"></span> ${text}`;
+  } else {
+    btnText.innerHTML = `${icon('send', { size: 16 })} Kirim ke Admin`;
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -142,7 +150,6 @@ async function handleLogin(event) {
   const password = $('inputPass').value;
   const rememberChecked = $('remember').checked;
 
-  // Validasi
   if (!username || !password) {
     showError('Username dan password wajib diisi.');
     shakeCard();
@@ -163,7 +170,6 @@ async function handleLogin(event) {
 
     const user = result.user || {};
 
-    // Validasi role
     if (currentRole === 'admin' && user.role !== 'admin') {
       showError('Akun ini bukan Admin Gudang. Pilih peran "Cabang".');
       setLoadingBtn(false);
@@ -178,16 +184,13 @@ async function handleLogin(event) {
       return;
     }
 
-    // Simpan session
     setSession(user, result.token);
-
-    // Remember me
     setLastUsername(rememberChecked ? user.username : '');
 
     // Success animation
     const btnText = $('btnText');
     if (btnText) {
-      btnText.innerHTML = '<span>✅</span> Berhasil! Mengalihkan...';
+      btnText.innerHTML = `${icon('check-circle', { size: 18 })} Berhasil! Mengalihkan...`;
     }
 
     toast.success(`Selamat datang, ${user.nama || user.username}!`);
@@ -213,7 +216,6 @@ function openForgot() {
 
   if (!overlay) return;
 
-  // Auto-fill dari input login
   if (fUser && inputUser) {
     fUser.value = inputUser.value.trim();
   }
@@ -274,32 +276,25 @@ async function submitForgot() {
 // ─────────────────────────────────────────────────────────────────────────
 
 function bindEvents() {
-  // Role selector
   $('role-admin')?.addEventListener('click', () => setRole('admin'));
   $('role-cabang')?.addEventListener('click', () => setRole('cabang'));
 
-  // Toggle password
   $('toggleBtn')?.addEventListener('click', togglePw);
 
-  // Form submit
   $('loginForm')?.addEventListener('submit', handleLogin);
 
-  // Forgot password
   $('forgotBtn')?.addEventListener('click', openForgot);
   $('fCancel')?.addEventListener('click', closeForgot);
   $('fBtn')?.addEventListener('click', submitForgot);
 
-  // Close modal on backdrop click
   $('forgotOv')?.addEventListener('click', (e) => {
     if (e.target.id === 'forgotOv') closeForgot();
   });
 
-  // Close on ESC
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeForgot();
   });
 
-  // Submit forgot on Enter in input
   $('fUser')?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -307,7 +302,6 @@ function bindEvents() {
     }
   });
 
-  // Clear error saat user typing
   ['inputUser', 'inputPass'].forEach((id) => {
     $(id)?.addEventListener('input', hideError);
   });
@@ -318,10 +312,11 @@ function bindEvents() {
 // ─────────────────────────────────────────────────────────────────────────
 
 function init() {
-  // Auto-redirect kalau sudah login
   if (redirectIfAuthenticated()) return;
 
-  // Restore last username (remember me)
+  // Inject semua icons dari data-icon
+  injectIcons();
+
   const lastUser = getLastUsername();
   if (lastUser) {
     const input = $('inputUser');
@@ -332,7 +327,6 @@ function init() {
 
   bindEvents();
 
-  // Focus username field
   setTimeout(() => {
     const input = $('inputUser');
     if (input && !input.value) input.focus();
@@ -340,7 +334,6 @@ function init() {
   }, 300);
 }
 
-// Mobile viewport fix
 function setVH() {
   document.documentElement.style.setProperty(
     '--vh',

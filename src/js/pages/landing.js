@@ -1,10 +1,11 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   LANDING PAGE — Logic & Animations
+   LANDING PAGE — Logic & Animations (with Lucide Icons)
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, $$$, throttle } from '../utils.js';
 import { CABANG_LIST } from '../config.js';
-import { getSession, isSessionValid, getHomeRoute } from '../session.js';
+import { getSession, isSessionValid } from '../session.js';
+import { icon, injectIcons } from '../icons.js';
 
 // ─────────────────────────────────────────────────────────────────────────
 // AUTO-REDIRECT jika sudah login
@@ -13,10 +14,17 @@ import { getSession, isSessionValid, getHomeRoute } from '../session.js';
 function checkExistingSession() {
   const s = getSession();
   if (s && isSessionValid(s)) {
-    // Optional: show banner "Continue as X" instead of auto-redirect
-    // Untuk landing, kita biarkan user browse dulu
     console.log('User sudah login sebagai:', s.username);
   }
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// INJECT ALL ICONS
+// ─────────────────────────────────────────────────────────────────────────
+
+function initIcons() {
+  // Auto-inject semua element dengan data-icon
+  injectIcons();
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -47,12 +55,10 @@ function initDrawer() {
   closeBtn?.addEventListener('click', close);
   overlay.addEventListener('click', close);
 
-  // Close on link click
   drawer.querySelectorAll('[data-drawer-link]').forEach((link) => {
     link.addEventListener('click', close);
   });
 
-  // ESC to close
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') close();
   });
@@ -66,7 +72,6 @@ function initCursorGlow() {
   const glow = $('cursorGlow');
   if (!glow) return;
 
-  // Skip untuk touch device
   if (!window.matchMedia('(hover: hover)').matches) {
     glow.remove();
     return;
@@ -118,7 +123,6 @@ function initScroll() {
     if (progress) progress.style.width = percent + '%';
     if (nav) nav.classList.toggle('scrolled', scrollY > 20);
 
-    // Parallax hero
     if (scrollY < winH && hero) {
       hero.style.setProperty('--scroll-y', `-${scrollY * 0.15}px`);
     }
@@ -199,28 +203,30 @@ function initCounters() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// MARQUEE KATEGORI (auto-generated)
+// MARQUEE KATEGORI (dengan SVG icons)
 // ─────────────────────────────────────────────────────────────────────────
 
 const KATEGORI_MARQUEE = [
-  { name: 'Kursi', icon: '🪑' },
-  { name: 'Kasur', icon: '🛏️' },
-  { name: 'Meja', icon: '🍽️' },
-  { name: 'Elektronik', icon: '📺' },
-  { name: 'Peralatan Dapur', icon: '🍳' },
-  { name: 'Peralatan Makan', icon: '🍴' },
-  { name: 'Peralatan Mandi', icon: '🚿' },
-  { name: 'Lemari', icon: '🗄️' },
-  { name: 'Loker', icon: '🗃️' },
-  { name: 'Sofa', icon: '🛋️' },
-  { name: 'Rak Buku', icon: '📚' },
-  { name: 'Dekorasi', icon: '🎨' },
+  { name: 'Kursi', iconName: 'armchair' },
+  { name: 'Kasur', iconName: 'bed' },
+  { name: 'Meja', iconName: 'utensils' },
+  { name: 'Elektronik', iconName: 'monitor' },
+  { name: 'Peralatan Dapur', iconName: 'cooking' },
+  { name: 'Peralatan Makan', iconName: 'utensils' },
+  { name: 'Peralatan Mandi', iconName: 'sparkles' },
+  { name: 'Lemari', iconName: 'boxes' },
+  { name: 'Loker', iconName: 'boxes' },
+  { name: 'Sofa', iconName: 'sofa' },
+  { name: 'Rak Buku', iconName: 'boxes' },
+  { name: 'Dekorasi', iconName: 'palette' },
 ];
 
-function buildMarqueeItem({ name, icon }) {
+function buildMarqueeItem({ name, iconName }) {
   return `
     <span class="marquee-item">
-      <span class="marquee-icon">${icon}</span>
+      <span class="marquee-icon">
+        ${icon(iconName, { size: 22, strokeWidth: 1.8 })}
+      </span>
       ${name}
     </span>
     <span class="marquee-dot"></span>
@@ -231,7 +237,6 @@ function initMarquee() {
   const track = $('marqueeTrack');
   if (!track) return;
 
-  // Duplikasi 2x untuk seamless loop
   const html = [...KATEGORI_MARQUEE, ...KATEGORI_MARQUEE]
     .map(buildMarqueeItem)
     .join('');
@@ -240,7 +245,7 @@ function initMarquee() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// CABANG LIST (dari config)
+// CABANG LIST (dengan avatar SVG)
 // ─────────────────────────────────────────────────────────────────────────
 
 function initCabangList() {
@@ -255,7 +260,7 @@ function initCabangList() {
         <span class="cabang-avatar">${cabang.pic.charAt(0)}</span>
         PIC · ${cabang.pic}
       </div>
-      <span class="cabang-go">→</span>
+      <span class="cabang-go">${icon('arrow-right', { size: 20 })}</span>
     </a>
   `).join('');
 }
@@ -268,7 +273,6 @@ function initParticles() {
   const canvas = $('bgCanvas');
   if (!canvas) return;
 
-  // Skip untuk reduced motion
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     canvas.parentElement.style.display = 'none';
     return;
@@ -319,7 +323,6 @@ function initParticles() {
       p.y += p.vy;
       p.life += 0.4;
 
-      // Wrap edges
       if (p.x < 0) p.x = W;
       if (p.x > W) p.x = 0;
       if (p.y < 0) p.y = H;
@@ -328,7 +331,6 @@ function initParticles() {
       const twinkle = Math.sin(p.life * 0.04) * 0.3 + 0.7;
       const alpha = p.opacity * twinkle;
 
-      // Mouse proximity boost
       const dx = p.x - mouseX;
       const dy = p.y - mouseY;
       const dist = Math.sqrt(dx * dx + dy * dy);
@@ -361,7 +363,6 @@ function initParticles() {
 
   window.addEventListener('resize', throttle(resize, 200), { passive: true });
 
-  // Pause when tab not visible (save battery)
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
       cancelAnimationFrame(animationId);
@@ -375,7 +376,7 @@ function initParticles() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// SMOOTH SCROLL FOR ANCHOR LINKS
+// SMOOTH SCROLL
 // ─────────────────────────────────────────────────────────────────────────
 
 function initSmoothScroll() {
@@ -413,6 +414,7 @@ function registerPwa() {
 
 function init() {
   checkExistingSession();
+  initIcons(); // ← NEW: inject semua data-icon
   initDrawer();
   initCursorGlow();
   initScroll();

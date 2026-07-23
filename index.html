@@ -8,26 +8,20 @@
 
   <title>GudangHub — Kolaborasi Cabang & Gudang, Tanpa Batas Waktu</title>
 
-  <!-- PWA -->
   <link rel="manifest" href="./manifest.json">
   <link rel="apple-touch-icon" href="./public/icons/icon-192.png">
 
-  <!-- Preload -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-  <!-- CSS -->
   <link rel="stylesheet" href="./src/styles/main.css">
 
-  <!-- Page-specific styles -->
   <style>
-    /* ═══════════ LANDING PAGE SPECIFIC ═══════════ */
-
     body {
       background: var(--ink-950);
     }
 
-    /* ─── SCROLL PROGRESS ─── */
+    /* SCROLL PROGRESS */
     .scroll-progress {
       position: fixed;
       top: 0;
@@ -41,7 +35,7 @@
       pointer-events: none;
     }
 
-    /* ─── CURSOR GLOW ─── */
+    /* CURSOR GLOW */
     .cursor-glow {
       position: fixed;
       top: 0;
@@ -64,7 +58,7 @@
 
     .cursor-glow.hide { opacity: 0; }
 
-    /* ─── BACKGROUND PARTICLES ─── */
+    /* BACKGROUND PARTICLES */
     .bg-particles {
       position: fixed;
       inset: 0;
@@ -79,7 +73,7 @@
       display: block;
     }
 
-    /* ─── REVEAL ANIMATION ─── */
+    /* REVEAL ANIMATION */
     .reveal {
       opacity: 0;
       transform: translateY(30px);
@@ -101,7 +95,7 @@
 
     .reveal-scale.in { opacity: 1; transform: scale(1); }
 
-    /* ─── NAV ─── */
+    /* NAV */
     .nav {
       position: fixed;
       top: 0;
@@ -149,16 +143,6 @@
       box-shadow: 0 6px 18px rgba(255, 107, 0, 0.32);
     }
 
-    .brand-mark svg {
-      width: 20px;
-      height: 20px;
-      stroke: currentColor;
-      fill: none;
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
     .brand-name {
       font-family: var(--font-serif);
       font-weight: 600;
@@ -196,6 +180,27 @@
       flex-shrink: 0;
     }
 
+    .btn-nav-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--orange);
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 14px;
+      text-decoration: none;
+      transition: all 0.25s var(--ease-spring);
+      box-shadow: 0 6px 18px rgba(255, 107, 0, 0.3);
+      min-height: 42px;
+    }
+
+    .btn-nav-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(255, 107, 0, 0.45);
+    }
+
     .burger {
       display: none;
       background: none;
@@ -206,13 +211,15 @@
       min-width: 44px;
       min-height: 44px;
       border-radius: 8px;
+      align-items: center;
+      justify-content: center;
     }
 
     .burger:hover {
       background: rgba(255, 255, 255, 0.05);
     }
 
-    /* ─── MOBILE DRAWER ─── */
+    /* MOBILE DRAWER */
     .drawer-overlay {
       display: none;
       position: fixed;
@@ -254,6 +261,7 @@
       min-height: 44px;
       display: flex;
       align-items: center;
+      gap: 12px;
       text-decoration: none;
     }
 
@@ -270,10 +278,11 @@
       border-radius: 10px;
       color: var(--text);
       cursor: pointer;
-      font-size: 18px;
+      display: grid;
+      place-items: center;
     }
 
-    /* ─── HERO CINEMATIC ─── */
+    /* HERO */
     .hero {
       position: relative;
       min-height: 100dvh;
@@ -326,7 +335,9 @@
     }
 
     .hero-eyebrow {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
       font-family: var(--font-mono);
       font-size: clamp(11px, 1.3vw, 13px);
       color: var(--orange);
@@ -339,6 +350,14 @@
       background: rgba(255, 107, 0, 0.05);
       opacity: 0;
       animation: heroFadeIn 0.8s ease 0.1s forwards;
+    }
+
+    .hero-eyebrow-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--orange);
+      box-shadow: 0 0 8px var(--orange);
     }
 
     .hero-headline h1 {
@@ -491,12 +510,11 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 22px;
-      height: 22px;
+      width: 24px;
+      height: 24px;
       border-radius: 50%;
       background: var(--orange);
       color: #fff;
-      font-size: 11px;
       transition: transform 0.3s;
     }
 
@@ -573,7 +591,7 @@
       margin-top: 6px;
     }
 
-    /* ─── MARQUEE KATEGORI ─── */
+    /* MARQUEE */
     .marquee {
       position: relative;
       overflow: hidden;
@@ -635,7 +653,7 @@
       border: 1px solid rgba(255, 107, 0, 0.18);
       transition: all 0.3s ease;
       flex-shrink: 0;
-      font-size: clamp(16px, 2vw, 20px);
+      color: var(--orange);
     }
 
     .marquee-item:hover .marquee-icon {
@@ -655,7 +673,7 @@
       box-shadow: 0 0 6px rgba(255, 107, 0, 0.5);
     }
 
-    /* ─── SECTION HEAD ─── */
+    /* SECTION HEAD */
     .section-head {
       max-width: 720px;
       margin-bottom: clamp(32px, 5vw, 56px);
@@ -705,7 +723,7 @@
       line-height: 1.7;
     }
 
-    /* ─── STEPS ─── */
+    /* STEPS */
     .steps {
       padding: var(--gap-section) 0;
       position: relative;
@@ -760,7 +778,6 @@
       place-items: center;
       margin-bottom: clamp(18px, 2.5vw, 22px);
       transition: all 0.3s var(--ease-spring);
-      font-size: 24px;
       border: 1px solid rgba(255, 107, 0, 0.15);
     }
 
@@ -782,7 +799,7 @@
       line-height: 1.65;
     }
 
-    /* ─── ABOUT ─── */
+    /* ABOUT */
     .about {
       padding: var(--gap-section) 0;
       background: rgba(20, 20, 31, 0.5);
@@ -810,24 +827,13 @@
       box-shadow: 0 40px 80px -24px rgba(0, 0, 0, 0.7);
       position: relative;
       background: linear-gradient(135deg, var(--orange), var(--orange-deep));
+      display: grid;
+      place-items: center;
     }
 
-    .about-media-main::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, transparent 60%, rgba(255, 107, 0, 0.15));
-      z-index: 2;
+    .about-media-icon {
+      color: rgba(255, 255, 255, 0.9);
     }
-
-    .about-media-main img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 1.2s var(--ease-spring);
-    }
-
-    .about-media:hover .about-media-main img { transform: scale(1.05); }
 
     .about h2 {
       font-size: clamp(28px, 4.5vw, 52px);
@@ -868,7 +874,6 @@
       color: var(--orange);
       display: grid;
       place-items: center;
-      font-size: 22px;
       border: 1px solid rgba(255, 107, 0, 0.2);
       transition: all 0.3s;
     }
@@ -893,7 +898,27 @@
       line-height: 1.65;
     }
 
-    /* ─── STATS ─── */
+    .btn-about {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, var(--orange), var(--orange-light));
+      color: #fff;
+      padding: 14px 26px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 14px;
+      text-decoration: none;
+      transition: all 0.25s var(--ease-spring);
+      box-shadow: 0 6px 18px rgba(255, 107, 0, 0.3);
+    }
+
+    .btn-about:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(255, 107, 0, 0.45);
+    }
+
+    /* STATS */
     .stats {
       padding: var(--gap-section) 0;
       position: relative;
@@ -944,7 +969,7 @@
       color: var(--muted);
     }
 
-    /* ─── CABANG ─── */
+    /* CABANG */
     .cabang {
       padding: var(--gap-section) 0;
       background: rgba(20, 20, 31, 0.5);
@@ -1045,7 +1070,7 @@
       box-shadow: 0 8px 20px rgba(255, 107, 0, 0.4);
     }
 
-    /* ─── CTA ─── */
+    /* CTA */
     .cta {
       padding: var(--gap-section) 0;
       position: relative;
@@ -1062,7 +1087,9 @@
     }
 
     .cta-eyebrow {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
       font-family: var(--font-mono);
       font-size: 12px;
       color: rgba(255, 255, 255, 0.85);
@@ -1075,6 +1102,14 @@
       margin-bottom: 20px;
       -webkit-backdrop-filter: blur(8px);
       backdrop-filter: blur(8px);
+    }
+
+    .cta-eyebrow-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 0 8px #fff;
     }
 
     .cta-box h2 {
@@ -1119,7 +1154,7 @@
       box-shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
     }
 
-    /* ─── FOOTER ─── */
+    /* FOOTER */
     .footer {
       padding: clamp(48px, 8vw, 72px) 0 34px;
       padding-bottom: calc(34px + var(--safe-bottom));
@@ -1155,7 +1190,9 @@
     }
 
     .footer-col a {
-      display: block;
+      display: flex;
+      align-items: center;
+      gap: 8px;
       color: var(--muted);
       font-size: 14.5px;
       margin-bottom: 12px;
@@ -1183,10 +1220,10 @@
 
     .footer-bottom b { color: var(--orange); }
 
-    /* ═══════════ RESPONSIVE ═══════════ */
+    /* RESPONSIVE */
     @media (max-width: 900px) {
       .nav-links { display: none; }
-      .burger { display: flex; align-items: center; justify-content: center; }
+      .burger { display: flex; }
 
       .hero-main {
         grid-template-columns: 1fr;
@@ -1233,27 +1270,38 @@
 
 <body>
 
-  <!-- SKIP LINK (accessibility) -->
   <a href="#main-content" class="skip-link">Lompat ke konten utama</a>
 
-  <!-- SCROLL PROGRESS -->
   <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
-
-  <!-- CURSOR GLOW -->
   <div class="cursor-glow hide" id="cursorGlow" aria-hidden="true"></div>
-
-  <!-- BACKGROUND PARTICLES -->
   <div class="bg-particles" aria-hidden="true"><canvas id="bgCanvas"></canvas></div>
 
   <!-- MOBILE DRAWER -->
   <div class="drawer-overlay" id="drawerOverlay"></div>
   <aside class="mobile-drawer" id="mobileDrawer" aria-label="Menu navigasi">
-    <button class="close-drawer" id="closeDrawer" aria-label="Tutup menu">✕</button>
-    <a href="#cara" data-drawer-link>🔧 Cara Kerja</a>
-    <a href="#katalog" data-drawer-link>📚 Katalog</a>
-    <a href="#tentang" data-drawer-link>ℹ️ Tentang</a>
-    <a href="#cabang" data-drawer-link>🏬 Cabang</a>
-    <a href="./login.html" style="background: var(--orange); color: #fff; margin-top: 16px; justify-content: center;">Masuk →</a>
+    <button class="close-drawer" id="closeDrawer" aria-label="Tutup menu">
+      <span data-icon="close" data-icon-size="18"></span>
+    </button>
+    <a href="#cara" data-drawer-link>
+      <span data-icon="wrench" data-icon-size="20"></span>
+      Cara Kerja
+    </a>
+    <a href="#katalog" data-drawer-link>
+      <span data-icon="grid" data-icon-size="20"></span>
+      Katalog
+    </a>
+    <a href="#tentang" data-drawer-link>
+      <span data-icon="info" data-icon-size="20"></span>
+      Tentang
+    </a>
+    <a href="#cabang" data-drawer-link>
+      <span data-icon="store" data-icon-size="20"></span>
+      Cabang
+    </a>
+    <a href="./login.html" style="background: var(--orange); color: #fff; margin-top: 16px; justify-content: center;">
+      <span data-icon="login" data-icon-size="20"></span>
+      Masuk
+    </a>
   </aside>
 
   <!-- NAV -->
@@ -1261,12 +1309,7 @@
     <div class="nav-inner">
       <a href="#top" class="brand">
         <span class="brand-mark">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35A2 2 0 0 1 3.26 6.5l8-3.2a2 2 0 0 1 1.48 0l8 3.2A2 2 0 0 1 22 8.35Z"/>
-            <path d="M6 18h12"/>
-            <path d="M6 14h12"/>
-            <rect width="12" height="12" x="6" y="10"/>
-          </svg>
+          <span data-icon="warehouse" data-icon-size="20"></span>
         </span>
         <span class="brand-name">Gudang<em>Hub</em></span>
       </a>
@@ -1279,13 +1322,12 @@
       </div>
 
       <div class="nav-cta">
-        <a href="./login.html" class="btn btn-primary btn-sm">Masuk →</a>
+        <a href="./login.html" class="btn-nav-primary">
+          Masuk
+          <span data-icon="arrow-right" data-icon-size="16"></span>
+        </a>
         <button class="burger" id="burgerBtn" aria-label="Buka menu">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <line x1="4" x2="20" y1="12" y2="12"/>
-            <line x1="4" x2="20" y1="6" y2="6"/>
-            <line x1="4" x2="20" y1="18" y2="18"/>
-          </svg>
+          <span data-icon="menu" data-icon-size="24"></span>
         </button>
       </div>
     </div>
@@ -1293,7 +1335,7 @@
 
   <main id="main-content">
 
-    <!-- HERO CINEMATIC -->
+    <!-- HERO -->
     <section class="hero" id="top">
       <div class="hero-spotlight" aria-hidden="true"></div>
       <div class="hero-vignette" aria-hidden="true"></div>
@@ -1301,7 +1343,10 @@
       <div class="hero-inner">
         <div class="hero-main">
           <div class="hero-headline">
-            <span class="hero-eyebrow">● Sistem Kolaborasi Cabang</span>
+            <span class="hero-eyebrow">
+              <span class="hero-eyebrow-dot"></span>
+              Sistem Kolaborasi Cabang
+            </span>
             <h1>
               <span class="line"><span class="word">Satu Jaringan,</span></span>
               <span class="line"><span class="word"><em>Ribuan</em> Peluang.</span></span>
@@ -1316,7 +1361,9 @@
             <div class="hero-actions">
               <a href="./login.html" class="hero-btn hero-btn-primary">
                 Mulai Kelola
-                <span class="hero-btn-icon">→</span>
+                <span class="hero-btn-icon">
+                  <span data-icon="arrow-right" data-icon-size="14"></span>
+                </span>
               </a>
               <a href="#cara" class="hero-btn hero-btn-ghost">Pelajari Sistem</a>
             </div>
@@ -1346,7 +1393,7 @@
       </div>
     </section>
 
-    <!-- MARQUEE KATEGORI -->
+    <!-- MARQUEE -->
     <div class="marquee" aria-label="Kategori barang">
       <div class="marquee-track" id="marqueeTrack">
         <!-- Diisi oleh JS -->
@@ -1364,28 +1411,36 @@
       <div class="steps-grid">
         <article class="step reveal" data-delay="1">
           <div class="step-num">/ 01</div>
-          <div class="step-icon">🔍</div>
+          <div class="step-icon">
+            <span data-icon="search" data-icon-size="26"></span>
+          </div>
           <h3>Telusuri Katalog</h3>
           <p>Cabang menjelajah katalog lengkap dengan kode, harga, dan stok real-time. Semua transparan.</p>
         </article>
 
         <article class="step reveal" data-delay="2">
           <div class="step-num">/ 02</div>
-          <div class="step-icon">🛒</div>
+          <div class="step-icon">
+            <span data-icon="cart" data-icon-size="26"></span>
+          </div>
           <h3>Susun Order</h3>
           <p>Tambahkan barang satu per satu atau kirim massal — copy-paste dari Excel pun jalan.</p>
         </article>
 
         <article class="step reveal" data-delay="3">
           <div class="step-num">/ 03</div>
-          <div class="step-icon">📋</div>
+          <div class="step-icon">
+            <span data-icon="shield-check" data-icon-size="26"></span>
+          </div>
           <h3>Admin Verifikasi</h3>
           <p>Gudang pusat meninjau, menyesuaikan, atau menolak dari dashboard. Semua ada jejaknya.</p>
         </article>
 
         <article class="step reveal" data-delay="3">
           <div class="step-num">/ 04</div>
-          <div class="step-icon">🚚</div>
+          <div class="step-icon">
+            <span data-icon="truck" data-icon-size="26"></span>
+          </div>
           <h3>Barang Meluncur</h3>
           <p>Order approved masuk antrean pengiriman. Cabang dapat notifikasi email otomatis.</p>
         </article>
@@ -1397,8 +1452,8 @@
       <div class="container about-inner">
         <div class="about-media reveal">
           <div class="about-media-main">
-            <div style="display: grid; place-items: center; width: 100%; height: 100%; color: #fff; font-size: 120px;">
-              🏭
+            <div class="about-media-icon">
+              <span data-icon="factory" data-icon-size="120" data-icon-stroke="1.2"></span>
             </div>
           </div>
         </div>
@@ -1410,21 +1465,27 @@
 
           <div class="about-list">
             <div class="about-item reveal" data-delay="1">
-              <span class="about-item-icon">🔄</span>
+              <span class="about-item-icon">
+                <span data-icon="file" data-icon-size="22"></span>
+              </span>
               <div>
                 <h4>Terdokumentasi Sempurna</h4>
                 <p>Setiap permintaan memiliki jejak audit — dari siapa, kapan, dan alasannya.</p>
               </div>
             </div>
             <div class="about-item reveal" data-delay="2">
-              <span class="about-item-icon">⚡</span>
+              <span class="about-item-icon">
+                <span data-icon="zap" data-icon-size="22"></span>
+              </span>
               <div>
                 <h4>Keputusan dalam Sekejap</h4>
                 <p>Admin approve, edit, atau tolak dari mana saja. Perubahan tersinkron instan.</p>
               </div>
             </div>
             <div class="about-item reveal" data-delay="3">
-              <span class="about-item-icon">📊</span>
+              <span class="about-item-icon">
+                <span data-icon="chart-bar" data-icon-size="22"></span>
+              </span>
               <div>
                 <h4>Wawasan Berbasis Data</h4>
                 <p>Laporan cabang, rate persetujuan, dan pola order — semua dalam satu layar.</p>
@@ -1432,7 +1493,10 @@
             </div>
           </div>
 
-          <a href="./login.html" class="btn btn-primary reveal" data-delay="1">Masuk ke Dashboard →</a>
+          <a href="./login.html" class="btn-about reveal" data-delay="1">
+            Masuk ke Dashboard
+            <span data-icon="arrow-right" data-icon-size="16"></span>
+          </a>
         </div>
       </div>
     </section>
@@ -1487,12 +1551,15 @@
     <!-- CTA -->
     <section class="cta container">
       <div class="cta-box reveal">
-        <span class="cta-eyebrow">● Siap mulai hari ini</span>
+        <span class="cta-eyebrow">
+          <span class="cta-eyebrow-dot"></span>
+          Siap mulai hari ini
+        </span>
         <h2>Waktunya berhenti <em>menebak-nebak</em>.</h2>
         <p>Login sekali, kendalikan seluruh alur order antar cabang. Sederhana untuk cabang, powerful untuk admin.</p>
         <a href="./login.html" class="cta-btn">
           Masuk ke GudangHub
-          <span>→</span>
+          <span data-icon="arrow-right" data-icon-size="18"></span>
         </a>
       </div>
     </section>
@@ -1506,12 +1573,7 @@
         <div class="footer-about">
           <a href="#top" class="brand">
             <span class="brand-mark">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35A2 2 0 0 1 3.26 6.5l8-3.2a2 2 0 0 1 1.48 0l8 3.2A2 2 0 0 1 22 8.35Z"/>
-                <path d="M6 18h12"/>
-                <path d="M6 14h12"/>
-                <rect width="12" height="12" x="6" y="10"/>
-              </svg>
+              <span data-icon="warehouse" data-icon-size="20"></span>
             </span>
             <span class="brand-name">Gudang<em>Hub</em></span>
           </a>
@@ -1520,24 +1582,54 @@
 
         <div class="footer-col">
           <h5>Jelajahi</h5>
-          <a href="#cara">Cara Kerja</a>
-          <a href="#katalog">Katalog</a>
-          <a href="#tentang">Tentang</a>
-          <a href="#cabang">Cabang</a>
+          <a href="#cara">
+            <span data-icon="wrench" data-icon-size="14"></span>
+            Cara Kerja
+          </a>
+          <a href="#katalog">
+            <span data-icon="grid" data-icon-size="14"></span>
+            Katalog
+          </a>
+          <a href="#tentang">
+            <span data-icon="info" data-icon-size="14"></span>
+            Tentang
+          </a>
+          <a href="#cabang">
+            <span data-icon="store" data-icon-size="14"></span>
+            Cabang
+          </a>
         </div>
 
         <div class="footer-col">
           <h5>Sistem</h5>
-          <a href="./login.html">Masuk Cabang</a>
-          <a href="./login.html">Masuk Admin</a>
-          <a href="./login.html">Dashboard</a>
+          <a href="./login.html">
+            <span data-icon="login" data-icon-size="14"></span>
+            Masuk Cabang
+          </a>
+          <a href="./login.html">
+            <span data-icon="login" data-icon-size="14"></span>
+            Masuk Admin
+          </a>
+          <a href="./login.html">
+            <span data-icon="dashboard" data-icon-size="14"></span>
+            Dashboard
+          </a>
         </div>
 
         <div class="footer-col">
           <h5>Terhubung</h5>
-          <a href="#">Gudang Pusat NTT</a>
-          <a href="tel:+6281234567890">+62 812 3456 7890</a>
-          <a href="mailto:silitongadimas@gmail.com">silitongadimas@gmail.com</a>
+          <a href="#">
+            <span data-icon="map-pin" data-icon-size="14"></span>
+            Gudang Pusat NTT
+          </a>
+          <a href="tel:+6281234567890">
+            <span data-icon="phone" data-icon-size="14"></span>
+            +62 812 3456 7890
+          </a>
+          <a href="mailto:silitongadimas@gmail.com">
+            <span data-icon="mail" data-icon-size="14"></span>
+            silitongadimas@gmail.com
+          </a>
         </div>
       </div>
 
@@ -1548,11 +1640,6 @@
     </div>
   </footer>
 
-  <!-- JavaScript -->
   <script type="module" src="./src/js/pages/landing.js"></script>
-  <script type="module">
-  import { initPwa } from './src/js/pwa.js';
-  initPwa();
-</script>
 </body>
 </html>

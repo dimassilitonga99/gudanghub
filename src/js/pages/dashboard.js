@@ -1,20 +1,18 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   DASHBOARD ADMIN — Main Controller
+   DASHBOARD ADMIN — Main Controller with Lucide Icons
    ═══════════════════════════════════════════════════════════════════════ */
 
-import { $, getCurrentWitaTime, getInitials, debounce } from '../utils.js';
-import { orders as ordersApi, katalog as katalogApi, loadAll } from '../api.js';
+import { $, getCurrentWitaTime, getInitials } from '../utils.js';
+import { loadAll } from '../api.js';
 import { requireAdmin, logout } from '../session.js';
 import { toast, confirm } from '../ui.js';
 import { SETTINGS } from '../config.js';
+import { icon, injectIcons } from '../icons.js';
 
-// Import page renderers (akan dibuat di BATCH 6b)
 import { renderDashboardPage, updateDashboardData } from './dashboard-pages/dashboard-page.js';
 import { renderOrdersPage, updateOrdersData } from './dashboard-pages/orders-page.js';
 import { renderKatalogPage, updateKatalogData } from './dashboard-pages/katalog-page.js';
 import { renderCabangPage, updateCabangData } from './dashboard-pages/cabang-page.js';
-
-// Import modal edit order (akan dibuat di BATCH 6c)
 import { initEditModal } from './dashboard-pages/edit-modal.js';
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -32,12 +30,11 @@ export const state = {
   autoRefreshInterval: null,
 };
 
-// Page metadata
 const PAGE_TITLES = {
-  dashboard: '📊 Dashboard',
-  orders: '📦 Semua Pesanan',
-  katalog: '📚 Katalog Barang',
-  cabang: '🏬 Status Cabang',
+  dashboard: { text: 'Dashboard', iconName: 'dashboard' },
+  orders: { text: 'Semua Pesanan', iconName: 'package' },
+  katalog: { text: 'Katalog Barang', iconName: 'boxes' },
+  cabang: { text: 'Status Cabang', iconName: 'store' },
 };
 
 const PAGE_RENDERERS = {
@@ -69,7 +66,7 @@ function initUserInfo() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// SIDEBAR (mobile)
+// SIDEBAR
 // ─────────────────────────────────────────────────────────────────────────
 
 function toggleSidebar() {
@@ -91,7 +88,7 @@ function closeSidebar() {
 // ─────────────────────────────────────────────────────────────────────────
 
 function updateClock() {
-  const el = $('topbarTime');
+  const el = $('topbarTimeText');
   if (el) {
     el.textContent = getCurrentWitaTime() + ' WITA';
   }
@@ -112,31 +109,35 @@ export function showPage(pageId) {
 
   state.currentPage = pageId;
 
-  // Update nav active state
   document.querySelectorAll('.nav-item[data-page]').forEach((item) => {
     item.classList.toggle('active', item.dataset.page === pageId);
   });
 
-  // Update title
+  // Update topbar title dengan icon
   const titleEl = $('topbarTitle');
-  if (titleEl) titleEl.textContent = PAGE_TITLES[pageId] || pageId;
+  const titleInfo = PAGE_TITLES[pageId];
+  if (titleEl && titleInfo) {
+    titleEl.innerHTML = `
+      ${icon(titleInfo.iconName, { size: 20, color: 'var(--orange)' })}
+      ${titleInfo.text}
+    `;
+  }
 
-  // Render page
   const contentWrap = $('contentWrap');
   if (contentWrap) {
     contentWrap.innerHTML = `<div class="page-wrap">${renderer(state)}</div>`;
   }
 
-  // Close sidebar (mobile)
   closeSidebar();
 
-  // Update data (jika sudah ada data)
   requestAnimationFrame(() => {
+    // Inject icons setelah render page baru
+    injectIcons();
+
     const updater = PAGE_UPDATERS[pageId];
     if (updater) updater(state);
   });
 
-  // Update URL hash
   window.location.hash = pageId;
 }
 
@@ -147,7 +148,6 @@ export function showPage(pageId) {
 export async function loadData(force = false) {
   if (state.isLoading) return;
 
-  // Throttle (jangan reload terlalu sering)
   if (!force && Date.now() - state.lastLoadTime < SETTINGS.throttleMs) {
     return;
   }
@@ -166,10 +166,8 @@ export async function loadData(force = false) {
     state.allKatalog = katalog || [];
     state.lastLoadTime = Date.now();
 
-    // Update badges
     updatePendingBadge();
 
-    // Re-render current page
     const updater = PAGE_UPDATERS[state.currentPage];
     if (updater) updater(state);
 
@@ -199,7 +197,6 @@ export function updatePendingBadge() {
     badge.style.display = count > 0 ? '' : 'none';
   }
 
-  // Update notification dot
   const notifDot = $('notifDot');
   if (notifDot) {
     notifDot.style.display = count > 0 ? '' : 'none';
@@ -220,7 +217,6 @@ async function handleLogout() {
   });
 
   if (ok) {
-    // Cleanup
     if (state.clockInterval) clearInterval(state.clockInterval);
     if (state.autoRefreshInterval) clearInterval(state.autoRefreshInterval);
 
@@ -233,8 +229,6 @@ async function handleLogout() {
 // ─────────────────────────────────────────────────────────────────────────
 
 function bindEvents() {
-
-  // Sidebar nav
   document.querySelectorAll('.nav-item[data-page]').forEach((item) => {
     item.addEventListener('click', (e) => {
       e.preventDefault();
@@ -242,22 +236,17 @@ function bindEvents() {
     });
   });
 
-  // Sidebar mobile toggle
   $('topbarMenu')?.addEventListener('click', toggleSidebar);
   $('sidebarOverlay')?.addEventListener('click', closeSidebar);
 
-  // Refresh
   $('btnRefresh')?.addEventListener('click', () => loadData(true));
 
-  // Notification bell → redirect
   $('btnNotif')?.addEventListener('click', () => {
     window.location.href = './notifikasi.html';
   });
 
-  // Logout
   $('btnLogout')?.addEventListener('click', handleLogout);
 
-  // Google Sheets link
   const gsLink = $('navGoogleSheets');
   if (gsLink) {
     gsLink.addEventListener('click', (e) => {
@@ -266,7 +255,6 @@ function bindEvents() {
     });
   }
 
-  // Handle URL hash change
   window.addEventListener('hashchange', () => {
     const hash = window.location.hash.replace('#', '');
     if (hash && PAGE_RENDERERS[hash] && hash !== state.currentPage) {
@@ -274,27 +262,20 @@ function bindEvents() {
     }
   });
 
-  // Keyboard shortcuts
   document.addEventListener('keydown', (e) => {
-    // Ctrl/Cmd + R = refresh data
     if ((e.ctrlKey || e.metaKey) && e.key === 'r' && !e.shiftKey) {
       e.preventDefault();
       loadData(true);
     }
-
-    // Ctrl/Cmd + K = focus search (jika ada)
     if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
       e.preventDefault();
       $('orderSearch')?.focus() || $('katalogSearch')?.focus();
     }
-
-    // ESC = close sidebar
     if (e.key === 'Escape') {
       closeSidebar();
     }
   });
 
-  // Pause auto-refresh when tab hidden
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
       if (state.autoRefreshInterval) {
@@ -303,7 +284,7 @@ function bindEvents() {
       }
     } else {
       startAutoRefresh();
-      loadData(false); // Refresh saat kembali ke tab
+      loadData(false);
     }
   });
 }
@@ -327,28 +308,25 @@ function startAutoRefresh() {
 // ─────────────────────────────────────────────────────────────────────────
 
 async function init() {
-  // Guard: hanya admin
   state.session = requireAdmin();
   if (!state.session) return;
 
-  // Initialize UI
+  // Inject icons dulu untuk sidebar & topbar
+  injectIcons();
+
   initUserInfo();
   startClock();
   bindEvents();
 
-  // Init modal edit order (dari BATCH 6c)
   initEditModal(state);
 
-  // Get initial page from URL hash
   const initialPage = window.location.hash.replace('#', '') || 'dashboard';
   const validPage = PAGE_RENDERERS[initialPage] ? initialPage : 'dashboard';
 
   showPage(validPage);
 
-  // Load initial data
   await loadData(true);
 
-  // Start auto-refresh
   startAutoRefresh();
 }
 
@@ -358,5 +336,4 @@ if (document.readyState === 'loading') {
   init();
 }
 
-// Export untuk debugging
 window.__gudangHub = { state, loadData, showPage };

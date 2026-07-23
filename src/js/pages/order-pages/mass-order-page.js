@@ -1,10 +1,11 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   MASS ORDER PAGE — Order massal via copy-paste
+   MASS ORDER PAGE — with Lucide Icons
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, escapeHtml, formatRupiah, toInt, debounce, pasteFromClipboard } from '../../utils.js';
 import { orders as ordersApi } from '../../api.js';
 import { toast, confirm } from '../../ui.js';
+import { icon } from '../../icons.js';
 
 // ─────────────────────────────────────────────────────────────────────────
 // RENDER
@@ -13,13 +14,17 @@ import { toast, confirm } from '../../ui.js';
 export function renderMassOrderPage(state) {
   return `
     <header class="page-heading">
-      <h1>⚡ Order Massal</h1>
+      <h1>
+        <span data-icon="zap" data-icon-size="24" data-icon-color="var(--orange)"></span>
+        Order Massal
+      </h1>
       <p>Copy-paste kode dan jumlah barang sekaligus untuk order banyak barang.</p>
     </header>
 
     <section class="format-box">
       <div class="format-title">
-        📋 Format: <span style="font-family: var(--font-mono);">KODE;JUMLAH</span>
+        <span data-icon="file" data-icon-size="14"></span>
+        Format: <span style="font-family: var(--font-mono);">KODE;JUMLAH</span>
       </div>
       <div class="format-example">
         NN00001;5<br>
@@ -27,7 +32,8 @@ export function renderMassOrderPage(state) {
         NN00003;3
       </div>
       <div class="format-note">
-        💡 Separator bisa ; , atau Tab. Isi juga stok gudang dan stok toko sebelum kirim.
+        <span data-icon="info" data-icon-size="12"></span>
+        Separator bisa ; , atau Tab. Isi juga stok gudang dan stok toko sebelum kirim.
       </div>
     </section>
 
@@ -43,10 +49,12 @@ export function renderMassOrderPage(state) {
 
       <div class="inline-actions">
         <button class="secondary-button grow" id="pasteButton" type="button">
-          📋 Paste dari Clipboard
+          <span data-icon="copy" data-icon-size="14"></span>
+          Paste dari Clipboard
         </button>
         <button class="secondary-button" id="clearMassButton" type="button">
-          🗑️ Hapus
+          <span data-icon="trash" data-icon-size="14"></span>
+          Hapus
         </button>
       </div>
     </section>
@@ -55,7 +63,7 @@ export function renderMassOrderPage(state) {
       <div class="preview-title">Preview Barang</div>
       <div id="massPreview">
         <div class="empty-state" style="border: 1px dashed var(--line-soft); border-radius: 14px;">
-          <div class="empty-icon">⚡</div>
+          <div class="empty-icon">${icon('zap', { size: 48, color: 'var(--muted)' })}</div>
           <div>Mulai ketik atau paste kode di atas.</div>
         </div>
       </div>
@@ -63,7 +71,7 @@ export function renderMassOrderPage(state) {
 
     <section class="content-section" style="padding-bottom: 120px;">
       <div class="warning-banner" id="massWarning">
-        <span>⚠️</span>
+        <span data-icon="alert-triangle" data-icon-size="14"></span>
         <span id="massWarningText"></span>
       </div>
 
@@ -75,7 +83,8 @@ export function renderMassOrderPage(state) {
       ></textarea>
 
       <button class="submit-button" id="massSubmitButton" type="button" disabled>
-        🚀 Kirim Order Massal
+        <span data-icon="send" data-icon-size="18"></span>
+        Kirim Order Massal
       </button>
 
       <div class="summary-bar" id="massSummary">
@@ -107,7 +116,6 @@ export function initMassOrder(state) {
   $('clearMassButton')?.addEventListener('click', () => clearMassOrder(state));
   $('massSubmitButton')?.addEventListener('click', () => confirmMassSubmit(state));
 
-  // Preview actions (delegation)
   $('massPreview')?.addEventListener('click', (e) => {
     const target = e.target.closest('[data-mass-action]');
     if (!target) return;
@@ -152,7 +160,7 @@ async function pasteFromClipboardHandler(state) {
   try {
     const text = await pasteFromClipboard();
     if (!text) {
-      toast.info('ℹ️ Paste manual dengan Ctrl+V.');
+      toast.info('Paste manual dengan Ctrl+V.');
       return;
     }
 
@@ -164,9 +172,9 @@ async function pasteFromClipboardHandler(state) {
       updateMassSummary(state);
     }
 
-    toast.success('✅ Berhasil paste.');
+    toast.success('Berhasil paste.');
   } catch {
-    toast.info('ℹ️ Paste manual dengan Ctrl+V.');
+    toast.info('Paste manual dengan Ctrl+V.');
   }
 }
 
@@ -180,7 +188,7 @@ function clearMassOrder(state) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// PARSE INPUT
+// PARSE
 // ─────────────────────────────────────────────────────────────────────────
 
 function parseMassInput(state) {
@@ -188,7 +196,6 @@ function parseMassInput(state) {
   const lines = text.split('\n').map((line) => line.trim()).filter(Boolean);
 
   state.massItems = lines.map((line) => {
-    // Support separator: ; , atau Tab
     const parts = line.split(/[;,\t]/).map((p) => p.trim());
 
     if (parts.length < 2) {
@@ -226,7 +233,7 @@ function parseMassInput(state) {
       qty: quantity,
       stock,
       valid: true,
-      warning: quantity > stock ? `⚠️ Melebihi stok sistem (${stock})` : '',
+      warning: quantity > stock ? `Melebihi stok sistem (${stock})` : '',
       stokGudang: '',
       stokToko: '',
     };
@@ -244,7 +251,7 @@ function renderMassPreview(state) {
   if (!state.massItems.length) {
     wrapper.innerHTML = `
       <div class="empty-state" style="border: 1px dashed var(--line-soft); border-radius: 14px;">
-        <div class="empty-icon">⚡</div>
+        <div class="empty-icon">${icon('zap', { size: 48, color: 'var(--muted)' })}</div>
         <div>Mulai ketik atau paste kode di atas.</div>
       </div>
     `;
@@ -256,12 +263,14 @@ function renderMassPreview(state) {
 
   wrapper.innerHTML = `
     <div style="display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;">
-      <span style="padding: 4px 12px; border-radius: 20px; background: rgba(34,197,94,0.15); color: var(--success); font-size: 11px; font-weight: 700;">
-        ✅ ${validCount} valid
+      <span style="padding: 4px 12px; border-radius: 20px; background: rgba(34,197,94,0.15); color: var(--success); font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+        ${icon('check-circle', { size: 12 })}
+        ${validCount} valid
       </span>
       ${invalidCount ? `
-        <span style="padding: 4px 12px; border-radius: 20px; background: rgba(239,68,68,0.15); color: var(--danger); font-size: 11px; font-weight: 700;">
-          ❌ ${invalidCount} error
+        <span style="padding: 4px 12px; border-radius: 20px; background: rgba(239,68,68,0.15); color: var(--danger); font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+          ${icon('x-circle', { size: 12 })}
+          ${invalidCount} error
         </span>
       ` : ''}
     </div>
@@ -275,12 +284,17 @@ function buildMassItem(item, index) {
   if (!item.valid) {
     return `
       <article class="massal-item invalid">
-        <div class="massal-icon">❌</div>
+        <div class="massal-icon">${icon('x-circle', { size: 20, color: 'var(--danger)' })}</div>
         <div class="massal-info">
           <div class="massal-code">${escapeHtml(item.kode || '?')}</div>
-          <div class="massal-error">${escapeHtml(item.error)}</div>
+          <div class="massal-error">
+            ${icon('alert-triangle', { size: 10 })}
+            ${escapeHtml(item.error)}
+          </div>
         </div>
-        <button class="delete-button" type="button" data-mass-action="delete" data-index="${index}">🗑️</button>
+        <button class="delete-button" type="button" data-mass-action="delete" data-index="${index}">
+          ${icon('trash', { size: 14 })}
+        </button>
       </article>
     `;
   }
@@ -290,13 +304,23 @@ function buildMassItem(item, index) {
 
   return `
     <article class="massal-item valid">
-      <div class="massal-icon">${item.warning ? '⚠️' : '✅'}</div>
+      <div class="massal-icon">
+        ${item.warning
+          ? icon('alert-triangle', { size: 20, color: 'var(--warning)' })
+          : icon('check-circle', { size: 20, color: 'var(--success)' })
+        }
+      </div>
 
       <div class="massal-info">
         <div class="massal-code">${escapeHtml(item.kode)}</div>
         <div class="massal-name">${escapeHtml(item.nama)}</div>
         <div class="massal-price">${formatRupiah(item.harga)} / ${escapeHtml(item.satuan)}</div>
-        ${item.warning ? `<div class="massal-warning">${escapeHtml(item.warning)}</div>` : ''}
+        ${item.warning ? `
+          <div class="massal-warning">
+            ${icon('alert-triangle', { size: 10 })}
+            ${escapeHtml(item.warning)}
+          </div>
+        ` : ''}
       </div>
 
       <div class="massal-right">
@@ -304,27 +328,33 @@ function buildMassItem(item, index) {
 
         <div class="massal-controls">
           <span class="compact-quantity">
-            <button type="button" data-mass-action="decrease" data-index="${index}">−</button>
+            <button type="button" data-mass-action="decrease" data-index="${index}">
+              ${icon('minus', { size: 10 })}
+            </button>
             <input type="number" min="1" value="${item.qty}"
                    data-mass-action="set-qty" data-index="${index}">
-            <button type="button" data-mass-action="increase" data-index="${index}">+</button>
+            <button type="button" data-mass-action="increase" data-index="${index}">
+              ${icon('plus', { size: 10 })}
+            </button>
           </span>
 
           <label class="stock-group ${gudangEmpty ? 'empty' : ''}" title="Stok Gudang">
-            <span>🏭</span>
+            <span class="stock-group-icon">${icon('warehouse', { size: 12 })}</span>
             <input class="stock-input" type="number" min="0" placeholder="Gudang"
                    value="${gudangEmpty ? '' : item.stokGudang}"
                    data-mass-stock="gudang" data-index="${index}">
           </label>
 
           <label class="stock-group ${tokoEmpty ? 'empty' : ''}" title="Stok Toko">
-            <span>📦</span>
+            <span class="stock-group-icon">${icon('store', { size: 12 })}</span>
             <input class="stock-input" type="number" min="0" placeholder="Toko"
                    value="${tokoEmpty ? '' : item.stokToko}"
                    data-mass-stock="toko" data-index="${index}">
           </label>
 
-          <button class="delete-button" type="button" data-mass-action="delete" data-index="${index}">🗑️</button>
+          <button class="delete-button" type="button" data-mass-action="delete" data-index="${index}">
+            ${icon('trash', { size: 14 })}
+          </button>
         </div>
       </div>
     </article>
@@ -433,9 +463,9 @@ function updateMassSummary(state) {
 
   const submitBtn = $('massSubmitButton');
   if (submitBtn) {
-    submitBtn.textContent = validItems.length
-      ? `🚀 Kirim ${validItems.length} Barang ke Gudang`
-      : '⚡ Kirim Order Massal';
+    submitBtn.innerHTML = validItems.length
+      ? `${icon('send', { size: 18 })} Kirim ${validItems.length} Barang ke Gudang`
+      : `${icon('zap', { size: 18 })} Kirim Order Massal`;
   }
 
   validateMassStocks(state);
@@ -449,12 +479,12 @@ async function confirmMassSubmit(state) {
   const validItems = state.massItems.filter((i) => i.valid);
 
   if (!validItems.length) {
-    toast.error('❌ Tidak ada barang valid.');
+    toast.error('Tidak ada barang valid.');
     return;
   }
 
   if (!validateMassStocks(state)) {
-    toast.warning('⚠️ Isi stok gudang dan stok toko semua barang.', {
+    toast.warning('Isi stok gudang dan stok toko semua barang.', {
       duration: 4000,
     });
     return;
@@ -469,7 +499,7 @@ async function confirmMassSubmit(state) {
     icon: '🚀',
     title: 'Kirim Order Massal?',
     message: `${validItems.length} barang · Total ${formatRupiah(total)}\n\n${summary}\n\nKirim untuk ${state.branchId}?`,
-    okText: '🚀 Ya, Kirim',
+    okText: 'Ya, Kirim',
     okVariant: 'primary',
   });
 
@@ -526,18 +556,17 @@ async function submitMassOrder(state, items) {
       renderMassPreview(state);
       updateMassSummary(state);
 
-      toast.success('✅ Order massal berhasil dikirim!', { duration: 4000 });
+      toast.success('Order massal berhasil dikirim!', { duration: 4000 });
 
-      // Redirect ke history
       setTimeout(() => {
         const historyTab = document.querySelector('[data-tab="history"]');
         historyTab?.click();
       }, 1500);
     } else {
-      toast.error('❌ ' + (result.message || 'Gagal mengirim order.'));
+      toast.error(result.message || 'Gagal mengirim order.');
     }
   } catch (error) {
-    toast.error('❌ ' + (error.message || 'Terjadi kesalahan.'));
+    toast.error(error.message || 'Terjadi kesalahan.');
   } finally {
     state.isSubmitting = false;
     if (submitBtn) {

@@ -1,16 +1,13 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   GANTI PASSWORD PAGE — Logic
+   GANTI PASSWORD PAGE — with Lucide Icons
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, sleep } from '../utils.js';
 import { auth } from '../api.js';
-import { requireAuth, getSession, clearSession } from '../session.js';
+import { requireAuth, clearSession } from '../session.js';
 import { getOrderUrl } from '../config.js';
 import { toast } from '../ui.js';
-
-// ─────────────────────────────────────────────────────────────────────────
-// STATE
-// ─────────────────────────────────────────────────────────────────────────
+import { icon, injectIcons } from '../icons.js';
 
 let session = null;
 let errorTimer = null;
@@ -32,7 +29,6 @@ function initUserInfo() {
       .charAt(0).toUpperCase();
   }
 
-  // Back link sesuai role
   if (backLink) {
     if (session.role === 'admin') {
       backLink.href = './dashboard.html';
@@ -43,7 +39,7 @@ function initUserInfo() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// TOGGLE PASSWORD VISIBILITY
+// TOGGLE PASSWORD
 // ─────────────────────────────────────────────────────────────────────────
 
 function togglePassword(button) {
@@ -53,7 +49,10 @@ function togglePassword(button) {
 
   const shouldShow = input.type === 'password';
   input.type = shouldShow ? 'text' : 'password';
-  button.textContent = shouldShow ? '🙈' : '👁';
+
+  // Update icon
+  button.innerHTML = icon(shouldShow ? 'eye-off' : 'eye', { size: 18 });
+
   button.setAttribute(
     'aria-label',
     shouldShow ? 'Sembunyikan password' : 'Tampilkan password'
@@ -61,30 +60,24 @@ function togglePassword(button) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// PASSWORD STRENGTH INDICATOR
+// PASSWORD STRENGTH
 // ─────────────────────────────────────────────────────────────────────────
 
-/**
- * Calculate password strength (0-100)
- */
 function calculateStrength(password) {
   if (!password) return { score: 0, label: '-', level: 'weak' };
 
   let score = 0;
 
-  // Length
   if (password.length >= 6) score += 20;
   if (password.length >= 8) score += 15;
   if (password.length >= 12) score += 15;
   if (password.length >= 16) score += 10;
 
-  // Character types
   if (/[a-z]/.test(password)) score += 10;
   if (/[A-Z]/.test(password)) score += 10;
   if (/[0-9]/.test(password)) score += 10;
   if (/[^a-zA-Z0-9]/.test(password)) score += 10;
 
-  // Determine level
   let label, level;
   if (score < 40) {
     label = 'Lemah';
@@ -113,7 +106,6 @@ function updateStrength() {
   label.textContent = labelText;
   label.className = `strength-${level}`;
 
-  // Warna bar
   const colors = {
     weak: 'var(--danger)',
     medium: 'var(--warning)',
@@ -161,7 +153,7 @@ function shakeCard() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// LOADING STATE
+// LOADING
 // ─────────────────────────────────────────────────────────────────────────
 
 function setLoadingState(isLoading) {
@@ -173,9 +165,11 @@ function setLoadingState(isLoading) {
   btn.classList.toggle('loading', isLoading);
   btn.disabled = isLoading;
 
-  btnText.innerHTML = isLoading
-    ? '<span class="spinner spinner-sm"></span> Menyimpan...'
-    : '💾 Simpan Password Baru';
+  if (isLoading) {
+    btnText.innerHTML = `<span class="spinner spinner-sm"></span> Menyimpan...`;
+  } else {
+    btnText.innerHTML = `${icon('save', { size: 18 })} Simpan Password Baru`;
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -199,7 +193,6 @@ function validateForm(oldPass, newPass, confirmPass) {
     return 'Password baru harus berbeda dari password lama.';
   }
 
-  // Warning kalau password lemah
   const { score } = calculateStrength(newPass);
   if (score < 40) {
     return 'Password terlalu lemah. Gunakan minimal 8 karakter dengan kombinasi huruf, angka, dan simbol.';
@@ -209,7 +202,7 @@ function validateForm(oldPass, newPass, confirmPass) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// SUBMIT HANDLER
+// SUBMIT
 // ─────────────────────────────────────────────────────────────────────────
 
 async function handleSubmit(event) {
@@ -255,7 +248,6 @@ async function handleSubmit(event) {
 
     toast.success('Password berhasil diubah!');
 
-    // Auto logout & redirect setelah 2 detik (security best practice)
     await sleep(2000);
     clearSession();
     window.location.href = './login.html';
@@ -272,22 +264,16 @@ async function handleSubmit(event) {
 // ─────────────────────────────────────────────────────────────────────────
 
 function bindEvents() {
-  // Toggle password buttons
   document.querySelectorAll('[data-target]').forEach((btn) => {
     btn.addEventListener('click', () => togglePassword(btn));
   });
 
-  // Form submit
   $('passwordForm')?.addEventListener('submit', handleSubmit);
 
-  // Strength indicator
   $('newPassword')?.addEventListener('input', updateStrength);
 
-  // Clear messages on input
   ['oldPassword', 'newPassword', 'confirmPassword'].forEach((id) => {
-    $(id)?.addEventListener('input', () => {
-      hideMessages();
-    });
+    $(id)?.addEventListener('input', () => hideMessages());
   });
 }
 
@@ -298,6 +284,9 @@ function bindEvents() {
 function init() {
   session = requireAuth();
   if (!session) return;
+
+  // Inject icons dulu sebelum init user info
+  injectIcons();
 
   initUserInfo();
   bindEvents();

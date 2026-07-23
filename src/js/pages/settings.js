@@ -1,11 +1,12 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   SETTINGS PAGE — App preferences & system info
+   SETTINGS PAGE — with Lucide Icons
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, escapeHtml, getInitials, storage, isStandalone } from '../utils.js';
 import { requireAuth } from '../session.js';
 import { CABANG, SESSION } from '../config.js';
 import { toast, confirm } from '../ui.js';
+import { icon, injectIcons } from '../icons.js';
 
 const PREFS_KEY = 'gudanghub_prefs';
 
@@ -29,9 +30,11 @@ function init() {
   state.session = requireAuth();
   if (!state.session) return;
 
+  // Inject icons dulu
+  injectIcons();
+
   loadPrefs();
 
-  // Set back link sesuai role
   const backLink = $('btnBack');
   if (backLink) {
     if (state.session.role === 'admin') {
@@ -45,7 +48,6 @@ function init() {
   renderCabangList();
   renderSystemInfo();
 
-  // Admin-only sections
   if (state.session.role === 'admin') {
     renderUserList();
   }
@@ -72,7 +74,6 @@ function renderPrefs() {
   $('tglSoundNotif').checked = state.prefs.soundNotif;
   $('tglAutoRefresh').checked = state.prefs.autoRefresh;
 
-  // Apply dark mode
   document.documentElement.setAttribute(
     'data-theme',
     state.prefs.darkMode ? 'dark' : 'light'
@@ -80,7 +81,7 @@ function renderPrefs() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// USER LIST (mock data - real users from Google Sheet)
+// USER LIST
 // ─────────────────────────────────────────────────────────────────────────
 
 function renderUserList() {
@@ -89,7 +90,6 @@ function renderUserList() {
 
   section.style.display = '';
 
-  // Hardcoded users (bisa fetch dari backend nanti)
   const users = [
     { username: 'admin', nama: 'Admin Gudang Pusat', role: 'admin', idCabang: '' },
     { username: 'cb001', nama: 'Toko Nasional Eltari – Arfa', role: 'cabang', idCabang: 'CB001' },
@@ -108,8 +108,16 @@ function renderUserList() {
         <div class="user-row-name">${escapeHtml(user.nama)}</div>
         <div class="user-row-username">@${escapeHtml(user.username)}</div>
         <div class="user-row-tags">
-          <span class="user-tag ${user.role}">${user.role === 'admin' ? '🏪 Admin' : '🏬 Cabang'}</span>
-          ${user.idCabang ? `<span class="user-tag cabang">${user.idCabang}</span>` : ''}
+          <span class="user-tag ${user.role}">
+            ${icon(user.role === 'admin' ? 'warehouse' : 'store', { size: 10 })}
+            ${user.role === 'admin' ? 'Admin' : 'Cabang'}
+          </span>
+          ${user.idCabang ? `
+            <span class="user-tag cabang">
+              ${icon('tag', { size: 10 })}
+              ${user.idCabang}
+            </span>
+          ` : ''}
         </div>
       </div>
     </div>
@@ -127,15 +135,23 @@ function renderCabangList() {
   container.innerHTML = Object.entries(CABANG).map(([id, info]) => `
     <div class="cabang-card">
       <div class="cabang-card-header">
-        <div class="cabang-card-icon">${info.icon}</div>
+        <div class="cabang-card-icon">
+          ${icon('store', { size: 20 })}
+        </div>
         <div>
           <div class="cabang-card-title">${escapeHtml(info.nama)}</div>
           <div class="cabang-card-id">${id} · PIC: ${escapeHtml(info.pic)}</div>
         </div>
       </div>
       <div class="cabang-card-info">
-        📞 <b>${escapeHtml(info.telepon || '-')}</b><br>
-        📍 ${escapeHtml(info.alamat || '-')}
+        <div class="cabang-card-info-line">
+          ${icon('phone', { size: 12 })}
+          <b>${escapeHtml(info.telepon || '-')}</b>
+        </div>
+        <div class="cabang-card-info-line">
+          ${icon('map-pin', { size: 12 })}
+          ${escapeHtml(info.alamat || '-')}
+        </div>
       </div>
     </div>
   `).join('');
@@ -146,7 +162,6 @@ function renderCabangList() {
 // ─────────────────────────────────────────────────────────────────────────
 
 function renderSystemInfo() {
-  // Storage usage
   try {
     let total = 0;
     for (const key in localStorage) {
@@ -160,23 +175,21 @@ function renderSystemInfo() {
     $('storageUsed').textContent = 'N/A';
   }
 
-  // PWA status
   const isPwa = isStandalone();
   const swSupported = 'serviceWorker' in navigator;
-  const pwaStatus = isPwa ? '✅ Installed'
-                  : swSupported ? '📱 Ready'
-                  : '❌ Not Supported';
+  const pwaStatus = isPwa ? 'Installed'
+                  : swSupported ? 'Ready'
+                  : 'Not Supported';
   $('pwaStatus').textContent = pwaStatus;
   if (isPwa) $('pwaStatus').style.color = 'var(--success)';
 
-  // Browser info
   const ua = navigator.userAgent;
   let browser = 'Unknown';
-  if (/chrome/i.test(ua) && !/edg/i.test(ua)) browser = '🌐 Chrome';
-  else if (/safari/i.test(ua) && !/chrome/i.test(ua)) browser = '🧭 Safari';
-  else if (/firefox/i.test(ua)) browser = '🦊 Firefox';
-  else if (/edg/i.test(ua)) browser = '🔷 Edge';
-  else if (/opera|opr/i.test(ua)) browser = '🎭 Opera';
+  if (/chrome/i.test(ua) && !/edg/i.test(ua)) browser = 'Chrome';
+  else if (/safari/i.test(ua) && !/chrome/i.test(ua)) browser = 'Safari';
+  else if (/firefox/i.test(ua)) browser = 'Firefox';
+  else if (/edg/i.test(ua)) browser = 'Edge';
+  else if (/opera|opr/i.test(ua)) browser = 'Opera';
 
   $('browserInfo').textContent = browser;
 }
@@ -186,8 +199,6 @@ function renderSystemInfo() {
 // ─────────────────────────────────────────────────────────────────────────
 
 function bindEvents() {
-
-  // Dark mode toggle
   $('tglDarkMode')?.addEventListener('change', (e) => {
     state.prefs.darkMode = e.target.checked;
     savePrefs();
@@ -195,10 +206,8 @@ function bindEvents() {
     toast.success(`Mode ${e.target.checked ? 'gelap' : 'terang'} diaktifkan.`);
   });
 
-  // Browser notifications
   $('tglNotifBrowser')?.addEventListener('change', async (e) => {
     if (e.target.checked) {
-      // Request permission
       if (!('Notification' in window)) {
         toast.error('Browser tidak mendukung notifikasi.');
         e.target.checked = false;
@@ -213,11 +222,10 @@ function bindEvents() {
           state.prefs.browserNotif = false;
         } else {
           state.prefs.browserNotif = true;
-          toast.success('✅ Notifikasi browser aktif!');
+          toast.success('Notifikasi browser aktif!');
 
-          // Send test notif
           new Notification('GudangHub', {
-            body: 'Notifikasi berhasil diaktifkan! Anda akan menerima update order.',
+            body: 'Notifikasi berhasil diaktifkan!',
             icon: './public/icons/icon-192.png',
           });
         }
@@ -232,7 +240,6 @@ function bindEvents() {
     savePrefs();
   });
 
-  // Sound notif
   $('tglSoundNotif')?.addEventListener('change', (e) => {
     state.prefs.soundNotif = e.target.checked;
     savePrefs();
@@ -242,7 +249,6 @@ function bindEvents() {
     }
   });
 
-  // Auto refresh
   $('tglAutoRefresh')?.addEventListener('change', (e) => {
     state.prefs.autoRefresh = e.target.checked;
     savePrefs();
@@ -252,7 +258,6 @@ function bindEvents() {
     );
   });
 
-  // Clear cache
   $('btnClearCache')?.addEventListener('click', async () => {
     const ok = await confirm({
       icon: '🗑️',
@@ -265,13 +270,12 @@ function bindEvents() {
     if (!ok) return;
 
     try {
-      // Simpan session, hapus semua yang lain
       const session = sessionStorage.getItem(SESSION.key);
       localStorage.clear();
       sessionStorage.clear();
       if (session) sessionStorage.setItem(SESSION.key, session);
 
-      toast.success('✅ Cache lokal berhasil dihapus.');
+      toast.success('Cache lokal berhasil dihapus.');
 
       setTimeout(() => {
         window.location.reload();
@@ -281,7 +285,6 @@ function bindEvents() {
     }
   });
 
-  // Reset preferences
   $('btnResetPrefs')?.addEventListener('click', async () => {
     const ok = await confirm({
       icon: '🔄',
@@ -296,7 +299,7 @@ function bindEvents() {
     state.prefs = { ...DEFAULT_PREFS };
     savePrefs();
     renderPrefs();
-    toast.success('✅ Preferensi direset ke default.');
+    toast.success('Preferensi direset ke default.');
   });
 }
 

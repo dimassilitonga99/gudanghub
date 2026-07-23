@@ -1,9 +1,10 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   CABANG PAGE — Status per Cabang
+   CABANG PAGE — with Lucide Icons
    ═══════════════════════════════════════════════════════════════════════ */
 
-import { $, escapeHtml, formatRupiah } from '../../utils.js';
+import { $, escapeHtml } from '../../utils.js';
 import { CABANG } from '../../config.js';
+import { icon } from '../../icons.js';
 
 // ─────────────────────────────────────────────────────────────────────────
 // RENDER
@@ -12,7 +13,10 @@ import { CABANG } from '../../config.js';
 export function renderCabangPage(state) {
   return `
     <header class="page-header">
-      <h1>🏬 Status Cabang</h1>
+      <h1>
+        <span data-icon="store" data-icon-size="24" data-icon-color="var(--orange)"></span>
+        Status Cabang
+      </h1>
       <p>Pantau aktivitas pesanan dari setiap cabang</p>
     </header>
 
@@ -43,7 +47,7 @@ export function updateCabangData(state) {
       <article class="cabang-card" data-cabang="${id}">
         <div class="cabang-card-header">
           <div class="cabang-avatar" style="background: linear-gradient(135deg, ${info.color}, ${info.color}dd);">
-            ${info.icon}
+            ${icon('store', { size: 20, color: '#fff' })}
           </div>
           <div style="min-width: 0; flex: 1;">
             <div class="cabang-name">${escapeHtml(info.nama)}</div>
@@ -67,8 +71,14 @@ export function updateCabangData(state) {
         </div>
 
         <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line-soft); font-size: 11px; color: var(--muted); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-          <span>📞 ${escapeHtml(info.telepon || '-')}</span>
-          <span>❌ ${rejected} ditolak</span>
+          <span style="display: inline-flex; align-items: center; gap: 4px;">
+            ${icon('phone', { size: 12 })}
+            ${escapeHtml(info.telepon || '-')}
+          </span>
+          <span style="display: inline-flex; align-items: center; gap: 4px;">
+            ${icon('x-circle', { size: 12, color: 'var(--danger)' })}
+            ${rejected} ditolak
+          </span>
         </div>
       </article>
     `;

@@ -1,9 +1,10 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   DASHBOARD PAGE — Overview, Stats, Charts, Activity
+   DASHBOARD PAGE — with Lucide Icons
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, escapeHtml, formatWita, sortBy, parseAnyDate } from '../../utils.js';
-import { CABANG, getStatusInfo } from '../../config.js';
+import { CABANG } from '../../config.js';
+import { icon, injectIcons } from '../../icons.js';
 import { showEditModal } from './edit-modal.js';
 import { showPage } from '../dashboard.js';
 
@@ -16,25 +17,30 @@ export function renderDashboardPage(state) {
 
   return `
     <header class="page-header">
-      <h1>Selamat datang, ${escapeHtml(name)}! 👋</h1>
+      <h1>
+        <span data-icon="sparkles" data-icon-size="24" data-icon-color="var(--orange)"></span>
+        Selamat datang, ${escapeHtml(name)}!
+      </h1>
       <p>Ringkasan operasional PT Central Perabot Utama hari ini</p>
     </header>
 
-    <!-- Stats Grid -->
     <div class="stats-grid">
-      ${buildStatCard('Total Order', 'statTotal', 'Semua pesanan masuk', '📦', 'var(--orange)', 'rgba(255,107,0,0.15)')}
-      ${buildStatCard('Menunggu', 'statPending', 'Perlu persetujuan', '⏳', 'var(--warning)', 'rgba(245,158,11,0.15)')}
-      ${buildStatCard('Disetujui', 'statApproved', 'Pesanan berhasil', '✅', 'var(--success)', 'rgba(34,197,94,0.15)')}
-      ${buildStatCard('Ditolak', 'statRejected', 'Pesanan ditolak', '❌', 'var(--danger)', 'rgba(239,68,68,0.15)')}
+      ${buildStatCard('Total Order', 'statTotal', 'Semua pesanan masuk', 'package', 'var(--orange)', 'rgba(255,107,0,0.15)')}
+      ${buildStatCard('Menunggu', 'statPending', 'Perlu persetujuan', 'clock', 'var(--warning)', 'rgba(245,158,11,0.15)')}
+      ${buildStatCard('Disetujui', 'statApproved', 'Pesanan berhasil', 'check-circle', 'var(--success)', 'rgba(34,197,94,0.15)')}
+      ${buildStatCard('Ditolak', 'statRejected', 'Pesanan ditolak', 'x-circle', 'var(--danger)', 'rgba(239,68,68,0.15)')}
     </div>
 
-    <!-- Pending orders + Status donut -->
     <div class="grid-3-1">
       <section class="panel">
         <header class="panel-header">
-          <div class="panel-title">⏳ Order Menunggu Persetujuan</div>
+          <div class="panel-title">
+            <span data-icon="clock" data-icon-size="18" data-icon-color="var(--warning)"></span>
+            Order Menunggu Persetujuan
+          </div>
           <button class="panel-action" type="button" data-goto="orders">
-            Lihat Semua →
+            Lihat Semua
+            <span data-icon="arrow-right" data-icon-size="12"></span>
           </button>
         </header>
         <div class="panel-body" style="padding: 0;">
@@ -65,7 +71,10 @@ export function renderDashboardPage(state) {
 
       <section class="panel">
         <header class="panel-header">
-          <div class="panel-title">📊 Status Order</div>
+          <div class="panel-title">
+            <span data-icon="chart-pie" data-icon-size="18" data-icon-color="var(--orange)"></span>
+            Status Order
+          </div>
         </header>
         <div class="panel-body">
           ${buildDonutHtml()}
@@ -73,11 +82,13 @@ export function renderDashboardPage(state) {
       </section>
     </div>
 
-    <!-- Bar chart + Activity -->
     <div class="grid-2">
       <section class="panel">
         <header class="panel-header">
-          <div class="panel-title">📊 Pesanan per Cabang</div>
+          <div class="panel-title">
+            <span data-icon="chart-bar" data-icon-size="18" data-icon-color="var(--orange)"></span>
+            Pesanan per Cabang
+          </div>
         </header>
         <div class="panel-body">
           <div class="bar-chart" id="barChart"></div>
@@ -86,11 +97,14 @@ export function renderDashboardPage(state) {
 
       <section class="panel">
         <header class="panel-header">
-          <div class="panel-title">⚡ Aktivitas Terbaru</div>
+          <div class="panel-title">
+            <span data-icon="activity" data-icon-size="18" data-icon-color="var(--orange)"></span>
+            Aktivitas Terbaru
+          </div>
         </header>
         <div class="panel-body" id="activityFeed">
           <div class="empty-state">
-            <div class="empty-state-icon">⚡</div>
+            <div class="spinner spinner-lg" style="color: var(--orange); margin-bottom: 12px;"></div>
             <p>Memuat aktivitas...</p>
           </div>
         </div>
@@ -99,12 +113,14 @@ export function renderDashboardPage(state) {
   `;
 }
 
-function buildStatCard(label, valueId, description, icon, color, iconBg) {
+function buildStatCard(label, valueId, description, iconName, color, iconBg) {
   return `
     <article class="stat-card" data-goto="orders">
       <div class="stat-header">
         <div class="stat-label">${label}</div>
-        <div class="stat-icon" style="background: ${iconBg};">${icon}</div>
+        <div class="stat-icon" style="background: ${iconBg}; color: ${color};">
+          <span data-icon="${iconName}" data-icon-size="20"></span>
+        </div>
       </div>
       <div class="stat-value" id="${valueId}" style="color: ${color};">–</div>
       <div class="stat-change">${description}</div>
@@ -191,7 +207,7 @@ function updateDonut(state) {
   const pending = countByStatus(state.allOrders, 'PENDING');
   const rejected = countByStatus(state.allOrders, 'REJECTED');
 
-  const circumference = 2 * Math.PI * 44; // ~276.5
+  const circumference = 2 * Math.PI * 44;
 
   const approvedLen = (approved / total) * circumference;
   const pendingLen = (pending / total) * circumference;
@@ -257,7 +273,7 @@ function updatePendingTable(state) {
       <tr>
         <td colspan="4">
           <div class="empty-state">
-            <div class="empty-state-icon">✅</div>
+            <div class="empty-state-icon">${icon('check-circle', { size: 48, color: 'var(--success)' })}</div>
             <p>Semua order sudah diproses!</p>
           </div>
         </td>
@@ -267,20 +283,32 @@ function updatePendingTable(state) {
   }
 
   body.innerHTML = pendingOrders.slice(0, 5).map((order) => {
-    const branch = CABANG[order.ID_CABANG] || { pic: '-', icon: '🏪' };
+    const branch = CABANG[order.ID_CABANG] || { pic: '-' };
     const itemCount = order.DETAIL?.length || 0;
     const orderId = escapeHtml(order.ORDER_ID);
 
     return `
       <tr>
         <td><span class="order-id">${orderId}</span></td>
-        <td><span class="cabang-badge">${branch.icon} ${escapeHtml(branch.pic)}</span></td>
+        <td>
+          <span class="cabang-badge">
+            ${icon('store', { size: 14 })}
+            ${escapeHtml(branch.pic)}
+          </span>
+        </td>
         <td style="text-align: center;">${itemCount}</td>
         <td>
           <div class="action-btns">
-            <button class="btn-approve" type="button" data-quick-approve="${orderId}" title="Setujui">✅</button>
-            <button class="btn-reject" type="button" data-quick-reject="${orderId}" title="Tolak">❌</button>
-            <button class="btn-detail" type="button" data-show-detail="${orderId}">✏️ Kelola</button>
+            <button class="btn-approve" type="button" data-quick-approve="${orderId}" title="Setujui">
+              ${icon('check', { size: 14 })}
+            </button>
+            <button class="btn-reject" type="button" data-quick-reject="${orderId}" title="Tolak">
+              ${icon('close', { size: 14 })}
+            </button>
+            <button class="btn-detail" type="button" data-show-detail="${orderId}">
+              ${icon('edit', { size: 12 })}
+              Kelola
+            </button>
           </div>
         </td>
       </tr>
@@ -297,7 +325,7 @@ function updateActivityFeed(state) {
   if (!state.allOrders.length) {
     feed.innerHTML = `
       <div class="empty-state">
-        <div class="empty-state-icon">⚡</div>
+        <div class="empty-state-icon">${icon('activity', { size: 48, color: 'var(--muted)' })}</div>
         <p>Belum ada aktivitas</p>
       </div>
     `;
@@ -314,7 +342,7 @@ function updateActivityFeed(state) {
   ).slice(0, 6);
 
   const statusColor = { PENDING: 'orange', APPROVED: 'green', REJECTED: 'red' };
-  const statusIcon = { PENDING: '⏳', APPROVED: '✅', REJECTED: '❌' };
+  const statusIconName = { PENDING: 'clock', APPROVED: 'check-circle', REJECTED: 'x-circle' };
 
   feed.innerHTML = latest.map((order) => {
     const status = String(order.STATUS || 'PENDING').toUpperCase();
@@ -325,12 +353,13 @@ function updateActivityFeed(state) {
         <div class="activity-dot ${statusColor[status] || 'blue'}"></div>
         <div class="activity-content">
           <div class="activity-text">
-            ${statusIcon[status] || '📦'}
+            ${icon(statusIconName[status] || 'package', { size: 14 })}
             <strong>${escapeHtml(order.ORDER_ID)}</strong>
             dari ${escapeHtml(branch.pic)} · ${escapeHtml(order.ID_CABANG)}
           </div>
           <div class="activity-time">
-            🕐 ${escapeHtml(formatWita(order.TANGGAL_ORDER))}
+            ${icon('clock', { size: 12 })}
+            ${escapeHtml(formatWita(order.TANGGAL_ORDER))}
           </div>
         </div>
       </div>
@@ -343,7 +372,6 @@ function updateActivityFeed(state) {
 // ─────────────────────────────────────────────────────────────────────────
 
 function bindPageEvents(state) {
-  // Goto orders
   document.querySelectorAll('[data-goto="orders"]').forEach((el) => {
     el.addEventListener('click', () => showPage('orders'));
   });
@@ -373,7 +401,7 @@ function bindOrderActions(container, state) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// QUICK ACTIONS (Approve/Reject)
+// QUICK ACTIONS
 // ─────────────────────────────────────────────────────────────────────────
 
 async function quickApprove(orderId, state) {
@@ -388,13 +416,12 @@ async function quickApprove(orderId, state) {
     icon: '✅',
     title: 'Setujui Pesanan?',
     message: `${orderId}\nCabang: ${branch.pic}\n\nSemua item akan disetujui.\nEmail akan dikirim ke cabang.`,
-    okText: '✅ Ya, Setujui',
+    okText: 'Ya, Setujui',
     okVariant: 'success',
   });
 
   if (!ok) return;
 
-  // Optimistic update
   const idx = state.allOrders.findIndex((o) => o.ORDER_ID === orderId);
   const oldStatus = idx >= 0 ? state.allOrders[idx].STATUS : null;
   if (idx >= 0) {
@@ -403,7 +430,7 @@ async function quickApprove(orderId, state) {
     updatePendingBadge();
   }
 
-  toast.info('⏳ Memproses...');
+  toast.info('Memproses...');
 
   const result = await ordersApi.updateStatus({
     orderId,
@@ -412,10 +439,9 @@ async function quickApprove(orderId, state) {
   });
 
   if (result.status === 'ok') {
-    toast.success('✅ Order disetujui!');
+    toast.success('Order disetujui!');
     await loadData(true);
   } else {
-    // Rollback
     if (idx >= 0 && oldStatus) {
       state.allOrders[idx].STATUS = oldStatus;
       updateDashboardData(state);
@@ -438,14 +464,13 @@ async function quickReject(orderId, state) {
     title: 'Tolak Seluruh Pesanan',
     message: `${orderId} — Cabang: ${branch.pic}\n\nIsi alasan penolakan:`,
     placeholder: 'Contoh: Stok habis...',
-    okText: '❌ Ya, Tolak',
+    okText: 'Ya, Tolak',
     okVariant: 'danger',
     required: true,
   });
 
   if (!reason) return;
 
-  // Optimistic update
   const idx = state.allOrders.findIndex((o) => o.ORDER_ID === orderId);
   const oldStatus = idx >= 0 ? state.allOrders[idx].STATUS : null;
   if (idx >= 0) {
@@ -454,7 +479,7 @@ async function quickReject(orderId, state) {
     updatePendingBadge();
   }
 
-  toast.info('⏳ Memproses...');
+  toast.info('Memproses...');
 
   const result = await ordersApi.updateStatus({
     orderId,
@@ -463,7 +488,7 @@ async function quickReject(orderId, state) {
   });
 
   if (result.status === 'ok') {
-    toast.success('❌ Order ditolak.');
+    toast.success('Order ditolak.');
     await loadData(true);
   } else {
     if (idx >= 0 && oldStatus) {

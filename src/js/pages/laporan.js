@@ -1,14 +1,14 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   LAPORAN PAGE — Print-ready report
+   LAPORAN PAGE — with Lucide Icons
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, escapeHtml, formatRupiah, formatWita, parseAnyDate, sortBy, toNumber } from '../utils.js';
 import { orders as ordersApi } from '../api.js';
 import { requireAuth } from '../session.js';
-import { CABANG, getStatusInfo, getHomeRoute } from '../config.js';
+import { CABANG, getStatusInfo } from '../config.js';
 import { toast } from '../ui.js';
+import { icon, injectIcons } from '../icons.js';
 
-// State
 const state = {
   session: null,
   allOrders: [],
@@ -28,7 +28,9 @@ async function init() {
   state.session = requireAuth();
   if (!state.session) return;
 
-  // Set back link sesuai role
+  // Inject icons dulu
+  injectIcons();
+
   const backLink = $('btnBack');
   if (backLink) {
     if (state.session.role === 'admin') {
@@ -38,14 +40,10 @@ async function init() {
     }
   }
 
-  // Meta
   $('metaCreatedBy').textContent = state.session.nama || state.session.username;
   $('metaCreatedAt').textContent = formatWita(new Date().toISOString());
 
-  // Bind events
   bindEvents();
-
-  // Load data
   await loadData();
 }
 
@@ -77,21 +75,18 @@ async function loadData() {
 function applyFilters() {
   let filtered = [...state.allOrders];
 
-  // Filter cabang
   if (state.filter.cabang) {
     filtered = filtered.filter(
       (o) => String(o.ID_CABANG || '').toUpperCase() === state.filter.cabang
     );
   }
 
-  // Filter status
   if (state.filter.status) {
     filtered = filtered.filter(
       (o) => String(o.STATUS || '').toUpperCase() === state.filter.status
     );
   }
 
-  // Filter periode
   if (state.filter.period !== 'all') {
     const now = new Date();
     const cutoff = new Date();
@@ -122,7 +117,6 @@ function applyFilters() {
 
   state.filteredOrders = filtered;
 
-  // Update period label
   const periodLabels = {
     all: 'Semua Periode',
     today: 'Hari Ini',
@@ -199,7 +193,12 @@ function renderCabangTable() {
 
     return `
       <tr>
-        <td><span class="badge-cabang">${info.icon} ${id}</span></td>
+        <td>
+          <span class="badge-cabang">
+            ${icon('store', { size: 12 })}
+            ${id}
+          </span>
+        </td>
         <td>${escapeHtml(info.nama)}</td>
         <td style="color: var(--muted);">${escapeHtml(info.pic)}</td>
         <td style="text-align: right; font-weight: 700;">${total}</td>
@@ -249,7 +248,7 @@ function renderDetailTable() {
     tbody.innerHTML = `
       <tr>
         <td colspan="7" class="empty-state">
-          <div class="empty-icon">📋</div>
+          <div class="empty-icon">${icon('file', { size: 48, color: 'var(--muted)' })}</div>
           <p>Tidak ada data yang cocok dengan filter.</p>
         </td>
       </tr>
@@ -258,7 +257,6 @@ function renderDetailTable() {
     return;
   }
 
-  // Sort by tanggal (terbaru dulu)
   const sorted = sortBy(
     state.filteredOrders.map((o) => ({
       ...o,
@@ -268,10 +266,15 @@ function renderDetailTable() {
     'desc'
   );
 
+  const statusIconMap = {
+    PENDING: 'clock',
+    APPROVED: 'check-circle',
+    REJECTED: 'x-circle',
+  };
+
   tbody.innerHTML = sorted.map((order, i) => {
     const status = String(order.STATUS || 'PENDING').toUpperCase();
-    const statusInfo = getStatusInfo(status);
-    const branch = CABANG[order.ID_CABANG] || { pic: '-', icon: '🏪' };
+    const branch = CABANG[order.ID_CABANG] || { pic: '-' };
     const itemCount = order.DETAIL?.length || 0;
     const total = calcTotal(order);
 
@@ -286,13 +289,17 @@ function renderDetailTable() {
           ${escapeHtml(order.ORDER_ID)}
         </td>
         <td>
-          <span class="badge-cabang">${branch.icon} ${escapeHtml(order.ID_CABANG)}</span>
+          <span class="badge-cabang">
+            ${icon('store', { size: 12 })}
+            ${escapeHtml(order.ID_CABANG)}
+          </span>
           <div style="font-size: 11px; color: var(--muted); margin-top: 2px;">${escapeHtml(branch.pic)}</div>
         </td>
         <td style="font-size: 12px;">${escapeHtml(formatWita(order.TANGGAL_ORDER, false))}</td>
         <td>
-          <span style="color: ${statusColor}; font-weight: 700; font-size: 11px;">
-            ${statusInfo.icon} ${status}
+          <span style="color: ${statusColor}; font-weight: 700; font-size: 11px; display: inline-flex; align-items: center; gap: 4px;">
+            ${icon(statusIconMap[status] || 'clock', { size: 12 })}
+            ${status}
           </span>
         </td>
         <td style="text-align: right;">${itemCount}</td>
@@ -340,17 +347,8 @@ function bindEvents() {
   });
 
   $('btnPrint')?.addEventListener('click', () => {
-    // Update timestamp sebelum print
     $('metaCreatedAt').textContent = formatWita(new Date().toISOString());
     setTimeout(() => window.print(), 100);
-  });
-
-  // Keyboard: Ctrl+P
-  document.addEventListener('keydown', (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
-      // Biarkan browser handle
-      $('metaCreatedAt').textContent = formatWita(new Date().toISOString());
-    }
   });
 }
 

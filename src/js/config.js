@@ -1,32 +1,22 @@
 /* ═══════════════════════════════════════════════════════════════════════
    CONFIG — GudangHub v3.0
-   Konfigurasi terpusat untuk seluruh aplikasi
    ═══════════════════════════════════════════════════════════════════════ */
 
-// ─────────────────────────────────────────────────────────────────────────
-// API ENDPOINT
-// ─────────────────────────────────────────────────────────────────────────
-
+// ─── API ENDPOINT ───
 export const API_URL = 'https://script.google.com/macros/s/AKfycbwv0cOk6GaRvPTi_TOiuJ1RNDkPtIoTv5Ch-Ix40ofswtZIAwm1EuTxU5okAPUWcn3p/exec';
 
-// ─────────────────────────────────────────────────────────────────────────
-// APP METADATA
-// ─────────────────────────────────────────────────────────────────────────
-
+// ─── APP METADATA ───
 export const APP = {
   name: 'GudangHub',
   version: '3.0.0',
   company: 'PT Central Perabot Utama',
   location: 'NTT',
   timezone: 'WITA',
-  timezoneOffset: 8, // GMT+8
+  timezoneOffset: 8,
   email: 'silitongadimas@gmail.com',
 };
 
-// ─────────────────────────────────────────────────────────────────────────
-// SESSION
-// ─────────────────────────────────────────────────────────────────────────
-
+// ─── SESSION ───
 export const SESSION = {
   key: 'gudanghub_session',
   lastUserKey: 'gudanghub_lastuser',
@@ -34,16 +24,13 @@ export const SESSION = {
   durationHours: 8,
 };
 
-// ─────────────────────────────────────────────────────────────────────────
-// DATA CABANG
-// ─────────────────────────────────────────────────────────────────────────
-
+// ─── DATA CABANG ───
 export const CABANG = {
   CB001: {
     id: 'CB001',
     nama: 'Toko Nasional Eltari',
     pic: 'Arfa',
-    icon: '🏪',
+    icon: 'store',
     color: '#ff6b00',
     telepon: '081234567001',
     alamat: 'Jl. Eltari, Kupang',
@@ -52,7 +39,7 @@ export const CABANG = {
     id: 'CB002',
     nama: 'Toko Perabot Mama Oesapa',
     pic: 'Akmal',
-    icon: '🏪',
+    icon: 'store',
     color: '#22c55e',
     telepon: '081234567002',
     alamat: 'Jl. Oesapa, Kupang',
@@ -61,7 +48,7 @@ export const CABANG = {
     id: 'CB003',
     nama: 'Toko Perabot Mama TDM',
     pic: 'Shally',
-    icon: '🏪',
+    icon: 'store',
     color: '#3b82f6',
     telepon: '081234567003',
     alamat: 'Jl. TDM, Kupang',
@@ -70,7 +57,7 @@ export const CABANG = {
     id: 'CB004',
     nama: 'Toko Perabot Mama Kefamenanu',
     pic: 'Fajar',
-    icon: '🏪',
+    icon: 'store',
     color: '#f59e0b',
     telepon: '081234567004',
     alamat: 'Jl. Utama, Kefamenanu',
@@ -80,10 +67,9 @@ export const CABANG = {
 export const CABANG_LIST = Object.values(CABANG);
 export const CABANG_IDS = Object.keys(CABANG);
 
-// ─────────────────────────────────────────────────────────────────────────
-// KATEGORI BARANG
-// ─────────────────────────────────────────────────────────────────────────
+// ─── KATEGORI BARANG (Emoji fallback + SVG icon name) ───
 
+// Emoji fallback (untuk backward compatibility)
 export const KATEGORI_ICONS = {
   Kursi: '🪑',
   Meja: '🍽️',
@@ -103,30 +89,60 @@ export const KATEGORI_ICONS = {
   default: '📦',
 };
 
+// SVG icon name mapping (untuk Lucide)
+export const KATEGORI_ICON_NAMES = {
+  Kursi: 'armchair',
+  Meja: 'utensils',
+  Lemari: 'boxes',
+  Sofa: 'sofa',
+  Kasur: 'bed',
+  Rak: 'boxes',
+  Bufet: 'boxes',
+  Dapur: 'chef-hat',
+  Elektronik: 'monitor',
+  Dekorasi: 'palette',
+  'Peralatan Dapur': 'cooking',
+  'Peralatan Makan': 'utensils',
+  'Peralatan Mandi': 'sparkles',
+  Loker: 'boxes',
+  'Rak Buku': 'boxes',
+  default: 'package',
+};
+
+/**
+ * Get emoji untuk kategori (backward compatibility)
+ */
 export function getKategoriIcon(kategori) {
   return KATEGORI_ICONS[kategori] || KATEGORI_ICONS.default;
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-// STATUS ORDER
-// ─────────────────────────────────────────────────────────────────────────
+/**
+ * Get SVG icon name untuk kategori
+ */
+export function getKategoriIconName(kategori) {
+  return KATEGORI_ICON_NAMES[kategori] || KATEGORI_ICON_NAMES.default;
+}
 
+// ─── STATUS ORDER ───
 export const STATUS = {
   PENDING: {
     label: 'Tertunda',
     icon: '⏳',
+    iconName: 'clock',
     color: 'warning',
     badge: 'badge-warning',
   },
   APPROVED: {
     label: 'Disetujui',
     icon: '✅',
+    iconName: 'check-circle',
     color: 'success',
     badge: 'badge-success',
   },
   REJECTED: {
     label: 'Ditolak',
     icon: '❌',
+    iconName: 'x-circle',
     color: 'danger',
     badge: 'badge-danger',
   },
@@ -137,21 +153,15 @@ export function getStatusInfo(status) {
   return STATUS[key] || STATUS.PENDING;
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-// ITEM STATUS (per item dalam order)
-// ─────────────────────────────────────────────────────────────────────────
-
+// ─── ITEM STATUS ───
 export const ITEM_STATUS = {
-  APPROVED: { label: 'Disetujui', icon: '✅', color: 'success' },
-  REJECTED: { label: 'Ditolak', icon: '🚫', color: 'warning' },
-  DELETED: { label: 'Dihapus', icon: '🗑️', color: 'danger' },
-  EDITED: { label: 'Diedit', icon: '✏️', color: 'info' },
+  APPROVED: { label: 'Disetujui', icon: '✅', iconName: 'check-circle', color: 'success' },
+  REJECTED: { label: 'Ditolak', icon: '🚫', iconName: 'ban', color: 'warning' },
+  DELETED: { label: 'Dihapus', icon: '🗑️', iconName: 'trash', color: 'danger' },
+  EDITED: { label: 'Diedit', icon: '✏️', iconName: 'edit-2', color: 'info' },
 };
 
-// ─────────────────────────────────────────────────────────────────────────
-// ROUTES / URL MAPPING
-// ─────────────────────────────────────────────────────────────────────────
-
+// ─── ROUTES ───
 export const ROUTES = {
   landing: 'index.html',
   login: 'login.html',
@@ -164,65 +174,41 @@ export const ROUTES = {
   settings: 'settings.html',
 };
 
-/**
- * Ambil route berdasarkan role user
- */
 export function getHomeRoute(role) {
   return role === 'admin' ? ROUTES.dashboard : ROUTES.order;
 }
 
-/**
- * Build URL order dengan cabang parameter
- */
 export function getOrderUrl(idCabang = '') {
   return `${ROUTES.order}?cabang=${encodeURIComponent(idCabang)}`;
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-// SETTINGS DEFAULT
-// ─────────────────────────────────────────────────────────────────────────
-
+// ─── SETTINGS ───
 export const SETTINGS = {
-  // Katalog
   itemsPerPage: 40,
   maxOrderItems: 100,
-
-  // API
-  apiTimeout: 30000,       // 30 detik
-  autoRefreshMs: 60000,    // 1 menit
-  throttleMs: 3000,        // 3 detik antar refresh
-
-  // UI
+  apiTimeout: 30000,
+  autoRefreshMs: 60000,
+  throttleMs: 3000,
   toastDuration: 3000,
   toastDurationError: 5000,
   debounceMs: 200,
-
-  // Notifikasi
-  notifPollingMs: 30000,   // 30 detik
-
-  // Cache
+  notifPollingMs: 30000,
   cacheEnabled: true,
-  cacheDuration: 60000,    // 1 menit
+  cacheDuration: 60000,
 };
 
-// ─────────────────────────────────────────────────────────────────────────
-// FEATURE FLAGS
-// ─────────────────────────────────────────────────────────────────────────
-
+// ─── FEATURE FLAGS ───
 export const FEATURES = {
   darkMode: true,
   pwa: true,
   offline: true,
   notifications: true,
   printLaporan: true,
-  exportPdf: false, // butuh library tambahan, next batch
+  exportPdf: false,
   exportExcel: false,
 };
 
-// ─────────────────────────────────────────────────────────────────────────
-// EXPORT DEFAULT
-// ─────────────────────────────────────────────────────────────────────────
-
+// ─── EXPORT DEFAULT ───
 export default {
   API_URL,
   APP,
@@ -231,12 +217,14 @@ export default {
   CABANG_LIST,
   CABANG_IDS,
   KATEGORI_ICONS,
+  KATEGORI_ICON_NAMES,
   STATUS,
   ITEM_STATUS,
   ROUTES,
   SETTINGS,
   FEATURES,
   getKategoriIcon,
+  getKategoriIconName,
   getStatusInfo,
   getHomeRoute,
   getOrderUrl,

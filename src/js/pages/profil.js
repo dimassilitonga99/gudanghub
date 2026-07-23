@@ -1,12 +1,13 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   PROFIL PAGE — User profile + activity log
+   PROFIL PAGE — with Lucide Icons
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, escapeHtml, formatWita, formatTimeAgo, getInitials, parseAnyDate, sortBy } from '../utils.js';
 import { orders as ordersApi } from '../api.js';
 import { requireAuth, getSessionRemainingMinutes, logout } from '../session.js';
-import { CABANG, getHomeRoute } from '../config.js';
+import { CABANG } from '../config.js';
 import { toast, confirm } from '../ui.js';
+import { icon, injectIcons } from '../icons.js';
 
 const state = {
   session: null,
@@ -20,16 +21,17 @@ async function init() {
   state.session = requireAuth();
   if (!state.session) return;
 
+  // Inject icons dulu
+  injectIcons();
+
   renderProfile();
   renderInfo();
   renderSessionInfo();
   updateSessionRemaining();
   bindEvents();
 
-  // Load activity
   await loadActivity();
 
-  // Update session remaining tiap menit
   setInterval(updateSessionRemaining, 60000);
 }
 
@@ -44,12 +46,16 @@ function renderProfile() {
   $('profileName').textContent = s.nama || s.username || '-';
   $('profileUsername').textContent = '@' + (s.username || '-');
 
+  const roleIcon = s.role === 'admin' ? 'warehouse' : 'store';
   const roleLabel = s.role === 'admin'
-    ? '🏪 Admin Gudang Pusat'
-    : `🏬 Cabang ${s.idCabang || ''}`;
-  $('profileRole').textContent = roleLabel;
+    ? 'Admin Gudang Pusat'
+    : `Cabang ${s.idCabang || ''}`;
 
-  // Back link + home link
+  $('profileRole').innerHTML = `
+    ${icon(roleIcon, { size: 12 })}
+    ${roleLabel}
+  `;
+
   const backLink = $('btnBack');
   const homeLink = $('btnMainHome');
   const targetHome = s.role === 'admin'
@@ -85,7 +91,6 @@ function renderInfo() {
     }
   }
 
-  // Login info
   if (s.loginAt) {
     $('infoLoginAt').textContent = formatWita(s.loginAt);
     $('infoLoginAgo').textContent = formatTimeAgo(s.loginAt);
@@ -93,7 +98,7 @@ function renderInfo() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// RENDER SESSION INFO
+// SESSION INFO
 // ─────────────────────────────────────────────────────────────────────────
 
 function renderSessionInfo() {
@@ -112,9 +117,8 @@ function updateSessionRemaining() {
   const remaining = getSessionRemainingMinutes();
 
   if (remaining <= 0) {
-    $('sessionRemaining').textContent = '⚠️ Expired';
+    $('sessionRemaining').textContent = 'Expired';
     $('sessionRemaining').style.color = 'var(--danger)';
-    // Force logout kalau expired
     setTimeout(() => logout(true), 1000);
     return;
   }
@@ -128,7 +132,6 @@ function updateSessionRemaining() {
 
   $('sessionRemaining').textContent = text;
 
-  // Warning kalau < 30 menit
   if (remaining < 30) {
     $('sessionRemaining').style.color = 'var(--warning)';
   } else {
@@ -137,12 +140,19 @@ function updateSessionRemaining() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// ACTIVITY LOG
+// ACTIVITY
 // ─────────────────────────────────────────────────────────────────────────
 
 async function loadActivity() {
   const list = $('activityList');
   if (!list) return;
+
+  list.innerHTML = `
+    <div class="empty-state">
+      <div class="loading-spinner" style="width: 32px; height: 32px; border: 3px solid var(--line-soft); border-top-color: var(--orange); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 12px;"></div>
+      <p>Memuat aktivitas...</p>
+    </div>
+  `;
 
   try {
     const result = await ordersApi.getAll({ cache: true });
@@ -153,12 +163,10 @@ async function loadActivity() {
     const allOrders = result.data || [];
     const s = state.session;
 
-    // Filter: admin lihat semua, cabang hanya orderannya
     const relevantOrders = s.role === 'admin'
       ? allOrders
       : allOrders.filter((o) => String(o.ID_CABANG).toUpperCase() === s.idCabang);
 
-    // Sort desc, ambil 15 terbaru
     const activities = sortBy(
       relevantOrders.map((o) => ({
         ...o,
@@ -173,7 +181,7 @@ async function loadActivity() {
   } catch (error) {
     list.innerHTML = `
       <div class="empty-state">
-        <div class="empty-icon">⚠️</div>
+        <div class="empty-icon">${icon('alert-triangle', { size: 40, color: 'var(--danger)' })}</div>
         <p>Gagal memuat aktivitas.</p>
       </div>
     `;
@@ -189,7 +197,7 @@ function renderActivity(activities) {
   if (!activities.length) {
     list.innerHTML = `
       <div class="empty-state">
-        <div class="empty-icon">📭</div>
+        <div class="empty-icon">${icon('activity', { size: 40, color: 'var(--muted)' })}</div>
         <p>Belum ada aktivitas.</p>
       </div>
     `;
@@ -199,21 +207,23 @@ function renderActivity(activities) {
 
   if (countEl) countEl.textContent = `${activities.length} aktivitas`;
 
-  const statusIconMap = {
-    PENDING: { icon: '⏳', color: 'orange', label: 'menunggu persetujuan' },
-    APPROVED: { icon: '✅', color: 'green', label: 'disetujui' },
-    REJECTED: { icon: '❌', color: 'red', label: 'ditolak' },
+  const statusInfo = {
+    PENDING: { iconName: 'clock', color: 'orange', label: 'menunggu persetujuan' },
+    APPROVED: { iconName: 'check-circle', color: 'green', label: 'disetujui' },
+    REJECTED: { iconName: 'x-circle', color: 'red', label: 'ditolak' },
   };
 
   list.innerHTML = activities.map((order) => {
     const status = String(order.STATUS || 'PENDING').toUpperCase();
-    const info = statusIconMap[status] || statusIconMap.PENDING;
+    const info = statusInfo[status] || statusInfo.PENDING;
     const branch = CABANG[order.ID_CABANG];
     const branchName = branch ? branch.pic : order.ID_CABANG;
 
     return `
       <div class="activity-item">
-        <div class="activity-icon ${info.color}">${info.icon}</div>
+        <div class="activity-icon ${info.color}">
+          ${icon(info.iconName, { size: 18 })}
+        </div>
         <div class="activity-content">
           <div class="activity-desc">
             Order <strong>${escapeHtml(order.ORDER_ID)}</strong>
@@ -221,7 +231,8 @@ function renderActivity(activities) {
             ${info.label}
           </div>
           <div class="activity-time">
-            🕐 ${escapeHtml(formatTimeAgo(order.TANGGAL_ORDER))}
+            ${icon('clock', { size: 12 })}
+            ${escapeHtml(formatTimeAgo(order.TANGGAL_ORDER))}
             · ${escapeHtml(formatWita(order.TANGGAL_ORDER, false))}
           </div>
         </div>
