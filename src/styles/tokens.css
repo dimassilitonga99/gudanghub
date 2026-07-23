@@ -4,42 +4,36 @@
    ═══════════════════════════════════════════════════════════════════════ */
 
 :root {
-  /* ─────────────────────────────────────────────────────────────────────
-     COLOR SYSTEM — Orange & Dark Ink
-     ───────────────────────────────────────────────────────────────────── */
-
   /* Brand Orange */
   --orange-50:  #fff4e6;
   --orange-100: #ffe0b3;
   --orange-200: #ffc880;
   --orange-300: #ffa94d;
   --orange-400: #ff8c38;
-  --orange-500: #ff6b00;   /* PRIMARY */
+  --orange-500: #ff6b00;
   --orange-600: #e05a00;
   --orange-700: #b34700;
   --orange-800: #803300;
   --orange-900: #4d1f00;
 
-  /* Aliases (backward compatibility) */
   --orange:       var(--orange-500);
   --orange-light: var(--orange-400);
   --orange-deep:  var(--orange-600);
   --orange-dim:   rgba(255, 107, 0, 0.12);
 
   /* Ink / Dark backgrounds */
-  --ink-950: #08080d;   /* Darkest (landing bg) */
-  --ink-900: #0d0d1a;   /* App bg */
+  --ink-950: #08080d;
+  --ink-900: #0d0d1a;
   --ink-850: #10101a;
-  --ink-800: #12122a;   /* Card bg 1 */
+  --ink-800: #12122a;
   --ink-750: #14141f;
   --ink-700: #191922;
-  --ink-650: #1a1a24;   /* Input bg */
-  --ink-600: #1a1a35;   /* Card bg 2 */
+  --ink-650: #1a1a24;
+  --ink-600: #1a1a35;
   --ink-550: #1c1c2b;
-  --ink-500: #1e1e3a;   /* Panel bg */
+  --ink-500: #1e1e3a;
   --ink-450: #22223f;
 
-  /* Aliases */
   --ink:    var(--ink-900);
   --ink-2:  var(--ink-800);
   --ink-3:  var(--ink-600);
@@ -53,7 +47,6 @@
   --text-dim:       #64645a;
   --text-invert:    #08080d;
 
-  /* Aliases */
   --text:  var(--text-primary);
   --muted: var(--text-muted);
 
@@ -64,7 +57,6 @@
   --line-orange: rgba(255, 107, 0, 0.20);
   --line-orange-soft: rgba(255, 107, 0, 0.10);
 
-  /* Aliases */
   --border:      var(--line-orange);
   --border-soft: var(--line-soft);
 
@@ -85,21 +77,16 @@
   --info-bg:      rgba(59, 130, 246, 0.12);
   --info-line:    rgba(59, 130, 246, 0.30);
 
-  /* Aliases */
   --green:  var(--success);
   --red:    var(--danger);
   --yellow: var(--warning);
   --blue:   var(--info);
 
-  /* ─────────────────────────────────────────────────────────────────────
-     TYPOGRAPHY
-     ───────────────────────────────────────────────────────────────────── */
-
+  /* Typography */
   --font-sans: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-serif: 'Fraunces', Georgia, 'Times New Roman', serif;
   --font-mono: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
 
-  /* Font sizes (fluid, mobile-first) */
   --fs-xs:   clamp(10px, 1.4vw, 11px);
   --fs-sm:   clamp(12px, 1.6vw, 13px);
   --fs-base: clamp(13px, 1.8vw, 14px);
@@ -112,7 +99,6 @@
   --fs-5xl:  clamp(40px, 8vw,   64px);
   --fs-hero: clamp(38px, 9vw,   96px);
 
-  /* Font weights */
   --fw-normal:   400;
   --fw-medium:   500;
   --fw-semibold: 600;
@@ -120,24 +106,19 @@
   --fw-extra:    800;
   --fw-black:    900;
 
-  /* Line heights */
   --lh-tight:   1.1;
   --lh-snug:    1.3;
   --lh-normal:  1.5;
   --lh-relaxed: 1.65;
   --lh-loose:   1.8;
 
-  /* Letter spacing */
   --tracking-tight:  -0.02em;
   --tracking-normal: 0;
   --tracking-wide:   0.05em;
   --tracking-wider:  0.15em;
   --tracking-widest: 0.25em;
 
-  /* ─────────────────────────────────────────────────────────────────────
-     SPACING (4px scale)
-     ───────────────────────────────────────────────────────────────────── */
-
+  /* Spacing */
   --space-0:  0;
   --space-1:  4px;
   --space-2:  8px;
@@ -152,14 +133,10 @@
   --space-20: 80px;
   --space-24: 96px;
 
-  /* Section gaps */
   --gap-section: clamp(56px, 9vw, 120px);
   --gap-card:    clamp(14px, 2vw, 20px);
 
-  /* ─────────────────────────────────────────────────────────────────────
-     BORDER RADIUS
-     ───────────────────────────────────────────────────────────────────── */
-
+  /* Border radius */
   --radius-xs:   4px;
   --radius-sm:   6px;
   --radius-md:   8px;
@@ -169,10 +146,7 @@
   --radius-3xl:  24px;
   --radius-full: 9999px;
 
-  /* ─────────────────────────────────────────────────────────────────────
-     SHADOWS
-     ───────────────────────────────────────────────────────────────────── */
-
+  /* Shadows */
   --shadow-xs:  0 1px 2px rgba(0, 0, 0, 0.2);
   --shadow-sm:  0 2px 6px rgba(0, 0, 0, 0.25);
   --shadow-md:  0 4px 12px rgba(0, 0, 0, 0.3);
@@ -180,20 +154,15 @@
   --shadow-xl:  0 12px 40px rgba(0, 0, 0, 0.4);
   --shadow-2xl: 0 24px 60px rgba(0, 0, 0, 0.5);
 
-  /* Orange glows */
   --glow-orange-sm: 0 4px 12px rgba(255, 107, 0, 0.3);
   --glow-orange-md: 0 8px 24px rgba(255, 107, 0, 0.35);
   --glow-orange-lg: 0 12px 40px rgba(255, 107, 0, 0.45);
 
-  /* Status glows */
   --glow-success: 0 6px 20px rgba(34, 197, 94, 0.3);
   --glow-danger:  0 6px 20px rgba(239, 68, 68, 0.3);
   --glow-info:    0 6px 20px rgba(59, 130, 246, 0.3);
 
-  /* ─────────────────────────────────────────────────────────────────────
-     Z-INDEX SCALE
-     ───────────────────────────────────────────────────────────────────── */
-
+  /* Z-index */
   --z-base:     0;
   --z-elevated: 10;
   --z-sticky:   50;
@@ -206,10 +175,7 @@
   --z-tooltip:  800;
   --z-toast:    9999;
 
-  /* ─────────────────────────────────────────────────────────────────────
-     TRANSITIONS & ANIMATIONS
-     ───────────────────────────────────────────────────────────────────── */
-
+  /* Transitions */
   --ease-linear: linear;
   --ease-in:     cubic-bezier(0.4, 0, 1, 1);
   --ease-out:    cubic-bezier(0, 0, 0.2, 1);
@@ -222,15 +188,11 @@
   --dur-slow:   0.4s;
   --dur-slower: 0.6s;
 
-  /* Common combos */
   --transition-fast:   all var(--dur-fast) var(--ease-out);
   --transition-normal: all var(--dur-normal) var(--ease-out);
   --transition-spring: all var(--dur-normal) var(--ease-spring);
 
-  /* ─────────────────────────────────────────────────────────────────────
-     LAYOUT
-     ───────────────────────────────────────────────────────────────────── */
-
+  /* Layout */
   --container-sm:  640px;
   --container-md:  768px;
   --container-lg:  1024px;
@@ -242,19 +204,13 @@
   --topbar-height:      60px;
   --bottom-nav-height:  65px;
 
-  /* ─────────────────────────────────────────────────────────────────────
-     SAFE AREA (iOS notch)
-     ───────────────────────────────────────────────────────────────────── */
-
+  /* Safe area */
   --safe-top:    env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left:   env(safe-area-inset-left, 0px);
   --safe-right:  env(safe-area-inset-right, 0px);
 
-  /* ─────────────────────────────────────────────────────────────────────
-     BACKDROP EFFECTS
-     ───────────────────────────────────────────────────────────────────── */
-
+  /* Backdrop */
   --blur-sm: blur(4px);
   --blur-md: blur(8px);
   --blur-lg: blur(16px);
@@ -263,6 +219,19 @@
   --backdrop-blur: rgba(13, 13, 26, 0.85);
 }
 
-/* ─────────────────────────────────────────────────────────────────────────
-   LIGHT MODE (optional, di-toggle via [data-theme="light"])
-   ───────────────────────────────────────────────────────────────────── 
+/* LIGHT MODE */
+[data-theme="light"] {
+  --ink:    #ffffff;
+  --ink-2:  #f8fafc;
+  --ink-3:  #f1f5f9;
+  --card:   #ffffff;
+  --field:  #f8fafc;
+
+  --text-primary:   #0f172a;
+  --text-secondary: #1e293b;
+  --text-muted:     #64748b;
+
+  --line-strong: rgba(0, 0, 0, 0.14);
+  --line:        rgba(0, 0, 0, 0.09);
+  --line-soft:   rgba(0, 0, 0, 0.05);
+}
