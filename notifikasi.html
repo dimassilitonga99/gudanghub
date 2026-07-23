@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0d0d1a">
+  <title>GudangHub — Notifikasi</title>
+
+  <link rel="manifest" href="/gudanghub/assets/manifest-DWsLcWLB.json">
+  <link rel="apple-touch-icon" href="./public/icons/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <style>
+    body {
+      background: var(--ink);
+      min-height: 100dvh;
+    }
+
+    .topbar {
+      background: var(--ink-2);
+      border-bottom: 1px solid var(--line-soft);
+      padding: 12px 20px;
+      padding-top: calc(12px + var(--safe-top));
+      padding-right: calc(20px + var(--safe-right));
+      padding-left: calc(20px + var(--safe-left));
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: var(--z-sticky);
+    }
+
+    .topbar-back {
+      display: grid;
+      min-width: 40px;
+      min-height: 40px;
+      place-items: center;
+      padding: 8px;
+      border: 1px solid var(--line-soft);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--muted);
+      text-decoration: none;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+
+    .topbar-back:hover {
+      border-color: var(--orange);
+      color: var(--orange);
+    }
+
+    .topbar-title {
+      font-family: var(--font-serif);
+      font-size: 17px;
+      font-weight: 700;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .topbar-title em {
+      color: var(--orange);
+      font-style: normal;
+    }
+
+    .notif-badge-count {
+      background: var(--orange);
+      color: #fff;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 800;
+      font-family: var(--font-sans);
+      font-variant-numeric: tabular-nums;
+      flex-shrink: 0;
+    }
+
+    .btn-mark-read {
+      background: var(--orange-dim);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 14px;
+      color: var(--orange);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      min-height: 40px;
+      transition: background 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-mark-read:hover {
+      background: rgba(255, 107, 0, 0.2);
+    }
+
+    .content {
+      padding: 20px;
+      padding-left: calc(20px + var(--safe-left));
+      padding-right: calc(20px + var(--safe-right));
+      padding-bottom: calc(20px + var(--safe-bottom));
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* FILTER CHIPS */
+    .filter-chips {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .filter-chips::-webkit-scrollbar {
+      display: none;
+    }
+
+    .chip {
+      flex-shrink: 0;
+      padding: 8px 16px;
+      border: 1px solid var(--line-soft);
+      border-radius: 20px;
+      background: var(--card);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: inherit;
+      min-height: 36px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .chip:hover {
+      color: var(--text);
+    }
+
+    .chip.active {
+      border-color: var(--orange);
+      background: var(--orange-dim);
+      color: var(--orange);
+    }
+
+    .chip-count {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 1px 8px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .chip.active .chip-count {
+      background: var(--orange);
+      color: #fff;
+    }
+
+    /* LIVE INDICATOR */
+    .live-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: rgba(34, 197, 94, 0.08);
+      border: 1px solid rgba(34, 197, 94, 0.2);
+      border-radius: 12px;
+      margin-bottom: 20px;
+      font-size: 12px;
+      color: var(--success);
+      font-weight: 600;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: livePulse 2s ease-in-out infinite;
+    }
+
+    @keyframes livePulse {
+      0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6); }
+      50% { opacity: 0.7; transform: scale(1.1); box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+    }
+
+    .live-info {
+      flex: 1;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-size: 11px;
+      align-items: center;
+    }
+
+    .live-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* NOTIF LIST */
+    .notif-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .notif-item {
+      background: var(--card);
+      border: 1px solid var(--line-soft);
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      gap: 14px;
+      transition: all 0.2s var(--ease-out);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .notif-item:hover {
+      transform: translateX(4px);
+      border-color: var(--line-orange);
+    }
+
+    .notif-item.unread {
+      background: linear-gradient(90deg, rgba(255, 107, 0, 0.06), var(--card) 60%);
+      border-color: var(--line-orange);
+    }
+
+    .notif-item.unread::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--orange);
+    }
+
+    .notif-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+
+    .notif-icon.pending { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+    .notif-icon.approved { background: rgba(34, 197, 94, 0.15); color: var(--success); }
+    .notif-icon.rejected { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+    .notif-icon.info { background: rgba(59, 130, 246, 0.15); color: var(--info); }
+
+    .notif-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .notif-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 4px;
+      flex-wrap: wrap;
+    }
+
+    .notif-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      min-width: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .notif-time {
+      font-size: 11px;
+      color: var(--muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .notif-desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .notif-desc strong {
+      color: var(--orange);
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+
+    .notif-meta {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .notif-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .notif-tag.cabang {
+      background: var(--ink-3);
+      color: var(--text);
+    }
+
+    .notif-tag.status-pending { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+    .notif-tag.status-approved { background: rgba(34, 197, 94, 0.15); color: var(--success); }
+    .notif-tag.status-rejected { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+
+    /* EMPTY STATE */
+    .empty-state {
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--muted);
+      background: var(--card);
+      border: 1px solid var(--line-soft);
+      border-radius: 16px;
+    }
+
+    .empty-icon {
+      margin-bottom: 12px;
+      opacity: 0.5;
+      display: grid;
+      place-items: center;
+    }
+
+    .loading-state {
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .loading-spinner {
+      width: 36px;
+      height: 36px;
+      margin: 0 auto 16px;
+      border: 3px solid var(--line-soft);
+      border-top-color: var(--orange);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 600px) {
+      .content { padding: 12px; }
+      .notif-item { padding: 12px; gap: 10px; }
+      .notif-icon { width: 36px; height: 36px; }
+    }
+  </style>
+  <script type="module" crossorigin src="/gudanghub/assets/js/notifikasi-DXNLRG61.js"></script>
+  <link rel="modulepreload" crossorigin href="/gudanghub/assets/js/icons-DdqG2uRW.js">
+  <link rel="modulepreload" crossorigin href="/gudanghub/assets/js/api-DBPU_7n9.js">
+  <link rel="modulepreload" crossorigin href="/gudanghub/assets/js/ui-CDv0hAY9.js">
+  <link rel="stylesheet" crossorigin href="/gudanghub/assets/css/icons-BrzFGbpM.css">
+</head>
+
+<body>
+
+  <header class="topbar">
+    <a class="topbar-back" id="btnBack" href="./dashboard.html" title="Kembali">
+      <span data-icon="arrow-left" data-icon-size="18"></span>
+    </a>
+    <div class="topbar-title">
+      <span data-icon="bell-ring" data-icon-size="20" data-icon-color="var(--orange)"></span>
+      <span>Notifikasi <em>Live</em></span>
+      <span class="notif-badge-count" id="notifTotalCount">0</span>
+    </div>
+    <button class="btn-mark-read" id="btnMarkAllRead" type="button">
+      <span data-icon="check-check" data-icon-size="14"></span>
+      Tandai Dibaca
+    </button>
+  </header>
+
+  <main class="content">
+
+    <div class="live-indicator">
+      <div class="live-dot"></div>
+      <div class="live-info">
+        <span class="live-label">
+          <span data-icon="wifi" data-icon-size="12"></span>
+          Notifikasi live · Auto-refresh setiap 30 detik
+        </span>
+        <span id="lastRefresh">Baru saja</span>
+      </div>
+    </div>
+
+    <div class="filter-chips" id="filterChips">
+      <button class="chip active" type="button" data-filter="all">
+        <span data-icon="list" data-icon-size="14"></span>
+        Semua
+        <span class="chip-count" id="countAll">0</span>
+      </button>
+      <button class="chip" type="button" data-filter="unread">
+        <span data-icon="mail" data-icon-size="14"></span>
+        Belum Dibaca
+        <span class="chip-count" id="countUnread">0</span>
+      </button>
+      <button class="chip" type="button" data-filter="PENDING">
+        <span data-icon="clock" data-icon-size="14"></span>
+        Menunggu
+        <span class="chip-count" id="countPending">0</span>
+      </button>
+      <button class="chip" type="button" data-filter="APPROVED">
+        <span data-icon="check-circle" data-icon-size="14"></span>
+        Disetujui
+        <span class="chip-count" id="countApproved">0</span>
+      </button>
+      <button class="chip" type="button" data-filter="REJECTED">
+        <span data-icon="x-circle" data-icon-size="14"></span>
+        Ditolak
+        <span class="chip-count" id="countRejected">0</span>
+      </button>
+    </div>
+
+    <div class="notif-list" id="notifList">
+      <div class="loading-state">
+        <div class="loading-spinner"></div>
+        <p>Memuat notifikasi...</p>
+      </div>
+    </div>
+
+  </main>
+
+</body>
+</html>

@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0d0d1a">
+  <title>GudangHub — Settings</title>
+
+  <link rel="manifest" href="/gudanghub/assets/manifest-DWsLcWLB.json">
+  <link rel="apple-touch-icon" href="./public/icons/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <style>
+    body {
+      background: var(--ink);
+      min-height: 100dvh;
+    }
+
+    .topbar {
+      background: var(--ink-2);
+      border-bottom: 1px solid var(--line-soft);
+      padding: 12px 20px;
+      padding-top: calc(12px + var(--safe-top));
+      padding-right: calc(20px + var(--safe-right));
+      padding-left: calc(20px + var(--safe-left));
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: var(--z-sticky);
+    }
+
+    .topbar-back {
+      display: grid;
+      min-width: 40px;
+      min-height: 40px;
+      place-items: center;
+      padding: 8px;
+      border: 1px solid var(--line-soft);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--muted);
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+
+    .topbar-back:hover {
+      border-color: var(--orange);
+      color: var(--orange);
+    }
+
+    .topbar-title {
+      font-family: var(--font-serif);
+      font-size: 17px;
+      font-weight: 700;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .topbar-title em {
+      color: var(--orange);
+      font-style: normal;
+    }
+
+    .content {
+      padding: 20px;
+      padding-left: calc(20px + var(--safe-left));
+      padding-right: calc(20px + var(--safe-right));
+      padding-bottom: calc(20px + var(--safe-bottom));
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* SECTION */
+    .settings-section {
+      background: var(--card);
+      border: 1px solid var(--line-soft);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .section-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--line-soft);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: var(--orange-dim);
+      color: var(--orange);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+
+    .section-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .section-title {
+      font-family: var(--font-serif);
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .section-desc {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .section-body {
+      padding: 20px;
+    }
+
+    /* SETTING ITEM */
+    .setting-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--line-soft);
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .setting-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .setting-item:first-child {
+      padding-top: 0;
+    }
+
+    .setting-info {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .setting-label {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .setting-help {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    /* TOGGLE */
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 26px;
+      flex-shrink: 0;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background: var(--ink-3);
+      border: 1px solid var(--line);
+      transition: 0.3s;
+      border-radius: 26px;
+    }
+
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      height: 20px;
+      width: 20px;
+      left: 2px;
+      bottom: 2px;
+      background: var(--muted);
+      transition: 0.3s;
+      border-radius: 50%;
+    }
+
+    .toggle-switch input:checked + .toggle-slider {
+      background: var(--orange-dim);
+      border-color: var(--orange);
+    }
+
+    .toggle-switch input:checked + .toggle-slider::before {
+      transform: translateX(22px);
+      background: var(--orange);
+    }
+
+    /* USERS LIST */
+    .users-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .user-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px;
+      border: 1px solid var(--line-soft);
+      border-radius: 12px;
+      background: var(--ink-3);
+    }
+
+    .user-row-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--orange), var(--orange-deep));
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 17px;
+      flex-shrink: 0;
+    }
+
+    .user-row-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .user-row-name {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .user-row-username {
+      color: var(--orange);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      margin-bottom: 4px;
+    }
+
+    .user-row-tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .user-tag {
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .user-tag.admin {
+      background: rgba(255, 107, 0, 0.15);
+      color: var(--orange);
+    }
+
+    .user-tag.cabang {
+      background: rgba(59, 130, 246, 0.15);
+      color: var(--info);
+    }
+
+    /* CABANG LIST */
+    .cabang-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 12px;
+    }
+
+    .cabang-card {
+      padding: 16px;
+      border: 1px solid var(--line-soft);
+      border-radius: 12px;
+      background: var(--ink-3);
+    }
+
+    .cabang-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .cabang-card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--orange), var(--orange-light));
+      display: grid;
+      place-items: center;
+      color: #fff;
+    }
+
+    .cabang-card-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .cabang-card-id {
+      color: var(--orange);
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    .cabang-card-info {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .cabang-card-info-line {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .cabang-card-info b {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    /* SYSTEM INFO */
+    .system-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .info-tile {
+      padding: 14px;
+      border: 1px solid var(--line-soft);
+      border-radius: 12px;
+      background: var(--ink-3);
+      text-align: center;
+    }
+
+    .info-tile-label {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .info-tile-value {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 700;
+      word-break: break-all;
+    }
+
+    /* DANGER ZONE */
+    .danger-zone {
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    .danger-zone .section-icon {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--danger);
+    }
+
+    .danger-btn {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid var(--danger);
+      color: var(--danger);
+      padding: 10px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      transition: all 0.15s;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .danger-btn:hover {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--orange-dim);
+      color: var(--orange);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 13px;
+      transition: background 0.15s;
+    }
+
+    .link-btn:hover {
+      background: rgba(255, 107, 0, 0.2);
+    }
+
+    @media (max-width: 600px) {
+      .content { padding: 12px; }
+      .section-header,
+      .section-body { padding: 16px; }
+    }
+  </style>
+  <script type="module" crossorigin src="/gudanghub/assets/js/settings-C9Mww8Lf.js"></script>
+  <link rel="modulepreload" crossorigin href="/gudanghub/assets/js/icons-DdqG2uRW.js">
+  <link rel="modulepreload" crossorigin href="/gudanghub/assets/js/ui-CDv0hAY9.js">
+  <link rel="stylesheet" crossorigin href="/gudanghub/assets/css/icons-BrzFGbpM.css">
+</head>
+
+<body>
+
+  <header class="topbar">
+    <a class="topbar-back" id="btnBack" href="./dashboard.html" title="Kembali">
+      <span data-icon="arrow-left" data-icon-size="18"></span>
+    </a>
+    <div class="topbar-title">
+      <span data-icon="settings" data-icon-size="20" data-icon-color="var(--orange)"></span>
+      Settings <em>Sistem</em>
+    </div>
+  </header>
+
+  <main class="content">
+
+    <!-- APP PREFERENCES -->
+    <section class="settings-section">
+      <header class="section-header">
+        <div class="section-icon">
+          <span data-icon="palette" data-icon-size="22"></span>
+        </div>
+        <div class="section-info">
+          <h2 class="section-title">Preferensi Tampilan</h2>
+          <p class="section-desc">Kustomisasi pengalaman aplikasi Anda</p>
+        </div>
+      </header>
+      <div class="section-body">
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">
+              <span data-icon="palette" data-icon-size="16"></span>
+              Dark Mode
+            </div>
+            <div class="setting-help">Tema gelap untuk mata lebih nyaman (default: ON)</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="tglDarkMode" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">
+              <span data-icon="bell-ring" data-icon-size="16"></span>
+              Browser Notifikasi
+            </div>
+            <div class="setting-help">Terima notifikasi order baru meski tab tidak aktif</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="tglNotifBrowser">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">
+              <span data-icon="waves" data-icon-size="16"></span>
+              Suara Notifikasi
+            </div>
+            <div class="setting-help">Bunyi saat ada notifikasi baru</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="tglSoundNotif">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">
+              <span data-icon="refresh" data-icon-size="16"></span>
+              Auto Refresh Dashboard
+            </div>
+            <div class="setting-help">Refresh data otomatis setiap 1 menit</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="tglAutoRefresh" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- USER MANAGEMENT -->
+    <section class="settings-section" id="userSection" style="display: none;">
+      <header class="section-header">
+        <div class="section-icon">
+          <span data-icon="users" data-icon-size="22"></span>
+        </div>
+        <div class="section-info">
+          <h2 class="section-title">Kelola User</h2>
+          <p class="section-desc">Daftar akun yang terdaftar di sistem</p>
+        </div>
+      </header>
+      <div class="section-body">
+        <div class="users-list" id="usersList"></div>
+
+        <div style="margin-top: 16px; padding: 14px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 10px; font-size: 12px; color: var(--info); line-height: 1.6; display: flex; gap: 10px; align-items: flex-start;">
+          <span data-icon="info" data-icon-size="18" style="flex-shrink: 0;"></span>
+          <div>
+            <b>Info:</b> User dikelola melalui Google Sheet (sheet <code>USERS</code>). Buka Google Sheets untuk menambah/mengedit akun.
+            <div style="margin-top: 10px;">
+              <a href="https://docs.google.com/spreadsheets" target="_blank" rel="noopener" class="link-btn">
+                <span data-icon="file-sheet" data-icon-size="14"></span>
+                Buka Google Sheets
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CABANG -->
+    <section class="settings-section">
+      <header class="section-header">
+        <div class="section-icon">
+          <span data-icon="store" data-icon-size="22"></span>
+        </div>
+        <div class="section-info">
+          <h2 class="section-title">Daftar Cabang</h2>
+          <p class="section-desc">Cabang aktif di sistem</p>
+        </div>
+      </header>
+      <div class="section-body">
+        <div class="cabang-list" id="cabangList"></div>
+      </div>
+    </section>
+
+    <!-- SYSTEM INFO -->
+    <section class="settings-section">
+      <header class="section-header">
+        <div class="section-icon">
+          <span data-icon="info" data-icon-size="22"></span>
+        </div>
+        <div class="section-info">
+          <h2 class="section-title">Informasi Sistem</h2>
+          <p class="section-desc">Detail teknis aplikasi</p>
+        </div>
+      </header>
+      <div class="section-body">
+        <div class="system-info">
+          <div class="info-tile">
+            <div class="info-tile-label">
+              <span data-icon="tag" data-icon-size="12"></span>
+              App Version
+            </div>
+            <div class="info-tile-value" style="color: var(--orange);">v3.0.0</div>
+          </div>
+          <div class="info-tile">
+            <div class="info-tile-label">
+              <span data-icon="database" data-icon-size="12"></span>
+              Backend
+            </div>
+            <div class="info-tile-value">Google Apps Script</div>
+          </div>
+          <div class="info-tile">
+            <div class="info-tile-label">
+              <span data-icon="globe" data-icon-size="12"></span>
+              Timezone
+            </div>
+            <div class="info-tile-value">Asia/Makassar</div>
+          </div>
+          <div class="info-tile">
+            <div class="info-tile-label">
+              <span data-icon="database" data-icon-size="12"></span>
+              Storage Used
+            </div>
+            <div class="info-tile-value" id="storageUsed">-</div>
+          </div>
+          <div class="info-tile">
+            <div class="info-tile-label">
+              <span data-icon="smartphone" data-icon-size="12"></span>
+              PWA Status
+            </div>
+            <div class="info-tile-value" id="pwaStatus">-</div>
+          </div>
+          <div class="info-tile">
+            <div class="info-tile-label">
+              <span data-icon="monitor" data-icon-size="12"></span>
+              Browser
+            </div>
+            <div class="info-tile-value" id="browserInfo">-</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DANGER ZONE -->
+    <section class="settings-section danger-zone">
+      <header class="section-header">
+        <div class="section-icon">
+          <span data-icon="alert-triangle" data-icon-size="22"></span>
+        </div>
+        <div class="section-info">
+          <h2 class="section-title" style="color: var(--danger);">Danger Zone</h2>
+          <p class="section-desc">Aksi yang bersifat destruktif — hati-hati!</p>
+        </div>
+      </header>
+      <div class="section-body" style="display: flex; flex-direction: column; gap: 10px;">
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">
+              <span data-icon="trash" data-icon-size="16"></span>
+              Hapus Cache Lokal
+            </div>
+            <div class="setting-help">Hapus semua data yang tersimpan di browser (setting, notifikasi dibaca, dll)</div>
+          </div>
+          <button type="button" class="danger-btn" id="btnClearCache">
+            <span data-icon="trash" data-icon-size="14"></span>
+            Hapus
+          </button>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">
+              <span data-icon="refresh" data-icon-size="16"></span>
+              Reset Preferensi
+            </div>
+            <div class="setting-help">Kembalikan semua setting ke default</div>
+          </div>
+          <button type="button" class="danger-btn" id="btnResetPrefs">
+            <span data-icon="refresh" data-icon-size="14"></span>
+            Reset
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+</body>
+</html>

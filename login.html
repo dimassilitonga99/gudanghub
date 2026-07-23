@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0">
+  <meta name="theme-color" content="#0d0d1a">
+  <title>GudangHub — Masuk</title>
+
+  <link rel="manifest" href="/gudanghub/assets/manifest-DWsLcWLB.json">
+  <link rel="apple-touch-icon" href="./public/icons/icon-192.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100dvh;
+      padding: 24px;
+      padding-top: max(24px, var(--safe-top));
+      padding-right: max(24px, var(--safe-right));
+      padding-bottom: max(24px, var(--safe-bottom));
+      padding-left: max(24px, var(--safe-left));
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    .bg-decoration {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(50vw 50vw at 85% 12%, rgba(255, 107, 0, 0.10), transparent 60%),
+        radial-gradient(45vw 45vw at 8% 95%, rgba(255, 107, 0, 0.07), transparent 60%);
+    }
+
+    .bg-decoration svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.35;
+    }
+
+    .bg-decoration .flow {
+      stroke: rgba(255, 255, 255, 0.04);
+      stroke-width: 1.5;
+      fill: none;
+    }
+
+    .login-card {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 1000px;
+      background: linear-gradient(150deg, #17171f 0%, #121219 60%, #191118 100%);
+      border: 1px solid var(--line-soft);
+      border-radius: clamp(18px, 3vw, 26px);
+      box-shadow: 0 50px 120px -30px rgba(0, 0, 0, 0.8);
+      overflow: hidden;
+    }
+
+    .login-card.shake {
+      animation: shake 0.4s ease;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-8px); }
+      40% { transform: translateX(8px); }
+      60% { transform: translateX(-5px); }
+      80% { transform: translateX(5px); }
+    }
+
+    /* CARD NAV */
+    .card-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: clamp(18px, 2.5vw, 22px) clamp(20px, 3vw, 34px);
+      border-bottom: 1px solid var(--line-soft);
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .card-brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .card-brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 11px;
+      background: linear-gradient(140deg, var(--orange), var(--orange-deep));
+      display: grid;
+      place-items: center;
+      color: #fff;
+      box-shadow: 0 6px 18px rgba(255, 107, 0, 0.4);
+    }
+
+    .card-brand-name {
+      font-family: var(--font-serif);
+      font-weight: 600;
+      font-size: clamp(18px, 2vw, 20px);
+      letter-spacing: -0.02em;
+    }
+
+    .card-brand-name em {
+      color: var(--orange);
+      font-style: normal;
+    }
+
+    .card-menu {
+      display: flex;
+      gap: clamp(16px, 2.5vw, 26px);
+      flex-wrap: wrap;
+    }
+
+    .card-menu a {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      text-transform: uppercase;
+      transition: color 0.2s;
+      padding: 8px 0;
+      text-decoration: none;
+      min-height: 32px;
+    }
+
+    .card-menu a:hover,
+    .card-menu a:focus-visible {
+      color: var(--text);
+    }
+
+    /* CARD BODY */
+    .card-body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(24px, 4vw, 40px);
+      padding: clamp(24px, 4vw, 42px) clamp(20px, 3.5vw, 34px);
+      align-items: center;
+    }
+
+    .form-side {
+      max-width: 380px;
+      width: 100%;
+      justify-self: center;
+    }
+
+    .welcome-title {
+      font-family: var(--font-serif);
+      font-size: clamp(26px, 5vw, 44px);
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      line-height: 1.05;
+      overflow-wrap: break-word;
+    }
+
+    .welcome-title em {
+      font-style: italic;
+      color: var(--orange);
+    }
+
+    .welcome-sub {
+      font-size: clamp(13px, 1.6vw, 14px);
+      color: var(--muted);
+      margin-top: 10px;
+      margin-bottom: 24px;
+    }
+
+    /* ROLE SELECTOR */
+    .roles {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    .role {
+      background: var(--field);
+      border: 1px solid var(--line-soft);
+      border-radius: 12px;
+      padding: 14px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      transition: all 0.2s var(--ease-out);
+      min-height: 78px;
+      font-family: inherit;
+      text-align: center;
+    }
+
+    .role:hover,
+    .role:focus-visible {
+      border-color: rgba(255, 107, 0, 0.35);
+      color: var(--text);
+      outline: none;
+    }
+
+    .role.active {
+      background: rgba(255, 107, 0, 0.12);
+      border-color: var(--orange);
+      color: var(--orange);
+    }
+
+    .role-icon {
+      display: grid;
+      place-items: center;
+    }
+
+    /* FIELDS */
+    .field-group {
+      margin-bottom: 16px;
+    }
+
+    .field-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .field {
+      position: relative;
+    }
+
+    .field-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+    }
+
+    .field-input {
+      width: 100%;
+      background: var(--field);
+      border: 1px solid var(--line-soft);
+      border-radius: 12px;
+      padding: 14px 44px 14px 42px;
+      color: var(--text);
+      font-size: 15px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+      min-height: 48px;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .field-input::placeholder {
+      color: var(--muted);
+      opacity: 0.6;
+    }
+
+    .field-input:focus {
+      border-color: var(--orange);
+      box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.14);
+    }
+
+    /* TOGGLE PASSWORD */
+    .toggle-pw {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 8px;
+      min-width: 36px;
+      min-height: 36px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      transition: color 0.15s, background 0.15s;
+    }
+
+    .toggle-pw:hover,
+    .toggle-pw:focus-visible {
+      color: var(--orange);
+      background: rgba(255, 255, 255, 0.03);
+      outline: none;
+    }
+
+    /* ROW OPTIONS */
+    .row-opts {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .remember {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--muted);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .remember input {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: var(--field);
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+
+    .remember input:checked {
+      background: var(--orange);
+      border-color: var(--orange);
+    }
+
+    .remember input:checked::after {
+      content: '';
+      position: absolute;
+      left: 5px;
+      top: 2px;
+      width: 5px;
+      height: 9px;
+      border: solid #fff;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+
+    .forgot {
+      font-size: 13px;
+      color: var(--orange);
+      font-weight: 700;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      padding: 6px 0;
+      min-height: 32px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .forgot:hover,
+    .forgot:focus-visible {
+      text-decoration: underline;
+      outline: none;
+    }
+
+    /* SUBMIT BUTTON */
+    .btn-signin {
+      width: 100%;
+      border: none;
+      border-radius: 12px;
+      padding: 15px;
+      background: linear-gradient(135deg, var(--orange), var(--orange-light));
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      transition: transform 0.2s var(--ease-spring), box-shadow 0.2s ease;
+      box-shadow: 0 8px 25px rgba(255, 107, 0, 0.35);
+      min-height: 50px;
+    }
+
+    .btn-signin:hover,
+    .btn-signin:focus-visible {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(255, 107, 0, 0.5);
+      outline: none;
+    }
+
+    .btn-signin:active {
+      transform: translateY(0);
+    }
+
+    .btn-signin.loading {
+      pointer-events: none;
+      opacity: 0.75;
+    }
+
+    /* MESSAGES */
+    .msg {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      line-height: 1.4;
+    }
+
+    .msg.show { display: flex; }
+
+    .msg-err {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #f87171;
+    }
+
+    .msg-ok {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: #4ade80;
+    }
+
+    .msg-icon {
+      flex-shrink: 0;
+      display: grid;
+      place-items: center;
+    }
+
+    /* VISUAL SIDE */
+    .visual-side {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 420px;
+    }
+
+    .circle {
+      position: relative;
+      width: min(360px, 82%);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      overflow: hidden;
+      background: linear-gradient(135deg, var(--orange), var(--orange-deep));
+      box-shadow: 0 30px 80px -18px rgba(255, 107, 0, 0.5);
+      animation: floaty 5.5s ease-in-out infinite;
+      display: grid;
+      place-items: center;
+    }
+
+    @keyframes floaty {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+
+    .circle-content {
+      color: rgba(255, 255, 255, 0.95);
+      display: grid;
+      place-items: center;
+    }
+
+    .visual-taglines {
+      margin-top: 24px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      max-width: 300px;
+      line-height: 1.6;
+    }
+
+    .visual-taglines strong {
+      color: var(--orange);
+      display: block;
+      font-family: var(--font-serif);
+      font-size: 16px;
+      margin-bottom: 6px;
+    }
+
+    /* SOCIAL BUTTONS */
+    .social {
+      position: absolute;
+      right: -6px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: grid;
+      gap: 12px;
+      z-index: 3;
+    }
+
+    .social a {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--orange);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 8px 20px -4px rgba(255, 107, 0, 0.55);
+      transition: transform 0.2s, background 0.2s;
+      text-decoration: none;
+    }
+
+    .social a:hover,
+    .social a:focus-visible {
+      background: var(--orange-light);
+      transform: translateX(-3px);
+      outline: none;
+    }
+
+    /* CARD FOOTER */
+    .card-foot {
+      text-align: center;
+      padding: 0 34px 26px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .card-foot b {
+      color: var(--orange);
+    }
+
+    /* MODAL LUPA PASSWORD */
+    .modal-ov {
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      background: rgba(0, 0, 0, 0.75);
+      -webkit-backdrop-filter: blur(5px);
+      backdrop-filter: blur(5px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      padding-top: max(20px, var(--safe-top));
+      padding-bottom: max(20px, var(--safe-bottom));
+    }
+
+    .modal-ov.show { display: flex; }
+
+    .modal-fp {
+      width: 100%;
+      max-width: 420px;
+      background: var(--ink-800);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: clamp(20px, 4vw, 28px);
+      animation: modalIn 0.2s var(--ease-spring);
+      max-height: calc(100dvh - 40px);
+      overflow-y: auto;
+    }
+
+    @keyframes modalIn {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-fp h3 {
+      font-family: var(--font-serif);
+      font-size: clamp(20px, 3vw, 22px);
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .modal-fp h3 em {
+      font-style: italic;
+      color: var(--orange);
+    }
+
+    .modal-fp p {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 18px;
+      flex-wrap: wrap;
+    }
+
+    .btn-cancel,
+    .btn-ok {
+      flex: 1;
+      padding: 13px;
+      border-radius: 11px;
+      border: none;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      min-height: 48px;
+      min-width: 120px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-cancel {
+      background: var(--field);
+      color: var(--muted);
+      border: 1px solid var(--line-soft);
+    }
+
+    .btn-cancel:hover {
+      color: var(--text);
+    }
+
+    .btn-ok {
+      background: linear-gradient(135deg, var(--orange), var(--orange-light));
+      color: #fff;
+    }
+
+    .btn-ok.loading {
+      pointer-events: none;
+      opacity: 0.75;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 820px) {
+      .card-body {
+        grid-template-columns: 1fr;
+        padding: clamp(20px, 4vw, 32px);
+      }
+
+      .visual-side {
+        order: -1;
+        min-height: auto;
+        padding: 20px 0 10px;
+      }
+
+      .circle {
+        width: min(220px, 60%);
+      }
+
+      .visual-taglines {
+        display: none;
+      }
+
+      .card-menu {
+        display: none;
+      }
+
+      .form-side {
+        max-width: 100%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 12px;
+        padding-top: max(12px, var(--safe-top));
+        padding-bottom: max(12px, var(--safe-bottom));
+      }
+
+      .login-card {
+        border-radius: 16px;
+      }
+
+      .card-nav {
+        padding: 16px 20px;
+      }
+
+      .card-body {
+        padding: 20px;
+        gap: 16px;
+      }
+
+      .card-foot {
+        padding: 0 20px 20px;
+        font-size: 11px;
+      }
+
+      .circle {
+        width: 180px;
+      }
+
+      .social a {
+        width: 34px;
+        height: 34px;
+      }
+
+      .roles {
+        gap: 8px;
+      }
+
+      .role {
+        padding: 12px 8px;
+        font-size: 12px;
+        min-height: 70px;
+      }
+
+      .field-input {
+        font-size: 16px;
+        padding: 13px 42px 13px 40px;
+      }
+
+      .btn-signin {
+        padding: 14px;
+        font-size: 15px;
+      }
+    }
+  </style>
+  <script type="module" crossorigin src="/gudanghub/assets/js/login-var1qEqI.js"></script>
+  <link rel="modulepreload" crossorigin href="/gudanghub/assets/js/icons-DdqG2uRW.js">
+  <link rel="modulepreload" crossorigin href="/gudanghub/assets/js/api-DBPU_7n9.js">
+  <link rel="modulepreload" crossorigin href="/gudanghub/assets/js/ui-CDv0hAY9.js">
+  <link rel="stylesheet" crossorigin href="/gudanghub/assets/css/icons-BrzFGbpM.css">
+</head>
+
+<body>
+
+  <div class="bg-decoration" aria-hidden="true">
+    <svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
+      <path class="flow" d="M-50 120 C 300 40, 600 260, 1250 90"/>
+      <path class="flow" d="M-50 220 C 320 150, 640 360, 1250 200"/>
+      <path class="flow" d="M-50 330 C 340 260, 680 470, 1250 320"/>
+      <path class="flow" d="M-50 620 C 300 540, 620 760, 1250 600"/>
+      <path class="flow" d="M-50 710 C 320 640, 660 860, 1250 700"/>
+    </svg>
+  </div>
+
+  <main class="login-card" id="loginCard">
+
+    <!-- CARD NAV -->
+    <div class="card-nav">
+      <a href="./index.html" class="card-brand">
+        <span class="card-brand-mark">
+          <span data-icon="warehouse" data-icon-size="20"></span>
+        </span>
+        <span class="card-brand-name">Gudang<em>Hub</em></span>
+      </a>
+
+      <nav class="card-menu" aria-label="Menu">
+        <a href="./index.html">
+          <span data-icon="home" data-icon-size="14"></span>
+          Beranda
+        </a>
+        <a href="./index.html#cara">
+          <span data-icon="wrench" data-icon-size="14"></span>
+          Cara Kerja
+        </a>
+        <a href="./index.html#cabang">
+          <span data-icon="store" data-icon-size="14"></span>
+          Cabang
+        </a>
+      </nav>
+    </div>
+
+    <!-- CARD BODY -->
+    <div class="card-body">
+
+      <!-- FORM SIDE -->
+      <section class="form-side" aria-labelledby="welcome-title">
+
+        <h1 class="welcome-title" id="welcome-title">
+          Selamat <em>Datang</em>
+        </h1>
+        <p class="welcome-sub">Pilih peran Anda dan masuk untuk mulai mengelola order.</p>
+
+        <!-- ROLE SELECTOR -->
+        <div class="roles" role="radiogroup" aria-label="Pilih peran">
+          <button type="button" class="role active" id="role-admin" role="radio" aria-checked="true">
+            <span class="role-icon" data-icon="warehouse" data-icon-size="22"></span>
+            <span>Admin Gudang</span>
+          </button>
+          <button type="button" class="role" id="role-cabang" role="radio" aria-checked="false">
+            <span class="role-icon" data-icon="store" data-icon-size="22"></span>
+            <span>Cabang</span>
+          </button>
+        </div>
+
+        <!-- MESSAGES -->
+        <div class="msg msg-err" id="errorMsg" role="alert">
+          <span class="msg-icon" data-icon="alert-circle" data-icon-size="16"></span>
+          <span id="errorText"></span>
+        </div>
+
+        <!-- FORM -->
+        <form id="loginForm" autocomplete="on" novalidate>
+
+          <div class="field-group">
+            <label class="field-label" for="inputUser">Username</label>
+            <div class="field">
+              <span class="field-icon" data-icon="user" data-icon-size="18"></span>
+              <input
+                type="text"
+                id="inputUser"
+                class="field-input"
+                placeholder="Masukkan username admin"
+                autocomplete="username"
+                autocapitalize="off"
+                autocorrect="off"
+                spellcheck="false"
+                required
+              >
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="inputPass">Password</label>
+            <div class="field">
+              <span class="field-icon" data-icon="lock" data-icon-size="18"></span>
+              <input
+                type="password"
+                id="inputPass"
+                class="field-input"
+                placeholder="Masukkan password"
+                autocomplete="current-password"
+                required
+              >
+              <button
+                type="button"
+                id="toggleBtn"
+                class="toggle-pw"
+                aria-label="Tampilkan password"
+              >
+                <span id="eyeIcon" data-icon="eye" data-icon-size="18"></span>
+              </button>
+            </div>
+          </div>
+
+          <div class="row-opts">
+            <label class="remember">
+              <input type="checkbox" id="remember">
+              <span>Ingat saya</span>
+            </label>
+            <button type="button" class="forgot" id="forgotBtn">
+              <span data-icon="key" data-icon-size="13"></span>
+              Lupa password?
+            </button>
+          </div>
+
+          <button type="submit" class="btn-signin" id="btnLogin">
+            <span id="btnText" style="display: inline-flex; align-items: center; gap: 8px;">
+              <span data-icon="login" data-icon-size="18"></span>
+              Masuk
+            </span>
+          </button>
+        </form>
+      </section>
+
+      <!-- VISUAL SIDE -->
+      <aside class="visual-side" aria-hidden="true">
+        <div class="circle">
+          <div class="circle-content">
+            <span data-icon="factory" data-icon-size="120" data-icon-stroke="1.2"></span>
+          </div>
+        </div>
+
+        <div class="visual-taglines">
+          <strong>Satu Sistem, Semua Terpantau</strong>
+          Kelola order antar cabang dengan cepat, akurat, dan real-time.
+        </div>
+
+        <div class="social">
+          <a href="https://wa.me/6281234567890" target="_blank" rel="noopener" aria-label="WhatsApp" title="WhatsApp">
+            <span data-icon="message" data-icon-size="16"></span>
+          </a>
+          <a href="#" onclick="return false;" aria-label="Instagram" title="Instagram">
+            <span data-icon="sparkles" data-icon-size="16"></span>
+          </a>
+          <a href="#" onclick="return false;" aria-label="Website" title="Website">
+            <span data-icon="globe" data-icon-size="16"></span>
+          </a>
+          <a href="mailto:silitongadimas@gmail.com" aria-label="Email" title="Email">
+            <span data-icon="mail" data-icon-size="16"></span>
+          </a>
+        </div>
+      </aside>
+    </div>
+
+    <!-- CARD FOOTER -->
+    <div class="card-foot">
+      <b>GudangHub v3.0</b> · PT Central Perabot Utama · Waktu WITA
+    </div>
+  </main>
+
+  <!-- MODAL LUPA PASSWORD -->
+  <div class="modal-ov" id="forgotOv" role="dialog" aria-modal="true" aria-labelledby="forgot-title">
+    <div class="modal-fp">
+      <h3 id="forgot-title">
+        <span data-icon="key" data-icon-size="24"></span>
+        Lupa <em>Password</em>?
+      </h3>
+      <p>Masukkan username Anda. Password sementara akan dikirim ke email admin gudang. Hubungi admin untuk menerimanya, lalu ganti password setelah masuk.</p>
+
+      <div class="msg msg-err" id="fErr" role="alert">
+        <span class="msg-icon" data-icon="alert-circle" data-icon-size="16"></span>
+        <span id="fErrText"></span>
+      </div>
+
+      <div class="msg msg-ok" id="fOk" role="status">
+        <span class="msg-icon" data-icon="check-circle" data-icon-size="16"></span>
+        <span id="fOkText"></span>
+      </div>
+
+      <div class="field-group" style="margin-bottom: 0;">
+        <label class="field-label" for="fUser">Username</label>
+        <div class="field">
+          <span class="field-icon" data-icon="user" data-icon-size="18"></span>
+          <input
+            type="text"
+            id="fUser"
+            class="field-input"
+            placeholder="Contoh: cb001"
+            autocomplete="username"
+            autocapitalize="off"
+            autocorrect="off"
+            spellcheck="false"
+          >
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" id="fCancel">
+          <span data-icon="close" data-icon-size="16"></span>
+          Batal
+        </button>
+        <button type="button" class="btn-ok" id="fBtn">
+          <span id="fBtnText" style="display: inline-flex; align-items: center; gap: 8px;">
+            <span data-icon="send" data-icon-size="16"></span>
+            Kirim ke Admin
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
