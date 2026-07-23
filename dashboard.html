@@ -23,18 +23,7 @@
       position: relative;
     }
 
-    body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    linear-gradient(rgba(255,255,255,0.016) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.016) 1px, transparent 1px);
-  background-size: 46px 46px;
-}
-
+    
 /* HIDE BACKGROUND GRID DI MOBILE (fix glitch) */
 @media (max-width: 768px) {
   body::before {
