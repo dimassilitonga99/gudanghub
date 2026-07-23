@@ -7,7 +7,7 @@
 // API ENDPOINT
 // ─────────────────────────────────────────────────────────────────────────
 
-export const API_URL = 'https://script.google.com/macros/s/AKfycbzk8A4xuXOVGqbK6a4zffpG6u2s4jVROZwIitmCDat2fYU7qyU3VkxQJmtxtEtjQxji/exec';
+export const API_URL = 'https://script.google.com/macros/s/AKfycbwv0cOk6GaRvPTi_TOiuJ1RNDkPtIoTv5Ch-Ix40ofswtZIAwm1EuTxU5okAPUWcn3p/exec';
 
 // ─────────────────────────────────────────────────────────────────────────
 // APP METADATA
