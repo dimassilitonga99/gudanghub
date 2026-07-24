@@ -328,12 +328,103 @@ function addPrintStyles() {
       color: #000;
     }
 
-    /* ═══ PRINT MEDIA QUERY ═══ */
+        /* ═══ PRINT MEDIA QUERY ═══ */
     @media print {
+      /* FORCE PRINT COLORS (Chrome, Safari, Edge, Firefox) */
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
+
+      html, body {
+        background: #fff !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
       /* Hide semua kecuali print preview */
       body > *:not(#printModalContainer) {
         display: none !important;
       }
+
+      #printModalContainer,
+      .print-overlay,
+      .print-modal {
+        position: static !important;
+        max-width: 100% !important;
+        max-height: none !important;
+        background: #fff !important;
+        box-shadow: none !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        transform: none !important;
+      }
+
+      .print-modal-header,
+      .print-modal-actions {
+        display: none !important;
+      }
+
+      .print-modal-body {
+        background: #fff !important;
+        padding: 0 !important;
+        overflow: visible !important;
+      }
+
+      #printPreview {
+        box-shadow: none !important;
+        padding: 15px 20px !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      /* FORCE COLORS untuk semua elemen preview */
+      .pf-title-form { color: #E67E22 !important; }
+      .pf-title-order { color: #1B4F94 !important; }
+      .pf-logo-nk .n { color: #000 !important; }
+      .pf-logo-nk .k { color: #E63329 !important; }
+      .pf-logo-text {
+        background: #1B2C5C !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .pf-logo-text-1,
+      .pf-logo-text-2 { color: #fff !important; }
+      .pf-logo-tagline { color: #1B2C5C !important; }
+
+      .pf-table thead {
+        background: #B4D6F0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .pf-table th,
+      .pf-table td {
+        border: 1px solid #000 !important;
+        color: #000 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .pf-table td.jml-order {
+        color: #00B050 !important;
+        font-weight: 600 !important;
+      }
+
+      .pf-signature,
+      .pf-signature-cell {
+        border-color: #000 !important;
+        color: #000 !important;
+      }
+
+      @page {
+        size: A4;
+        margin: 12mm;
+      }
+    }
 
       #printModalContainer,
       .print-overlay,
