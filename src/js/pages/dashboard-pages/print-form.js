@@ -426,43 +426,7 @@ function addPrintStyles() {
       }
     }
 
-      #printModalContainer,
-      .print-overlay,
-      .print-modal {
-        position: static !important;
-        max-width: 100% !important;
-        max-height: none !important;
-        background: #fff !important;
-        box-shadow: none !important;
-        opacity: 1 !important;
-        pointer-events: auto !important;
-        transform: none !important;
-      }
-
-      .print-modal-header,
-      .print-modal-actions {
-        display: none !important;
-      }
-
-      .print-modal-body {
-        background: #fff !important;
-        padding: 0 !important;
-        overflow: visible !important;
-      }
-
-      #printPreview {
-        box-shadow: none !important;
-        padding: 15px 20px !important;
-        max-width: 100% !important;
-        margin: 0 !important;
-      }
-
-      @page {
-        size: A4;
-        margin: 12mm;
-      }
-    }
-
+     
     /* ═══ RESPONSIVE ═══ */
     @media (max-width: 768px) {
       .print-modal {
