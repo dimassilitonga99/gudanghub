@@ -472,7 +472,24 @@
       display: grid;
       place-items: center;
     }
+        /* CIRCLE IMAGE */
+    .circle-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 2;
+      border-radius: 50%;
+    }
 
+    .circle-fallback {
+      position: relative;
+      z-index: 1;
+    }
+    
     @keyframes floaty {
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-12px); }
@@ -866,13 +883,20 @@
         </form>
       </section>
 
-      <!-- VISUAL SIDE -->
-      <aside class="visual-side" aria-hidden="true">
-        <div class="circle">
-          <div class="circle-content">
-            <span data-icon="factory" data-icon-size="120" data-icon-stroke="1.2"></span>
-          </div>
-        </div>
+     <!-- VISUAL SIDE -->
+<aside class="visual-side" aria-hidden="true">
+  <div class="circle">
+    <img
+      src="./public/images/login-hero.jpg"
+      alt="GudangHub"
+      class="circle-image"
+      loading="lazy"
+      onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';"
+    >
+    <div class="circle-content circle-fallback" style="display: none;">
+      <span data-icon="factory" data-icon-size="120" data-icon-stroke="1.2"></span>
+    </div>
+  </div>
 
         <div class="visual-taglines">
           <strong>Satu Sistem, Semua Terpantau</strong>
