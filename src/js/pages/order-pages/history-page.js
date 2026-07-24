@@ -1,16 +1,18 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   HISTORY PAGE — with Lucide Icons
+   HISTORY PAGE — with Lucide Icons + Print Form Feature
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, escapeHtml, formatWita, parseAnyDate, sortBy } from '../../utils.js';
 import { orders as ordersApi } from '../../api.js';
 import { getStatusInfo } from '../../config.js';
 import { icon } from '../../icons.js';
+import { showPrintFormCabang, initPrintFormCabang } from './print-form-cabang.js';
 
 let localState = {
   orders: [],
   filter: 'ALL',
   isLoading: false,
+  stateRef: null,
 };
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -63,6 +65,11 @@ export function renderHistoryPage(state) {
 // ─────────────────────────────────────────────────────────────────────────
 
 export function initHistory(state) {
+  localState.stateRef = state;
+
+  // Init print form modal
+  initPrintFormCabang();
+
   $('historyFilter')?.addEventListener('click', (e) => {
     const chip = e.target.closest('[data-history-filter]');
     if (!chip) return;
@@ -84,6 +91,7 @@ export async function loadHistory(state) {
   if (localState.isLoading) return;
 
   localState.isLoading = true;
+  localState.stateRef = state;
   const list = $('historyList');
   if (!list) return;
 
@@ -159,6 +167,14 @@ function renderHistoryList(state) {
   }
 
   list.innerHTML = filtered.map(buildHistoryItem).join('');
+
+  // Bind click events untuk tombol download
+  list.querySelectorAll('[data-download-order]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      handleDownload(btn.dataset.downloadOrder);
+    });
+  });
 }
 
 function buildHistoryItem(order) {
@@ -217,10 +233,35 @@ function buildHistoryItem(order) {
           ${escapeHtml(cleanCatatan(order.CATATAN))}
         </div>
       ` : ''}
+
+      <!-- DOWNLOAD BUTTON -->
+      <div class="history-actions">
+        <button class="btn-download-history" type="button" data-download-order="${escapeHtml(order.ORDER_ID)}">
+          ${icon('download', { size: 14 })}
+          Download Form
+        </button>
+      </div>
     </article>
   `;
 }
 
 function cleanCatatan(catatan) {
   return String(catatan || '').replace(/\[STOK AKTUAL\][\s\S]*/, '').trim();
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// HANDLE DOWNLOAD
+// ─────────────────────────────────────────────────────────────────────────
+
+function handleDownload(orderId) {
+  const order = localState.orders.find((o) => o.ORDER_ID === orderId);
+
+  if (!order) {
+    const { toast } = window.__gudangHubOrder ? { toast: null } : { toast: null };
+    if (toast) toast.error('Order tidak ditemukan.');
+    console.error('Order not found:', orderId);
+    return;
+  }
+
+  showPrintFormCabang(order);
 }
