@@ -498,15 +498,8 @@ function renderPreview() {
   const cabang = CABANG[order.ID_CABANG] || { nama: '-', pic: '-' };
   const pic = String(cabang.pic || 'SUPERVISOR').toUpperCase();
 
-  // Nomor order dari ORDER_ID (ambil detik dari timestamp)
-  let nomorOrder = '1';
-  try {
-    const parts = String(order.ORDER_ID).split('-');
-    const timeStr = parts[2] || '';
-    if (timeStr.length >= 6) {
-      nomorOrder = String(parseInt(timeStr.substring(4, 6)) || 1);
-    }
-  } catch(e) {}
+    // Nomor order sequential per bulan
+  const nomorOrder = getSequentialNumber(order);
 
   // Format tanggal
   const hariID = ['MINGGU','SENIN','SELASA','RABU','KAMIS','JUMAT','SABTU'];
@@ -653,4 +646,43 @@ function getStokBarang(kode) {
 
 function doPrint() {
   window.print();
+}
+// ─────────────────────────────────────────────────────────────────────────
+// GET SEQUENTIAL ORDER NUMBER (per bulan)
+// ─────────────────────────────────────────────────────────────────────────
+
+function getSequentialNumber(order) {
+  try {
+    const dashboardState = window.__gudangHub?.state;
+    if (!dashboardState || !dashboardState.allOrders) return '1';
+
+    const orderDate = parseAnyDate(order.TANGGAL_ORDER);
+    if (!orderDate || orderDate.getTime() === 0) return '1';
+
+    const orderMonth = orderDate.getMonth();
+    const orderYear = orderDate.getFullYear();
+
+    // Filter semua order di bulan & tahun yang sama
+    const sameMonthOrders = dashboardState.allOrders
+      .filter((o) => {
+        const d = parseAnyDate(o.TANGGAL_ORDER);
+        return d && d.getTime() !== 0 &&
+               d.getMonth() === orderMonth &&
+               d.getFullYear() === orderYear;
+      })
+      // Sort berdasarkan tanggal (paling awal = nomor 1)
+      .sort((a, b) => {
+        return parseAnyDate(a.TANGGAL_ORDER).getTime() -
+               parseAnyDate(b.TANGGAL_ORDER).getTime();
+      });
+
+    // Cari posisi order ini (index + 1 = nomor urut)
+    const index = sameMonthOrders.findIndex((o) => o.ORDER_ID === order.ORDER_ID);
+    const nomor = index >= 0 ? index + 1 : sameMonthOrders.length + 1;
+
+    // Format: 01, 02, 03, dst
+    return String(nomor).padStart(2, '0');
+  } catch (e) {
+    return '01';
+  }
 }
