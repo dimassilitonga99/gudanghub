@@ -340,12 +340,125 @@ function addPrintCabangStyles() {
       color: #000;
     }
 
-    /* ═══ PRINT MEDIA QUERY ═══ */
+        /* ═══ PRINT MEDIA QUERY ═══ */
     @media print {
+      /* FORCE PRINT COLORS (Chrome, Safari, Edge, Firefox) */
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
+
+      html, body {
+        background: #fff !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
       /* Hide semua kecuali print preview */
       body > *:not(#printCabangModalContainer) {
         display: none !important;
       }
+
+      #printCabangModalContainer,
+      .print-cabang-overlay,
+      .print-cabang-modal {
+        position: static !important;
+        max-width: 100% !important;
+        max-height: none !important;
+        background: #fff !important;
+        box-shadow: none !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        transform: none !important;
+      }
+
+      .print-cabang-modal-header,
+      .print-cabang-modal-actions {
+        display: none !important;
+      }
+
+      .print-cabang-modal-body {
+        background: #fff !important;
+        padding: 0 !important;
+        overflow: visible !important;
+      }
+
+      #printCabangPreview {
+        box-shadow: none !important;
+        padding: 15px 20px !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      /* FORCE COLORS untuk semua elemen preview */
+      .pfc-title-form { color: #E67E22 !important; }
+      .pfc-title-order { color: #1B4F94 !important; }
+      .pfc-logo-nk .n { color: #000 !important; }
+      .pfc-logo-nk .k { color: #E63329 !important; }
+      .pfc-logo-text {
+        background: #1B2C5C !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .pfc-logo-text-1,
+      .pfc-logo-text-2 { color: #fff !important; }
+      .pfc-logo-tagline { color: #1B2C5C !important; }
+
+      /* Status badges */
+      .pfc-status-badge {
+        color: #fff !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .pfc-status-pending {
+        background: #f59e0b !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .pfc-status-approved {
+        background: #16a34a !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .pfc-status-rejected {
+        background: #dc2626 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .pfc-table thead {
+        background: #B4D6F0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .pfc-table th,
+      .pfc-table td {
+        border: 1px solid #000 !important;
+        color: #000 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .pfc-table td.jml-order {
+        color: #00B050 !important;
+        font-weight: 600 !important;
+      }
+
+      .pfc-signature,
+      .pfc-signature-cell {
+        border-color: #000 !important;
+        color: #000 !important;
+      }
+
+      @page {
+        size: A4;
+        margin: 12mm;
+      }
+    }
 
       #printCabangModalContainer,
       .print-cabang-overlay,
