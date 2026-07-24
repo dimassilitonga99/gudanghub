@@ -535,15 +535,8 @@ function renderPreview() {
   const cabang = CABANG[order.ID_CABANG] || { nama: '-', pic: '-' };
   const pic = String(cabang.pic || 'SUPERVISOR').toUpperCase();
 
-  // Nomor order dari ORDER_ID (ambil detik dari timestamp)
-  let nomorOrder = '1';
-  try {
-    const parts = String(order.ORDER_ID).split('-');
-    const timeStr = parts[2] || '';
-    if (timeStr.length >= 6) {
-      nomorOrder = String(parseInt(timeStr.substring(4, 6)) || 1);
-    }
-  } catch(e) {}
+    // Nomor order sequential per bulan
+  const nomorOrder = getSequentialNumberCabang(order);
 
   // Format tanggal
   const hariID = ['MINGGU','SENIN','SELASA','RABU','KAMIS','JUMAT','SABTU'];
@@ -701,4 +694,89 @@ function getStokBarangCabang(kode) {
 
 function doDownload() {
   window.print();
+}
+// ─────────────────────────────────────────────────────────────────────────
+// GET SEQUENTIAL ORDER NUMBER (per bulan) - Cabang Version
+// ─────────────────────────────────────────────────────────────────────────
+
+function getSequentialNumberCabang(order) {
+  try {
+    // Ambil semua orders dari localState history
+    const allOrders = window.__gudangHubOrder?.state?.allProducts
+      ? null
+      : null;
+
+    // Coba ambil dari history localState
+    const historyList = document.querySelectorAll('.history-item');
+
+    // Fallback: ambil dari cached orders via API
+    // Kita perlu ambil data orders
+
+    const orderDate = parseAnyDate(order.TANGGAL_ORDER);
+    if (!orderDate || orderDate.getTime() === 0) return '01';
+
+    const orderMonth = orderDate.getMonth();
+    const orderYear = orderDate.getFullYear();
+
+    // Coba ambil semua orders dari order.DETAIL parent
+    // Karena cabang tidak punya allOrders global, kita pakai pendekatan berbeda
+
+    // Ambil dari localState history-page
+    let cachedOrders = [];
+    try {
+      // Dynamic import tidak bisa di sini, jadi pakai window cache
+      if (window.__cabangOrdersCache) {
+        cachedOrders = window.__cabangOrdersCache;
+      }
+    } catch(e) {}
+
+    if (!cachedOrders.length) {
+      // Fallback: hitung dari ORDER_ID
+      return getNumberFromOrderId(order);
+    }
+
+    // Filter order bulan & tahun yang sama
+    const sameMonthOrders = cachedOrders
+      .filter((o) => {
+        const d = parseAnyDate(o.TANGGAL_ORDER);
+        return d && d.getTime() !== 0 &&
+               d.getMonth() === orderMonth &&
+               d.getFullYear() === orderYear;
+      })
+      .sort((a, b) => {
+        return parseAnyDate(a.TANGGAL_ORDER).getTime() -
+               parseAnyDate(b.TANGGAL_ORDER).getTime();
+      });
+
+    const index = sameMonthOrders.findIndex((o) => o.ORDER_ID === order.ORDER_ID);
+    const nomor = index >= 0 ? index + 1 : sameMonthOrders.length + 1;
+
+    return String(nomor).padStart(2, '0');
+  } catch (e) {
+    return getNumberFromOrderId(order);
+  }
+}
+
+function getNumberFromOrderId(order) {
+  try {
+    // Fallback: extract dari ORDER_ID timestamp
+    // Format: ORD-YYYYMMDD-HHMMSS-CB00X
+    const parts = String(order.ORDER_ID).split('-');
+    const dateStr = parts[1] || '';
+    const timeStr = parts[2] || '';
+
+    if (dateStr.length >= 8 && timeStr.length >= 6) {
+      const day = parseInt(dateStr.substring(6, 8)) || 1;
+      const hour = parseInt(timeStr.substring(0, 2)) || 0;
+      const minute = parseInt(timeStr.substring(2, 4)) || 0;
+
+      // Estimasi nomor berdasarkan hari + waktu
+      // Ini tidak 100% akurat tapi lebih baik dari random
+      return String(day).padStart(2, '0');
+    }
+
+    return '01';
+  } catch(e) {
+    return '01';
+  }
 }
