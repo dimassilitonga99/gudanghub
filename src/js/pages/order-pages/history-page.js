@@ -119,7 +119,9 @@ export async function loadHistory(state) {
       }));
 
     localState.orders = sortBy(branchOrders, '_sortKey', 'desc');
-
+       // Cache orders untuk print form numbering
+    window.__cabangOrdersCache = localState.orders;
+     
     renderHistoryList(state);
   } catch (error) {
     list.innerHTML = `
