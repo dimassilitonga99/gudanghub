@@ -877,7 +877,44 @@
     .history-note {
       margin-top: 4px;
     }
+    /* HISTORY ACTIONS */
+.history-actions {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--line-soft);
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
 
+.btn-download-history {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  border-radius: 8px;
+  background: rgba(99, 102, 241, 0.1);
+  color: #818cf8;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+  min-height: 36px;
+}
+
+.btn-download-history:hover {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: #6366f1;
+  color: #a5b4fc;
+  transform: translateY(-1px);
+}
+
+.btn-download-history:active {
+  transform: translateY(0);
+}
+    
     /* CART FLOATING BAR */
     .cart-bar {
       position: fixed;
