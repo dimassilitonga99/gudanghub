@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   EDIT MODAL — with Lucide Icons
+   EDIT MODAL — with Lucide Icons + Print Form Feature
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, escapeHtml, formatRupiah, formatWita, toNumber, toInt } from '../../utils.js';
@@ -7,6 +7,7 @@ import { CABANG } from '../../config.js';
 import { orders as ordersApi } from '../../api.js';
 import { toast, confirm, prompt } from '../../ui.js';
 import { icon, injectIcons } from '../../icons.js';
+import { showPrintForm, initPrintForm } from './print-form.js';
 
 let modalState = {
   orderId: '',
@@ -22,6 +23,9 @@ let modalState = {
 
 export function initEditModal(dashboardState) {
   modalState.dashboardState = dashboardState;
+
+  // Init print form modal
+  initPrintForm();
 
   const container = $('editModalContainer');
   if (!container) return;
@@ -420,6 +424,18 @@ function addEditModalStyles() {
       box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
     }
 
+    .mf-print {
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      color: #fff;
+      flex: 1;
+      min-width: 140px;
+    }
+
+    .mf-print:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+    }
+
     .mf-cancel {
       background: var(--ink-3);
       color: var(--muted);
@@ -448,7 +464,7 @@ function addEditModalStyles() {
       }
       .er-qty { text-align: center; }
       .er-sub { text-align: right; padding-top: 4px; }
-      .mf-save, .mf-email, .mf-cancel { min-width: 100%; }
+      .mf-save, .mf-email, .mf-print, .mf-cancel { min-width: 100%; }
       .add-row { grid-template-columns: 1fr; gap: 6px; }
       .btn-add-item { width: 100%; justify-content: center; }
     }
@@ -586,6 +602,10 @@ function renderModalContent() {
       <button class="mf-btn mf-email" id="btnSendEmail" type="button">
         ${icon('send', { size: 16 })}
         Kirim Email ke Cabang
+      </button>
+      <button class="mf-btn mf-print" id="btnPrintForm" type="button">
+        ${icon('download', { size: 16 })}
+        Print Form
       </button>
       <button class="mf-btn mf-cancel" id="btnCloseModal" type="button">
         ${icon('close', { size: 16 })}
@@ -970,10 +990,12 @@ async function handleSave(sendEmail) {
 async function submitEdit(sendEmail) {
   const saveBtn = $('btnSaveEdit');
   const emailBtn = $('btnSendEmail');
+  const printBtn = $('btnPrintForm');
   const cancelBtn = $('btnCloseModal');
 
   if (saveBtn) saveBtn.disabled = true;
   if (emailBtn) emailBtn.disabled = true;
+  if (printBtn) printBtn.disabled = true;
   if (cancelBtn) cancelBtn.disabled = true;
 
   const targetBtn = sendEmail ? emailBtn : saveBtn;
@@ -1012,6 +1034,7 @@ async function submitEdit(sendEmail) {
 
       if (saveBtn) saveBtn.disabled = false;
       if (emailBtn) emailBtn.disabled = false;
+      if (printBtn) printBtn.disabled = false;
       if (cancelBtn) cancelBtn.disabled = false;
       if (targetBtn) targetBtn.innerHTML = originalText;
       return;
@@ -1032,9 +1055,31 @@ async function submitEdit(sendEmail) {
 
     if (saveBtn) saveBtn.disabled = false;
     if (emailBtn) emailBtn.disabled = false;
+    if (printBtn) printBtn.disabled = false;
     if (cancelBtn) cancelBtn.disabled = false;
     if (targetBtn) targetBtn.innerHTML = originalText;
   }
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// PRINT FORM
+// ─────────────────────────────────────────────────────────────────────────
+
+function handlePrintForm() {
+  if (!modalState.items.length) {
+    toast.warning('Pesanan kosong. Tambahkan minimal 1 item.');
+    return;
+  }
+
+  // Filter items yang tidak DELETED
+  const activeItems = modalState.items.filter((i) => i.itemStatus !== 'DELETED');
+
+  if (!activeItems.length) {
+    toast.warning('Tidak ada item aktif untuk di-print.');
+    return;
+  }
+
+  showPrintForm(modalState.order, modalState.items);
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -1045,6 +1090,7 @@ function bindModalEvents() {
   $('btnTambahItem')?.addEventListener('click', addNewItem);
   $('btnSaveEdit')?.addEventListener('click', () => handleSave(false));
   $('btnSendEmail')?.addEventListener('click', () => handleSave(true));
+  $('btnPrintForm')?.addEventListener('click', handlePrintForm);
   $('btnCloseModal')?.addEventListener('click', closeEditModal);
 
   $('addQty')?.addEventListener('keydown', (e) => {
