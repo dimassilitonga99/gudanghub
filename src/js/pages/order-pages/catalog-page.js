@@ -6,7 +6,16 @@ import { $, escapeHtml, formatRupiah, debounce, toInt, unique } from '../../util
 import { icon, kategoriIcon, injectIcons } from '../../icons.js';
 import { toast } from '../../ui.js';
 import { addToCart, updateCartUi } from './cart.js';
-
+// Daftar satuan yang bisa dipilih
+const SATUAN_OPTIONS = [
+  'PCS',
+  'DUS',
+  'KRG',
+  'SET',
+  'PACK',
+  'IKAT',
+  'GROSS',
+];
 let localState = {
   searchQuery: '',
   activeCategory: '',
@@ -102,14 +111,25 @@ export function initCatalog(state) {
       loadMore(state);
     }
   });
-
+     // Satuan change di catalog
   $('catalogGrid')?.addEventListener('change', (e) => {
-    const target = e.target.closest('[data-action="set-qty"]');
-    if (!target) return;
 
-    setQty(state, target.dataset.code, target.value);
+    const target = e.target.closest('[data-action="set-qty"]');
+    if (target) {
+      setQty(state, target.dataset.code, target.value);
+      return;
+    }
+
+    // Satuan change
+    const satuanTarget = e.target.closest('[data-action="set-satuan"]');
+    if (satuanTarget) {
+      const code = satuanTarget.dataset.code;
+      if (state.cart[code]) {
+        state.cart[code].satuan = satuanTarget.value;
+        updateCartUi(state);
+      }
+    }
   });
-}
 
 // ─────────────────────────────────────────────────────────────────────────
 // UPDATE
@@ -251,7 +271,7 @@ function buildProductCard(product, state) {
       <div class="item-name">${escapeHtml(name)}</div>
       <div class="item-category">${escapeHtml(category)}</div>
       <div class="item-price">${formatRupiah(price)}</div>
-      <div class="item-unit">per ${escapeHtml(unit)}</div>
+            <div class="item-unit">per ${escapeHtml(unit)}</div>
 
       <div class="quantity-control">
         <button class="quantity-button" type="button" data-action="decrease" data-code="${escCode}">
@@ -268,6 +288,31 @@ function buildProductCard(product, state) {
         <button class="quantity-button" type="button" data-action="increase" data-code="${escCode}">
           ${icon('plus', { size: 14 })}
         </button>
+      </div>
+
+      <div class="satuan-control">
+        <span class="satuan-label">Satuan:</span>
+        <select class="satuan-select"
+                id="satuan-${escCode}"
+                data-action="set-satuan"
+                data-code="${escCode}">
+          ${SATUAN_OPTIONS.map(function(s) {
+            var selected = s === unit ? ' selected' : '';
+            return '<option value="' + s + '"' + selected + '>' + s + '</option>';
+          }).join('')}
+        </select>
+      </div>
+
+      <button class="add-button ${inCart ? 'added' : ''}"
+              type="button"
+              ${stock === 0 ? 'disabled' : ''}
+              data-action="add"
+              data-code="${escCode}">
+        ${inCart
+          ? icon('check', { size: 14 }) + ' Di Keranjang'
+          : icon('plus', { size: 14 }) + ' Tambah'
+        }
+      </button>
       </div>
 
       <button class="add-button ${inCart ? 'added' : ''}"
@@ -350,12 +395,16 @@ function addItemToCart(state, code) {
   const input = $(`qty-${code}`);
   const quantity = clampQty(state, code, input?.value || 1);
 
+    // Ambil satuan yang dipilih user
+  var satuanSelect = $('satuan-' + code);
+  var selectedSatuan = satuanSelect ? satuanSelect.value : String(product.SATUAN || 'PCS');
+
   state.cart[code] = {
     kode: code,
     nama: String(product.NAMA_BARANG || ''),
     kategori: String(product.KATEGORI || ''),
     harga: parseFloat(product.HARGA) || 0,
-    satuan: String(product.SATUAN || 'PCS'),
+    satuan: selectedSatuan,
     qty: quantity,
     stokGudang: '',
     stokToko: '',
