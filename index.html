@@ -1119,10 +1119,155 @@
       z-index: 3;
     }
 
-    /* ── INDIVIDUAL CARD ── */
+        /* ── INDIVIDUAL CARD (FLIP) ── */
     .tim-card {
       position: relative;
-      transition: transform 0.4s var(--ease-spring);
+      perspective: 1000px;
+      cursor: pointer;
+    }
+
+    .tim-card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-style: preserve-3d;
+    }
+
+    /* Saat di-flip */
+    .tim-card.flipped .tim-card-inner {
+      transform: rotateY(180deg);
+    }
+
+    /* Sisi depan & belakang */
+    .tim-card-front,
+    .tim-card-front-side,
+    .tim-card-back {
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+    }
+
+    .tim-card-front,
+    .tim-card-front-side {
+      position: relative;
+    }
+
+    .tim-card-back {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      transform: rotateY(180deg);
+      border-radius: clamp(20px, 3vw, 36px);
+      border: clamp(4px, 0.8vw, 8px) solid #D4AF37;
+      background: linear-gradient(
+        135deg,
+        #0B5A3A 0%,
+        #0E6B45 40%,
+        #0B3A25 100%
+      );
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(12px, 2vw, 24px);
+      box-shadow:
+        0 20px 50px -10px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(212, 175, 55, 0.3),
+        inset 0 0 30px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+    }
+
+    /* Efek shine pada sisi belakang */
+    .tim-card-back::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(
+        circle,
+        rgba(212, 175, 55, 0.15),
+        transparent 70%
+      );
+      pointer-events: none;
+    }
+
+    /* Quote content */
+    .tim-card-quote {
+      text-align: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    .tim-quote-mark {
+      font-family: var(--font-serif);
+      font-size: clamp(36px, 5vw, 56px);
+      color: #D4AF37;
+      line-height: 0.5;
+      margin-bottom: 8px;
+      opacity: 0.6;
+    }
+
+    .tim-card-quote p {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: clamp(10px, 1.3vw, 15px);
+      color: rgba(255, 255, 255, 0.9);
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .tim-quote-author {
+      font-family: var(--font-mono);
+      font-size: clamp(8px, 1vw, 11px);
+      color: #D4AF37;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    /* Hover hint (sebelum flip) */
+    .tim-card:not(.flipped):hover .tim-card-frame {
+      box-shadow:
+        0 30px 60px -10px rgba(0, 0, 0, 0.6),
+        0 0 0 2px rgba(212, 175, 55, 0.4),
+        0 0 30px rgba(14, 107, 69, 0.3);
+    }
+
+    .tim-card:not(.flipped):hover {
+      transform: translateY(-8px) scale(1.03);
+      z-index: 100;
+    }
+
+    /* Saat sudah flip, hover effect berbeda */
+    .tim-card.flipped:hover {
+      transform: scale(1.05);
+      z-index: 100;
+    }
+
+    /* Hint text (klik untuk balik) */
+    .tim-card::after {
+      content: 'Klik untuk balik';
+      position: absolute;
+      bottom: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 9px;
+      color: rgba(255, 255, 255, 0.3);
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    .tim-card:hover::after {
+      opacity: 1;
+    }
+
+    .tim-card.flipped::after {
+      content: 'Klik untuk kembali';
     }
 
     .tim-card:hover {
@@ -2258,21 +2403,28 @@
           </div>
         </div>
 
-        <!-- KARTU FOTO TIM -->
+                <!-- KARTU FOTO TIM (FLIP CARDS) -->
         <div class="tim-cards reveal">
 
-          <!-- Level 1: CEO (paling atas, paling besar) -->
+          <!-- Level 1: CEO -->
           <div class="tim-row tim-row-top">
-            <div class="tim-card tim-card-ceo">
-              <div class="tim-card-frame">
-                <img
-                  src="./public/images/tim/ceo.png"
-                  alt="CEO"
-                  loading="lazy"
-                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-                >
-                <div class="tim-card-placeholder" style="display:none;">
-                  <span>CEO</span>
+            <div class="tim-card tim-card-ceo" onclick="this.classList.toggle('flipped')">
+              <div class="tim-card-inner">
+                <!-- DEPAN: Foto -->
+                <div class="tim-card-front">
+                  <div class="tim-card-frame">
+                    <img src="./public/images/tim/ceo.png" alt="CEO" loading="lazy"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="tim-card-placeholder" style="display:none;"><span>CEO</span></div>
+                  </div>
+                </div>
+                <!-- BELAKANG: Quote -->
+                <div class="tim-card-back">
+                  <div class="tim-card-quote">
+                    <div class="tim-quote-mark">"</div>
+                    <p>Memimpin bukan soal jabatan. Memimpin adalah soal menjadi contoh — bahkan saat tak ada yang melihat.</p>
+                    <div class="tim-quote-author">— Pemimpin</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -2281,30 +2433,40 @@
           <!-- Level 2: Manager kiri & kanan -->
           <div class="tim-row tim-row-mid">
 
-            <div class="tim-card tim-card-mid">
-              <div class="tim-card-frame">
-                <img
-                  src="./public/images/tim/manager-1.png"
-                  alt="Manager 1"
-                  loading="lazy"
-                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-                >
-                <div class="tim-card-placeholder" style="display:none;">
-                  <span>MGR</span>
+            <div class="tim-card tim-card-mid" onclick="this.classList.toggle('flipped')">
+              <div class="tim-card-inner">
+                <div class="tim-card-front">
+                  <div class="tim-card-frame">
+                    <img src="./public/images/tim/manager-1.png" alt="Manager 1" loading="lazy"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="tim-card-placeholder" style="display:none;"><span>MGR</span></div>
+                  </div>
+                </div>
+                <div class="tim-card-back">
+                  <div class="tim-card-quote">
+                    <div class="tim-quote-mark">"</div>
+                    <p>Kerja keras tidak pernah mengkhianati. Setiap tetes keringat hari ini adalah fondasi kesuksesan esok.</p>
+                    <div class="tim-quote-author">— Pejuang Lapangan</div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div class="tim-card tim-card-mid">
-              <div class="tim-card-frame">
-                <img
-                  src="./public/images/tim/manager-2.png"
-                  alt="Manager 2"
-                  loading="lazy"
-                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-                >
-                <div class="tim-card-placeholder" style="display:none;">
-                  <span>MGR</span>
+            <div class="tim-card tim-card-mid" onclick="this.classList.toggle('flipped')">
+              <div class="tim-card-inner">
+                <div class="tim-card-front">
+                  <div class="tim-card-frame">
+                    <img src="./public/images/tim/manager-2.png" alt="Manager 2" loading="lazy"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="tim-card-placeholder" style="display:none;"><span>MGR</span></div>
+                  </div>
+                </div>
+                <div class="tim-card-back">
+                  <div class="tim-card-quote">
+                    <div class="tim-quote-mark">"</div>
+                    <p>Melayani dengan tulus, bekerja dengan jujur. Itulah cara kami menjaga kepercayaan pelanggan.</p>
+                    <div class="tim-quote-author">— Garda Terdepan</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -2314,44 +2476,59 @@
           <!-- Level 3: Staff depan (3 orang) -->
           <div class="tim-row tim-row-front">
 
-            <div class="tim-card tim-card-front">
-              <div class="tim-card-frame">
-                <img
-                  src="./public/images/tim/staff-1.png"
-                  alt="Staff 1"
-                  loading="lazy"
-                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-                >
-                <div class="tim-card-placeholder" style="display:none;">
-                  <span>PIC</span>
+            <div class="tim-card tim-card-front" onclick="this.classList.toggle('flipped')">
+              <div class="tim-card-inner">
+                <div class="tim-card-front-side">
+                  <div class="tim-card-frame">
+                    <img src="./public/images/tim/staff-1.png" alt="Staff 1" loading="lazy"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="tim-card-placeholder" style="display:none;"><span>PIC</span></div>
+                  </div>
+                </div>
+                <div class="tim-card-back">
+                  <div class="tim-card-quote">
+                    <div class="tim-quote-mark">"</div>
+                    <p>Setiap barang yang kami kirim, membawa harapan keluarga di ujung sana.</p>
+                    <div class="tim-quote-author">— Hati yang Melayani</div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div class="tim-card tim-card-front tim-card-center">
-              <div class="tim-card-frame">
-                <img
-                  src="./public/images/tim/staff-2.png"
-                  alt="Staff 2"
-                  loading="lazy"
-                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-                >
-                <div class="tim-card-placeholder" style="display:none;">
-                  <span>PIC</span>
+            <div class="tim-card tim-card-front tim-card-center" onclick="this.classList.toggle('flipped')">
+              <div class="tim-card-inner">
+                <div class="tim-card-front-side">
+                  <div class="tim-card-frame">
+                    <img src="./public/images/tim/staff-2.png" alt="Staff 2" loading="lazy"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="tim-card-placeholder" style="display:none;"><span>PIC</span></div>
+                  </div>
+                </div>
+                <div class="tim-card-back">
+                  <div class="tim-card-quote">
+                    <div class="tim-quote-mark">"</div>
+                    <p>Senyum pelanggan adalah bonus terbaik. Kepuasan mereka adalah gaji tertinggi kami.</p>
+                    <div class="tim-quote-author">— Jiwa Pelayanan</div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div class="tim-card tim-card-front">
-              <div class="tim-card-frame">
-                <img
-                  src="./public/images/tim/staff-3.png"
-                  alt="Staff 3"
-                  loading="lazy"
-                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-                >
-                <div class="tim-card-placeholder" style="display:none;">
-                  <span>PIC</span>
+            <div class="tim-card tim-card-front" onclick="this.classList.toggle('flipped')">
+              <div class="tim-card-inner">
+                <div class="tim-card-front-side">
+                  <div class="tim-card-frame">
+                    <img src="./public/images/tim/staff-3.png" alt="Staff 3" loading="lazy"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="tim-card-placeholder" style="display:none;"><span>PIC</span></div>
+                  </div>
+                </div>
+                <div class="tim-card-back">
+                  <div class="tim-card-quote">
+                    <div class="tim-quote-mark">"</div>
+                    <p>Kami bukan hanya mengirim barang. Kami mengirim janji — tepat waktu, tepat hati.</p>
+                    <div class="tim-quote-author">— Pengantar Amanah</div>
+                  </div>
                 </div>
               </div>
             </div>
