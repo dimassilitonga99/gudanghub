@@ -407,12 +407,48 @@ function registerPwa() {
       .catch((err) => console.warn('⚠️ SW registration failed:', err));
   });
 }
+// ─────────────────────────────────────────────────────────────────────────
+// SPLASH SCREEN
+// ─────────────────────────────────────────────────────────────────────────
 
+function hideSplashScreen() {
+
+  var splash = document.getElementById('splashScreen');
+
+  if (!splash) {
+    return;
+  }
+
+  // Desktop: 5 detik (animasi penuh)
+  // Mobile: 3.5 detik (animasi dipercepat)
+  var isMobile = window.innerWidth <= 768;
+  var duration = isMobile ? 3500 : 5000;
+
+  // Klik untuk skip
+  splash.addEventListener('click', function () {
+    splash.classList.add('hide');
+  });
+
+  // Auto hide setelah durasi
+  setTimeout(function () {
+    splash.classList.add('hide');
+  }, duration);
+
+  // Remove dari DOM setelah fade out
+  setTimeout(function () {
+    if (splash.parentNode) {
+      splash.parentNode.removeChild(splash);
+    }
+  }, duration + 1000);
+}
 // ─────────────────────────────────────────────────────────────────────────
 // INIT
 // ─────────────────────────────────────────────────────────────────────────
 
 function init() {
+   
+  // ── SPLASH SCREEN ──
+  hideSplashScreen();
   checkExistingSession();
   initIcons(); // ← NEW: inject semua data-icon
   initDrawer();
