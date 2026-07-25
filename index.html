@@ -805,6 +805,163 @@
       line-height: 1.65;
     }
 
+        /* ═══════════ GALLERY SECTION ═══════════ */
+    .gallery-section {
+      padding: var(--gap-section) 0;
+      position: relative;
+      z-index: 2;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: clamp(10px, 1.5vw, 16px);
+    }
+
+    .gallery-item {
+      position: relative;
+      border-radius: clamp(14px, 2vw, 20px);
+      overflow: hidden;
+      border: 1px solid var(--line-soft);
+      aspect-ratio: 4/3;
+      cursor: pointer;
+      transition: transform 0.4s var(--ease-spring),
+                  border-color 0.3s ease;
+    }
+
+    .gallery-item:hover {
+      transform: translateY(-4px);
+      border-color: rgba(255, 107, 0, 0.3);
+    }
+
+    /* Item besar (span 2 kolom) */
+    .gallery-big {
+      grid-column: span 2;
+      aspect-ratio: 16/9;
+    }
+
+    /* Image */
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.7s var(--ease-spring);
+    }
+
+    .gallery-item:hover img {
+      transform: scale(1.06);
+    }
+
+    /* Overlay gradient */
+    .gallery-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        200deg,
+        transparent 30%,
+        rgba(10, 10, 18, 0.85) 100%
+      );
+      display: flex;
+      align-items: flex-end;
+      padding: clamp(14px, 2vw, 24px);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .gallery-item:hover .gallery-overlay {
+      opacity: 1;
+    }
+
+    /* Label */
+    .gallery-label {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .gallery-tag {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--orange);
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .gallery-caption {
+      font-family: var(--font-serif);
+      font-size: clamp(16px, 2vw, 22px);
+      font-weight: 600;
+      color: #fff;
+    }
+
+    /* CTA Button */
+    .gallery-cta {
+      text-align: center;
+      margin-top: clamp(28px, 4vw, 48px);
+    }
+
+    .gallery-cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 28px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+      color: var(--text);
+      border: 1px solid var(--line);
+      background: transparent;
+      transition: all 0.3s var(--ease-spring);
+    }
+
+    .gallery-cta-btn:hover {
+      border-color: var(--orange);
+      color: var(--orange);
+      transform: translateY(-2px);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .gallery-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .gallery-big {
+        grid-column: span 2;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .gallery-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .gallery-big {
+        grid-column: span 1;
+      }
+
+      .gallery-item {
+        aspect-ratio: 16/10;
+      }
+
+      .gallery-overlay {
+        opacity: 1;
+        background: linear-gradient(
+          180deg,
+          transparent 50%,
+          rgba(10, 10, 18, 0.8) 100%
+        );
+      }
+
+      .gallery-caption {
+        font-size: 16px;
+      }
+    }
+    
     /* ABOUT */
     .about {
       padding: var(--gap-section) 0;
@@ -1486,7 +1643,107 @@
         </article>
       </div>
     </section>
+      <!-- ═══════════ GALERI DISPLAY TOKO ═══════════ -->
+    <section class="gallery-section" id="katalog" aria-labelledby="gallery-title">
+      <div class="container">
 
+        <header class="section-head reveal">
+          <span class="section-kicker">Showroom Kami</span>
+          <h2 id="gallery-title">Display toko yang <em>menginspirasi</em>.</h2>
+          <p>Lihat langsung bagaimana produk furniture kami tertata rapi di setiap cabang — siap menyambut pelanggan setiap hari.</p>
+        </header>
+
+        <div class="gallery-grid">
+
+          <!-- FOTO 1 (besar, span 2 kolom) -->
+          <div class="gallery-item gallery-big reveal-scale">
+            <img
+              src="./public/images/display-1.jpg"
+              alt="Display rak toko 1"
+              loading="lazy"
+            >
+            <div class="gallery-overlay">
+              <div class="gallery-label">
+                <span class="gallery-tag">Showroom Utama</span>
+                <span class="gallery-caption">Display Furniture Premium</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- FOTO 2 -->
+          <div class="gallery-item reveal-scale" data-delay="1">
+            <img
+              src="./public/images/display-2.jpg"
+              alt="Display rak toko 2"
+              loading="lazy"
+            >
+            <div class="gallery-overlay">
+              <div class="gallery-label">
+                <span class="gallery-tag">Rak Display</span>
+                <span class="gallery-caption">Peralatan Rumah Tangga</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- FOTO 3 -->
+          <div class="gallery-item reveal-scale" data-delay="2">
+            <img
+              src="./public/images/display-3.jpg"
+              alt="Display rak toko 3"
+              loading="lazy"
+            >
+            <div class="gallery-overlay">
+              <div class="gallery-label">
+                <span class="gallery-tag">Koleksi Baru</span>
+                <span class="gallery-caption">Elektronik & Kitchen</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- FOTO 4 -->
+          <div class="gallery-item reveal-scale" data-delay="1">
+            <img
+              src="./public/images/display-4.jpg"
+              alt="Display rak toko 4"
+              loading="lazy"
+            >
+            <div class="gallery-overlay">
+              <div class="gallery-label">
+                <span class="gallery-tag">Area Dapur</span>
+                <span class="gallery-caption">Peralatan Masak Lengkap</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- FOTO 5 (besar, span 2 kolom) -->
+          <div class="gallery-item gallery-big reveal-scale" data-delay="2">
+            <img
+              src="./public/images/display-5.jpg"
+              alt="Display rak toko 5"
+              loading="lazy"
+            >
+            <div class="gallery-overlay">
+              <div class="gallery-label">
+                <span class="gallery-tag">Cabang Terbaru</span>
+                <span class="gallery-caption">Toko Siap Melayani</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- CTA -->
+        <div class="gallery-cta reveal" data-delay="1">
+          <a href="./login.html" class="gallery-cta-btn">
+            <span data-icon="shopping-bag" data-icon-size="18"></span>
+            Lihat Katalog Lengkap
+            <span data-icon="arrow-right" data-icon-size="16"></span>
+          </a>
+        </div>
+
+      </div>
+    </section>
+    
     <!-- ABOUT -->
 <section class="about" id="tentang" aria-labelledby="tentang-title">
   <div class="container about-inner">
