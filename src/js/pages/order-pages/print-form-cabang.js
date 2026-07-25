@@ -1,5 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════════════
    PRINT FORM CABANG — Download sebagai PDF atau JPG
+   Logo dari file: ./public/images/logo/logo-nk.png
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, escapeHtml, formatWita, parseAnyDate, toNumber } from '../../utils.js';
@@ -27,17 +28,16 @@ export function initPrintFormCabang() {
     + '<div class="overlay print-cabang-overlay" id="printCabangOverlay" role="dialog" aria-modal="true">'
     + '<div class="modal modal-xl print-cabang-modal">'
 
+    // Header
     + '<header class="modal-header print-cabang-modal-header">'
     + '<div class="modal-title" id="printCabangModalTitle">Preview Form Order</div>'
     + '<div class="print-cabang-modal-actions">'
 
-    // Tombol Download JPG
     + '<button class="btn-download-jpg" id="btnDownloadJpg" type="button" title="Download JPG">'
     + icon('download', { size: 16 })
     + ' Download JPG'
     + '</button>'
 
-    // Tombol Download PDF
     + '<button class="btn-download-action" id="btnDoDownloadCabang" type="button" title="Download PDF">'
     + icon('download', { size: 16 })
     + ' Download PDF'
@@ -46,9 +46,11 @@ export function initPrintFormCabang() {
     + '<button class="modal-close" id="printCabangModalClose" type="button" aria-label="Tutup">'
     + icon('close', { size: 16 })
     + '</button>'
+
     + '</div>'
     + '</header>'
 
+    // Body
     + '<div class="modal-body print-cabang-modal-body" id="printCabangModalBody">'
     + '<div id="printCabangPreview"></div>'
     + '</div>'
@@ -59,9 +61,7 @@ export function initPrintFormCabang() {
   addPrintCabangStyles();
 
   $('printCabangModalClose')?.addEventListener('click', closePrintCabangModal);
-
   $('btnDoDownloadCabang')?.addEventListener('click', doDownloadPdf);
-
   $('btnDownloadJpg')?.addEventListener('click', doDownloadJpg);
 
   $('printCabangOverlay')?.addEventListener('click', function (e) {
@@ -71,7 +71,6 @@ export function initPrintFormCabang() {
   });
 
   document.addEventListener('keydown', function (e) {
-
     if (!$('printCabangOverlay')?.classList.contains('show')) return;
 
     if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
@@ -96,119 +95,26 @@ function addPrintCabangStyles() {
   var style = document.createElement('style');
   style.id = 'printCabangStyles';
   style.textContent = ''
+    + '.print-cabang-overlay { background: rgba(0,0,0,0.85) !important; }'
+    + '.print-cabang-modal { max-width: 950px !important; background: #f0f0f0 !important; padding: 0 !important; max-height: calc(100dvh - 40px) !important; }'
+    + '.print-cabang-modal-header { background: var(--ink-2) !important; color: var(--text) !important; padding: 12px 20px !important; display: flex; align-items: center; justify-content: space-between; gap: 8px; }'
+    + '.print-cabang-modal-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }'
+    + '.btn-download-action { background: linear-gradient(135deg, #6366f1, #4f46e5); color: #fff; border: 0; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-family: inherit; transition: transform 0.15s; }'
+    + '.btn-download-action:hover { transform: translateY(-1px); }'
+    + '.btn-download-jpg { background: linear-gradient(135deg, #16a34a, #15803d); color: #fff; border: 0; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-family: inherit; transition: transform 0.15s; }'
+    + '.btn-download-jpg:hover { transform: translateY(-1px); }'
+    + '.btn-download-jpg.loading, .btn-download-action.loading { opacity: 0.7; pointer-events: none; }'
+    + '.print-cabang-modal-body { background: #e0e0e0 !important; padding: 20px !important; overflow-y: auto; }'
+    + '#printCabangPreview { background: #fff; color: #000; padding: 30px 35px; max-width: 850px; margin: 0 auto; box-shadow: 0 10px 40px rgba(0,0,0,0.3); font-family: Arial, sans-serif; font-size: 12px; min-height: 600px; }'
 
-    + '.print-cabang-overlay {'
-    + '  background: rgba(0,0,0,0.85) !important;'
-    + '}'
-
-    + '.print-cabang-modal {'
-    + '  max-width: 950px !important;'
-    + '  background: #f0f0f0 !important;'
-    + '  padding: 0 !important;'
-    + '  max-height: calc(100dvh - 40px) !important;'
-    + '}'
-
-    + '.print-cabang-modal-header {'
-    + '  background: var(--ink-2) !important;'
-    + '  color: var(--text) !important;'
-    + '  padding: 12px 20px !important;'
-    + '  display: flex;'
-    + '  align-items: center;'
-    + '  justify-content: space-between;'
-    + '  gap: 8px;'
-    + '}'
-
-    + '.print-cabang-modal-actions {'
-    + '  display: flex;'
-    + '  align-items: center;'
-    + '  gap: 8px;'
-    + '  flex-wrap: wrap;'
-    + '}'
-
-    + '.btn-download-action {'
-    + '  background: linear-gradient(135deg, #6366f1, #4f46e5);'
-    + '  color: #fff;'
-    + '  border: 0;'
-    + '  padding: 8px 14px;'
-    + '  border-radius: 8px;'
-    + '  font-size: 12px;'
-    + '  font-weight: 700;'
-    + '  cursor: pointer;'
-    + '  display: inline-flex;'
-    + '  align-items: center;'
-    + '  gap: 6px;'
-    + '  font-family: inherit;'
-    + '  transition: transform 0.15s;'
-    + '}'
-
-    + '.btn-download-action:hover {'
-    + '  transform: translateY(-1px);'
-    + '}'
-
-    + '.btn-download-jpg {'
-    + '  background: linear-gradient(135deg, #16a34a, #15803d);'
-    + '  color: #fff;'
-    + '  border: 0;'
-    + '  padding: 8px 14px;'
-    + '  border-radius: 8px;'
-    + '  font-size: 12px;'
-    + '  font-weight: 700;'
-    + '  cursor: pointer;'
-    + '  display: inline-flex;'
-    + '  align-items: center;'
-    + '  gap: 6px;'
-    + '  font-family: inherit;'
-    + '  transition: transform 0.15s;'
-    + '}'
-
-    + '.btn-download-jpg:hover {'
-    + '  transform: translateY(-1px);'
-    + '}'
-
-    + '.btn-download-jpg.loading,'
-    + '.btn-download-action.loading {'
-    + '  opacity: 0.7;'
-    + '  pointer-events: none;'
-    + '}'
-
-    + '.print-cabang-modal-body {'
-    + '  background: #e0e0e0 !important;'
-    + '  padding: 20px !important;'
-    + '  overflow-y: auto;'
-    + '}'
-
-    + '#printCabangPreview {'
-    + '  background: #fff;'
-    + '  color: #000;'
-    + '  padding: 30px 35px;'
-    + '  max-width: 850px;'
-    + '  margin: 0 auto;'
-    + '  box-shadow: 0 10px 40px rgba(0,0,0,0.3);'
-    + '  font-family: Arial, sans-serif;'
-    + '  font-size: 12px;'
-    + '  min-height: 600px;'
-    + '}'
-
-    // Print media
+    // Print
     + '@media print {'
     + '  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }'
     + '  body > *:not(#printCabangModalContainer) { display: none !important; }'
-    + '  #printCabangModalContainer, .print-cabang-overlay, .print-cabang-modal {'
-    + '    position: static !important; max-width: 100% !important; max-height: none !important;'
-    + '    background: #fff !important; box-shadow: none !important; opacity: 1 !important;'
-    + '    pointer-events: auto !important; transform: none !important;'
-    + '  }'
+    + '  #printCabangModalContainer, .print-cabang-overlay, .print-cabang-modal { position: static !important; max-width: 100% !important; max-height: none !important; background: #fff !important; box-shadow: none !important; opacity: 1 !important; pointer-events: auto !important; transform: none !important; }'
     + '  .print-cabang-modal-header, .print-cabang-modal-actions { display: none !important; }'
     + '  .print-cabang-modal-body { background: #fff !important; padding: 0 !important; overflow: visible !important; }'
     + '  #printCabangPreview { box-shadow: none !important; padding: 15px 20px !important; }'
-    + '  .pfc-table thead { background: #B4D6F0 !important; -webkit-print-color-adjust: exact !important; }'
-    + '  .pfc-title-form { color: #E67E22 !important; }'
-    + '  .pfc-title-order { color: #1B4F94 !important; }'
-    + '  .pfc-table td.jml-order { color: #00B050 !important; }'
-    + '  .pfc-status-badge { color: #fff !important; -webkit-print-color-adjust: exact !important; }'
-    + '  .pfc-status-pending { background: #f59e0b !important; }'
-    + '  .pfc-status-approved { background: #16a34a !important; }'
-    + '  .pfc-status-rejected { background: #dc2626 !important; }'
     + '  @page { size: A4; margin: 12mm; }'
     + '}'
 
@@ -248,7 +154,7 @@ function closePrintCabangModal() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// RENDER PREVIEW (sama seperti sebelumnya)
+// RENDER PREVIEW
 // ─────────────────────────────────────────────────────────────────────────
 
 function renderPreview() {
@@ -265,7 +171,7 @@ function renderPreview() {
   var nomorOrder = getSequentialNumberCabang(order);
 
   // Tanggal
-  var hariID = ['MINGGU','SENIN','SELASA','RABU','KAMIS','JUMAT','SABTU'];
+  var hariID = ['MINGGU', 'SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT', 'SABTU'];
   var date = parseAnyDate(order.TANGGAL_ORDER) || new Date();
   var hari = hariID[date.getDay()];
   var tgl = hari + ', '
@@ -289,7 +195,6 @@ function renderPreview() {
 
     var qty = toNumber(item.QTY);
     var sat = String(item.SATUAN || 'PCS').toUpperCase();
-
     var stokS = getStokBarangCabang(item.KODE_BARANG);
 
     var stokG = '0';
@@ -306,81 +211,47 @@ function renderPreview() {
 
     return ''
       + '<tr>'
-      + '<td style="padding:8px 6px; text-align:center; border:1px solid #000; font-size:12px; vertical-align:middle;">'
-      + stokS
-      + '</td>'
-      + '<td style="padding:8px 6px; text-align:center; border:1px solid #000; font-size:12px; vertical-align:middle;">'
-      + stokG
-      + '</td>'
-      + '<td style="padding:8px 6px; text-align:center; border:1px solid #000; font-size:12px; vertical-align:middle;">'
-      + stokR
-      + '</td>'
-      + '<td style="padding:8px 6px; text-align:center; border:1px solid #000; font-size:12px; vertical-align:middle; color:#00B050; font-weight:600;">'
-      + qty + ' ' + sat
-      + '</td>'
-      + '<td style="padding:8px 10px; text-align:center; border:1px solid #000; font-size:12px; vertical-align:middle;">'
-      + escapeHtml(item.KODE_BARANG || '')
-      + '</td>'
-      + '<td style="padding:8px 10px; text-align:center; border:1px solid #000; font-size:12px; vertical-align:middle;">'
-      + escapeHtml((item.NAMA_BARANG || '').toUpperCase())
-      + '</td>'
-      + '<td style="padding:8px 8px; text-align:center; border:1px solid #000; font-size:12px; vertical-align:middle; font-weight:700;">'
-      + escapeHtml(jenis)
-      + '</td>'
+      + '<td style="padding:8px 6px; text-align:center; border:1px solid #000; font-size:12px; vertical-align:middle;">' + stokS + '</td>'
+      + '<td style="padding:8px 6px; text-align:center; border:1px solid #000; font-size:12px; vertical-align:middle;">' + stokG + '</td>'
+      + '<td style="padding:8px 6px; text-align:center; border:1px solid #000; font-size:12px; vertical-align:middle;">' + stokR + '</td>'
+      + '<td style="padding:8px 6px; text-align:center; border:1px solid #000; font-size:12px; vertical-align:middle; color:#00B050; font-weight:600;">' + qty + ' ' + sat + '</td>'
+      + '<td style="padding:8px 10px; text-align:center; border:1px solid #000; font-size:12px; vertical-align:middle;">' + escapeHtml(item.KODE_BARANG || '') + '</td>'
+      + '<td style="padding:8px 10px; text-align:center; border:1px solid #000; font-size:12px; vertical-align:middle;">' + escapeHtml((item.NAMA_BARANG || '').toUpperCase()) + '</td>'
+      + '<td style="padding:8px 8px; text-align:center; border:1px solid #000; font-size:12px; vertical-align:middle; font-weight:700;">' + escapeHtml(jenis) + '</td>'
       + '</tr>';
 
   }).join('');
 
-  // ── BUILD HTML (table-based untuk kompatibilitas html2canvas) ──
+  // ── BUILD HTML ──
 
   preview.innerHTML = ''
 
-    // ══════ HEADER: FORM ORDER BARANG + LOGO NK ══════
-    + '<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse; margin-bottom:12px;">'
+    // ══════ HEADER ══════
+    + '<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse; margin-bottom:0;">'
     + '<tr>'
 
-    // FORM ORDER BARANG (kiri)
-    + '<td style="vertical-align:middle; padding-bottom:12px;">'
-    + '<div style="font-size:44px; font-weight:900; line-height:1; letter-spacing:-1px;">'
+    // FORM ORDER BARANG
+    + '<td style="vertical-align:bottom; padding-bottom:14px;">'
+    + '<div style="font-size:42px; font-weight:900; line-height:1; letter-spacing:-1px;">'
     + '<span style="color:#E67E22;">FORM</span>'
     + '<span style="color:#1B4F94;"> ORDER BARANG</span>'
     + '</div>'
     + '</td>'
 
-    // LOGO NK (kanan) — pakai table agar tidak bertumpuk
-    + '<td style="vertical-align:middle; text-align:right; width:200px; padding-bottom:12px;">'
-    + '<table cellpadding="0" cellspacing="0" style="border-collapse:collapse; margin-left:auto;">'
-    + '<tr><td style="text-align:center; padding:0;">'
-
-    // NK Letters
-    + '<table cellpadding="0" cellspacing="0" style="border-collapse:collapse; margin:0 auto;">'
-    + '<tr>'
-    + '<td style="font-family:Arial Black,Arial,sans-serif; font-size:58px; font-weight:900; line-height:1; color:#000; padding:0; vertical-align:bottom;">N</td>'
-    + '<td style="font-family:Arial Black,Arial,sans-serif; font-size:58px; font-weight:900; line-height:1; color:#E63329; padding:0; vertical-align:bottom;">K</td>'
-    + '</tr>'
-    + '</table>'
-
-    // NASIONAL KITCHEN box
-    + '<table cellpadding="0" cellspacing="0" style="border-collapse:collapse; margin:2px auto 0; background:#1B2C5C;">'
-    + '<tr><td style="padding:4px 12px 2px; text-align:center;">'
-    + '<div style="font-size:13px; font-weight:900; color:#fff; letter-spacing:2px; line-height:1;">NASIONAL</div>'
-    + '<div style="font-size:11px; font-weight:700; color:#fff; letter-spacing:3px; line-height:1; margin-top:1px;">KITCHEN</div>'
-    + '</td></tr>'
-    + '</table>'
-
-    // Tagline
-    + '<div style="margin-top:2px; font-size:7px; font-weight:700; color:#1B2C5C; letter-spacing:0.3px; text-align:center;">'
-    + 'PILIHAN BIJAK, HARGA TERBAIK'
-    + '</div>'
-
-    + '</td></tr>'
-    + '</table>'
+    // LOGO NK (dari file gambar)
+    + '<td style="vertical-align:bottom; text-align:right; width:180px; padding-bottom:14px;">'
+    + '<img src="./public/images/logo/logo-nk.png"'
+    + ' alt="Logo Nasional Kitchen"'
+    + ' style="width:160px; height:auto; display:block; margin-left:auto;"'
+    + ' crossorigin="anonymous"'
+    + ' onerror="this.style.display=\'none\';"'
+    + '>'
     + '</td>'
 
     + '</tr>'
     + '</table>'
 
-    // ══════ GARIS PEMISAH ══════
+    // ══════ GARIS ══════
     + '<div style="border-top:1px solid #000; margin-bottom:12px;"></div>'
 
     // ══════ INFO ══════
@@ -414,7 +285,6 @@ function renderPreview() {
     // ══════ TABLE DATA ══════
     + '<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse; border:1px solid #000; margin-bottom:30px;">'
 
-    // Table header
     + '<thead>'
     + '<tr style="background:#B4D6F0;">'
     + '<th style="padding:8px 6px; border:1px solid #000; font-size:12px; font-weight:700; text-align:center; width:80px; line-height:1.2; vertical-align:middle;">STOCK<br>SISTEM</th>'
@@ -427,48 +297,34 @@ function renderPreview() {
     + '</tr>'
     + '</thead>'
 
-    + '<tbody>'
-    + rows
-    + '</tbody>'
-
+    + '<tbody>' + rows + '</tbody>'
     + '</table>'
 
     // ══════ SIGNATURE ══════
     + '<table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #000; border-collapse:collapse;">'
-
-    // Labels
     + '<tr>'
     + '<td style="padding:18px 25px 5px; width:33%; text-align:left; font-size:13px; vertical-align:top;">pengantar,</td>'
     + '<td style="padding:18px 10px 5px; width:34%; text-align:center; font-size:13px; vertical-align:top;">Persetujuan,</td>'
     + '<td style="padding:18px 25px 5px; width:33%; text-align:right; font-size:13px; vertical-align:top;">Penerima,</td>'
     + '</tr>'
-
-    // Space
-    + '<tr>'
-    + '<td colspan="3" style="padding:32px 0;">&nbsp;</td>'
-    + '</tr>'
-
-    // Lines
+    + '<tr><td colspan="3" style="padding:32px 0;">&nbsp;</td></tr>'
     + '<tr>'
     + '<td style="padding:0 25px 5px; text-align:left; font-size:13px;">(_______________)</td>'
     + '<td style="padding:0 10px 5px; text-align:center; font-size:13px;">(_______________)</td>'
     + '<td style="padding:0 25px 5px; text-align:right; font-size:13px;">(_______________)</td>'
     + '</tr>'
-
-    // Roles
     + '<tr>'
     + '<td style="padding:0 25px 18px 35px; text-align:left; font-size:14px; font-weight:900;">Driver</td>'
     + '<td style="padding:0 10px 18px; text-align:center; font-size:14px; font-weight:900;">SPV Gudang</td>'
     + '<td style="padding:0 35px 18px 25px; text-align:right; font-size:14px; font-weight:900;">SPV Cabang</td>'
     + '</tr>'
-
     + '</table>';
 
   $('printCabangModalTitle').textContent = 'Preview Form Order — ' + order.ORDER_ID;
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// DOWNLOAD PDF (via browser print)
+// DOWNLOAD PDF
 // ─────────────────────────────────────────────────────────────────────────
 
 function doDownloadPdf() {
@@ -476,7 +332,7 @@ function doDownloadPdf() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// DOWNLOAD JPG (via html2canvas)
+// DOWNLOAD JPG
 // ─────────────────────────────────────────────────────────────────────────
 
 async function doDownloadJpg() {
@@ -486,7 +342,6 @@ async function doDownloadJpg() {
 
   if (!preview) return;
 
-  // Loading state
   var originalText = btn?.innerHTML;
 
   if (btn) {
@@ -503,7 +358,6 @@ async function doDownloadJpg() {
       var module = await import('html2canvas');
       html2canvas = module.default || module;
     } catch (importErr) {
-      // Fallback: load dari CDN
       html2canvas = await loadHtml2CanvasCDN();
     }
 
@@ -512,10 +366,14 @@ async function doDownloadJpg() {
       return;
     }
 
+    // Tunggu gambar logo loaded
+    await waitForImages(preview);
+
     // Render ke canvas
     var canvas = await html2canvas(preview, {
       scale: 2,
       useCORS: true,
+      allowTaint: true,
       backgroundColor: '#ffffff',
       logging: false,
       width: preview.scrollWidth,
@@ -537,12 +395,9 @@ async function doDownloadJpg() {
     }, 100);
 
   } catch (err) {
-
     console.error('Download JPG error:', err);
     alert('Gagal download JPG. Error: ' + err.message);
-
   } finally {
-
     if (btn) {
       btn.classList.remove('loading');
       btn.innerHTML = originalText || (icon('download', { size: 16 }) + ' Download JPG');
@@ -550,6 +405,42 @@ async function doDownloadJpg() {
   }
 }
 
+// ── Tunggu semua gambar loaded ──
+
+function waitForImages(container) {
+
+  return new Promise(function (resolve) {
+
+    var imgs = container.querySelectorAll('img');
+
+    if (!imgs.length) {
+      resolve();
+      return;
+    }
+
+    var loaded = 0;
+    var total = imgs.length;
+
+    function check() {
+      loaded++;
+      if (loaded >= total) {
+        resolve();
+      }
+    }
+
+    imgs.forEach(function (img) {
+      if (img.complete) {
+        check();
+      } else {
+        img.addEventListener('load', check, { once: true });
+        img.addEventListener('error', check, { once: true });
+      }
+    });
+
+    // Timeout fallback (3 detik)
+    setTimeout(resolve, 3000);
+  });
+}
 
 // ── Load html2canvas dari CDN (fallback) ──
 
@@ -557,7 +448,6 @@ function loadHtml2CanvasCDN() {
 
   return new Promise(function (resolve, reject) {
 
-    // Cek kalau sudah di-load
     if (window.html2canvas) {
       resolve(window.html2canvas);
       return;
