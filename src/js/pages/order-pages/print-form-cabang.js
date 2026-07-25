@@ -269,80 +269,199 @@ function renderPreview() {
   var date = parseAnyDate(order.TANGGAL_ORDER) || new Date();
   var hari = hariID[date.getDay()];
   var tgl = hari + ', '
-    + String(date.getDate()).padStart(2,'0') + '/'
-    + String(date.getMonth()+1).padStart(2,'0') + '/'
+    + String(date.getDate()).padStart(2, '0') + '/'
+    + String(date.getMonth() + 1).padStart(2, '0') + '/'
     + date.getFullYear();
 
   // Status
   var status = String(order.STATUS || 'PENDING').toUpperCase();
-  var statusClass = status === 'APPROVED' ? 'pfc-status-approved'
-                  : status === 'REJECTED' ? 'pfc-status-rejected'
-                  : 'pfc-status-pending';
-  var statusLabel = status === 'APPROVED' ? 'DISETUJUI'
-                  : status === 'REJECTED' ? 'DITOLAK'
-                  : 'MENUNGGU';
+
+  var statusBg = '#f59e0b';
+  if (status === 'APPROVED') statusBg = '#16a34a';
+  if (status === 'REJECTED') statusBg = '#dc2626';
+
+  var statusLabel = 'MENUNGGU';
+  if (status === 'APPROVED') statusLabel = 'DISETUJUI';
+  if (status === 'REJECTED') statusLabel = 'DITOLAK';
 
   // Table rows
   var rows = items.map(function (item) {
+
     var qty = toNumber(item.QTY);
     var sat = String(item.SATUAN || 'PCS').toUpperCase();
+
     var stokS = getStokBarangCabang(item.KODE_BARANG);
-    var stokG = item.STOK_GUDANG !== undefined && item.STOK_GUDANG !== '' ? String(item.STOK_GUDANG) : '0';
-    var stokR = item.STOK_TOKO !== undefined && item.STOK_TOKO !== '' ? String(item.STOK_TOKO) : '0';
+
+    var stokG = '0';
+    if (item.STOK_GUDANG !== undefined && item.STOK_GUDANG !== '') {
+      stokG = String(item.STOK_GUDANG);
+    }
+
+    var stokR = '0';
+    if (item.STOK_TOKO !== undefined && item.STOK_TOKO !== '') {
+      stokR = String(item.STOK_TOKO);
+    }
+
     var jenis = String(item.KATEGORI || 'ELEKTRONIK').toUpperCase();
 
-    return '<tr>'
-      + '<td style="padding:6px 4px;text-align:center;border:1px solid #000;font-size:12px;">' + stokS + '</td>'
-      + '<td style="padding:6px 4px;text-align:center;border:1px solid #000;font-size:12px;">' + stokG + '</td>'
-      + '<td style="padding:6px 4px;text-align:center;border:1px solid #000;font-size:12px;">' + stokR + '</td>'
-      + '<td style="padding:6px 4px;text-align:center;border:1px solid #000;font-size:12px;color:#00B050;font-weight:600;" class="jml-order">' + qty + ' ' + sat + '</td>'
-      + '<td style="padding:6px 10px;text-align:left;border:1px solid #000;font-size:12px;">' + escapeHtml(item.KODE_BARANG || '') + '</td>'
-      + '<td style="padding:6px 10px;text-align:left;border:1px solid #000;font-size:12px;">' + escapeHtml((item.NAMA_BARANG || '').toUpperCase()) + '</td>'
-      + '<td style="padding:6px 8px;text-align:center;border:1px solid #000;font-size:12px;font-weight:700;">' + escapeHtml(jenis) + '</td>'
+    return ''
+      + '<tr>'
+      + '<td style="padding:8px 6px; text-align:center; border:1px solid #000; font-size:12px; vertical-align:middle;">'
+      + stokS
+      + '</td>'
+      + '<td style="padding:8px 6px; text-align:center; border:1px solid #000; font-size:12px; vertical-align:middle;">'
+      + stokG
+      + '</td>'
+      + '<td style="padding:8px 6px; text-align:center; border:1px solid #000; font-size:12px; vertical-align:middle;">'
+      + stokR
+      + '</td>'
+      + '<td style="padding:8px 6px; text-align:center; border:1px solid #000; font-size:12px; vertical-align:middle; color:#00B050; font-weight:600;">'
+      + qty + ' ' + sat
+      + '</td>'
+      + '<td style="padding:8px 10px; text-align:center; border:1px solid #000; font-size:12px; vertical-align:middle;">'
+      + escapeHtml(item.KODE_BARANG || '')
+      + '</td>'
+      + '<td style="padding:8px 10px; text-align:center; border:1px solid #000; font-size:12px; vertical-align:middle;">'
+      + escapeHtml((item.NAMA_BARANG || '').toUpperCase())
+      + '</td>'
+      + '<td style="padding:8px 8px; text-align:center; border:1px solid #000; font-size:12px; vertical-align:middle; font-weight:700;">'
+      + escapeHtml(jenis)
+      + '</td>'
       + '</tr>';
+
   }).join('');
 
+  // ── BUILD HTML (table-based untuk kompatibilitas html2canvas) ──
+
   preview.innerHTML = ''
-    // Header
-    + '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:12px;border-bottom:1px solid #000;margin-bottom:12px;">'
-    + '<div style="font-size:44px;font-weight:900;line-height:1;letter-spacing:-1px;">'
-    + '<span class="pfc-title-form" style="color:#E67E22;">FORM</span>'
-    + '<span class="pfc-title-order" style="color:#1B4F94;"> ORDER BARANG</span>'
-    + '</div>'
-    + '<div style="text-align:center;">'
-    + '<div style="font-family:Arial Black,Arial,sans-serif;font-size:62px;font-weight:900;line-height:0.9;letter-spacing:-5px;"><span style="color:#000;">N</span><span style="color:#E63329;">K</span></div>'
-    + '<div style="margin-top:2px;background:#1B2C5C;padding:5px 14px;"><div style="font-size:14px;font-weight:900;color:#fff;letter-spacing:2px;line-height:1;">NASIONAL</div><div style="font-size:12px;font-weight:700;color:#fff;letter-spacing:3px;line-height:1;margin-top:2px;">KITCHEN</div></div>'
-    + '<div style="margin-top:3px;font-size:8px;font-weight:700;color:#1B2C5C;">PILIHAN BIJAK, HARGA TERBAIK</div>'
-    + '</div>'
-    + '</div>'
 
-    // Info
-    + '<div style="margin-bottom:12px;font-size:13px;color:#000;">'
-    + '<div style="display:flex;gap:20px;padding:3px 0;"><span style="font-weight:700;min-width:130px;">DIBUAT OLEH</span><span>: ' + pic + '</span></div>'
-    + '<div style="display:flex;gap:20px;padding:3px 0;"><span style="font-weight:700;min-width:130px;">NOMOR ORDER</span><span style="flex:1;">: ' + nomorOrder + '</span><span><b>Hari/Tgl</b> &nbsp;: ' + tgl + '</span></div>'
-    + '<div style="display:flex;gap:20px;padding:3px 0;"><span style="font-weight:700;min-width:130px;">STATUS ORDER</span><span>: <span class="pfc-status-badge ' + statusClass + '" style="display:inline-block;padding:2px 10px;border-radius:4px;font-size:11px;font-weight:700;color:#fff;">' + statusLabel + '</span></span></div>'
-    + '</div>'
+    // ══════ HEADER: FORM ORDER BARANG + LOGO NK ══════
+    + '<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse; margin-bottom:12px;">'
+    + '<tr>'
 
-    // Table
-    + '<table style="width:100%;border-collapse:collapse;border:1px solid #000;margin-bottom:30px;" class="pfc-table">'
-    + '<thead><tr style="background:#B4D6F0;">'
-    + '<th style="padding:8px 4px;border:1px solid #000;font-size:12px;font-weight:700;text-align:center;width:80px;line-height:1.2;">STOCK<br>SISTEM</th>'
-    + '<th style="padding:8px 4px;border:1px solid #000;font-size:12px;font-weight:700;text-align:center;width:80px;line-height:1.2;">STOCK<br>(Gudang)</th>'
-    + '<th style="padding:8px 4px;border:1px solid #000;font-size:12px;font-weight:700;text-align:center;width:75px;line-height:1.2;">STOCK<br>(Rak)</th>'
-    + '<th style="padding:8px 4px;border:1px solid #000;font-size:12px;font-weight:700;text-align:center;width:85px;line-height:1.2;">JMLH<br>ORDER</th>'
-    + '<th style="padding:8px 10px;border:1px solid #000;font-size:12px;font-weight:700;text-align:left;width:100px;">KODE ITEM</th>'
-    + '<th style="padding:8px 10px;border:1px solid #000;font-size:12px;font-weight:700;text-align:center;">NAMA ITEM</th>'
-    + '<th style="padding:8px 8px;border:1px solid #000;font-size:12px;font-weight:700;text-align:center;width:100px;">Jenis</th>'
-    + '</tr></thead>'
-    + '<tbody>' + rows + '</tbody>'
+    // FORM ORDER BARANG (kiri)
+    + '<td style="vertical-align:middle; padding-bottom:12px;">'
+    + '<div style="font-size:44px; font-weight:900; line-height:1; letter-spacing:-1px;">'
+    + '<span style="color:#E67E22;">FORM</span>'
+    + '<span style="color:#1B4F94;"> ORDER BARANG</span>'
+    + '</div>'
+    + '</td>'
+
+    // LOGO NK (kanan) — pakai table agar tidak bertumpuk
+    + '<td style="vertical-align:middle; text-align:right; width:200px; padding-bottom:12px;">'
+    + '<table cellpadding="0" cellspacing="0" style="border-collapse:collapse; margin-left:auto;">'
+    + '<tr><td style="text-align:center; padding:0;">'
+
+    // NK Letters
+    + '<table cellpadding="0" cellspacing="0" style="border-collapse:collapse; margin:0 auto;">'
+    + '<tr>'
+    + '<td style="font-family:Arial Black,Arial,sans-serif; font-size:58px; font-weight:900; line-height:1; color:#000; padding:0; vertical-align:bottom;">N</td>'
+    + '<td style="font-family:Arial Black,Arial,sans-serif; font-size:58px; font-weight:900; line-height:1; color:#E63329; padding:0; vertical-align:bottom;">K</td>'
+    + '</tr>'
     + '</table>'
 
-    // Signature
-    + '<table style="width:100%;border:1px solid #000;border-collapse:collapse;">'
-    + '<tr><td style="padding:18px 25px 5px;width:33%;text-align:left;font-size:13px;">pengantar,</td><td style="padding:18px 10px 5px;width:34%;text-align:center;font-size:13px;">Persetujuan,</td><td style="padding:18px 25px 5px;width:33%;text-align:right;font-size:13px;">Penerima,</td></tr>'
-    + '<tr><td colspan="3" style="padding:32px 0;">&nbsp;</td></tr>'
-    + '<tr><td style="padding:0 25px 5px;text-align:left;font-size:13px;">(_______________)</td><td style="padding:0 10px 5px;text-align:center;font-size:13px;">(_______________)</td><td style="padding:0 25px 5px;text-align:right;font-size:13px;">(_______________)</td></tr>'
-    + '<tr><td style="padding:0 25px 18px 35px;text-align:left;font-size:14px;font-weight:900;">Driver</td><td style="padding:0 10px 18px;text-align:center;font-size:14px;font-weight:900;">SPV Gudang</td><td style="padding:0 35px 18px 25px;text-align:right;font-size:14px;font-weight:900;">SPV Cabang</td></tr>'
+    // NASIONAL KITCHEN box
+    + '<table cellpadding="0" cellspacing="0" style="border-collapse:collapse; margin:2px auto 0; background:#1B2C5C;">'
+    + '<tr><td style="padding:4px 12px 2px; text-align:center;">'
+    + '<div style="font-size:13px; font-weight:900; color:#fff; letter-spacing:2px; line-height:1;">NASIONAL</div>'
+    + '<div style="font-size:11px; font-weight:700; color:#fff; letter-spacing:3px; line-height:1; margin-top:1px;">KITCHEN</div>'
+    + '</td></tr>'
+    + '</table>'
+
+    // Tagline
+    + '<div style="margin-top:2px; font-size:7px; font-weight:700; color:#1B2C5C; letter-spacing:0.3px; text-align:center;">'
+    + 'PILIHAN BIJAK, HARGA TERBAIK'
+    + '</div>'
+
+    + '</td></tr>'
+    + '</table>'
+    + '</td>'
+
+    + '</tr>'
+    + '</table>'
+
+    // ══════ GARIS PEMISAH ══════
+    + '<div style="border-top:1px solid #000; margin-bottom:12px;"></div>'
+
+    // ══════ INFO ══════
+    + '<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse; margin-bottom:14px; font-size:13px; color:#000;">'
+
+    + '<tr>'
+    + '<td style="padding:3px 0; width:140px; font-weight:700; vertical-align:top;">DIBUAT OLEH</td>'
+    + '<td style="padding:3px 0; vertical-align:top;">: ' + pic + '</td>'
+    + '<td style="padding:3px 0; width:1px;"></td>'
+    + '</tr>'
+
+    + '<tr>'
+    + '<td style="padding:3px 0; font-weight:700; vertical-align:top;">NOMOR ORDER</td>'
+    + '<td style="padding:3px 0; vertical-align:top;">: ' + nomorOrder + '</td>'
+    + '<td style="padding:3px 0; text-align:right; vertical-align:top; white-space:nowrap;">'
+    + '<span style="font-weight:700;">Hari/Tgl</span> : ' + tgl
+    + '</td>'
+    + '</tr>'
+
+    + '<tr>'
+    + '<td style="padding:3px 0; font-weight:700; vertical-align:top;">STATUS ORDER</td>'
+    + '<td style="padding:3px 0; vertical-align:top;" colspan="2">'
+    + ': <span style="display:inline-block; padding:2px 10px; border-radius:4px; font-size:11px; font-weight:700; color:#fff; background:' + statusBg + ';">'
+    + statusLabel
+    + '</span>'
+    + '</td>'
+    + '</tr>'
+
+    + '</table>'
+
+    // ══════ TABLE DATA ══════
+    + '<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse; border:1px solid #000; margin-bottom:30px;">'
+
+    // Table header
+    + '<thead>'
+    + '<tr style="background:#B4D6F0;">'
+    + '<th style="padding:8px 6px; border:1px solid #000; font-size:12px; font-weight:700; text-align:center; width:80px; line-height:1.2; vertical-align:middle;">STOCK<br>SISTEM</th>'
+    + '<th style="padding:8px 6px; border:1px solid #000; font-size:12px; font-weight:700; text-align:center; width:80px; line-height:1.2; vertical-align:middle;">STOCK<br>(Gudang)</th>'
+    + '<th style="padding:8px 6px; border:1px solid #000; font-size:12px; font-weight:700; text-align:center; width:75px; line-height:1.2; vertical-align:middle;">STOCK<br>(Rak)</th>'
+    + '<th style="padding:8px 6px; border:1px solid #000; font-size:12px; font-weight:700; text-align:center; width:85px; line-height:1.2; vertical-align:middle;">JMLH<br>ORDER</th>'
+    + '<th style="padding:8px 10px; border:1px solid #000; font-size:12px; font-weight:700; text-align:center; width:100px; vertical-align:middle;">KODE ITEM</th>'
+    + '<th style="padding:8px 10px; border:1px solid #000; font-size:12px; font-weight:700; text-align:center; vertical-align:middle;">NAMA ITEM</th>'
+    + '<th style="padding:8px 8px; border:1px solid #000; font-size:12px; font-weight:700; text-align:center; width:100px; vertical-align:middle;">Jenis</th>'
+    + '</tr>'
+    + '</thead>'
+
+    + '<tbody>'
+    + rows
+    + '</tbody>'
+
+    + '</table>'
+
+    // ══════ SIGNATURE ══════
+    + '<table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #000; border-collapse:collapse;">'
+
+    // Labels
+    + '<tr>'
+    + '<td style="padding:18px 25px 5px; width:33%; text-align:left; font-size:13px; vertical-align:top;">pengantar,</td>'
+    + '<td style="padding:18px 10px 5px; width:34%; text-align:center; font-size:13px; vertical-align:top;">Persetujuan,</td>'
+    + '<td style="padding:18px 25px 5px; width:33%; text-align:right; font-size:13px; vertical-align:top;">Penerima,</td>'
+    + '</tr>'
+
+    // Space
+    + '<tr>'
+    + '<td colspan="3" style="padding:32px 0;">&nbsp;</td>'
+    + '</tr>'
+
+    // Lines
+    + '<tr>'
+    + '<td style="padding:0 25px 5px; text-align:left; font-size:13px;">(_______________)</td>'
+    + '<td style="padding:0 10px 5px; text-align:center; font-size:13px;">(_______________)</td>'
+    + '<td style="padding:0 25px 5px; text-align:right; font-size:13px;">(_______________)</td>'
+    + '</tr>'
+
+    // Roles
+    + '<tr>'
+    + '<td style="padding:0 25px 18px 35px; text-align:left; font-size:14px; font-weight:900;">Driver</td>'
+    + '<td style="padding:0 10px 18px; text-align:center; font-size:14px; font-weight:900;">SPV Gudang</td>'
+    + '<td style="padding:0 35px 18px 25px; text-align:right; font-size:14px; font-weight:900;">SPV Cabang</td>'
+    + '</tr>'
+
     + '</table>';
 
   $('printCabangModalTitle').textContent = 'Preview Form Order — ' + order.ORDER_ID;
