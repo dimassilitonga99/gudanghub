@@ -797,6 +797,49 @@
   }
 }
 
+/* ═══ FIX FLIP CARD DI MOBILE ═══ */
+@media (max-width: 768px) {
+
+  /* Disable semua 3D transform */
+  .tim-card,
+  .tim-card-inner,
+  .tim-card-front,
+  .tim-card-front-side,
+  .tim-card-back {
+    perspective: none !important;
+    transform-style: flat !important;
+    -webkit-transform-style: flat !important;
+  }
+
+  /* Transition lebih cepat di mobile */
+  .tim-card-front,
+  .tim-card-front-side,
+  .tim-card-back {
+    transition: opacity 0.2s ease !important;
+  }
+
+  /* Disable transform pada flip (hanya opacity) */
+  .tim-card-back {
+    transform: none !important;
+  }
+
+  .tim-card.flipped .tim-card-front,
+  .tim-card.flipped .tim-card-front-side {
+    transform: none !important;
+  }
+
+  .tim-card.flipped .tim-card-back {
+    transform: none !important;
+  }
+
+  /* Disable hover transform */
+  .tim-card:hover,
+  .tim-card:not(.flipped):hover,
+  .tim-card.flipped:hover {
+    transform: none !important;
+  }
+}
+
 /* ════════════════════════════════════════════════════════════════
    KEYFRAMES YANG DIPERTAHANKAN
    ════════════════════════════════════════════════════════════════ */
