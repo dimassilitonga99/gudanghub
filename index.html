@@ -23,10 +23,436 @@
   <link rel="stylesheet" href="./src/styles/main.css">
 
   <style>
+        /* ═══════════ SPLASH SCREEN ═══════════ */
+
+    .splash-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 999999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.8s ease, visibility 0.8s ease;
+    }
+
+    .splash-screen.hide {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    /* Background */
+    .splash-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(
+          ellipse 60% 60% at 50% 50%,
+          #1B4B5A 0%,
+          #123B4A 40%,
+          #0A1F2E 70%,
+          #08151C 100%
+        );
+    }
+
+    /* Vignette */
+    .splash-bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(
+          ellipse 80% 80% at 50% 50%,
+          transparent 40%,
+          rgba(8, 21, 28, 0.6) 100%
+        );
+    }
+
+    /* Content */
+    .splash-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+    }
+
+    /* Logo SVG */
+    .splash-logo {
+      width: min(320px, 70vw);
+      height: min(320px, 70vw);
+      display: block;
+      margin: 0 auto 20px;
+    }
+
+    /* ── STROKE ANIMATION ── */
+
+    .splash-stroke {
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 1000;
+      opacity: 0;
+    }
+
+    /* Stroke 1: Kepala & Leher */
+    .splash-stroke-1 {
+      animation:
+        splashFadeIn 0.3s ease 0.3s forwards,
+        splashDraw 1.8s ease 0.3s forwards;
+    }
+
+    /* Stroke 2: Sayap Kiri */
+    .splash-stroke-2 {
+      animation:
+        splashFadeIn 0.3s ease 1.2s forwards,
+        splashDraw 1.5s ease 1.2s forwards;
+    }
+
+    /* Stroke 3: Sayap Kanan */
+    .splash-stroke-3 {
+      animation:
+        splashFadeIn 0.3s ease 1.5s forwards,
+        splashDraw 1.5s ease 1.5s forwards;
+    }
+
+    /* Stroke 4: Ekor Kiri */
+    .splash-stroke-4 {
+      animation:
+        splashFadeIn 0.3s ease 2.2s forwards,
+        splashDraw 1.2s ease 2.2s forwards;
+    }
+
+    /* Stroke 5: Ekor Kanan */
+    .splash-stroke-5 {
+      animation:
+        splashFadeIn 0.3s ease 2.5s forwards,
+        splashDraw 1.2s ease 2.5s forwards;
+    }
+
+    @keyframes splashDraw {
+      to {
+        stroke-dashoffset: 0;
+      }
+    }
+
+    @keyframes splashFadeIn {
+      to {
+        opacity: 1;
+      }
+    }
+
+    /* ── GLOW BREATHING (setelah logo selesai) ── */
+
+    .splash-stroke {
+      animation-fill-mode: forwards;
+    }
+
+    .splash-logo {
+      animation: splashGlowPulse 2s ease-in-out 4s infinite;
+    }
+
+    @keyframes splashGlowPulse {
+      0%, 100% {
+        filter: drop-shadow(0 0 8px rgba(127, 219, 255, 0.3));
+      }
+      50% {
+        filter: drop-shadow(0 0 20px rgba(58, 222, 222, 0.6));
+      }
+    }
+
+    /* ── PARTIKEL SPARKLE ── */
+
+    .splash-particle {
+      opacity: 0;
+    }
+
+    .sp-1 { animation: splashSparkle 1.5s ease 3.5s infinite; }
+    .sp-2 { animation: splashSparkle 1.8s ease 3.8s infinite; }
+    .sp-3 { animation: splashSparkle 1.3s ease 4.0s infinite; }
+    .sp-4 { animation: splashSparkle 1.6s ease 4.2s infinite; }
+    .sp-5 { animation: splashSparkle 1.4s ease 3.6s infinite; }
+    .sp-6 { animation: splashSparkle 1.7s ease 3.9s infinite; }
+    .sp-7 { animation: splashSparkle 1.5s ease 4.1s infinite; }
+    .sp-8 { animation: splashSparkle 1.8s ease 4.3s infinite; }
+
+    @keyframes splashSparkle {
+      0%, 100% {
+        opacity: 0;
+        transform: scale(0.5);
+      }
+      50% {
+        opacity: 0.8;
+        transform: scale(1.5);
+      }
+    }
+
+    /* ── BRAND TEXT ── */
+
+    .splash-brand {
+      opacity: 0;
+      animation: splashTextIn 0.8s ease 3.5s forwards;
+      font-size: clamp(24px, 5vw, 36px);
+      font-weight: 900;
+      letter-spacing: 0.3em;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .splash-brand-accent {
+      color: #3ADEDE;
+    }
+
+    .splash-tagline {
+      opacity: 0;
+      animation: splashTextIn 0.8s ease 4s forwards;
+      font-size: clamp(11px, 1.5vw, 14px);
+      color: rgba(255, 255, 255, 0.4);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-top: 8px;
+    }
+
+    @keyframes splashTextIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ── MOBILE ── */
+    @media (max-width: 768px) {
+      .splash-logo {
+        width: min(250px, 65vw);
+        height: min(250px, 65vw);
+      }
+
+      .splash-brand {
+        font-size: 22px;
+        letter-spacing: 0.2em;
+      }
+
+      .splash-tagline {
+        font-size: 10px;
+      }
+
+      /* Percepat animasi di mobile */
+      .splash-stroke-1 {
+        animation:
+          splashFadeIn 0.2s ease 0.2s forwards,
+          splashDraw 1s ease 0.2s forwards;
+      }
+
+      .splash-stroke-2 {
+        animation:
+          splashFadeIn 0.2s ease 0.7s forwards,
+          splashDraw 0.8s ease 0.7s forwards;
+      }
+
+      .splash-stroke-3 {
+        animation:
+          splashFadeIn 0.2s ease 0.9s forwards,
+          splashDraw 0.8s ease 0.9s forwards;
+      }
+
+      .splash-stroke-4 {
+        animation:
+          splashFadeIn 0.2s ease 1.3s forwards,
+          splashDraw 0.7s ease 1.3s forwards;
+      }
+
+      .splash-stroke-5 {
+        animation:
+          splashFadeIn 0.2s ease 1.5s forwards,
+          splashDraw 0.7s ease 1.5s forwards;
+      }
+
+      .splash-logo {
+        animation: splashGlowPulse 2s ease-in-out 2.5s infinite;
+      }
+
+      .splash-brand {
+        animation: splashTextIn 0.6s ease 2.2s forwards;
+      }
+
+      .splash-tagline {
+        animation: splashTextIn 0.6s ease 2.5s forwards;
+      }
+
+      .sp-1 { animation: splashSparkle 1.5s ease 2.3s infinite; }
+      .sp-2 { animation: splashSparkle 1.8s ease 2.5s infinite; }
+      .sp-3 { animation: splashSparkle 1.3s ease 2.7s infinite; }
+      .sp-4 { animation: splashSparkle 1.6s ease 2.8s infinite; }
+      .sp-5 { animation: splashSparkle 1.4s ease 2.4s infinite; }
+      .sp-6 { animation: splashSparkle 1.7s ease 2.6s infinite; }
+      .sp-7 { animation: splashSparkle 1.5s ease 2.9s infinite; }
+      .sp-8 { animation: splashSparkle 1.8s ease 3.0s infinite; }
+
+      /* Disable glow filter di mobile (hemat GPU) */
+      .splash-stroke {
+        filter: none !important;
+      }
+
+      .splash-logo {
+        animation: none !important;
+        filter: drop-shadow(0 0 6px rgba(127, 219, 255, 0.3));
+      }
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      .splash-screen {
+        display: none !important;
+      }
+    }
     body {
       background: var(--ink-950);
     }
+      <!-- ═══════════ SPLASH SCREEN / PRELOADER ═══════════ -->
+  <div class="splash-screen" id="splashScreen">
 
+    <!-- Background -->
+    <div class="splash-bg"></div>
+
+    <!-- Logo Animation -->
+    <div class="splash-content">
+
+      <svg
+        class="splash-logo"
+        viewBox="0 0 480 480"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <!-- SVG Filters: Glow Effect -->
+        <defs>
+          <filter id="splashGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur1" />
+            <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur2" />
+            <feMerge>
+              <feMergeNode in="blur2" />
+              <feMergeNode in="blur1" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+
+          <linearGradient id="strokeGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#FFFFFF" />
+            <stop offset="100%" stop-color="#7FDBFF" />
+          </linearGradient>
+
+          <linearGradient id="strokeGrad2" x1="100%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#3ADEDE" />
+            <stop offset="100%" stop-color="#FFFFFF" />
+          </linearGradient>
+
+          <linearGradient id="strokeGrad3" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#7FDBFF" />
+            <stop offset="100%" stop-color="#00C2CB" />
+          </linearGradient>
+        </defs>
+
+        <!-- Stroke 1: Kepala & Leher -->
+        <path
+          class="splash-stroke splash-stroke-1"
+          d="M 240 120
+             C 220 100, 200 90, 185 95
+             C 170 100, 165 115, 170 130
+             C 175 145, 190 150, 200 145
+             C 210 140, 215 130, 220 140
+             C 230 160, 225 180, 220 200
+             C 215 220, 210 240, 215 260"
+          stroke="url(#strokeGrad1)"
+          stroke-width="4"
+          stroke-linecap="round"
+          fill="none"
+          filter="url(#splashGlow)"
+        />
+
+        <!-- Stroke 2: Sayap Kiri -->
+        <path
+          class="splash-stroke splash-stroke-2"
+          d="M 215 200
+             C 195 180, 160 160, 130 155
+             C 100 150, 80 160, 75 175
+             C 70 190, 85 200, 105 205
+             C 125 210, 155 215, 180 230
+             C 200 240, 210 255, 215 260"
+          stroke="url(#strokeGrad2)"
+          stroke-width="3.5"
+          stroke-linecap="round"
+          fill="none"
+          filter="url(#splashGlow)"
+        />
+
+        <!-- Stroke 3: Sayap Kanan -->
+        <path
+          class="splash-stroke splash-stroke-3"
+          d="M 225 195
+             C 245 175, 280 155, 310 150
+             C 340 145, 365 155, 370 170
+             C 375 185, 360 200, 340 205
+             C 320 210, 290 215, 265 230
+             C 245 240, 230 255, 225 260"
+          stroke="url(#strokeGrad1)"
+          stroke-width="3.5"
+          stroke-linecap="round"
+          fill="none"
+          filter="url(#splashGlow)"
+        />
+
+        <!-- Stroke 4: Badan & Ekor Kiri -->
+        <path
+          class="splash-stroke splash-stroke-4"
+          d="M 215 260
+             C 210 280, 200 300, 185 320
+             C 170 340, 150 355, 140 360
+             C 130 365, 125 360, 130 350
+             C 135 340, 150 330, 170 325
+             C 190 320, 210 310, 220 300"
+          stroke="url(#strokeGrad3)"
+          stroke-width="3"
+          stroke-linecap="round"
+          fill="none"
+          filter="url(#splashGlow)"
+        />
+
+        <!-- Stroke 5: Ekor Kanan -->
+        <path
+          class="splash-stroke splash-stroke-5"
+          d="M 225 260
+             C 230 280, 240 300, 255 320
+             C 270 340, 290 355, 305 360
+             C 320 365, 325 358, 318 348
+             C 310 338, 295 330, 275 325
+             C 255 320, 235 310, 225 300"
+          stroke="url(#strokeGrad2)"
+          stroke-width="3"
+          stroke-linecap="round"
+          fill="none"
+          filter="url(#splashGlow)"
+        />
+
+        <!-- Partikel sparkle (muncul di akhir) -->
+        <circle class="splash-particle sp-1" cx="170" cy="130" r="2" fill="#7FDBFF" />
+        <circle class="splash-particle sp-2" cx="340" cy="170" r="1.5" fill="#3ADEDE" />
+        <circle class="splash-particle sp-3" cx="140" cy="360" r="2" fill="#FFFFFF" />
+        <circle class="splash-particle sp-4" cx="310" cy="355" r="1.5" fill="#7FDBFF" />
+        <circle class="splash-particle sp-5" cx="185" cy="95" r="1.5" fill="#3ADEDE" />
+        <circle class="splash-particle sp-6" cx="240" cy="115" r="2" fill="#FFFFFF" />
+        <circle class="splash-particle sp-7" cx="375" cy="175" r="1.5" fill="#7FDBFF" />
+        <circle class="splash-particle sp-8" cx="75" cy="180" r="2" fill="#3ADEDE" />
+
+      </svg>
+
+      <!-- Brand text -->
+      <div class="splash-brand">
+        <span class="splash-brand-name">GUDANG</span><span class="splash-brand-accent">HUB</span>
+      </div>
+
+      <div class="splash-tagline">
+        PT Central Perabot Utama
+      </div>
+
+    </div>
+  </div>
     /* SCROLL PROGRESS */
     .scroll-progress {
       position: fixed;
