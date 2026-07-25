@@ -1,30 +1,40 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   CART — Bottom sheet with Lucide Icons
+   CART — Bottom sheet with Satuan Selector + Lucide Icons
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, escapeHtml, formatRupiah, toInt } from '../../utils.js';
 import { orders as ordersApi } from '../../api.js';
 import { toast, confirm } from '../../ui.js';
-import { icon, injectIcons } from '../../icons.js';
+import { icon } from '../../icons.js';
+
+// Satuan options
+var SATUAN_OPTIONS = ['PCS', 'DUS', 'KRG', 'SET', 'PACK', 'IKAT', 'GROSS'];
 
 // ─────────────────────────────────────────────────────────────────────────
 // INIT
 // ─────────────────────────────────────────────────────────────────────────
 
 export function initCart(state) {
-  $('openCartButton')?.addEventListener('click', () => openCart(state));
+
+  $('openCartButton')?.addEventListener('click', function () {
+    openCart(state);
+  });
 
   $('closeCartButton')?.addEventListener('click', closeCart);
   $('sheetOverlay')?.addEventListener('click', closeCart);
 
-  $('cartSubmitButton')?.addEventListener('click', () => confirmSubmit(state));
+  $('cartSubmitButton')?.addEventListener('click', function () {
+    confirmSubmit(state);
+  });
 
-  $('cartItems')?.addEventListener('click', (e) => {
-    const target = e.target.closest('[data-cart-action]');
+  // Cart items CLICK actions
+  $('cartItems')?.addEventListener('click', function (e) {
+
+    var target = e.target.closest('[data-cart-action]');
     if (!target) return;
 
-    const code = target.dataset.code;
-    const action = target.dataset.cartAction;
+    var code = target.dataset.code;
+    var action = target.dataset.cartAction;
 
     if (action === 'delete') {
       removeFromCart(state, code);
@@ -35,26 +45,33 @@ export function initCart(state) {
     }
   });
 
-    $('cartItems')?.addEventListener('change', (e) => {
+  // Cart items CHANGE events (qty + satuan)
+  $('cartItems')?.addEventListener('change', function (e) {
 
-    const target = e.target.closest('[data-cart-action="set-qty"]');
-    if (target) {
-      setCartQty(state, target.dataset.code, target.value);
+    // Qty change
+    var qtyTarget = e.target.closest('[data-cart-action="set-qty"]');
+    if (qtyTarget) {
+      setCartQty(state, qtyTarget.dataset.code, qtyTarget.value);
       return;
     }
 
-    // Satuan change di cart
-    const satuanTarget = e.target.closest('[data-cart-action="set-satuan"]');
+    // Satuan change
+    var satuanTarget = e.target.closest('[data-cart-action="set-satuan"]');
     if (satuanTarget) {
-      const code = satuanTarget.dataset.code;
+
+      var code = satuanTarget.dataset.code;
+
       if (state.cart[code]) {
         state.cart[code].satuan = satuanTarget.value;
         updateCartUi(state);
+        // Re-render untuk update subtotal display
+        renderCartSheet(state);
       }
     }
   });
 
-  document.addEventListener('keydown', (e) => {
+  // ESC close
+  document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape' && $('cartSheet')?.classList.contains('show')) {
       closeCart();
     }
@@ -71,20 +88,29 @@ export function addToCart(state, code) {
   updateCartUi(state);
 }
 
+
 export function updateCartUi(state) {
-  const items = Object.values(state.cart);
-  const total = items.reduce((s, i) => s + i.qty * i.harga, 0);
-  const qty = items.reduce((s, i) => s + i.qty, 0);
+
+  var items = Object.values(state.cart);
+  var total = items.reduce(function (s, i) { return s + i.qty * i.harga; }, 0);
+  var qty = items.reduce(function (s, i) { return s + i.qty; }, 0);
 
   $('cartBar')?.classList.toggle('show', items.length > 0);
-  const cartCount = $('cartCount');
-  if (cartCount) cartCount.textContent = `${qty} item · ${formatRupiah(total)}`;
 
-  const cartItemCount = $('cartItemCount');
-  if (cartItemCount) cartItemCount.textContent = `${qty} item`;
+  var cartCount = $('cartCount');
+  if (cartCount) {
+    cartCount.textContent = qty + ' item · ' + formatRupiah(total);
+  }
 
-  const cartTotal = $('cartTotal');
-  if (cartTotal) cartTotal.textContent = formatRupiah(total);
+  var cartItemCount = $('cartItemCount');
+  if (cartItemCount) {
+    cartItemCount.textContent = qty + ' item';
+  }
+
+  var cartTotal = $('cartTotal');
+  if (cartTotal) {
+    cartTotal.textContent = formatRupiah(total);
+  }
 
   validateCartStocks(state);
 }
@@ -111,107 +137,128 @@ function closeCart() {
 // ─────────────────────────────────────────────────────────────────────────
 
 function renderCartSheet(state) {
-  const items = Object.values(state.cart);
-  const wrapper = $('cartItems');
+
+  var items = Object.values(state.cart);
+  var wrapper = $('cartItems');
   if (!wrapper) return;
 
   if (!items.length) {
-    wrapper.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">${icon('cart', { size: 48, color: 'var(--muted)' })}</div>
-        <div>Keranjang kosong.</div>
-        <div style="margin-top: 8px; font-size: 12px;">Tambahkan barang dari katalog dulu ya!</div>
-      </div>
-    `;
+
+    wrapper.innerHTML = ''
+      + '<div class="empty-state">'
+      + '<div class="empty-icon">'
+      + icon('cart', { size: 48, color: 'var(--muted)' })
+      + '</div>'
+      + '<div>Keranjang kosong.</div>'
+      + '<div style="margin-top: 8px; font-size: 12px;">Tambahkan barang dari katalog dulu ya!</div>'
+      + '</div>';
+
     validateCartStocks(state);
     return;
   }
 
-  wrapper.innerHTML = items.map((item) => buildCartItem(item)).join('');
+  wrapper.innerHTML = items.map(function (item) {
+    return buildCartItem(item);
+  }).join('');
 
   bindStockInputs(state);
   validateCartStocks(state);
 }
 
+
 function buildCartItem(item) {
-  const code = escapeHtml(item.kode);
-  const gudangEmpty = isEmpty(item.stokGudang);
-  const tokoEmpty = isEmpty(item.stokToko);
 
-  return `
-    <article class="cart-item">
-      <div class="cart-info">
-        <div class="cart-name">${escapeHtml(item.nama)}</div>
-        <div class="cart-code">${code}</div>
+  var code = escapeHtml(item.kode);
+  var gudangEmpty = isEmpty(item.stokGudang);
+  var tokoEmpty = isEmpty(item.stokToko);
 
-                <div class="cart-price-row">
-          <span class="cart-quantity">
-            <button type="button" data-cart-action="decrease" data-code="${code}">
-              ${icon('minus', { size: 12 })}
-            </button>
-            <input type="number" min="1" value="${item.qty}"
-                   data-cart-action="set-qty" data-code="${code}">
-            <button type="button" data-cart-action="increase" data-code="${code}">
-              ${icon('plus', { size: 12 })}
-            </button>
-          </span>
+  // Build satuan options
+  var satuanOptionsHtml = SATUAN_OPTIONS.map(function (s) {
+    var selected = (s === item.satuan) ? ' selected' : '';
+    return '<option value="' + s + '"' + selected + '>' + s + '</option>';
+  }).join('');
 
-          <select class="cart-satuan-select"
-                  data-cart-action="set-satuan"
-                  data-code="${code}">
-            <option value="PCS" ${item.satuan === 'PCS' ? 'selected' : ''}>PCS</option>
-            <option value="DUS" ${item.satuan === 'DUS' ? 'selected' : ''}>DUS</option>
-            <option value="KRG" ${item.satuan === 'KRG' ? 'selected' : ''}>KRG</option>
-            <option value="SET" ${item.satuan === 'SET' ? 'selected' : ''}>SET</option>
-            <option value="PACK" ${item.satuan === 'PACK' ? 'selected' : ''}>PACK</option>
-            <option value="IKAT" ${item.satuan === 'IKAT' ? 'selected' : ''}>IKAT</option>
-            <option value="GROSS" ${item.satuan === 'GROSS' ? 'selected' : ''}>GROSS</option>
-          </select>
+  return ''
+    + '<article class="cart-item">'
 
-          <span>× ${formatRupiah(item.harga)}</span>
-          <span>=</span>
-          <span class="cart-subtotal">${formatRupiah(item.qty * item.harga)}</span>
-        </div>
-      </div>
+    + '<div class="cart-info">'
+    + '<div class="cart-name">' + escapeHtml(item.nama) + '</div>'
+    + '<div class="cart-code">' + code + '</div>'
 
-      <div class="cart-right">
-        <div class="stock-label">Isi stok aktual</div>
+    + '<div class="cart-price-row">'
 
-        <div class="cart-stock-row">
-          <label class="stock-group ${gudangEmpty ? 'empty' : ''}" title="Stok di Gudang Pusat">
-            <span class="stock-group-icon">${icon('warehouse', { size: 12 })}</span>
-            <input class="stock-input"
-                   type="number"
-                   min="0"
-                   placeholder="Gudang"
-                   value="${gudangEmpty ? '' : item.stokGudang}"
-                   data-stock-type="gudang"
-                   data-code="${code}">
-          </label>
+    // Qty control
+    + '<span class="cart-quantity">'
+    + '<button type="button" data-cart-action="decrease" data-code="' + code + '">'
+    + icon('minus', { size: 12 })
+    + '</button>'
+    + '<input type="number" min="1" value="' + item.qty + '"'
+    + ' data-cart-action="set-qty" data-code="' + code + '">'
+    + '<button type="button" data-cart-action="increase" data-code="' + code + '">'
+    + icon('plus', { size: 12 })
+    + '</button>'
+    + '</span>'
 
-          <label class="stock-group ${tokoEmpty ? 'empty' : ''}" title="Stok di Toko/Cabang">
-            <span class="stock-group-icon">${icon('store', { size: 12 })}</span>
-            <input class="stock-input"
-                   type="number"
-                   min="0"
-                   placeholder="Toko"
-                   value="${tokoEmpty ? '' : item.stokToko}"
-                   data-stock-type="toko"
-                   data-code="${code}">
-          </label>
-        </div>
+    // Satuan selector
+    + '<select class="cart-satuan-select"'
+    + ' data-cart-action="set-satuan"'
+    + ' data-code="' + code + '">'
+    + satuanOptionsHtml
+    + '</select>'
 
-        <button class="cart-delete"
-                type="button"
-                data-cart-action="delete"
-                data-code="${code}"
-                title="Hapus dari keranjang">
-          ${icon('trash', { size: 14 })}
-        </button>
-      </div>
-    </article>
-  `;
+    + '<span>× ' + formatRupiah(item.harga) + '</span>'
+    + '<span>=</span>'
+    + '<span class="cart-subtotal">' + formatRupiah(item.qty * item.harga) + '</span>'
+
+    + '</div>'
+    + '</div>'
+
+    + '<div class="cart-right">'
+
+    + '<div class="stock-label">Isi stok aktual</div>'
+
+    + '<div class="cart-stock-row">'
+
+    // Stok Gudang
+    + '<label class="stock-group ' + (gudangEmpty ? 'empty' : '') + '" title="Stok di Gudang Pusat">'
+    + '<span class="stock-group-icon">' + icon('warehouse', { size: 12 }) + '</span>'
+    + '<input class="stock-input"'
+    + ' type="number"'
+    + ' min="0"'
+    + ' placeholder="Gudang"'
+    + ' value="' + (gudangEmpty ? '' : item.stokGudang) + '"'
+    + ' data-stock-type="gudang"'
+    + ' data-code="' + code + '">'
+    + '</label>'
+
+    // Stok Toko
+    + '<label class="stock-group ' + (tokoEmpty ? 'empty' : '') + '" title="Stok di Toko/Cabang">'
+    + '<span class="stock-group-icon">' + icon('store', { size: 12 }) + '</span>'
+    + '<input class="stock-input"'
+    + ' type="number"'
+    + ' min="0"'
+    + ' placeholder="Toko"'
+    + ' value="' + (tokoEmpty ? '' : item.stokToko) + '"'
+    + ' data-stock-type="toko"'
+    + ' data-code="' + code + '">'
+    + '</label>'
+
+    + '</div>'
+
+    // Delete button
+    + '<button class="cart-delete"'
+    + ' type="button"'
+    + ' data-cart-action="delete"'
+    + ' data-code="' + code + '"'
+    + ' title="Hapus dari keranjang">'
+    + icon('trash', { size: 14 })
+    + '</button>'
+
+    + '</div>'
+
+    + '</article>';
 }
+
 
 function isEmpty(value) {
   return value === '' || value === undefined || value === null;
@@ -222,20 +269,24 @@ function isEmpty(value) {
 // ─────────────────────────────────────────────────────────────────────────
 
 function bindStockInputs(state) {
-  document.querySelectorAll('[data-stock-type]').forEach((input) => {
-    input.addEventListener('input', (e) => {
-      const code = input.dataset.code;
-      const type = input.dataset.stockType;
-      const value = input.value.trim();
 
-      const numeric = value === '' ? '' : Math.max(0, toInt(value, 0));
-      const field = type === 'gudang' ? 'stokGudang' : 'stokToko';
+  document.querySelectorAll('[data-stock-type]').forEach(function (input) {
+
+    input.addEventListener('input', function () {
+
+      var code = input.dataset.code;
+      var type = input.dataset.stockType;
+      var value = input.value.trim();
+
+      var numeric = value === '' ? '' : Math.max(0, toInt(value, 0));
+      var field = type === 'gudang' ? 'stokGudang' : 'stokToko';
 
       if (state.cart[code]) {
         state.cart[code][field] = numeric;
       }
 
       input.closest('.stock-group')?.classList.toggle('empty', value === '');
+
       validateCartStocks(state);
     });
   });
@@ -246,24 +297,35 @@ function bindStockInputs(state) {
 // ─────────────────────────────────────────────────────────────────────────
 
 function validateCartStocks(state) {
-  const items = Object.values(state.cart);
 
-  const gudangMissing = items.filter((i) => isEmpty(i.stokGudang)).length;
-  const tokoMissing = items.filter((i) => isEmpty(i.stokToko)).length;
-  const missing = gudangMissing + tokoMissing;
+  var items = Object.values(state.cart);
 
-  const valid = items.length > 0 && missing === 0;
+  var gudangMissing = items.filter(function (i) {
+    return isEmpty(i.stokGudang);
+  }).length;
 
-  const submitBtn = $('cartSubmitButton');
-  if (submitBtn) submitBtn.disabled = !valid;
+  var tokoMissing = items.filter(function (i) {
+    return isEmpty(i.stokToko);
+  }).length;
 
-  const warning = $('cartWarning');
-  const warningText = $('cartWarningText');
+  var missing = gudangMissing + tokoMissing;
+  var valid = items.length > 0 && missing === 0;
+
+  var submitBtn = $('cartSubmitButton');
+  if (submitBtn) {
+    submitBtn.disabled = !valid;
+  }
+
+  var warning = $('cartWarning');
+  var warningText = $('cartWarningText');
 
   if (warning && warningText) {
+
     if (!valid && items.length > 0) {
       warning.classList.add('show');
-      warningText.textContent = `Wajib isi stok gudang (${gudangMissing} kosong) dan stok toko (${tokoMissing} kosong).`;
+      warningText.textContent = 'Wajib isi stok gudang ('
+        + gudangMissing + ' kosong) dan stok toko ('
+        + tokoMissing + ' kosong).';
     } else {
       warning.classList.remove('show');
     }
@@ -277,27 +339,37 @@ function validateCartStocks(state) {
 // ─────────────────────────────────────────────────────────────────────────
 
 function clampCartQty(state, code, value) {
-  const product = state.productByCode[String(code).toUpperCase()];
-  const stock = product ? toInt(product.STOK) : 0;
-  let qty = Math.max(1, toInt(value, 1));
+
+  var product = state.productByCode[String(code).toUpperCase()];
+  var stock = product ? toInt(product.STOK) : 0;
+  var qty = Math.max(1, toInt(value, 1));
 
   if (stock > 0 && qty > stock) {
     qty = stock;
-    toast.info(`Maksimal stok ${stock}.`);
+    toast.info('Maksimal stok ' + stock + '.');
   }
 
   return qty;
 }
 
+
 function changeCartQty(state, code, delta) {
+
   if (!state.cart[code]) return;
 
-  state.cart[code].qty = clampCartQty(state, code, state.cart[code].qty + delta);
+  state.cart[code].qty = clampCartQty(
+    state,
+    code,
+    state.cart[code].qty + delta
+  );
+
   updateCartUi(state);
   renderCartSheet(state);
 }
 
+
 function setCartQty(state, code, value) {
+
   if (!state.cart[code]) return;
 
   state.cart[code].qty = clampCartQty(state, code, value);
@@ -305,19 +377,24 @@ function setCartQty(state, code, value) {
   renderCartSheet(state);
 }
 
+
 function removeFromCart(state, code) {
+
   delete state.cart[code];
   updateCartUi(state);
   renderCartSheet(state);
 
-  // Update catalog card (remove "in-cart" state)
-  const card = $(`card-${code}`);
+  // Update catalog card
+  var card = $('card-' + code);
+
   if (card) {
     card.classList.remove('in-cart');
-    const addBtn = card.querySelector('.add-button');
+
+    var addBtn = card.querySelector('.add-button');
+
     if (addBtn) {
       addBtn.classList.remove('added');
-      addBtn.innerHTML = `${icon('plus', { size: 14 })} Tambah`;
+      addBtn.innerHTML = icon('plus', { size: 14 }) + ' Tambah';
     }
   }
 
@@ -329,7 +406,8 @@ function removeFromCart(state, code) {
 // ─────────────────────────────────────────────────────────────────────────
 
 async function confirmSubmit(state) {
-  const items = Object.values(state.cart);
+
+  var items = Object.values(state.cart);
 
   if (!items.length) {
     toast.error('Keranjang kosong.');
@@ -343,16 +421,21 @@ async function confirmSubmit(state) {
     return;
   }
 
-  const total = items.reduce((s, i) => s + i.qty * i.harga, 0);
+  var total = items.reduce(function (s, i) {
+    return s + i.qty * i.harga;
+  }, 0);
 
-  const summary = items.map((i) =>
-    `• ${i.nama}: minta ${i.qty} ${i.satuan}\n   (Gudang: ${i.stokGudang}, Toko: ${i.stokToko})`
-  ).join('\n');
+  var summary = items.map(function (i) {
+    return '• ' + i.nama + ': minta ' + i.qty + ' ' + i.satuan
+      + '\n   (Gudang: ' + i.stokGudang + ', Toko: ' + i.stokToko + ')';
+  }).join('\n');
 
-  const ok = await confirm({
+  var ok = await confirm({
     icon: '🚀',
     title: 'Kirim Order ke Gudang?',
-    message: `${items.length} jenis barang · Total ${formatRupiah(total)}\n\n${summary}\n\nKirim order untuk ${state.branchId}?`,
+    message: items.length + ' jenis barang · Total ' + formatRupiah(total)
+      + '\n\n' + summary
+      + '\n\nKirim order untuk ' + state.branchId + '?',
     okText: 'Ya, Kirim',
     okVariant: 'primary',
   });
@@ -362,74 +445,88 @@ async function confirmSubmit(state) {
   await submitOrder(state, items);
 }
 
+
 async function submitOrder(state, items) {
+
   if (state.isSubmitting) return;
 
   state.isSubmitting = true;
 
-  const submitBtn = $('cartSubmitButton');
-  const originalText = submitBtn?.innerHTML;
+  var submitBtn = $('cartSubmitButton');
+  var originalText = submitBtn?.innerHTML;
 
   if (submitBtn) {
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<span class="spinner spinner-sm" style="color: #fff;"></span> Mengirim...';
   }
 
-  const userNote = $('cartNoteInput')?.value.trim() || '';
+  var userNote = $('cartNoteInput')?.value.trim() || '';
 
-  const stockNote = items.map((i) =>
-    `${i.kode}: gudang ${i.stokGudang}, toko ${i.stokToko}`
-  ).join(' | ');
+  var stockNote = items.map(function (i) {
+    return i.kode + ': gudang ' + i.stokGudang + ', toko ' + i.stokToko;
+  }).join(' | ');
 
-  const catatan = userNote
-    ? `${userNote}\n\n[STOK AKTUAL] ${stockNote}`
-    : `[STOK AKTUAL] ${stockNote}`;
+  var catatan = userNote
+    ? userNote + '\n\n[STOK AKTUAL] ' + stockNote
+    : '[STOK AKTUAL] ' + stockNote;
 
-  const payload = {
+  var payload = {
     idCabang: state.branchId,
-    catatan,
-    items: items.map((i) => ({
-      kode: i.kode,
-      nama: i.nama,
-      kategori: i.kategori,
-      qty: i.qty,
-      satuan: i.satuan,
-      harga: i.harga,
-      stokGudang: i.stokGudang,
-      stokToko: i.stokToko,
-    })),
+    catatan: catatan,
+    items: items.map(function (i) {
+      return {
+        kode: i.kode,
+        nama: i.nama,
+        kategori: i.kategori,
+        qty: i.qty,
+        satuan: i.satuan,
+        harga: i.harga,
+        stokGudang: i.stokGudang,
+        stokToko: i.stokToko,
+      };
+    }),
   };
 
   try {
-    const result = await ordersApi.submit(payload);
+
+    var result = await ordersApi.submit(payload);
 
     if (result.status === 'ok') {
+
       state.cart = {};
-      const noteInput = $('cartNoteInput');
+
+      var noteInput = $('cartNoteInput');
       if (noteInput) noteInput.value = '';
 
       closeCart();
       updateCartUi(state);
 
-      const { updateCatalog } = await import('./catalog-page.js');
-      updateCatalog(state);
+      // Re-render catalog
+      var catalogModule = await import('./catalog-page.js');
+      catalogModule.updateCatalog(state);
 
       toast.success('Order berhasil dikirim!', { duration: 4000 });
 
-      setTimeout(() => {
-        const historyTab = document.querySelector('[data-tab="history"]');
+      // Redirect ke history
+      setTimeout(function () {
+        var historyTab = document.querySelector('[data-tab="history"]');
         historyTab?.click();
       }, 1000);
+
     } else {
       toast.error(result.message || 'Gagal mengirim order.');
     }
+
   } catch (error) {
     toast.error(error.message || 'Terjadi kesalahan.');
   } finally {
+
     state.isSubmitting = false;
+
     if (submitBtn) {
       submitBtn.disabled = false;
-      submitBtn.innerHTML = originalText || `${icon('send', { size: 18 })} Kirim Order ke Gudang`;
+      submitBtn.innerHTML = originalText
+        || (icon('send', { size: 18 }) + ' Kirim Order ke Gudang');
     }
   }
 }
