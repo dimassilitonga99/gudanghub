@@ -1119,50 +1119,37 @@
       z-index: 3;
     }
 
-        /* ── INDIVIDUAL CARD (FLIP) ── */
+            /* ── CARD FLIP (RINGAN — Fade + Scale) ── */
     .tim-card {
       position: relative;
-      perspective: 1000px;
       cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .tim-card-inner {
       position: relative;
       width: 100%;
       height: 100%;
-      transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-      transform-style: preserve-3d;
     }
 
-    /* Saat di-flip */
-    .tim-card.flipped .tim-card-inner {
-      transform: rotateY(180deg);
-    }
-
-    /* Sisi depan & belakang */
-    .tim-card-front,
-    .tim-card-front-side,
-    .tim-card-back {
-      -webkit-backface-visibility: hidden;
-      backface-visibility: hidden;
-    }
-
+    /* Sisi depan */
     .tim-card-front,
     .tim-card-front-side {
       position: relative;
+      transition: opacity 0.3s ease, transform 0.3s ease;
     }
 
+    /* Sisi belakang */
     .tim-card-back {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      transform: rotateY(180deg);
       border-radius: clamp(20px, 3vw, 36px);
       border: clamp(4px, 0.8vw, 8px) solid #D4AF37;
       background: linear-gradient(
-        135deg,
+        150deg,
         #0B5A3A 0%,
         #0E6B45 40%,
         #0B3A25 100%
@@ -1171,14 +1158,17 @@
       align-items: center;
       justify-content: center;
       padding: clamp(12px, 2vw, 24px);
-      box-shadow:
-        0 20px 50px -10px rgba(0, 0, 0, 0.5),
-        0 0 0 1px rgba(212, 175, 55, 0.3),
-        inset 0 0 30px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.5);
       overflow: hidden;
+
+      /* HIDDEN by default */
+      opacity: 0;
+      transform: scale(0.95);
+      pointer-events: none;
+      transition: opacity 0.3s ease, transform 0.3s ease;
     }
 
-    /* Efek shine pada sisi belakang */
+    /* Efek shine */
     .tim-card-back::before {
       content: '';
       position: absolute;
@@ -1188,13 +1178,48 @@
       height: 200px;
       background: radial-gradient(
         circle,
-        rgba(212, 175, 55, 0.15),
+        rgba(212, 175, 55, 0.12),
         transparent 70%
       );
       pointer-events: none;
     }
 
-    /* Quote content */
+    /* ═══ SAAT DI-FLIP ═══ */
+
+    /* Foto tersembunyi */
+    .tim-card.flipped .tim-card-front,
+    .tim-card.flipped .tim-card-front-side {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+
+    /* Quote muncul */
+    .tim-card.flipped .tim-card-back {
+      opacity: 1;
+      transform: scale(1);
+      pointer-events: auto;
+    }
+
+    /* ═══ HOVER EFFECT ═══ */
+
+    .tim-card:not(.flipped):hover {
+      transform: translateY(-6px);
+      z-index: 100;
+    }
+
+    .tim-card:not(.flipped):hover .tim-card-frame {
+      box-shadow:
+        0 30px 60px -10px rgba(0, 0, 0, 0.6),
+        0 0 0 2px rgba(212, 175, 55, 0.4);
+    }
+
+    .tim-card.flipped:hover {
+      transform: scale(1.03);
+      z-index: 100;
+    }
+
+    /* ═══ QUOTE CONTENT ═══ */
+
     .tim-card-quote {
       text-align: center;
       position: relative;
@@ -1203,11 +1228,11 @@
 
     .tim-quote-mark {
       font-family: var(--font-serif);
-      font-size: clamp(36px, 5vw, 56px);
+      font-size: clamp(32px, 4vw, 50px);
       color: #D4AF37;
       line-height: 0.5;
       margin-bottom: 8px;
-      opacity: 0.6;
+      opacity: 0.5;
     }
 
     .tim-card-quote p {
@@ -1216,7 +1241,7 @@
       font-size: clamp(10px, 1.3vw, 15px);
       color: rgba(255, 255, 255, 0.9);
       line-height: 1.6;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .tim-quote-author {
@@ -1228,46 +1253,41 @@
       font-weight: 600;
     }
 
-    /* Hover hint (sebelum flip) */
-    .tim-card:not(.flipped):hover .tim-card-frame {
-      box-shadow:
-        0 30px 60px -10px rgba(0, 0, 0, 0.6),
-        0 0 0 2px rgba(212, 175, 55, 0.4),
-        0 0 30px rgba(14, 107, 69, 0.3);
-    }
+    /* ═══ HINT TEXT ═══ */
 
-    .tim-card:not(.flipped):hover {
-      transform: translateY(-8px) scale(1.03);
-      z-index: 100;
-    }
-
-    /* Saat sudah flip, hover effect berbeda */
-    .tim-card.flipped:hover {
-      transform: scale(1.05);
-      z-index: 100;
-    }
-
-    /* Hint text (klik untuk balik) */
     .tim-card::after {
-      content: 'Klik untuk balik';
+      content: 'Ketuk untuk balik';
       position: absolute;
-      bottom: -20px;
+      bottom: -22px;
       left: 50%;
       transform: translateX(-50%);
       font-size: 9px;
-      color: rgba(255, 255, 255, 0.3);
+      color: rgba(255, 255, 255, 0.25);
       white-space: nowrap;
-      opacity: 0;
-      transition: opacity 0.3s ease;
       pointer-events: none;
-    }
-
-    .tim-card:hover::after {
-      opacity: 1;
+      transition: opacity 0.2s ease;
     }
 
     .tim-card.flipped::after {
-      content: 'Klik untuk kembali';
+      content: 'Ketuk untuk kembali';
+    }
+
+    /* Desktop: show hint on hover */
+    @media (hover: hover) {
+      .tim-card::after {
+        opacity: 0;
+      }
+
+      .tim-card:hover::after {
+        opacity: 1;
+      }
+    }
+
+    /* Mobile: always show hint */
+    @media (hover: none) {
+      .tim-card::after {
+        opacity: 0.5;
+      }
     }
 
     .tim-card:hover {
