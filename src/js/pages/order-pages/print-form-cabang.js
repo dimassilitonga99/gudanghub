@@ -226,20 +226,20 @@ function renderPreview() {
 
   preview.innerHTML = ''
 
-    // ══════ HEADER ══════
+        // ══════ HEADER ══════
     + '<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse; margin-bottom:0;">'
     + '<tr>'
 
-    // FORM ORDER BARANG
-    + '<td style="vertical-align:bottom; padding-bottom:14px;">'
+    // FORM ORDER BARANG (sejajar atas dengan logo)
+    + '<td style="vertical-align:top; padding-bottom:14px; padding-top:4px;">'
     + '<div style="font-size:42px; font-weight:900; line-height:1; letter-spacing:-1px;">'
     + '<span style="color:#E67E22;">FORM</span>'
     + '<span style="color:#1B4F94;"> ORDER BARANG</span>'
     + '</div>'
     + '</td>'
 
-    // LOGO NK (dari file gambar)
-    + '<td style="vertical-align:bottom; text-align:right; width:180px; padding-bottom:14px;">'
+    // LOGO NK (sejajar atas)
+    + '<td style="vertical-align:top; text-align:right; width:180px; padding-bottom:14px;">'
     + '<img src="./public/images/logo/logo-nk.png"'
     + ' alt="Logo Nasional Kitchen"'
     + ' style="width:160px; height:auto; display:block; margin-left:auto;"'
