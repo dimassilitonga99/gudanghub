@@ -1275,13 +1275,39 @@
       text-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
     }
 
-    .tim-subtitle {
+        .tim-subtitle {
       font-size: clamp(13px, 1.6vw, 16px);
       color: rgba(255, 255, 255, 0.6);
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      max-width: 550px;
+      margin: 0 auto;
+      line-height: 1.7;
+      text-align: center;
+    }
+        .tim-quote {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: clamp(14px, 1.8vw, 18px);
+      color: rgba(255, 255, 255, 0.5);
+      max-width: 600px;
+      margin: 16px auto 0;
+      line-height: 1.7;
+      text-align: center;
+      position: relative;
+      padding: 0 20px;
     }
 
+    .tim-quote::before {
+      content: '"';
+      position: absolute;
+      left: 0;
+      top: -10px;
+      font-size: 40px;
+      color: #D4AF37;
+      opacity: 0.4;
+      font-family: var(--font-serif);
+      line-height: 1;
+    }
     /* ── INFO BAR ── */
     .tim-info-bar {
       display: flex;
@@ -2248,10 +2274,6 @@
                   <span>CEO</span>
                 </div>
               </div>
-              <div class="tim-badge">
-                <span class="tim-badge-role">CEO</span>
-                <span class="tim-badge-name">Nama Pimpinan</span>
-              </div>
             </div>
           </div>
 
@@ -2270,10 +2292,6 @@
                   <span>MGR</span>
                 </div>
               </div>
-              <div class="tim-badge tim-badge-left">
-                <span class="tim-badge-role">SPV</span>
-                <span class="tim-badge-name">Nama Manager 1</span>
-              </div>
             </div>
 
             <div class="tim-card tim-card-mid">
@@ -2287,10 +2305,6 @@
                 <div class="tim-card-placeholder" style="display:none;">
                   <span>MGR</span>
                 </div>
-              </div>
-              <div class="tim-badge">
-                <span class="tim-badge-role">SPV</span>
-                <span class="tim-badge-name">Nama Manager 2</span>
               </div>
             </div>
 
@@ -2311,10 +2325,6 @@
                   <span>PIC</span>
                 </div>
               </div>
-              <div class="tim-badge tim-badge-left">
-                <span class="tim-badge-role">PIC</span>
-                <span class="tim-badge-name">Nama Staff 1</span>
-              </div>
             </div>
 
             <div class="tim-card tim-card-front tim-card-center">
@@ -2328,10 +2338,6 @@
                 <div class="tim-card-placeholder" style="display:none;">
                   <span>PIC</span>
                 </div>
-              </div>
-              <div class="tim-badge">
-                <span class="tim-badge-role">GDKD</span>
-                <span class="tim-badge-name">Nama Staff 2</span>
               </div>
             </div>
 
@@ -2347,37 +2353,38 @@
                   <span>PIC</span>
                 </div>
               </div>
-              <div class="tim-badge">
-                <span class="tim-badge-role">PIC</span>
-                <span class="tim-badge-name">Nama Staff 3</span>
-              </div>
             </div>
 
           </div>
 
         </div>
 
-        <!-- JUDUL -->
+                <!-- JUDUL -->
         <div class="tim-title-block reveal" data-delay="1">
           <h2 class="tim-title" id="tim-title">
             <span class="tim-title-line1">TIM</span>
-            <span class="tim-title-line2">LEADERSHIP KAMI</span>
+            <span class="tim-title-line2">BALIK LAYAR</span>
           </h2>
           <p class="tim-subtitle">
-            PT Central Perabot Utama — Nasional Kitchen
+            Di balik setiap order yang lancar, ada manusia-manusia luar biasa
+            yang bekerja tanpa henti — memastikan setiap detail sempurna.
+          </p>
+          <p class="tim-quote">
+            "Bukan sekadar sistem. Kami adalah keluarga yang membangun
+            kepercayaan satu order di satu waktu."
           </p>
         </div>
 
-        <!-- INFO DETAIL -->
+                <!-- INFO DETAIL -->
         <div class="tim-info-bar reveal" data-delay="2">
           <div class="tim-info-item">
-            <span class="tim-info-label">Perusahaan</span>
-            <span class="tim-info-value">PT Central Perabot Utama</span>
+            <span class="tim-info-label">Visi</span>
+            <span class="tim-info-value">Satu Gudang, Empat Cabang, Satu Tujuan</span>
           </div>
           <div class="tim-info-divider"></div>
           <div class="tim-info-item">
-            <span class="tim-info-label">Lokasi</span>
-            <span class="tim-info-value">Kupang, NTT</span>
+            <span class="tim-info-label">Misi</span>
+            <span class="tim-info-value">Melayani NTT dengan Sepenuh Hati</span>
           </div>
         </div>
 
