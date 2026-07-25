@@ -35,10 +35,22 @@ export function initCart(state) {
     }
   });
 
-  $('cartItems')?.addEventListener('change', (e) => {
+    $('cartItems')?.addEventListener('change', (e) => {
+
     const target = e.target.closest('[data-cart-action="set-qty"]');
     if (target) {
       setCartQty(state, target.dataset.code, target.value);
+      return;
+    }
+
+    // Satuan change di cart
+    const satuanTarget = e.target.closest('[data-cart-action="set-satuan"]');
+    if (satuanTarget) {
+      const code = satuanTarget.dataset.code;
+      if (state.cart[code]) {
+        state.cart[code].satuan = satuanTarget.value;
+        updateCartUi(state);
+      }
     }
   });
 
@@ -132,7 +144,7 @@ function buildCartItem(item) {
         <div class="cart-name">${escapeHtml(item.nama)}</div>
         <div class="cart-code">${code}</div>
 
-        <div class="cart-price-row">
+                <div class="cart-price-row">
           <span class="cart-quantity">
             <button type="button" data-cart-action="decrease" data-code="${code}">
               ${icon('minus', { size: 12 })}
@@ -143,6 +155,19 @@ function buildCartItem(item) {
               ${icon('plus', { size: 12 })}
             </button>
           </span>
+
+          <select class="cart-satuan-select"
+                  data-cart-action="set-satuan"
+                  data-code="${code}">
+            <option value="PCS" ${item.satuan === 'PCS' ? 'selected' : ''}>PCS</option>
+            <option value="DUS" ${item.satuan === 'DUS' ? 'selected' : ''}>DUS</option>
+            <option value="KRG" ${item.satuan === 'KRG' ? 'selected' : ''}>KRG</option>
+            <option value="SET" ${item.satuan === 'SET' ? 'selected' : ''}>SET</option>
+            <option value="PACK" ${item.satuan === 'PACK' ? 'selected' : ''}>PACK</option>
+            <option value="IKAT" ${item.satuan === 'IKAT' ? 'selected' : ''}>IKAT</option>
+            <option value="GROSS" ${item.satuan === 'GROSS' ? 'selected' : ''}>GROSS</option>
+          </select>
+
           <span>× ${formatRupiah(item.harga)}</span>
           <span>=</span>
           <span class="cart-subtotal">${formatRupiah(item.qty * item.harga)}</span>
