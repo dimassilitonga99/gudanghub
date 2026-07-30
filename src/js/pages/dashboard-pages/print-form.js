@@ -1,687 +1,928 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   PRINT FORM — Form Order Barang printable (NK Style)
-   Hanya untuk dashboard admin
+   PRINT FORM ADMIN
+   
+   Fitur:
+   - Preview form order (NK Style)
+   - Print / Save as PDF (via browser print)
+   
+   Logo dari file: ./public/images/logo/logo-nk.png
    ═══════════════════════════════════════════════════════════════════════ */
 
-import { $, escapeHtml, formatWita, parseAnyDate, toNumber } from '../../utils.js';
+import {
+  $,
+  escapeHtml,
+  formatWita,
+  parseAnyDate,
+  toNumber,
+} from '../../utils.js';
+
 import { CABANG } from '../../config.js';
 import { icon } from '../../icons.js';
 
+
 // ─────────────────────────────────────────────────────────────────────────
-// STATE
+//  STATE
 // ─────────────────────────────────────────────────────────────────────────
 
-let printState = {
+var printState = {
   order: null,
   items: [],
 };
 
+
 // ─────────────────────────────────────────────────────────────────────────
-// INIT PRINT MODAL
+//  CELL STYLES (konsisten untuk browser & html2canvas)
+// ─────────────────────────────────────────────────────────────────────────
+
+var CELL_STYLE = ''
+  + 'padding: 8px 6px;'
+  + ' border: 1px solid #000;'
+  + ' font-family: Arial, sans-serif;'
+  + ' font-size: 12px;'
+  + ' vertical-align: middle;'
+  + ' text-align: center;';
+
+var HEADER_CELL_STYLE = ''
+  + 'padding: 8px 6px;'
+  + ' border: 1px solid #000;'
+  + ' font-family: Arial, sans-serif;'
+  + ' font-size: 12px;'
+  + ' font-weight: 700;'
+  + ' text-align: center;'
+  + ' vertical-align: middle;'
+  + ' line-height: 1.2;';
+
+var SIGN_CELL_STYLE = ''
+  + 'text-align: center;'
+  + ' font-family: Arial, sans-serif;'
+  + ' vertical-align: top;';
+
+
+// ─────────────────────────────────────────────────────────────────────────
+//  INIT MODAL
 // ─────────────────────────────────────────────────────────────────────────
 
 export function initPrintForm() {
-  // Buat modal container di body
-  if ($('printModalContainer')) return;
 
-  const container = document.createElement('div');
+  // Cegah duplikat
+  if ($('printModalContainer')) {
+    return;
+  }
+
+  // Buat container
+  var container = document.createElement('div');
   container.id = 'printModalContainer';
   document.body.appendChild(container);
 
-  container.innerHTML = `
-    <div class="overlay print-overlay" id="printOverlay" role="dialog" aria-modal="true">
-      <div class="modal modal-xl print-modal">
+  // Build modal HTML
+  var modalHtml = ''
 
-        <!-- MODAL HEADER -->
-        <header class="modal-header print-modal-header">
-          <div class="modal-title" id="printModalTitle">Preview Form Order</div>
-          <div class="print-modal-actions">
-            <button class="btn-print-action" id="btnDoPrint" type="button" title="Print">
-              ${icon('download', { size: 16 })}
-              Print / PDF
-            </button>
-            <button class="modal-close" id="printModalClose" type="button" aria-label="Tutup">
-              ${icon('close', { size: 16 })}
-            </button>
-          </div>
-        </header>
+    // Overlay
+    + '<div'
+    + '  class="overlay print-overlay"'
+    + '  id="printOverlay"'
+    + '  role="dialog"'
+    + '  aria-modal="true"'
+    + '>'
 
-        <!-- PREVIEW CONTENT -->
-        <div class="modal-body print-modal-body" id="printModalBody">
-          <div id="printPreview"></div>
-        </div>
-      </div>
-    </div>
-  `;
+    // Modal box
+    + '<div class="modal modal-xl print-modal">'
 
+    // ── Header ──
+    + '<header class="modal-header print-modal-header">'
+
+    + '<div class="modal-title" id="printModalTitle">'
+    + 'Preview Form Order'
+    + '</div>'
+
+    + '<div class="print-modal-actions">'
+
+    // Tombol Print / PDF
+    + '<button'
+    + '  class="btn-print-action"'
+    + '  id="btnDoPrint"'
+    + '  type="button"'
+    + '  title="Print / PDF"'
+    + '>'
+    + icon('download', { size: 16 })
+    + ' Print / PDF'
+    + '</button>'
+
+    // Tombol Close
+    + '<button'
+    + '  class="modal-close"'
+    + '  id="printModalClose"'
+    + '  type="button"'
+    + '  aria-label="Tutup"'
+    + '>'
+    + icon('close', { size: 16 })
+    + '</button>'
+
+    + '</div>'  // end actions
+    + '</header>'
+
+    // ── Body ──
+    + '<div'
+    + '  class="modal-body print-modal-body"'
+    + '  id="printModalBody"'
+    + '>'
+    + '<div id="printPreview"></div>'
+    + '</div>'
+
+    + '</div>'  // end modal
+    + '</div>';  // end overlay
+
+  container.innerHTML = modalHtml;
+
+  // Add CSS
   addPrintStyles();
 
+  // ── Event Listeners ──
+
   $('printModalClose')?.addEventListener('click', closePrintModal);
+
   $('btnDoPrint')?.addEventListener('click', doPrint);
-  $('printOverlay')?.addEventListener('click', (e) => {
-    if (e.target.id === 'printOverlay') closePrintModal();
+
+  $('printOverlay')?.addEventListener('click', function (e) {
+    if (e.target.id === 'printOverlay') {
+      closePrintModal();
+    }
   });
 
-  // Keyboard: Ctrl+P saat modal open
-  document.addEventListener('keydown', (e) => {
-    if ($('printOverlay')?.classList.contains('show')) {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
-        e.preventDefault();
-        doPrint();
-      }
-      if (e.key === 'Escape') {
-        closePrintModal();
-      }
+  document.addEventListener('keydown', function (e) {
+
+    if (!$('printOverlay')?.classList.contains('show')) {
+      return;
+    }
+
+    if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+      e.preventDefault();
+      doPrint();
+    }
+
+    if (e.key === 'Escape') {
+      closePrintModal();
     }
   });
 }
 
+
 // ─────────────────────────────────────────────────────────────────────────
-// STYLES
+//  CSS STYLES
 // ─────────────────────────────────────────────────────────────────────────
 
 function addPrintStyles() {
-  if (document.getElementById('printFormStyles')) return;
 
-  const style = document.createElement('style');
+  if (document.getElementById('printFormStyles')) {
+    return;
+  }
+
+  var style = document.createElement('style');
   style.id = 'printFormStyles';
-  style.textContent = `
-    /* ═══ MODAL WRAPPER ═══ */
-    .print-overlay {
-      background: rgba(0,0,0,0.85) !important;
-    }
 
-    .print-modal {
-      max-width: 950px !important;
-      background: #f0f0f0 !important;
-      padding: 0 !important;
-      max-height: calc(100dvh - 40px) !important;
-    }
+  style.textContent = ''
 
-    .print-modal-header {
-      background: var(--ink-2) !important;
-      color: var(--text) !important;
-      padding: 12px 20px !important;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
+    // Overlay
+    + '.print-overlay {'
+    + '  background: rgba(0, 0, 0, 0.85) !important;'
+    + '}'
 
-    .print-modal-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    // Modal
+    + '.print-modal {'
+    + '  max-width: 950px !important;'
+    + '  background: #f0f0f0 !important;'
+    + '  padding: 0 !important;'
+    + '  max-height: calc(100dvh - 40px) !important;'
+    + '}'
 
-    .btn-print-action {
-      background: linear-gradient(135deg, var(--orange), var(--orange-light));
-      color: #fff;
-      border: 0;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-family: inherit;
-      transition: transform 0.15s;
-    }
+    // Header
+    + '.print-modal-header {'
+    + '  background: var(--ink-2) !important;'
+    + '  color: var(--text) !important;'
+    + '  padding: 12px 20px !important;'
+    + '  display: flex;'
+    + '  align-items: center;'
+    + '  justify-content: space-between;'
+    + '  gap: 12px;'
+    + '}'
 
-    .btn-print-action:hover {
-      transform: translateY(-1px);
-    }
+    // Actions
+    + '.print-modal-actions {'
+    + '  display: flex;'
+    + '  align-items: center;'
+    + '  gap: 8px;'
+    + '}'
 
-    .print-modal-body {
-      background: #e0e0e0 !important;
-      padding: 20px !important;
-      overflow-y: auto;
-    }
+    // Button Print
+    + '.btn-print-action {'
+    + '  background: linear-gradient(135deg, var(--orange), var(--orange-light));'
+    + '  color: #fff;'
+    + '  border: 0;'
+    + '  padding: 8px 16px;'
+    + '  border-radius: 8px;'
+    + '  font-size: 13px;'
+    + '  font-weight: 700;'
+    + '  cursor: pointer;'
+    + '  display: inline-flex;'
+    + '  align-items: center;'
+    + '  gap: 6px;'
+    + '  font-family: inherit;'
+    + '  transition: transform 0.15s;'
+    + '}'
 
-    /* ═══ PREVIEW PAPER (A4 Style) ═══ */
-    #printPreview {
-      background: #fff;
-      color: #000;
-      padding: 30px 35px;
-      max-width: 850px;
-      margin: 0 auto;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-      font-family: Arial, sans-serif;
-      font-size: 12px;
-      min-height: 1100px;
-    }
+    + '.btn-print-action:hover {'
+    + '  transform: translateY(-1px);'
+    + '}'
 
-    /* Header form */
-    .pf-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      padding-bottom: 12px;
-      border-bottom: 1px solid #000;
-      margin-bottom: 12px;
-    }
+    // Body
+    + '.print-modal-body {'
+    + '  background: #e0e0e0 !important;'
+    + '  padding: 20px !important;'
+    + '  overflow-y: auto;'
+    + '}'
 
-    .pf-title {
-      font-size: 44px;
-      font-weight: 900;
-      line-height: 1;
-      letter-spacing: -1px;
-    }
+    // Preview paper
+    + '#printPreview {'
+    + '  background: #fff;'
+    + '  color: #000;'
+    + '  padding: 30px 35px;'
+    + '  max-width: 850px;'
+    + '  margin: 0 auto;'
+    + '  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);'
+    + '  font-family: Arial, sans-serif;'
+    + '  font-size: 12px;'
+    + '  min-height: 600px;'
+    + '}'
 
-    .pf-title-form { color: #E67E22; }
-    .pf-title-order { color: #1B4F94; }
+    // ── Print media ──
+    + '@media print {'
 
-    .pf-logo {
-      text-align: center;
-    }
+    + '  * {'
+    + '    -webkit-print-color-adjust: exact !important;'
+    + '    print-color-adjust: exact !important;'
+    + '  }'
 
-    .pf-logo-nk {
-      font-size: 62px;
-      font-weight: 900;
-      line-height: 0.9;
-      letter-spacing: -5px;
-      font-family: 'Arial Black', Arial, sans-serif;
-    }
+    + '  body > *:not(#printModalContainer) {'
+    + '    display: none !important;'
+    + '  }'
 
-    .pf-logo-nk .n { color: #000; }
-    .pf-logo-nk .k { color: #E63329; }
+    + '  #printModalContainer,'
+    + '  .print-overlay,'
+    + '  .print-modal {'
+    + '    position: static !important;'
+    + '    max-width: 100% !important;'
+    + '    max-height: none !important;'
+    + '    background: #fff !important;'
+    + '    box-shadow: none !important;'
+    + '    opacity: 1 !important;'
+    + '    pointer-events: auto !important;'
+    + '    transform: none !important;'
+    + '  }'
 
-    .pf-logo-text {
-      background: #1B2C5C;
-      padding: 5px 14px;
-      margin-top: 2px;
-    }
+    + '  .print-modal-header,'
+    + '  .print-modal-actions {'
+    + '    display: none !important;'
+    + '  }'
 
-    .pf-logo-text-1 {
-      color: #fff;
-      font-size: 14px;
-      font-weight: 900;
-      letter-spacing: 2px;
-      line-height: 1;
-    }
+    + '  .print-modal-body {'
+    + '    background: #fff !important;'
+    + '    padding: 0 !important;'
+    + '    overflow: visible !important;'
+    + '  }'
 
-    .pf-logo-text-2 {
-      color: #fff;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 3px;
-      line-height: 1;
-      margin-top: 2px;
-    }
+    + '  #printPreview {'
+    + '    box-shadow: none !important;'
+    + '    padding: 15px 20px !important;'
+    + '  }'
 
-    .pf-logo-tagline {
-      margin-top: 3px;
-      font-size: 8px;
-      font-weight: 700;
-      color: #1B2C5C;
-      letter-spacing: 0.3px;
-    }
+    + '  @page {'
+    + '    size: A4;'
+    + '    margin: 12mm;'
+    + '  }'
 
-    /* Info section */
-    .pf-info {
-      margin-bottom: 12px;
-    }
+    + '}'
 
-    .pf-info-row {
-      display: flex;
-      gap: 20px;
-      padding: 3px 0;
-      font-size: 13px;
-    }
+    // ── Responsive ──
+    + '@media (max-width: 768px) {'
 
-    .pf-info-label {
-      font-weight: 700;
-      min-width: 130px;
-    }
+    + '  .print-modal {'
+    + '    max-width: calc(100vw - 24px) !important;'
+    + '  }'
 
-    /* Table */
-    .pf-table {
-      width: 100%;
-      border-collapse: collapse;
-      border: 1px solid #000;
-      margin-bottom: 30px;
-    }
+    + '  #printPreview {'
+    + '    padding: 20px 15px;'
+    + '    font-size: 11px;'
+    + '  }'
 
-    .pf-table thead {
-      background: #B4D6F0;
-    }
+    + '}';
 
-    .pf-table th {
-      padding: 8px 4px;
-      border: 1px solid #000;
-      font-size: 12px;
-      font-weight: 700;
-      text-align: center;
-      line-height: 1.2;
-      color: #000;
-    }
-
-    .pf-table td {
-      padding: 5px 4px;
-      border: 1px solid #000;
-      font-size: 12px;
-      text-align: center;
-      color: #000;
-    }
-
-    .pf-table td.jml-order {
-      color: #00B050;
-      font-weight: 600;
-    }
-
-    .pf-table td.text-left {
-      text-align: left;
-      padding-left: 10px;
-    }
-
-    .pf-table td.jenis {
-      font-weight: 700;
-    }
-
-    /* Column widths */
-    .pf-th-stock-sistem { width: 80px; }
-    .pf-th-stock-gudang { width: 80px; }
-    .pf-th-stock-rak { width: 75px; }
-    .pf-th-jml-order { width: 85px; }
-    .pf-th-kode { width: 100px; }
-    .pf-th-jenis { width: 100px; }
-
-    /* Signature section */
-    .pf-signature {
-      border: 1px solid #000;
-      margin-top: 20px;
-    }
-
-    .pf-signature-row {
-      display: flex;
-    }
-
-    .pf-signature-cell {
-      flex: 1;
-      padding: 18px 25px;
-      text-align: center;
-    }
-
-    .pf-signature-cell:first-child { text-align: left; }
-    .pf-signature-cell:last-child { text-align: right; }
-
-    .pf-signature-label {
-      font-size: 13px;
-      color: #000;
-    }
-
-    .pf-signature-space {
-      padding: 32px 0;
-    }
-
-    .pf-signature-line {
-      font-size: 13px;
-      color: #000;
-      margin-bottom: 4px;
-    }
-
-    .pf-signature-role {
-      font-size: 14px;
-      font-weight: 900;
-      color: #000;
-    }
-
-        /* ═══ PRINT MEDIA QUERY ═══ */
-    @media print {
-      /* FORCE PRINT COLORS (Chrome, Safari, Edge, Firefox) */
-      * {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-        color-adjust: exact !important;
-      }
-
-      html, body {
-        background: #fff !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-      }
-
-      /* Hide semua kecuali print preview */
-      body > *:not(#printModalContainer) {
-        display: none !important;
-      }
-
-      #printModalContainer,
-      .print-overlay,
-      .print-modal {
-        position: static !important;
-        max-width: 100% !important;
-        max-height: none !important;
-        background: #fff !important;
-        box-shadow: none !important;
-        opacity: 1 !important;
-        pointer-events: auto !important;
-        transform: none !important;
-      }
-
-      .print-modal-header,
-      .print-modal-actions {
-        display: none !important;
-      }
-
-      .print-modal-body {
-        background: #fff !important;
-        padding: 0 !important;
-        overflow: visible !important;
-      }
-
-      #printPreview {
-        box-shadow: none !important;
-        padding: 15px 20px !important;
-        max-width: 100% !important;
-        margin: 0 !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-      }
-
-      /* FORCE COLORS untuk semua elemen preview */
-      .pf-title-form { color: #E67E22 !important; }
-      .pf-title-order { color: #1B4F94 !important; }
-      .pf-logo-nk .n { color: #000 !important; }
-      .pf-logo-nk .k { color: #E63329 !important; }
-      .pf-logo-text {
-        background: #1B2C5C !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-      }
-      .pf-logo-text-1,
-      .pf-logo-text-2 { color: #fff !important; }
-      .pf-logo-tagline { color: #1B2C5C !important; }
-
-      .pf-table thead {
-        background: #B4D6F0 !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-      }
-
-      .pf-table th,
-      .pf-table td {
-        border: 1px solid #000 !important;
-        color: #000 !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-      }
-
-      .pf-table td.jml-order {
-        color: #00B050 !important;
-        font-weight: 600 !important;
-      }
-
-      .pf-signature,
-      .pf-signature-cell {
-        border-color: #000 !important;
-        color: #000 !important;
-      }
-
-      @page {
-        size: A4;
-        margin: 12mm;
-      }
-    }
-
-     
-    /* ═══ RESPONSIVE ═══ */
-    @media (max-width: 768px) {
-      .print-modal {
-        max-width: calc(100vw - 24px) !important;
-      }
-
-      #printPreview {
-        padding: 20px 15px;
-        font-size: 11px;
-      }
-
-      .pf-title {
-        font-size: 26px;
-      }
-
-      .pf-logo-nk {
-        font-size: 40px;
-      }
-
-      .pf-info-row {
-        flex-direction: column;
-        gap: 4px;
-      }
-
-      .pf-table {
-        font-size: 10px;
-      }
-
-      .pf-table th,
-      .pf-table td {
-        padding: 4px 2px;
-        font-size: 10px;
-      }
-    }
-  `;
   document.head.appendChild(style);
 }
 
+
 // ─────────────────────────────────────────────────────────────────────────
-// SHOW PRINT MODAL
+//  SHOW MODAL
 // ─────────────────────────────────────────────────────────────────────────
 
 export function showPrintForm(order, items) {
-  if (!order || !items) return;
+
+  if (!order || !items) {
+    return;
+  }
 
   printState.order = order;
-  printState.items = items.filter((i) => i.itemStatus !== 'DELETED');
+
+  // Filter: hanya tampilkan yang tidak DELETED
+  printState.items = items.filter(function (i) {
+    return i.itemStatus !== 'DELETED';
+  });
 
   renderPreview();
+  openModal();
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────
+//  OPEN / CLOSE MODAL
+// ─────────────────────────────────────────────────────────────────────────
+
+function openModal() {
 
   $('printOverlay')?.classList.add('show');
   document.body.style.overflow = 'hidden';
 }
 
+
 function closePrintModal() {
+
   $('printOverlay')?.classList.remove('show');
   document.body.style.overflow = '';
 }
 
+
 // ─────────────────────────────────────────────────────────────────────────
-// RENDER PREVIEW
+//  RENDER PREVIEW
 // ─────────────────────────────────────────────────────────────────────────
 
 function renderPreview() {
-  const preview = $('printPreview');
-  if (!preview) return;
 
-  const { order, items } = printState;
-  const cabang = CABANG[order.ID_CABANG] || { nama: '-', pic: '-' };
-  const pic = String(cabang.pic || 'SUPERVISOR').toUpperCase();
+  var preview = $('printPreview');
 
-    // Nomor order sequential per bulan
-  const nomorOrder = getSequentialNumber(order);
-
-  // Format tanggal
-  const hariID = ['MINGGU','SENIN','SELASA','RABU','KAMIS','JUMAT','SABTU'];
-  const date = parseAnyDate(order.TANGGAL_ORDER) || new Date();
-  const hari = hariID[date.getDay()];
-  const tglFormatted = `${hari}, ${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}/${date.getFullYear()}`;
-
-  const rows = items.map((item) => {
-    const qty = toNumber(item.qty);
-    const satuan = String(item.satuan || 'PCS').toUpperCase();
-    const stokSistem = getStokBarang(item.kode);
-    const stokGudang = item.stokGudang !== undefined && item.stokGudang !== '' ? String(item.stokGudang) : '0';
-    const stokRak = item.stokToko !== undefined && item.stokToko !== '' ? String(item.stokToko) : '0';
-    const jenis = String(item.kategori || 'ELEKTRONIK').toUpperCase();
-
-    return `
-      <tr>
-        <td>${stokSistem}</td>
-        <td>${stokGudang}</td>
-        <td>${stokRak}</td>
-        <td class="jml-order">${qty} ${satuan}</td>
-        <td class="text-left">${escapeHtml(item.kode || '')}</td>
-        <td class="text-left">${escapeHtml((item.nama || '').toUpperCase())}</td>
-        <td class="jenis">${escapeHtml(jenis)}</td>
-      </tr>
-    `;
-  }).join('');
-
-  preview.innerHTML = `
-    <!-- HEADER -->
-    <div class="pf-header">
-      <div class="pf-title">
-        <span class="pf-title-form">FORM</span>
-        <span class="pf-title-order"> ORDER BARANG</span>
-      </div>
-
-      <div class="pf-logo">
-        <div class="pf-logo-nk">
-          <span class="n">N</span><span class="k">K</span>
-        </div>
-        <div class="pf-logo-text">
-          <div class="pf-logo-text-1">NASIONAL</div>
-          <div class="pf-logo-text-2">KITCHEN</div>
-        </div>
-        <div class="pf-logo-tagline">PILIHAN BIJAK, HARGA TERBAIK</div>
-      </div>
-    </div>
-
-    <!-- INFO -->
-    <div class="pf-info">
-      <div class="pf-info-row">
-        <span class="pf-info-label">DIBUAT OLEH</span>
-        <span>: ${pic}</span>
-      </div>
-      <div class="pf-info-row">
-        <span class="pf-info-label">NOMOR ORDER</span>
-        <span style="flex: 1;">: ${nomorOrder}</span>
-        <span><b>Hari/Tgl</b> &nbsp;: ${tglFormatted}</span>
-      </div>
-    </div>
-
-    <!-- TABLE -->
-    <table class="pf-table">
-      <thead>
-        <tr>
-          <th class="pf-th-stock-sistem">STOCK<br>SISTEM</th>
-          <th class="pf-th-stock-gudang">STOCK<br>(Gudang)</th>
-          <th class="pf-th-stock-rak">STOCK<br>(Rak)</th>
-          <th class="pf-th-jml-order">JMLH<br>ORDER</th>
-          <th class="pf-th-kode">KODE ITEM</th>
-          <th>NAMA ITEM</th>
-          <th class="pf-th-jenis">Jenis</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${rows}
-      </tbody>
-    </table>
-
-    <!-- SIGNATURE -->
-    <div class="pf-signature">
-      <div class="pf-signature-row">
-        <div class="pf-signature-cell">
-          <div class="pf-signature-label">pengantar,</div>
-        </div>
-        <div class="pf-signature-cell">
-          <div class="pf-signature-label">Persetujuan,</div>
-        </div>
-        <div class="pf-signature-cell">
-          <div class="pf-signature-label">Penerima,</div>
-        </div>
-      </div>
-
-      <div class="pf-signature-row">
-        <div class="pf-signature-cell pf-signature-space"></div>
-        <div class="pf-signature-cell pf-signature-space"></div>
-        <div class="pf-signature-cell pf-signature-space"></div>
-      </div>
-
-      <div class="pf-signature-row">
-        <div class="pf-signature-cell">
-          <div class="pf-signature-line">(_______________)</div>
-          <div class="pf-signature-role">Driver</div>
-        </div>
-        <div class="pf-signature-cell">
-          <div class="pf-signature-line">(_______________)</div>
-          <div class="pf-signature-role">SPV Gudang</div>
-        </div>
-        <div class="pf-signature-cell">
-          <div class="pf-signature-line">(_______________)</div>
-          <div class="pf-signature-role">SPV Cabang</div>
-        </div>
-      </div>
-    </div>
-  `;
-
-  // Update title
-  $('printModalTitle').textContent = `Preview Form Order — ${order.ORDER_ID}`;
-}
-
-// ─────────────────────────────────────────────────────────────────────────
-// GET STOK BARANG (dari state dashboard)
-// ─────────────────────────────────────────────────────────────────────────
-
-function getStokBarang(kode) {
-  try {
-    const dashboardState = window.__gudangHub?.state;
-    if (!dashboardState || !dashboardState.allKatalog) return '0';
-
-    const upperKode = String(kode).trim().toUpperCase();
-    const item = dashboardState.allKatalog.find(
-      (b) => String(b.KODE_BARANG).trim().toUpperCase() === upperKode
-    );
-
-    return item ? String(parseInt(item.STOK) || 0) : '0';
-  } catch (e) {
-    return '0';
+  if (!preview) {
+    return;
   }
+
+  var order = printState.order;
+  var items = printState.items;
+
+  var cabang = CABANG[order.ID_CABANG] || {
+    nama: '-',
+    pic: '-',
+  };
+
+  var pic = String(cabang.pic || 'SUPERVISOR').toUpperCase();
+
+  // ── Nomor order ──
+
+  var nomorOrder = getSequentialNumber(order);
+
+  // ── Tanggal ──
+
+  var hariID = [
+    'MINGGU',
+    'SENIN',
+    'SELASA',
+    'RABU',
+    'KAMIS',
+    'JUMAT',
+    'SABTU',
+  ];
+
+  var date = parseAnyDate(order.TANGGAL_ORDER) || new Date();
+  var hari = hariID[date.getDay()];
+
+  var tgl = hari + ', '
+    + String(date.getDate()).padStart(2, '0') + '/'
+    + String(date.getMonth() + 1).padStart(2, '0') + '/'
+    + date.getFullYear();
+
+  // ── Build table rows ──
+
+  var rows = buildTableRows(items);
+
+  // ── Build full HTML ──
+
+  var html = '';
+
+  // ══════════════════════════════════════════
+  //  HEADER: FORM ORDER BARANG + LOGO
+  // ══════════════════════════════════════════
+
+  html += '<table'
+    + ' width="100%"'
+    + ' cellpadding="0"'
+    + ' cellspacing="0"'
+    + ' style="border-collapse: collapse; margin-bottom: 0;"'
+    + '>';
+
+  html += '<tr>';
+
+  // Kolom kiri: FORM ORDER BARANG
+  html += '<td'
+    + ' style="'
+    + '   vertical-align: top;'
+    + '   padding-bottom: 14px;'
+    + '   padding-top: 4px;'
+    + ' "'
+    + '>';
+
+  html += '<div'
+    + ' style="'
+    + '   font-family: Arial, sans-serif;'
+    + '   font-size: 42px;'
+    + '   font-weight: 900;'
+    + '   line-height: 1;'
+    + '   letter-spacing: -1px;'
+    + ' "'
+    + '>';
+
+  html += '<span style="color: #E67E22;">FORM</span>';
+  html += '<span style="color: #1B4F94;"> ORDER BARANG</span>';
+
+  html += '</div>';
+  html += '</td>';
+
+  // Kolom kanan: LOGO
+  html += '<td'
+    + ' style="'
+    + '   vertical-align: top;'
+    + '   text-align: right;'
+    + '   width: 180px;'
+    + '   padding-bottom: 14px;'
+    + ' "'
+    + '>';
+
+  html += '<img'
+    + ' src="./public/images/logo/logo-nk.png"'
+    + ' alt="Logo Nasional Kitchen"'
+    + ' style="'
+    + '   width: 160px;'
+    + '   height: auto;'
+    + '   display: block;'
+    + '   margin-left: auto;'
+    + ' "'
+    + ' crossorigin="anonymous"'
+    + ' onerror="this.style.display=\'none\';"'
+    + '>';
+
+  html += '</td>';
+
+  html += '</tr>';
+  html += '</table>';
+
+  // ══════════════════════════════════════════
+  //  GARIS PEMISAH
+  // ══════════════════════════════════════════
+
+  html += '<div'
+    + ' style="'
+    + '   border-top: 1px solid #000;'
+    + '   margin-bottom: 12px;'
+    + ' "'
+    + '>';
+  html += '</div>';
+
+  // ══════════════════════════════════════════
+  //  INFO
+  // ══════════════════════════════════════════
+
+  html += '<table'
+    + ' width="100%"'
+    + ' cellpadding="0"'
+    + ' cellspacing="0"'
+    + ' style="'
+    + '   border-collapse: collapse;'
+    + '   margin-bottom: 14px;'
+    + '   font-family: Arial, sans-serif;'
+    + '   font-size: 13px;'
+    + '   color: #000;'
+    + ' "'
+    + '>';
+
+  // DIBUAT OLEH
+  html += '<tr>';
+
+  html += '<td style="padding: 3px 0; width: 140px; font-weight: 700; vertical-align: top;">';
+  html += 'DIBUAT OLEH';
+  html += '</td>';
+
+  html += '<td style="padding: 3px 0; vertical-align: top;">';
+  html += ': ' + pic;
+  html += '</td>';
+
+  html += '<td></td>';
+
+  html += '</tr>';
+
+  // NOMOR ORDER + TANGGAL
+  html += '<tr>';
+
+  html += '<td style="padding: 3px 0; font-weight: 700; vertical-align: top;">';
+  html += 'NOMOR ORDER';
+  html += '</td>';
+
+  html += '<td style="padding: 3px 0; vertical-align: top;">';
+  html += ': ' + nomorOrder;
+  html += '</td>';
+
+  html += '<td style="padding: 3px 0; text-align: right; vertical-align: top; white-space: nowrap;">';
+  html += '<span style="font-weight: 700;">Hari/Tgl</span> : ' + tgl;
+  html += '</td>';
+
+  html += '</tr>';
+
+  html += '</table>';
+
+  // ══════════════════════════════════════════
+  //  TABLE DATA
+  // ══════════════════════════════════════════
+
+  html += '<table'
+    + ' width="100%"'
+    + ' cellpadding="0"'
+    + ' cellspacing="0"'
+    + ' style="'
+    + '   border-collapse: collapse;'
+    + '   border: 1px solid #000;'
+    + '   margin-bottom: 30px;'
+    + ' "'
+    + '>';
+
+  // Table header
+  html += buildTableHeader();
+
+  // Table body
+  html += '<tbody>';
+  html += rows;
+  html += '</tbody>';
+
+  html += '</table>';
+
+  // ══════════════════════════════════════════
+  //  SIGNATURE
+  // ══════════════════════════════════════════
+
+  html += buildSignatureTable();
+
+  // ── Set innerHTML ──
+
+  preview.innerHTML = html;
+
+  // ── Update title ──
+
+  $('printModalTitle').textContent = 'Preview Form Order — ' + order.ORDER_ID;
 }
 
+
 // ─────────────────────────────────────────────────────────────────────────
-// DO PRINT
+//  BUILD TABLE HEADER
+// ─────────────────────────────────────────────────────────────────────────
+
+function buildTableHeader() {
+
+  var html = '';
+
+  html += '<thead>';
+  html += '<tr style="background: #B4D6F0;">';
+
+  html += '<th style="' + HEADER_CELL_STYLE + ' width: 80px;">';
+  html += 'STOCK<br>SISTEM';
+  html += '</th>';
+
+  html += '<th style="' + HEADER_CELL_STYLE + ' width: 80px;">';
+  html += 'STOCK<br>(Gudang)';
+  html += '</th>';
+
+  html += '<th style="' + HEADER_CELL_STYLE + ' width: 75px;">';
+  html += 'STOCK<br>(Rak)';
+  html += '</th>';
+
+  html += '<th style="' + HEADER_CELL_STYLE + ' width: 85px;">';
+  html += 'JMLH<br>ORDER';
+  html += '</th>';
+
+  html += '<th style="' + HEADER_CELL_STYLE + ' width: 100px;">';
+  html += 'KODE ITEM';
+  html += '</th>';
+
+  html += '<th style="' + HEADER_CELL_STYLE + '">';
+  html += 'NAMA ITEM';
+  html += '</th>';
+
+  html += '<th style="' + HEADER_CELL_STYLE + ' width: 100px;">';
+  html += 'Jenis';
+  html += '</th>';
+
+  html += '</tr>';
+  html += '</thead>';
+
+  return html;
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────
+//  BUILD TABLE ROWS
+// ─────────────────────────────────────────────────────────────────────────
+
+function buildTableRows(items) {
+
+  var html = '';
+
+  items.forEach(function (item) {
+
+    var qty = toNumber(item.qty);
+    var sat = String(item.satuan || 'PCS').toUpperCase();
+
+    var stokSistem = getStokBarang(item.kode);
+
+    var stokGudang = '0';
+    if (item.stokGudang !== undefined && item.stokGudang !== '') {
+      stokGudang = String(item.stokGudang);
+    }
+
+    var stokRak = '0';
+    if (item.stokToko !== undefined && item.stokToko !== '') {
+      stokRak = String(item.stokToko);
+    }
+
+    var kode = escapeHtml(item.kode || '');
+    var nama = escapeHtml((item.nama || '').toUpperCase());
+    var jenis = escapeHtml(String(item.kategori || 'ELEKTRONIK').toUpperCase());
+
+    html += '<tr>';
+
+    // Stok Sistem
+    html += '<td style="' + CELL_STYLE + '">';
+    html += stokSistem;
+    html += '</td>';
+
+    // Stok Gudang
+    html += '<td style="' + CELL_STYLE + '">';
+    html += stokGudang;
+    html += '</td>';
+
+    // Stok Rak
+    html += '<td style="' + CELL_STYLE + '">';
+    html += stokRak;
+    html += '</td>';
+
+    // Jumlah Order (hijau)
+    html += '<td style="' + CELL_STYLE + ' color: #00B050; font-weight: 600;">';
+    html += qty + ' ' + sat;
+    html += '</td>';
+
+    // Kode Item
+    html += '<td style="' + CELL_STYLE + '">';
+    html += kode;
+    html += '</td>';
+
+    // Nama Item
+    html += '<td style="' + CELL_STYLE + '">';
+    html += nama;
+    html += '</td>';
+
+    // Jenis
+    html += '<td style="' + CELL_STYLE + ' font-weight: 700;">';
+    html += jenis;
+    html += '</td>';
+
+    html += '</tr>';
+  });
+
+  return html;
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────
+//  BUILD SIGNATURE TABLE
+// ─────────────────────────────────────────────────────────────────────────
+
+function buildSignatureTable() {
+
+  var html = '';
+
+  html += '<table'
+    + ' width="100%"'
+    + ' cellpadding="0"'
+    + ' cellspacing="0"'
+    + ' style="'
+    + '   border: 1px solid #000;'
+    + '   border-collapse: collapse;'
+    + '   margin-top: 0;'
+    + ' "'
+    + '>';
+
+  // ── Baris 1: Labels ──
+
+  html += '<tr>';
+
+  html += '<td style="'
+    + SIGN_CELL_STYLE
+    + ' padding: 18px 25px 5px 25px;'
+    + ' width: 33%;'
+    + ' font-size: 13px;'
+    + '">';
+  html += 'pengantar,';
+  html += '</td>';
+
+  html += '<td style="'
+    + SIGN_CELL_STYLE
+    + ' padding: 18px 25px 5px 25px;'
+    + ' width: 34%;'
+    + ' font-size: 13px;'
+    + '">';
+  html += 'Persetujuan,';
+  html += '</td>';
+
+  html += '<td style="'
+    + SIGN_CELL_STYLE
+    + ' padding: 18px 25px 5px 25px;'
+    + ' width: 33%;'
+    + ' font-size: 13px;'
+    + '">';
+  html += 'Penerima,';
+  html += '</td>';
+
+  html += '</tr>';
+
+  // ── Baris 2: Space ──
+
+  html += '<tr>';
+  html += '<td colspan="3" style="padding: 32px 0;">';
+  html += '&nbsp;';
+  html += '</td>';
+  html += '</tr>';
+
+  // ── Baris 3: Garis tanda tangan ──
+
+  html += '<tr>';
+
+  html += '<td style="'
+    + SIGN_CELL_STYLE
+    + ' padding: 0 25px 5px 25px;'
+    + ' font-size: 13px;'
+    + '">';
+  html += '(_______________)';
+  html += '</td>';
+
+  html += '<td style="'
+    + SIGN_CELL_STYLE
+    + ' padding: 0 25px 5px 25px;'
+    + ' font-size: 13px;'
+    + '">';
+  html += '(_______________)';
+  html += '</td>';
+
+  html += '<td style="'
+    + SIGN_CELL_STYLE
+    + ' padding: 0 25px 5px 25px;'
+    + ' font-size: 13px;'
+    + '">';
+  html += '(_______________)';
+  html += '</td>';
+
+  html += '</tr>';
+
+  // ── Baris 4: Jabatan ──
+
+  html += '<tr>';
+
+  html += '<td style="'
+    + SIGN_CELL_STYLE
+    + ' padding: 0 25px 18px 25px;'
+    + ' font-size: 14px;'
+    + ' font-weight: 900;'
+    + '">';
+  html += 'Driver';
+  html += '</td>';
+
+  html += '<td style="'
+    + SIGN_CELL_STYLE
+    + ' padding: 0 25px 18px 25px;'
+    + ' font-size: 14px;'
+    + ' font-weight: 900;'
+    + '">';
+  html += 'SPV Gudang';
+  html += '</td>';
+
+  html += '<td style="'
+    + SIGN_CELL_STYLE
+    + ' padding: 0 25px 18px 25px;'
+    + ' font-size: 14px;'
+    + ' font-weight: 900;'
+    + '">';
+  html += 'SPV Cabang';
+  html += '</td>';
+
+  html += '</tr>';
+
+  html += '</table>';
+
+  return html;
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────
+//  PRINT
 // ─────────────────────────────────────────────────────────────────────────
 
 function doPrint() {
   window.print();
 }
+
+
 // ─────────────────────────────────────────────────────────────────────────
-// GET SEQUENTIAL ORDER NUMBER (per bulan)
+//  HELPER: Get Stok Barang (dari dashboard state)
+// ─────────────────────────────────────────────────────────────────────────
+
+function getStokBarang(kode) {
+  try {
+
+    var dashboardState = window.__gudangHub?.state;
+
+    if (!dashboardState || !dashboardState.allKatalog) {
+      return '0';
+    }
+
+    var upperKode = String(kode).trim().toUpperCase();
+
+    var item = dashboardState.allKatalog.find(function (b) {
+      return String(b.KODE_BARANG).trim().toUpperCase() === upperKode;
+    });
+
+    return item
+      ? String(parseInt(item.STOK) || 0)
+      : '0';
+
+  } catch (e) {
+    return '0';
+  }
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────
+//  HELPER: Get Sequential Number (dari dashboard state)
 // ─────────────────────────────────────────────────────────────────────────
 
 function getSequentialNumber(order) {
   try {
-    const dashboardState = window.__gudangHub?.state;
-    if (!dashboardState || !dashboardState.allOrders) return '1';
 
-    const orderDate = parseAnyDate(order.TANGGAL_ORDER);
-    if (!orderDate || orderDate.getTime() === 0) return '1';
+    var dashboardState = window.__gudangHub?.state;
 
-    const orderMonth = orderDate.getMonth();
-    const orderYear = orderDate.getFullYear();
+    if (!dashboardState || !dashboardState.allOrders) {
+      return '01';
+    }
 
-    // Filter semua order di bulan & tahun yang sama
-    const sameMonthOrders = dashboardState.allOrders
-      .filter((o) => {
-        const d = parseAnyDate(o.TANGGAL_ORDER);
-        return d && d.getTime() !== 0 &&
-               d.getMonth() === orderMonth &&
-               d.getFullYear() === orderYear;
+    var orderDate = parseAnyDate(order.TANGGAL_ORDER);
+
+    if (!orderDate || orderDate.getTime() === 0) {
+      return '01';
+    }
+
+    var targetMonth = orderDate.getMonth();
+    var targetYear = orderDate.getFullYear();
+
+    // Filter bulan yang sama
+    var sameMonth = dashboardState.allOrders
+
+      .filter(function (o) {
+
+        var d = parseAnyDate(o.TANGGAL_ORDER);
+
+        return d
+          && d.getTime() !== 0
+          && d.getMonth() === targetMonth
+          && d.getFullYear() === targetYear;
       })
-      // Sort berdasarkan tanggal (paling awal = nomor 1)
-      .sort((a, b) => {
-        return parseAnyDate(a.TANGGAL_ORDER).getTime() -
-               parseAnyDate(b.TANGGAL_ORDER).getTime();
+
+      .sort(function (a, b) {
+
+        return parseAnyDate(a.TANGGAL_ORDER).getTime()
+             - parseAnyDate(b.TANGGAL_ORDER).getTime();
       });
 
-    // Cari posisi order ini (index + 1 = nomor urut)
-    const index = sameMonthOrders.findIndex((o) => o.ORDER_ID === order.ORDER_ID);
-    const nomor = index >= 0 ? index + 1 : sameMonthOrders.length + 1;
+    // Cari posisi
+    var idx = sameMonth.findIndex(function (o) {
+      return o.ORDER_ID === order.ORDER_ID;
+    });
 
-    // Format: 01, 02, 03, dst
-    return String(nomor).padStart(2, '0');
+    var nomor = (idx >= 0) ? (idx + 1) : (sameMonth.length + 1);
+
+    // Format 01, 02, dst
+    return nomor < 10
+      ? '0' + nomor
+      : String(nomor);
+
   } catch (e) {
     return '01';
   }
