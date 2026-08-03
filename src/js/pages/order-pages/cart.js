@@ -1,5 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════════════
    CART — Bottom sheet with Satuan Selector + Lucide Icons
+   NO STOCK LIMIT — stok hanya info, label di atas input stok
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, escapeHtml, formatRupiah, toInt } from '../../utils.js';
@@ -158,7 +159,7 @@ function renderCartSheet(state) {
   }
 
   wrapper.innerHTML = items.map(function (item) {
-    return buildCartItem(item);
+    return buildCartItem(item, state);
   }).join('');
 
   bindStockInputs(state);
@@ -166,11 +167,23 @@ function renderCartSheet(state) {
 }
 
 
-function buildCartItem(item) {
+function buildCartItem(item, state) {
 
   var code = escapeHtml(item.kode);
   var gudangEmpty = isEmpty(item.stokGudang);
   var tokoEmpty = isEmpty(item.stokToko);
+
+  // Ambil stok sistem terbaru (dari productByCode)
+  var product = state.productByCode[String(item.kode).toUpperCase()];
+  var stokSistem = product ? toInt(product.STOK) : (item.stokSistem || 0);
+
+  // Warna badge stok sistem
+  var stokSistemClass = stokSistem === 0 ? 'stock-empty'
+                      : stokSistem <= 5 ? 'stock-low'
+                      : 'stock-ok';
+
+  var stokSistemText = stokSistem === 0 ? 'Habis'
+                     : 'Stok Sistem: ' + stokSistem;
 
   // Build satuan options
   var satuanOptionsHtml = SATUAN_OPTIONS.map(function (s) {
@@ -183,7 +196,10 @@ function buildCartItem(item) {
 
     + '<div class="cart-info">'
     + '<div class="cart-name">' + escapeHtml(item.nama) + '</div>'
-    + '<div class="cart-code">' + code + '</div>'
+    + '<div class="cart-code">'
+    + code
+    + ' <span class="cart-stok-sistem ' + stokSistemClass + '">' + stokSistemText + '</span>'
+    + '</div>'
 
     + '<div class="cart-price-row">'
 
@@ -215,7 +231,13 @@ function buildCartItem(item) {
 
     + '<div class="cart-right">'
 
-    + '<div class="stock-label">Isi stok aktual</div>'
+    + '<div class="stock-label">ISI STOK AKTUAL</div>'
+
+    // ── LABEL Gudang & Toko di atas input ──
+    + '<div class="stock-labels-row">'
+    + '<span class="stock-mini-label">Gudang</span>'
+    + '<span class="stock-mini-label">Toko</span>'
+    + '</div>'
 
     + '<div class="cart-stock-row">'
 
@@ -225,7 +247,7 @@ function buildCartItem(item) {
     + '<input class="stock-input"'
     + ' type="number"'
     + ' min="0"'
-    + ' placeholder="Gudang"'
+    + ' placeholder="0"'
     + ' value="' + (gudangEmpty ? '' : item.stokGudang) + '"'
     + ' data-stock-type="gudang"'
     + ' data-code="' + code + '">'
@@ -237,7 +259,7 @@ function buildCartItem(item) {
     + '<input class="stock-input"'
     + ' type="number"'
     + ' min="0"'
-    + ' placeholder="Toko"'
+    + ' placeholder="0"'
     + ' value="' + (tokoEmpty ? '' : item.stokToko) + '"'
     + ' data-stock-type="toko"'
     + ' data-code="' + code + '">'
@@ -335,21 +357,11 @@ function validateCartStocks(state) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// CART QTY ACTIONS
+// CART QTY ACTIONS — NO LIMIT
 // ─────────────────────────────────────────────────────────────────────────
 
-function clampCartQty(state, code, value) {
-
-  var product = state.productByCode[String(code).toUpperCase()];
-  var stock = product ? toInt(product.STOK) : 0;
-  var qty = Math.max(1, toInt(value, 1));
-
-  if (stock > 0 && qty > stock) {
-    qty = stock;
-    toast.info('Maksimal stok ' + stock + '.');
-  }
-
-  return qty;
+function normalizeQty(value) {
+  return Math.max(1, toInt(value, 1));
 }
 
 
@@ -357,11 +369,7 @@ function changeCartQty(state, code, delta) {
 
   if (!state.cart[code]) return;
 
-  state.cart[code].qty = clampCartQty(
-    state,
-    code,
-    state.cart[code].qty + delta
-  );
+  state.cart[code].qty = normalizeQty(state.cart[code].qty + delta);
 
   updateCartUi(state);
   renderCartSheet(state);
@@ -372,7 +380,7 @@ function setCartQty(state, code, value) {
 
   if (!state.cart[code]) return;
 
-  state.cart[code].qty = clampCartQty(state, code, value);
+  state.cart[code].qty = normalizeQty(value);
   updateCartUi(state);
   renderCartSheet(state);
 }
