@@ -275,9 +275,8 @@ function initCabangList() {
       <div class="bento-grid">
         ${CABANG_LIST.map((cabang, i) => `
           <a href="./login.html"
-             class="bento-card bento-pos-${i + 1} reveal-scale"
-             data-delay="${Math.min(i, 3)}"
-             style="--card-color: ${cabang.color || '#ff6b00'};">
+             class="bento-card bento-pos-${i + 1}"
+             style="--card-color: ${cabang.color || '#ff6b00'}; --anim-delay: ${i * 0.15}s;">
 
             <div class="bento-image">
               <img
