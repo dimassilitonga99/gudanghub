@@ -252,19 +252,131 @@ function initCabangList() {
   const container = $('cabangList');
   if (!container) return;
 
-  container.innerHTML = CABANG_LIST.map((cabang, i) => `
-    <a href="./login.html" class="cabang-row reveal" data-delay="${Math.min(i, 3)}">
-      <div class="cabang-id">${cabang.id}</div>
-      <div class="cabang-store">${cabang.nama}</div>
-      <div class="cabang-pic">
-        <span class="cabang-avatar">${cabang.pic.charAt(0)}</span>
-        PIC · ${cabang.pic}
-      </div>
-      <span class="cabang-go">${icon('arrow-right', { size: 20 })}</span>
-    </a>
-  `).join('');
-}
+  // Bento grid dengan variasi ukuran per index
+  const bentoClasses = ['bento-lg', 'bento-md', 'bento-md', 'bento-lg'];
 
+  container.innerHTML = `
+    <div class="cabang-bento-wrap">
+      <!-- SVG Connection Lines -->
+      <svg class="cabang-connect-svg" viewBox="0 0 1200 800" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="connectGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#ff6b00" stop-opacity="0"/>
+            <stop offset="50%" stop-color="#ff8c38" stop-opacity="0.6"/>
+            <stop offset="100%" stop-color="#ff6b00" stop-opacity="0"/>
+          </linearGradient>
+          <filter id="connectGlow">
+            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+        <path class="connect-line line-1" d="M 300 200 Q 600 100 900 200" stroke="url(#connectGrad)" stroke-width="1.5" fill="none" filter="url(#connectGlow)"/>
+        <path class="connect-line line-2" d="M 900 200 Q 1000 400 900 600" stroke="url(#connectGrad)" stroke-width="1.5" fill="none" filter="url(#connectGlow)"/>
+        <path class="connect-line line-3" d="M 900 600 Q 600 700 300 600" stroke="url(#connectGrad)" stroke-width="1.5" fill="none" filter="url(#connectGlow)"/>
+        <path class="connect-line line-4" d="M 300 600 Q 200 400 300 200" stroke="url(#connectGrad)" stroke-width="1.5" fill="none" filter="url(#connectGlow)"/>
+        <path class="connect-line line-diag-1" d="M 300 200 Q 600 400 900 600" stroke="url(#connectGrad)" stroke-width="1" fill="none" opacity="0.4"/>
+        <path class="connect-line line-diag-2" d="M 900 200 Q 600 400 300 600" stroke="url(#connectGrad)" stroke-width="1" fill="none" opacity="0.4"/>
+      </svg>
+
+      <div class="cabang-bento-grid">
+        ${CABANG_LIST.map((cabang, i) => `
+          <a href="./login.html"
+             class="cabang-bento-card ${bentoClasses[i] || 'bento-md'} reveal-scale"
+             data-delay="${Math.min(i, 3)}"
+             data-index="${i}"
+             style="--cabang-color: ${cabang.color || '#ff6b00'};">
+
+            <!-- Image with fallback -->
+            <div class="cabang-bento-image">
+              <img
+                src="./public/images/cabang/${cabang.id.toLowerCase()}.jpg"
+                alt="${cabang.nama}"
+                loading="lazy"
+                onerror="this.style.display='none'; this.parentElement.classList.add('no-image');"
+              >
+              <div class="cabang-bento-placeholder">
+                ${icon('store', { size: 64, strokeWidth: 1.2 })}
+              </div>
+            </div>
+
+            <!-- Gradient overlay -->
+            <div class="cabang-bento-overlay"></div>
+
+            <!-- Grain texture -->
+            <div class="cabang-bento-grain"></div>
+
+            <!-- Signal dot -->
+            <div class="cabang-signal">
+              <span class="cabang-signal-dot"></span>
+              <span class="cabang-signal-pulse"></span>
+            </div>
+
+            <!-- Badge ID -->
+            <div class="cabang-bento-badge">
+              ${icon('map-pin', { size: 11 })}
+              ${cabang.id}
+            </div>
+
+            <!-- Content -->
+            <div class="cabang-bento-content">
+              <div class="cabang-bento-header">
+                <div class="cabang-bento-avatar">
+                  ${cabang.pic.charAt(0)}
+                </div>
+                <div class="cabang-bento-pic-info">
+                  <div class="cabang-bento-pic-label">PIC Cabang</div>
+                  <div class="cabang-bento-pic-name">${cabang.pic}</div>
+                </div>
+              </div>
+
+              <h3 class="cabang-bento-title">${cabang.nama}</h3>
+
+              <div class="cabang-bento-footer">
+                <span class="cabang-bento-status">
+                  <span class="status-dot"></span>
+                  Aktif
+                </span>
+                <span class="cabang-bento-arrow">
+                  Kelola
+                  ${icon('arrow-up-right', { size: 14 })}
+                </span>
+              </div>
+            </div>
+
+            <!-- Corner glow -->
+            <div class="cabang-corner-glow"></div>
+          </a>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
+  // 3D Tilt effect on hover
+  container.querySelectorAll('.cabang-bento-card').forEach((card) => {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const rotateX = ((y - centerY) / centerY) * -6;
+      const rotateY = ((x - centerX) / centerX) * 6;
+
+      card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+
+      // Mouse position for glow
+      card.style.setProperty('--mouse-x', `${x}px`);
+      card.style.setProperty('--mouse-y', `${y}px`);
+    });
+
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = '';
+    });
+  });
+}
 // ─────────────────────────────────────────────────────────────────────────
 // BACKGROUND PARTICLES CANVAS
 // ─────────────────────────────────────────────────────────────────────────
