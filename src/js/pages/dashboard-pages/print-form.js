@@ -643,7 +643,16 @@ function buildTableRows(items) {
     var qty = toNumber(item.qty);
     var sat = String(item.satuan || 'PCS').toUpperCase();
 
-    var stokSistem = getStokBarang(item.kode);
+        // Ambil stok sistem dari snapshot order (bukan dari master live)
+    var stokSistem = '0';
+    if (item.stokSistem !== undefined && item.stokSistem !== '' && item.stokSistem !== null) {
+      stokSistem = String(item.stokSistem);
+    } else if (item.STOK_SISTEM !== undefined && item.STOK_SISTEM !== '' && item.STOK_SISTEM !== null) {
+      stokSistem = String(item.STOK_SISTEM);
+    } else {
+      // Fallback ke master (untuk order lama yang belum punya snapshot)
+      stokSistem = getStokBarang(item.kode);
+    }
 
     var stokGudang = '0';
     if (item.stokGudang !== undefined && item.stokGudang !== '') {
