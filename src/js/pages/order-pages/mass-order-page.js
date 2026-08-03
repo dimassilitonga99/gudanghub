@@ -1,5 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════════════
    MASS ORDER PAGE — with Lucide Icons
+   NO STOCK LIMIT — warning tetap tampil sebagai info
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, escapeHtml, formatRupiah, toInt, debounce, pasteFromClipboard } from '../../utils.js';
@@ -233,6 +234,7 @@ function parseMassInput(state) {
       qty: quantity,
       stock,
       valid: true,
+      // Warning tetap ada sebagai INFO (tidak blok submit)
       warning: quantity > stock ? `Melebihi stok sistem (${stock})` : '',
       stokGudang: '',
       stokToko: '',
@@ -314,7 +316,7 @@ function buildMassItem(item, index) {
       <div class="massal-info">
         <div class="massal-code">${escapeHtml(item.kode)}</div>
         <div class="massal-name">${escapeHtml(item.nama)}</div>
-        <div class="massal-price">${formatRupiah(item.harga)} / ${escapeHtml(item.satuan)}</div>
+        <div class="massal-price">${formatRupiah(item.harga)} / ${escapeHtml(item.satuan)} · Stok sistem: ${item.stock}</div>
         ${item.warning ? `
           <div class="massal-warning">
             ${icon('alert-triangle', { size: 10 })}
@@ -404,7 +406,7 @@ function validateMassStocks(state) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// QTY ACTIONS
+// QTY ACTIONS — NO LIMIT
 // ─────────────────────────────────────────────────────────────────────────
 
 function syncMassInput(state) {
@@ -420,6 +422,12 @@ function updateMassItemQty(state, index, delta) {
   if (!state.massItems[index]?.valid) return;
 
   state.massItems[index].qty = Math.max(1, state.massItems[index].qty + delta);
+
+  // Update warning info kalau qty > stock
+  const stock = state.massItems[index].stock;
+  const qty = state.massItems[index].qty;
+  state.massItems[index].warning = qty > stock ? `Melebihi stok sistem (${stock})` : '';
+
   syncMassInput(state);
   renderMassPreview(state);
   updateMassSummary(state);
@@ -429,6 +437,11 @@ function setMassItemQty(state, index, value) {
   if (!state.massItems[index]?.valid) return;
 
   state.massItems[index].qty = Math.max(1, toInt(value, 1));
+
+  const stock = state.massItems[index].stock;
+  const qty = state.massItems[index].qty;
+  state.massItems[index].warning = qty > stock ? `Melebihi stok sistem (${stock})` : '';
+
   syncMassInput(state);
   renderMassPreview(state);
   updateMassSummary(state);
