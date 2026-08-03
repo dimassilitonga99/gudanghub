@@ -3,7 +3,7 @@
    ═══════════════════════════════════════════════════════════════════════ */
 
 // ─── API ENDPOINT ───
-export const API_URL = 'https://script.google.com/macros/s/AKfycbwv0cOk6GaRvPTi_TOiuJ1RNDkPtIoTv5Ch-Ix40ofswtZIAwm1EuTxU5okAPUWcn3p/exec';
+export const API_URL = 'https://script.google.com/macros/s/AKfycbzbrS5cnTQn7Z8LJEHZZpRNphLP-oxakb90HP8WnyHnyT0m5MWWYSCOtyMOVVP40mNS/exec';
 
 // ─── APP METADATA ───
 export const APP = {
