@@ -544,7 +544,7 @@ async function submitMassOrder(state, items) {
   const payload = {
     idCabang: state.branchId,
     catatan,
-    items: items.map((i) => ({
+        items: items.map((i) => ({
       kode: i.kode,
       nama: i.nama,
       kategori: i.kategori,
@@ -553,6 +553,7 @@ async function submitMassOrder(state, items) {
       harga: i.harga,
       stokGudang: i.stokGudang,
       stokToko: i.stokToko,
+      stokSistem: i.stock !== undefined ? i.stock : 0,
     })),
   };
 
