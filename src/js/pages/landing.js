@@ -252,124 +252,101 @@ function initCabangList() {
   const container = $('cabangList');
   if (!container) return;
 
-  // Bento grid dengan variasi ukuran per index
-  const bentoClasses = ['bento-lg', 'bento-md', 'bento-md', 'bento-lg'];
-
   container.innerHTML = `
-    <div class="cabang-bento-wrap">
+    <div class="bento-wrap">
+
       <!-- SVG Connection Lines -->
-      <svg class="cabang-connect-svg" viewBox="0 0 1200 800" preserveAspectRatio="none" aria-hidden="true">
+      <svg class="bento-connect" viewBox="0 0 1200 700" preserveAspectRatio="none" aria-hidden="true">
         <defs>
-          <linearGradient id="connectGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id="bentoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stop-color="#ff6b00" stop-opacity="0"/>
-            <stop offset="50%" stop-color="#ff8c38" stop-opacity="0.6"/>
+            <stop offset="50%" stop-color="#ff8c38" stop-opacity="0.5"/>
             <stop offset="100%" stop-color="#ff6b00" stop-opacity="0"/>
           </linearGradient>
-          <filter id="connectGlow">
-            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-            <feMerge>
-              <feMergeNode in="coloredBlur"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
         </defs>
-        <path class="connect-line line-1" d="M 300 200 Q 600 100 900 200" stroke="url(#connectGrad)" stroke-width="1.5" fill="none" filter="url(#connectGlow)"/>
-        <path class="connect-line line-2" d="M 900 200 Q 1000 400 900 600" stroke="url(#connectGrad)" stroke-width="1.5" fill="none" filter="url(#connectGlow)"/>
-        <path class="connect-line line-3" d="M 900 600 Q 600 700 300 600" stroke="url(#connectGrad)" stroke-width="1.5" fill="none" filter="url(#connectGlow)"/>
-        <path class="connect-line line-4" d="M 300 600 Q 200 400 300 200" stroke="url(#connectGrad)" stroke-width="1.5" fill="none" filter="url(#connectGlow)"/>
-        <path class="connect-line line-diag-1" d="M 300 200 Q 600 400 900 600" stroke="url(#connectGrad)" stroke-width="1" fill="none" opacity="0.4"/>
-        <path class="connect-line line-diag-2" d="M 900 200 Q 600 400 300 600" stroke="url(#connectGrad)" stroke-width="1" fill="none" opacity="0.4"/>
+        <path class="bento-line bl-1" d="M 250 180 Q 600 80 950 180" stroke="url(#bentoGrad)" stroke-width="1.5" fill="none"/>
+        <path class="bento-line bl-2" d="M 950 180 Q 1050 350 950 520" stroke="url(#bentoGrad)" stroke-width="1.5" fill="none"/>
+        <path class="bento-line bl-3" d="M 950 520 Q 600 620 250 520" stroke="url(#bentoGrad)" stroke-width="1.5" fill="none"/>
+        <path class="bento-line bl-4" d="M 250 520 Q 150 350 250 180" stroke="url(#bentoGrad)" stroke-width="1.5" fill="none"/>
+        <path class="bento-line bl-5" d="M 250 180 Q 600 350 950 520" stroke="url(#bentoGrad)" stroke-width="1" fill="none" opacity="0.5"/>
+        <path class="bento-line bl-6" d="M 950 180 Q 600 350 250 520" stroke="url(#bentoGrad)" stroke-width="1" fill="none" opacity="0.5"/>
       </svg>
 
-      <div class="cabang-bento-grid">
+      <div class="bento-grid">
         ${CABANG_LIST.map((cabang, i) => `
           <a href="./login.html"
-             class="cabang-bento-card ${bentoClasses[i] || 'bento-md'} reveal-scale"
+             class="bento-card bento-pos-${i + 1} reveal-scale"
              data-delay="${Math.min(i, 3)}"
-             data-index="${i}"
-             style="--cabang-color: ${cabang.color || '#ff6b00'};">
+             style="--card-color: ${cabang.color || '#ff6b00'};">
 
-            <!-- Image with fallback -->
-            <div class="cabang-bento-image">
+            <div class="bento-image">
               <img
                 src="./public/images/cabang/${cabang.id.toLowerCase()}.jpg"
                 alt="${cabang.nama}"
                 loading="lazy"
-                onerror="this.style.display='none'; this.parentElement.classList.add('no-image');"
+                onerror="this.parentElement.classList.add('no-img'); this.remove();"
               >
-              <div class="cabang-bento-placeholder">
-                ${icon('store', { size: 64, strokeWidth: 1.2 })}
+              <div class="bento-placeholder">
+                ${icon('store', { size: 56, strokeWidth: 1.2 })}
+                <span class="bento-placeholder-text">${cabang.id}</span>
               </div>
             </div>
 
-            <!-- Gradient overlay -->
-            <div class="cabang-bento-overlay"></div>
+            <div class="bento-overlay"></div>
+            <div class="bento-grain"></div>
 
-            <!-- Grain texture -->
-            <div class="cabang-bento-grain"></div>
-
-            <!-- Signal dot -->
-            <div class="cabang-signal">
-              <span class="cabang-signal-dot"></span>
-              <span class="cabang-signal-pulse"></span>
+            <div class="bento-signal">
+              <span class="bento-signal-dot"></span>
+              <span class="bento-signal-pulse"></span>
             </div>
 
-            <!-- Badge ID -->
-            <div class="cabang-bento-badge">
-              ${icon('map-pin', { size: 11 })}
-              ${cabang.id}
+            <div class="bento-badge">
+              ${icon('map-pin', { size: 10 })}
+              <span>${cabang.id}</span>
             </div>
 
-            <!-- Content -->
-            <div class="cabang-bento-content">
-              <div class="cabang-bento-header">
-                <div class="cabang-bento-avatar">
-                  ${cabang.pic.charAt(0)}
-                </div>
-                <div class="cabang-bento-pic-info">
-                  <div class="cabang-bento-pic-label">PIC Cabang</div>
-                  <div class="cabang-bento-pic-name">${cabang.pic}</div>
+            <div class="bento-content">
+              <div class="bento-header">
+                <div class="bento-avatar">${cabang.pic.charAt(0)}</div>
+                <div class="bento-pic">
+                  <div class="bento-pic-label">PIC</div>
+                  <div class="bento-pic-name">${cabang.pic}</div>
                 </div>
               </div>
 
-              <h3 class="cabang-bento-title">${cabang.nama}</h3>
+              <h3 class="bento-title">${cabang.nama}</h3>
 
-              <div class="cabang-bento-footer">
-                <span class="cabang-bento-status">
-                  <span class="status-dot"></span>
+              <div class="bento-footer">
+                <span class="bento-status">
+                  <span class="bento-status-dot"></span>
                   Aktif
                 </span>
-                <span class="cabang-bento-arrow">
+                <span class="bento-arrow">
                   Kelola
-                  ${icon('arrow-up-right', { size: 14 })}
+                  ${icon('arrow-up-right', { size: 12 })}
                 </span>
               </div>
             </div>
 
-            <!-- Corner glow -->
-            <div class="cabang-corner-glow"></div>
+            <div class="bento-glow"></div>
           </a>
         `).join('')}
       </div>
     </div>
   `;
 
-  // 3D Tilt effect on hover
-  container.querySelectorAll('.cabang-bento-card').forEach((card) => {
+  // 3D Tilt effect
+  container.querySelectorAll('.bento-card').forEach((card) => {
     card.addEventListener('mousemove', (e) => {
       const rect = card.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
-      const rotateX = ((y - centerY) / centerY) * -6;
-      const rotateY = ((x - centerX) / centerX) * 6;
+      const rotateX = ((y - rect.height / 2) / (rect.height / 2)) * -5;
+      const rotateY = ((x - rect.width / 2) / (rect.width / 2)) * 5;
 
-      card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
-
-      // Mouse position for glow
-      card.style.setProperty('--mouse-x', `${x}px`);
-      card.style.setProperty('--mouse-y', `${y}px`);
+      card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+      card.style.setProperty('--mx', `${x}px`);
+      card.style.setProperty('--my', `${y}px`);
     });
 
     card.addEventListener('mouseleave', () => {
