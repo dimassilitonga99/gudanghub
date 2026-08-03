@@ -2390,6 +2390,515 @@
       .footer-top { grid-template-columns: 1fr; gap: 24px; }
       .footer-bottom { flex-direction: column; text-align: center; }
     }
+        /* ═══════════════════════════════════════════════════════════════
+       CABANG BENTO GRID — Modern & Connected
+       ═══════════════════════════════════════════════════════════════ */
+
+    .cabang-bento-wrap {
+      position: relative;
+      padding: 20px 0;
+    }
+
+    /* Connection lines SVG */
+    .cabang-connect-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0;
+      animation: fadeInSvg 1.2s ease 0.8s forwards;
+    }
+
+    @keyframes fadeInSvg {
+      to { opacity: 1; }
+    }
+
+    .connect-line {
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 1000;
+      animation: drawLine 3s ease forwards;
+    }
+
+    .line-1 { animation-delay: 1s; }
+    .line-2 { animation-delay: 1.3s; }
+    .line-3 { animation-delay: 1.6s; }
+    .line-4 { animation-delay: 1.9s; }
+    .line-diag-1 { animation-delay: 2.2s; }
+    .line-diag-2 { animation-delay: 2.5s; }
+
+    @keyframes drawLine {
+      to { stroke-dashoffset: 0; }
+    }
+
+    /* Bento Grid */
+    .cabang-bento-grid {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      grid-auto-rows: 180px;
+      gap: 16px;
+    }
+
+    /* Bento sizes */
+    .bento-lg {
+      grid-column: span 4;
+      grid-row: span 2;
+    }
+
+    .bento-md {
+      grid-column: span 2;
+      grid-row: span 2;
+    }
+
+    /* Alternate pattern */
+    .cabang-bento-card:nth-child(1) { grid-column: span 4; grid-row: span 2; }
+    .cabang-bento-card:nth-child(2) { grid-column: span 2; grid-row: span 2; }
+    .cabang-bento-card:nth-child(3) { grid-column: span 2; grid-row: span 2; }
+    .cabang-bento-card:nth-child(4) { grid-column: span 4; grid-row: span 2; }
+
+    /* Card */
+    .cabang-bento-card {
+      position: relative;
+      display: block;
+      overflow: hidden;
+      border-radius: clamp(16px, 2vw, 24px);
+      background: linear-gradient(135deg, #14141f 0%, #1a1a2e 100%);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+                  border-color 0.4s ease,
+                  box-shadow 0.4s ease;
+      transform-style: preserve-3d;
+      will-change: transform;
+      isolation: isolate;
+    }
+
+    .cabang-bento-card:hover {
+      border-color: rgba(255, 107, 0, 0.4);
+      box-shadow:
+        0 30px 60px -20px rgba(0, 0, 0, 0.6),
+        0 0 0 1px rgba(255, 107, 0, 0.15),
+        0 0 80px -20px rgba(255, 107, 0, 0.3);
+      z-index: 10;
+    }
+
+    /* Image */
+    .cabang-bento-image {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .cabang-bento-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scale(1);
+      transition: transform 8s ease;
+      filter: brightness(0.6) saturate(1.1);
+    }
+
+    .cabang-bento-card:hover .cabang-bento-image img {
+      transform: scale(1.12);
+      filter: brightness(0.75) saturate(1.3);
+      transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1),
+                  filter 0.6s ease;
+    }
+
+    /* Ken burns idle animation */
+    .cabang-bento-card:not(:hover) .cabang-bento-image img {
+      animation: kenBurns 20s ease-in-out infinite alternate;
+    }
+
+    @keyframes kenBurns {
+      0% { transform: scale(1) translate(0, 0); }
+      100% { transform: scale(1.08) translate(-2%, -1%); }
+    }
+
+    /* Placeholder (no image) */
+    .cabang-bento-placeholder {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(255, 107, 0, 0.15), transparent 50%),
+        linear-gradient(135deg, #1e1e3a 0%, #14141f 100%);
+      color: rgba(255, 107, 0, 0.3);
+    }
+
+    .cabang-bento-image.no-image .cabang-bento-placeholder {
+      display: flex;
+    }
+
+    /* Gradient overlay */
+    .cabang-bento-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background: linear-gradient(
+        180deg,
+        rgba(8, 8, 13, 0.2) 0%,
+        rgba(8, 8, 13, 0.4) 40%,
+        rgba(8, 8, 13, 0.95) 100%
+      );
+      transition: opacity 0.4s ease;
+    }
+
+    .cabang-bento-card:hover .cabang-bento-overlay {
+      background: linear-gradient(
+        180deg,
+        rgba(8, 8, 13, 0.1) 0%,
+        rgba(8, 8, 13, 0.3) 40%,
+        rgba(8, 8, 13, 0.92) 100%
+      );
+    }
+
+    /* Grain texture */
+    .cabang-bento-grain {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      opacity: 0.08;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' /%3E%3C/svg%3E");
+      mix-blend-mode: overlay;
+    }
+
+    /* Corner glow (mouse-following) */
+    .cabang-corner-glow {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      background: radial-gradient(
+        400px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 107, 0, 0.15),
+        transparent 40%
+      );
+    }
+
+    .cabang-bento-card:hover .cabang-corner-glow {
+      opacity: 1;
+    }
+
+    /* Signal indicator (top right) */
+    .cabang-signal {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 5;
+      width: 12px;
+      height: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cabang-signal-dot {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 12px rgba(34, 197, 94, 0.8);
+      z-index: 2;
+    }
+
+    .cabang-signal-pulse {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      animation: signalPulse 2s ease-out infinite;
+    }
+
+    @keyframes signalPulse {
+      0% {
+        transform: scale(1);
+        opacity: 0.8;
+      }
+      100% {
+        transform: scale(3.5);
+        opacity: 0;
+      }
+    }
+
+    /* Badge ID */
+    .cabang-bento-badge {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      z-index: 5;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 12px;
+      background: rgba(255, 107, 0, 0.15);
+      border: 1px solid rgba(255, 107, 0, 0.35);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 999px;
+      color: var(--orange);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    /* Content */
+    .cabang-bento-content {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 4;
+      padding: clamp(18px, 2.5vw, 26px);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transform: translateY(0);
+      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Header (avatar + PIC info) */
+    .cabang-bento-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.4s ease 0.1s, transform 0.4s ease 0.1s;
+    }
+
+    .cabang-bento-card:hover .cabang-bento-header {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .cabang-bento-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--cabang-color, var(--orange)), rgba(255, 107, 0, 0.7));
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 800;
+      font-size: 15px;
+      box-shadow:
+        0 4px 12px rgba(255, 107, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      flex-shrink: 0;
+    }
+
+    .cabang-bento-pic-info {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .cabang-bento-pic-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: rgba(255, 255, 255, 0.5);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .cabang-bento-pic-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* Title */
+    .cabang-bento-title {
+      font-family: var(--font-serif);
+      font-size: clamp(20px, 2.4vw, 28px);
+      font-weight: 500;
+      line-height: 1.15;
+      color: #fff;
+      letter-spacing: -0.01em;
+      margin: 0;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Footer */
+    .cabang-bento-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .cabang-bento-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.7);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 6px rgba(34, 197, 94, 0.7);
+      animation: statusBlink 2s ease-in-out infinite;
+    }
+
+    @keyframes statusBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .cabang-bento-arrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 12px;
+      background: rgba(255, 107, 0, 0.15);
+      border: 1px solid rgba(255, 107, 0, 0.3);
+      border-radius: 999px;
+      color: var(--orange);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      transition: all 0.3s ease;
+    }
+
+    .cabang-bento-card:hover .cabang-bento-arrow {
+      background: var(--orange);
+      color: #fff;
+      border-color: var(--orange);
+      box-shadow: 0 6px 20px rgba(255, 107, 0, 0.4);
+      transform: translateX(2px);
+    }
+
+    /* Reveal animation */
+    .cabang-bento-card.reveal-scale {
+      opacity: 0;
+      transform: scale(0.92) translateY(30px);
+      transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .cabang-bento-card.reveal-scale.in {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+
+    .cabang-bento-card[data-delay="0"] { transition-delay: 0s; }
+    .cabang-bento-card[data-delay="1"] { transition-delay: 0.15s; }
+    .cabang-bento-card[data-delay="2"] { transition-delay: 0.3s; }
+    .cabang-bento-card[data-delay="3"] { transition-delay: 0.45s; }
+
+    /* ─── RESPONSIVE ─── */
+
+    @media (max-width: 900px) {
+      .cabang-bento-grid {
+        grid-template-columns: repeat(4, 1fr);
+        grid-auto-rows: 200px;
+      }
+
+      .cabang-bento-card:nth-child(1),
+      .cabang-bento-card:nth-child(2),
+      .cabang-bento-card:nth-child(3),
+      .cabang-bento-card:nth-child(4) {
+        grid-column: span 2;
+        grid-row: span 2;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .cabang-bento-grid {
+        grid-template-columns: 1fr;
+        grid-auto-rows: 280px;
+        gap: 12px;
+      }
+
+      .cabang-bento-card:nth-child(1),
+      .cabang-bento-card:nth-child(2),
+      .cabang-bento-card:nth-child(3),
+      .cabang-bento-card:nth-child(4) {
+        grid-column: span 1;
+        grid-row: span 1;
+      }
+
+      /* Show content always on mobile (no hover) */
+      .cabang-bento-header {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* Disable 3D tilt on mobile */
+      .cabang-bento-card {
+        transform: none !important;
+      }
+
+      .cabang-bento-card:hover {
+        transform: none !important;
+      }
+
+      /* Disable ken burns on mobile (hemat GPU) */
+      .cabang-bento-card:not(:hover) .cabang-bento-image img {
+        animation: none;
+      }
+
+      /* Hide SVG connections on mobile */
+      .cabang-connect-svg {
+        display: none;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .cabang-bento-grid {
+        grid-auto-rows: 240px;
+      }
+
+      .cabang-bento-title {
+        font-size: 18px;
+      }
+
+      .cabang-bento-badge {
+        font-size: 9px;
+        padding: 4px 10px;
+      }
+    }
+
+    /* Reduce motion */
+    @media (prefers-reduced-motion: reduce) {
+      .cabang-connect-svg,
+      .connect-line,
+      .cabang-signal-pulse,
+      .status-dot,
+      .cabang-bento-image img {
+        animation: none !important;
+      }
+
+      .cabang-bento-card {
+        transform: none !important;
+      }
+    }
+    
   </style>
 </head>
 
