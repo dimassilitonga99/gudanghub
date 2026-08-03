@@ -8,7 +8,6 @@ import { icon, kategoriIcon, injectIcons } from '../../icons.js';
 import { toast } from '../../ui.js';
 import { addToCart, updateCartUi } from './cart.js';
 
-// Daftar satuan yang bisa dipilih
 var SATUAN_OPTIONS = [
   'PCS',
   'DUS',
@@ -26,10 +25,6 @@ var localState = {
   visibleCount: 0,
   itemsPerPage: 40,
 };
-
-// ─────────────────────────────────────────────────────────────────────────
-// RENDER
-// ─────────────────────────────────────────────────────────────────────────
 
 export function renderCatalogPage(state) {
   return `
@@ -68,17 +63,11 @@ export function renderCatalogPage(state) {
   `;
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-// INIT
-// ─────────────────────────────────────────────────────────────────────────
-
 export function initCatalog(state) {
 
-  // Search
   var searchInput = $('searchInput');
 
   if (searchInput) {
-
     var handleSearch = debounce(function (e) {
       localState.searchQuery = e.target.value;
       filterCatalog(state);
@@ -88,9 +77,7 @@ export function initCatalog(state) {
     searchInput.addEventListener('input', handleSearch);
   }
 
-  // Filter chip click
   $('filterScroll')?.addEventListener('click', function (e) {
-
     var chip = e.target.closest('[data-category]');
     if (!chip) return;
 
@@ -101,14 +88,11 @@ export function initCatalog(state) {
     });
 
     chip.classList.add('active');
-
     filterCatalog(state);
     renderCatalog(state);
   });
 
-  // Catalog grid CLICK actions
   $('catalogGrid')?.addEventListener('click', function (e) {
-
     var target = e.target.closest('[data-action]');
     if (!target) return;
 
@@ -126,23 +110,16 @@ export function initCatalog(state) {
     }
   });
 
-  // Catalog grid CHANGE events (qty + satuan)
   $('catalogGrid')?.addEventListener('change', function (e) {
-
-    // Qty change
     var qtyTarget = e.target.closest('[data-action="set-qty"]');
     if (qtyTarget) {
       setQty(state, qtyTarget.dataset.code, qtyTarget.value);
       return;
     }
 
-    // Satuan change
     var satuanTarget = e.target.closest('[data-action="set-satuan"]');
     if (satuanTarget) {
-
       var code = satuanTarget.dataset.code;
-
-      // Update cart kalau sudah ada di cart
       if (state.cart[code]) {
         state.cart[code].satuan = satuanTarget.value;
         updateCartUi(state);
@@ -151,30 +128,19 @@ export function initCatalog(state) {
   });
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-// UPDATE
-// ─────────────────────────────────────────────────────────────────────────
-
 export function updateCatalog(state) {
   buildCategoryFilters(state);
   filterCatalog(state);
   renderCatalog(state);
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-// CATEGORY FILTERS
-// ─────────────────────────────────────────────────────────────────────────
-
 function buildCategoryFilters(state) {
-
   var wrapper = $('filterScroll');
   if (!wrapper) return;
 
   var categories = unique(
     state.allProducts
-      .map(function (p) {
-        return String(p.KATEGORI || '').trim();
-      })
+      .map(function (p) { return String(p.KATEGORI || '').trim(); })
       .filter(Boolean)
   ).sort();
 
@@ -195,17 +161,11 @@ function buildCategoryFilters(state) {
       }).join('');
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-// FILTER & RENDER
-// ─────────────────────────────────────────────────────────────────────────
-
 function filterCatalog(state) {
-
   var query = localState.searchQuery.toLowerCase().trim();
   var activeCat = localState.activeCategory.toLowerCase();
 
   localState.visibleProducts = state.allProducts.filter(function (product) {
-
     var code = String(product.KODE_BARANG || '').toLowerCase();
     var name = String(product.NAMA_BARANG || '').toLowerCase();
     var category = String(product.KATEGORI || '').toLowerCase();
@@ -221,9 +181,7 @@ function filterCatalog(state) {
   });
 }
 
-
 function renderCatalog(state) {
-
   var grid = $('catalogGrid');
   var label = $('sectionLabel');
   if (!grid) return;
@@ -239,7 +197,6 @@ function renderCatalog(state) {
   localState.visibleCount = firstBatch.length;
 
   if (!count) {
-
     grid.innerHTML = ''
       + '<div class="empty-state">'
       + '<div class="empty-icon">'
@@ -276,9 +233,7 @@ function renderCatalog(state) {
   }
 }
 
-
 function buildProductCard(product, state) {
-
   var code = String(product.KODE_BARANG || '');
   var name = String(product.NAMA_BARANG || '');
   var category = String(product.KATEGORI || '');
@@ -290,7 +245,6 @@ function buildProductCard(product, state) {
   var cartSatuan = state.cart[code] ? state.cart[code].satuan : unit;
   var inCart = Boolean(state.cart[code]);
 
-  // ── Badge stok — INFO SAJA (tidak batasi order) ──
   var stockClass = stock === 0 ? 'stock-empty'
                  : stock <= 5 ? 'stock-low'
                  : 'stock-ok';
@@ -301,7 +255,6 @@ function buildProductCard(product, state) {
 
   var escCode = escapeHtml(code);
 
-  // Build satuan options
   var satuanOptionsHtml = SATUAN_OPTIONS.map(function (s) {
     var selected = (s === cartSatuan) ? ' selected' : '';
     return '<option value="' + s + '"' + selected + '>' + s + '</option>';
@@ -309,20 +262,15 @@ function buildProductCard(product, state) {
 
   return ''
     + '<article class="item-card ' + (inCart ? 'in-cart' : '') + '" id="card-' + escCode + '">'
-
     + '<span class="item-stock-badge ' + stockClass + '">' + stockText + '</span>'
-
     + '<div class="item-icon">'
     + kategoriIcon(category, { size: 24 })
     + '</div>'
-
     + '<div class="item-code">' + escCode + '</div>'
     + '<div class="item-name">' + escapeHtml(name) + '</div>'
     + '<div class="item-category">' + escapeHtml(category) + '</div>'
     + '<div class="item-price">' + formatRupiah(price) + '</div>'
     + '<div class="item-unit">per ' + escapeHtml(unit) + '</div>'
-
-    // Quantity control — TANPA MAX (no limit)
     + '<div class="quantity-control">'
     + '<button class="quantity-button" type="button" data-action="decrease" data-code="' + escCode + '">'
     + icon('minus', { size: 14 })
@@ -338,8 +286,6 @@ function buildProductCard(product, state) {
     + icon('plus', { size: 14 })
     + '</button>'
     + '</div>'
-
-    // Satuan selector
     + '<div class="satuan-control">'
     + '<span class="satuan-label">Satuan:</span>'
     + '<select class="satuan-select"'
@@ -349,8 +295,6 @@ function buildProductCard(product, state) {
     + satuanOptionsHtml
     + '</select>'
     + '</div>'
-
-    // Add button — SELALU AKTIF (tidak ada disabled)
     + '<button class="add-button ' + (inCart ? 'added' : '') + '"'
     + ' type="button"'
     + ' data-action="add"'
@@ -359,30 +303,22 @@ function buildProductCard(product, state) {
       ? icon('check', { size: 14 }) + ' Di Keranjang'
       : icon('plus', { size: 14 }) + ' Tambah')
     + '</button>'
-
     + '</article>';
 }
 
-
 function appendLoadMoreButton(remaining) {
-
   var wrapper = document.createElement('div');
-
   wrapper.dataset.loadMore = 'true';
   wrapper.style.cssText = 'grid-column: 1 / -1; padding: 20px; text-align: center;';
-
   wrapper.innerHTML = ''
     + '<button class="secondary-button" type="button" data-action="load-more">'
     + icon('chevron-down', { size: 14 })
     + ' Tampilkan ' + remaining + ' lainnya'
     + '</button>';
-
   $('catalogGrid')?.appendChild(wrapper);
 }
 
-
 function loadMore(state) {
-
   document.querySelector('[data-load-more]')?.remove();
 
   var nextBatch = localState.visibleProducts.slice(
@@ -395,28 +331,19 @@ function loadMore(state) {
   }).join('');
 
   $('catalogGrid')?.insertAdjacentHTML('beforeend', cardsHtml);
-
   localState.visibleCount += nextBatch.length;
 
   var remaining = localState.visibleProducts.length - localState.visibleCount;
-
   if (remaining > 0) {
     appendLoadMoreButton(remaining);
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-// CART ACTIONS — NO LIMIT
-// ─────────────────────────────────────────────────────────────────────────
-
 function normalizeQty(value) {
-  // Tidak ada batasan stok, hanya minimal 1
   return Math.max(1, toInt(value, 1));
 }
 
-
 function addItemToCart(state, code) {
-
   var product = state.productByCode[String(code).toUpperCase()];
 
   if (!product) {
@@ -427,7 +354,6 @@ function addItemToCart(state, code) {
   var input = $('qty-' + code);
   var quantity = normalizeQty(input?.value || 1);
 
-  // Ambil satuan yang dipilih user
   var satuanSelect = $('satuan-' + code);
   var selectedSatuan = satuanSelect
     ? satuanSelect.value
@@ -440,7 +366,7 @@ function addItemToCart(state, code) {
     harga: parseFloat(product.HARGA) || 0,
     satuan: selectedSatuan,
     qty: quantity,
-    stokSistem: toInt(product.STOK),   // ← simpan stok sistem untuk info di cart
+    stokSistem: toInt(product.STOK),
     stokGudang: '',
     stokToko: '',
   };
@@ -450,9 +376,7 @@ function addItemToCart(state, code) {
   toast.success('Ditambah ke keranjang.', { duration: 1500 });
 }
 
-
 function changeQty(state, code, delta) {
-
   var input = $('qty-' + code);
   var currentQty = toInt(input?.value, 1);
   var newQty = normalizeQty(currentQty + delta);
@@ -467,9 +391,7 @@ function changeQty(state, code, delta) {
   }
 }
 
-
 function setQty(state, code, value) {
-
   var newQty = normalizeQty(value);
   var input = $('qty-' + code);
 
