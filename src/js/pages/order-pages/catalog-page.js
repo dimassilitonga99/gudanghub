@@ -1,5 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════════════
    CATALOG PAGE — with Lucide Icons + Satuan Selector
+   NO STOCK LIMIT — stok hanya sebagai info visual
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, escapeHtml, formatRupiah, debounce, toInt, unique } from '../../utils.js';
@@ -289,6 +290,7 @@ function buildProductCard(product, state) {
   var cartSatuan = state.cart[code] ? state.cart[code].satuan : unit;
   var inCart = Boolean(state.cart[code]);
 
+  // ── Badge stok — INFO SAJA (tidak batasi order) ──
   var stockClass = stock === 0 ? 'stock-empty'
                  : stock <= 5 ? 'stock-low'
                  : 'stock-ok';
@@ -320,7 +322,7 @@ function buildProductCard(product, state) {
     + '<div class="item-price">' + formatRupiah(price) + '</div>'
     + '<div class="item-unit">per ' + escapeHtml(unit) + '</div>'
 
-    // Quantity control
+    // Quantity control — TANPA MAX (no limit)
     + '<div class="quantity-control">'
     + '<button class="quantity-button" type="button" data-action="decrease" data-code="' + escCode + '">'
     + icon('minus', { size: 14 })
@@ -329,7 +331,6 @@ function buildProductCard(product, state) {
     + ' id="qty-' + escCode + '"'
     + ' type="number"'
     + ' min="1"'
-    + ' max="' + (stock || 9999) + '"'
     + ' value="' + quantity + '"'
     + ' data-action="set-qty"'
     + ' data-code="' + escCode + '">'
@@ -349,10 +350,9 @@ function buildProductCard(product, state) {
     + '</select>'
     + '</div>'
 
-    // Add button
+    // Add button — SELALU AKTIF (tidak ada disabled)
     + '<button class="add-button ' + (inCart ? 'added' : '') + '"'
     + ' type="button"'
-    + (stock === 0 ? ' disabled' : '')
     + ' data-action="add"'
     + ' data-code="' + escCode + '">'
     + (inCart
@@ -406,21 +406,12 @@ function loadMore(state) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// CART ACTIONS
+// CART ACTIONS — NO LIMIT
 // ─────────────────────────────────────────────────────────────────────────
 
-function clampQty(state, code, value) {
-
-  var product = state.productByCode[String(code).toUpperCase()];
-  var stock = product ? toInt(product.STOK) : 0;
-  var qty = Math.max(1, toInt(value, 1));
-
-  if (stock > 0 && qty > stock) {
-    qty = stock;
-    toast.info('Maksimal stok ' + stock + '.');
-  }
-
-  return qty;
+function normalizeQty(value) {
+  // Tidak ada batasan stok, hanya minimal 1
+  return Math.max(1, toInt(value, 1));
 }
 
 
@@ -433,15 +424,8 @@ function addItemToCart(state, code) {
     return;
   }
 
-  var stock = toInt(product.STOK);
-
-  if (stock === 0) {
-    toast.error('Stok habis.');
-    return;
-  }
-
   var input = $('qty-' + code);
-  var quantity = clampQty(state, code, input?.value || 1);
+  var quantity = normalizeQty(input?.value || 1);
 
   // Ambil satuan yang dipilih user
   var satuanSelect = $('satuan-' + code);
@@ -456,6 +440,7 @@ function addItemToCart(state, code) {
     harga: parseFloat(product.HARGA) || 0,
     satuan: selectedSatuan,
     qty: quantity,
+    stokSistem: toInt(product.STOK),   // ← simpan stok sistem untuk info di cart
     stokGudang: '',
     stokToko: '',
   };
@@ -470,7 +455,7 @@ function changeQty(state, code, delta) {
 
   var input = $('qty-' + code);
   var currentQty = toInt(input?.value, 1);
-  var newQty = clampQty(state, code, currentQty + delta);
+  var newQty = normalizeQty(currentQty + delta);
 
   if (input) {
     input.value = newQty;
@@ -485,7 +470,7 @@ function changeQty(state, code, delta) {
 
 function setQty(state, code, value) {
 
-  var newQty = clampQty(state, code, value);
+  var newQty = normalizeQty(value);
   var input = $('qty-' + code);
 
   if (input) {
