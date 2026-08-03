@@ -1,16 +1,13 @@
 /* ═══════════════════════════════════════════════════════════════════════
    MASS ORDER PAGE — with Lucide Icons
    NO STOCK LIMIT — warning tetap tampil sebagai info
+   Stok sistem snapshot dikirim ke backend
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, escapeHtml, formatRupiah, toInt, debounce, pasteFromClipboard } from '../../utils.js';
 import { orders as ordersApi } from '../../api.js';
 import { toast, confirm } from '../../ui.js';
 import { icon } from '../../icons.js';
-
-// ─────────────────────────────────────────────────────────────────────────
-// RENDER
-// ─────────────────────────────────────────────────────────────────────────
 
 export function renderMassOrderPage(state) {
   return `
@@ -96,10 +93,6 @@ export function renderMassOrderPage(state) {
   `;
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-// INIT
-// ─────────────────────────────────────────────────────────────────────────
-
 export function initMassOrder(state) {
   const massInput = $('massInput');
 
@@ -109,7 +102,6 @@ export function initMassOrder(state) {
       renderMassPreview(state);
       updateMassSummary(state);
     }, 300);
-
     massInput.addEventListener('input', handleInput);
   }
 
@@ -120,17 +112,12 @@ export function initMassOrder(state) {
   $('massPreview')?.addEventListener('click', (e) => {
     const target = e.target.closest('[data-mass-action]');
     if (!target) return;
-
     const index = toInt(target.dataset.index);
     const action = target.dataset.massAction;
 
-    if (action === 'delete') {
-      deleteMassItem(state, index);
-    } else if (action === 'increase') {
-      updateMassItemQty(state, index, 1);
-    } else if (action === 'decrease') {
-      updateMassItemQty(state, index, -1);
-    }
+    if (action === 'delete') deleteMassItem(state, index);
+    else if (action === 'increase') updateMassItemQty(state, index, 1);
+    else if (action === 'decrease') updateMassItemQty(state, index, -1);
   });
 
   $('massPreview')?.addEventListener('change', (e) => {
@@ -138,33 +125,20 @@ export function initMassOrder(state) {
     if (target) {
       setMassItemQty(state, toInt(target.dataset.index), target.value);
     }
-
     const stockTarget = e.target.closest('[data-mass-stock]');
-    if (stockTarget) {
-      handleMassStockInput(state, stockTarget);
-    }
+    if (stockTarget) handleMassStockInput(state, stockTarget);
   });
 
   $('massPreview')?.addEventListener('input', (e) => {
     const stockTarget = e.target.closest('[data-mass-stock]');
-    if (stockTarget) {
-      handleMassStockInput(state, stockTarget);
-    }
+    if (stockTarget) handleMassStockInput(state, stockTarget);
   });
 }
-
-// ─────────────────────────────────────────────────────────────────────────
-// PASTE / CLEAR
-// ─────────────────────────────────────────────────────────────────────────
 
 async function pasteFromClipboardHandler(state) {
   try {
     const text = await pasteFromClipboard();
-    if (!text) {
-      toast.info('Paste manual dengan Ctrl+V.');
-      return;
-    }
-
+    if (!text) { toast.info('Paste manual dengan Ctrl+V.'); return; }
     const input = $('massInput');
     if (input) {
       input.value = text;
@@ -172,25 +146,17 @@ async function pasteFromClipboardHandler(state) {
       renderMassPreview(state);
       updateMassSummary(state);
     }
-
     toast.success('Berhasil paste.');
-  } catch {
-    toast.info('Paste manual dengan Ctrl+V.');
-  }
+  } catch { toast.info('Paste manual dengan Ctrl+V.'); }
 }
 
 function clearMassOrder(state) {
   const input = $('massInput');
   if (input) input.value = '';
-
   state.massItems = [];
   renderMassPreview(state);
   updateMassSummary(state);
 }
-
-// ─────────────────────────────────────────────────────────────────────────
-// PARSE
-// ─────────────────────────────────────────────────────────────────────────
 
 function parseMassInput(state) {
   const text = $('massInput')?.value || '';
@@ -199,29 +165,15 @@ function parseMassInput(state) {
   state.massItems = lines.map((line) => {
     const parts = line.split(/[;,\t]/).map((p) => p.trim());
 
-    if (parts.length < 2) {
-      return {
-        kode: line,
-        valid: false,
-        error: 'Format harus KODE;JUMLAH',
-      };
-    }
+    if (parts.length < 2) return { kode: line, valid: false, error: 'Format harus KODE;JUMLAH' };
 
     const code = String(parts[0]).toUpperCase();
     const quantity = toInt(parts[1], 0);
     const product = state.productByCode[code];
 
-    if (!code) {
-      return { kode: '', valid: false, error: 'Kode kosong' };
-    }
-
-    if (quantity <= 0) {
-      return { kode: code, valid: false, error: 'Jumlah harus > 0' };
-    }
-
-    if (!product) {
-      return { kode: code, valid: false, error: `Barang ${code} tidak ditemukan` };
-    }
+    if (!code) return { kode: '', valid: false, error: 'Kode kosong' };
+    if (quantity <= 0) return { kode: code, valid: false, error: 'Jumlah harus > 0' };
+    if (!product) return { kode: code, valid: false, error: `Barang ${code} tidak ditemukan` };
 
     const stock = toInt(product.STOK);
 
@@ -234,17 +186,12 @@ function parseMassInput(state) {
       qty: quantity,
       stock,
       valid: true,
-      // Warning tetap ada sebagai INFO (tidak blok submit)
       warning: quantity > stock ? `Melebihi stok sistem (${stock})` : '',
       stokGudang: '',
       stokToko: '',
     };
   });
 }
-
-// ─────────────────────────────────────────────────────────────────────────
-// RENDER PREVIEW
-// ─────────────────────────────────────────────────────────────────────────
 
 function renderMassPreview(state) {
   const wrapper = $('massPreview');
@@ -255,8 +202,7 @@ function renderMassPreview(state) {
       <div class="empty-state" style="border: 1px dashed var(--line-soft); border-radius: 14px;">
         <div class="empty-icon">${icon('zap', { size: 48, color: 'var(--muted)' })}</div>
         <div>Mulai ketik atau paste kode di atas.</div>
-      </div>
-    `;
+      </div>`;
     return;
   }
 
@@ -266,18 +212,14 @@ function renderMassPreview(state) {
   wrapper.innerHTML = `
     <div style="display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;">
       <span style="padding: 4px 12px; border-radius: 20px; background: rgba(34,197,94,0.15); color: var(--success); font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
-        ${icon('check-circle', { size: 12 })}
-        ${validCount} valid
+        ${icon('check-circle', { size: 12 })} ${validCount} valid
       </span>
       ${invalidCount ? `
         <span style="padding: 4px 12px; border-radius: 20px; background: rgba(239,68,68,0.15); color: var(--danger); font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
-          ${icon('x-circle', { size: 12 })}
-          ${invalidCount} error
-        </span>
-      ` : ''}
+          ${icon('x-circle', { size: 12 })} ${invalidCount} error
+        </span>` : ''}
     </div>
-    ${state.massItems.map((item, i) => buildMassItem(item, i)).join('')}
-  `;
+    ${state.massItems.map((item, i) => buildMassItem(item, i)).join('')}`;
 
   validateMassStocks(state);
 }
@@ -289,16 +231,12 @@ function buildMassItem(item, index) {
         <div class="massal-icon">${icon('x-circle', { size: 20, color: 'var(--danger)' })}</div>
         <div class="massal-info">
           <div class="massal-code">${escapeHtml(item.kode || '?')}</div>
-          <div class="massal-error">
-            ${icon('alert-triangle', { size: 10 })}
-            ${escapeHtml(item.error)}
-          </div>
+          <div class="massal-error">${icon('alert-triangle', { size: 10 })} ${escapeHtml(item.error)}</div>
         </div>
         <button class="delete-button" type="button" data-mass-action="delete" data-index="${index}">
           ${icon('trash', { size: 14 })}
         </button>
-      </article>
-    `;
+      </article>`;
   }
 
   const gudangEmpty = item.stokGudang === '';
@@ -309,73 +247,49 @@ function buildMassItem(item, index) {
       <div class="massal-icon">
         ${item.warning
           ? icon('alert-triangle', { size: 20, color: 'var(--warning)' })
-          : icon('check-circle', { size: 20, color: 'var(--success)' })
-        }
+          : icon('check-circle', { size: 20, color: 'var(--success)' })}
       </div>
-
       <div class="massal-info">
         <div class="massal-code">${escapeHtml(item.kode)}</div>
         <div class="massal-name">${escapeHtml(item.nama)}</div>
         <div class="massal-price">${formatRupiah(item.harga)} / ${escapeHtml(item.satuan)} · Stok sistem: ${item.stock}</div>
-        ${item.warning ? `
-          <div class="massal-warning">
-            ${icon('alert-triangle', { size: 10 })}
-            ${escapeHtml(item.warning)}
-          </div>
-        ` : ''}
+        ${item.warning ? `<div class="massal-warning">${icon('alert-triangle', { size: 10 })} ${escapeHtml(item.warning)}</div>` : ''}
       </div>
-
       <div class="massal-right">
         <div class="massal-subtotal">${formatRupiah(item.qty * item.harga)}</div>
-
         <div class="massal-controls">
           <span class="compact-quantity">
-            <button type="button" data-mass-action="decrease" data-index="${index}">
-              ${icon('minus', { size: 10 })}
-            </button>
-            <input type="number" min="1" value="${item.qty}"
-                   data-mass-action="set-qty" data-index="${index}">
-            <button type="button" data-mass-action="increase" data-index="${index}">
-              ${icon('plus', { size: 10 })}
-            </button>
+            <button type="button" data-mass-action="decrease" data-index="${index}">${icon('minus', { size: 10 })}</button>
+            <input type="number" min="1" value="${item.qty}" data-mass-action="set-qty" data-index="${index}">
+            <button type="button" data-mass-action="increase" data-index="${index}">${icon('plus', { size: 10 })}</button>
           </span>
-
           <label class="stock-group ${gudangEmpty ? 'empty' : ''}" title="Stok Gudang">
             <span class="stock-group-icon">${icon('warehouse', { size: 12 })}</span>
             <input class="stock-input" type="number" min="0" placeholder="Gudang"
                    value="${gudangEmpty ? '' : item.stokGudang}"
                    data-mass-stock="gudang" data-index="${index}">
           </label>
-
           <label class="stock-group ${tokoEmpty ? 'empty' : ''}" title="Stok Toko">
             <span class="stock-group-icon">${icon('store', { size: 12 })}</span>
             <input class="stock-input" type="number" min="0" placeholder="Toko"
                    value="${tokoEmpty ? '' : item.stokToko}"
                    data-mass-stock="toko" data-index="${index}">
           </label>
-
           <button class="delete-button" type="button" data-mass-action="delete" data-index="${index}">
             ${icon('trash', { size: 14 })}
           </button>
         </div>
       </div>
-    </article>
-  `;
+    </article>`;
 }
-
-// ─────────────────────────────────────────────────────────────────────────
-// STOCK HANDLERS
-// ─────────────────────────────────────────────────────────────────────────
 
 function handleMassStockInput(state, input) {
   const index = toInt(input.dataset.index);
   const value = input.value.trim();
   const field = input.dataset.massStock === 'gudang' ? 'stokGudang' : 'stokToko';
-
   if (state.massItems[index]) {
     state.massItems[index][field] = value === '' ? '' : Math.max(0, toInt(value, 0));
   }
-
   input.closest('.stock-group')?.classList.toggle('empty', value === '');
   validateMassStocks(state);
 }
@@ -389,7 +303,6 @@ function validateMassStocks(state) {
 
   const warning = $('massWarning');
   const warningText = $('massWarningText');
-
   if (warning && warningText) {
     if (validItems.length > 0 && missing > 0) {
       warning.classList.add('show');
@@ -401,13 +314,8 @@ function validateMassStocks(state) {
 
   const submitBtn = $('massSubmitButton');
   if (submitBtn) submitBtn.disabled = !canSubmit;
-
   return canSubmit;
 }
-
-// ─────────────────────────────────────────────────────────────────────────
-// QTY ACTIONS — NO LIMIT
-// ─────────────────────────────────────────────────────────────────────────
 
 function syncMassInput(state) {
   const input = $('massInput');
@@ -420,14 +328,10 @@ function syncMassInput(state) {
 
 function updateMassItemQty(state, index, delta) {
   if (!state.massItems[index]?.valid) return;
-
   state.massItems[index].qty = Math.max(1, state.massItems[index].qty + delta);
-
-  // Update warning info kalau qty > stock
   const stock = state.massItems[index].stock;
   const qty = state.massItems[index].qty;
   state.massItems[index].warning = qty > stock ? `Melebihi stok sistem (${stock})` : '';
-
   syncMassInput(state);
   renderMassPreview(state);
   updateMassSummary(state);
@@ -435,13 +339,10 @@ function updateMassItemQty(state, index, delta) {
 
 function setMassItemQty(state, index, value) {
   if (!state.massItems[index]?.valid) return;
-
   state.massItems[index].qty = Math.max(1, toInt(value, 1));
-
   const stock = state.massItems[index].stock;
   const qty = state.massItems[index].qty;
   state.massItems[index].warning = qty > stock ? `Melebihi stok sistem (${stock})` : '';
-
   syncMassInput(state);
   renderMassPreview(state);
   updateMassSummary(state);
@@ -454,10 +355,6 @@ function deleteMassItem(state, index) {
   updateMassSummary(state);
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-// SUMMARY
-// ─────────────────────────────────────────────────────────────────────────
-
 function updateMassSummary(state) {
   const validItems = state.massItems.filter((i) => i.valid);
   const totalQty = validItems.reduce((s, i) => s + i.qty, 0);
@@ -467,9 +364,7 @@ function updateMassSummary(state) {
   if (summary) summary.classList.toggle('show', validItems.length > 0);
 
   const summaryItems = $('massSummaryItems');
-  if (summaryItems) {
-    summaryItems.textContent = `${validItems.length} jenis · ${totalQty} unit`;
-  }
+  if (summaryItems) summaryItems.textContent = `${validItems.length} jenis · ${totalQty} unit`;
 
   const summaryTotal = $('massSummaryTotal');
   if (summaryTotal) summaryTotal.textContent = formatRupiah(totalPrice);
@@ -480,26 +375,14 @@ function updateMassSummary(state) {
       ? `${icon('send', { size: 18 })} Kirim ${validItems.length} Barang ke Gudang`
       : `${icon('zap', { size: 18 })} Kirim Order Massal`;
   }
-
   validateMassStocks(state);
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-// SUBMIT
-// ─────────────────────────────────────────────────────────────────────────
-
 async function confirmMassSubmit(state) {
   const validItems = state.massItems.filter((i) => i.valid);
-
-  if (!validItems.length) {
-    toast.error('Tidak ada barang valid.');
-    return;
-  }
-
+  if (!validItems.length) { toast.error('Tidak ada barang valid.'); return; }
   if (!validateMassStocks(state)) {
-    toast.warning('Isi stok gudang dan stok toko semua barang.', {
-      duration: 4000,
-    });
+    toast.warning('Isi stok gudang dan stok toko semua barang.', { duration: 4000 });
     return;
   }
 
@@ -517,13 +400,11 @@ async function confirmMassSubmit(state) {
   });
 
   if (!ok) return;
-
   await submitMassOrder(state, validItems);
 }
 
 async function submitMassOrder(state, items) {
   if (state.isSubmitting) return;
-
   state.isSubmitting = true;
 
   const submitBtn = $('massSubmitButton');
@@ -544,7 +425,7 @@ async function submitMassOrder(state, items) {
   const payload = {
     idCabang: state.branchId,
     catatan,
-        items: items.map((i) => ({
+    items: items.map((i) => ({
       kode: i.kode,
       nama: i.nama,
       kategori: i.kategori,
@@ -559,19 +440,15 @@ async function submitMassOrder(state, items) {
 
   try {
     const result = await ordersApi.submit(payload);
-
     if (result.status === 'ok') {
       state.massItems = [];
       const input = $('massInput');
       const note = $('massNoteInput');
       if (input) input.value = '';
       if (note) note.value = '';
-
       renderMassPreview(state);
       updateMassSummary(state);
-
       toast.success('Order massal berhasil dikirim!', { duration: 4000 });
-
       setTimeout(() => {
         const historyTab = document.querySelector('[data-tab="history"]');
         historyTab?.click();
