@@ -1544,6 +1544,60 @@
         gap: 8px;
       }
     }
+    /* ═══ STOK SISTEM DI CART ═══ */
+.cart-stok-sistem {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 9px;
+  font-weight: 700;
+  font-family: var(--font-sans);
+  vertical-align: middle;
+}
+
+.cart-stok-sistem.stock-ok {
+  background: rgba(34, 197, 94, 0.15);
+  color: var(--success);
+}
+
+.cart-stok-sistem.stock-low {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--warning);
+}
+
+.cart-stok-sistem.stock-empty {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--danger);
+}
+
+/* ═══ LABEL STOK GUDANG & TOKO ═══ */
+.stock-labels-row {
+  display: flex;
+  gap: 5px;
+  margin-top: 4px;
+  margin-bottom: 3px;
+  justify-content: flex-end;
+}
+
+.stock-mini-label {
+  flex: 1;
+  min-width: 92px;
+  max-width: 92px;
+  text-align: center;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--orange);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+@media (max-width: 480px) {
+  .stock-mini-label {
+    min-width: 104px;
+    max-width: 104px;
+  }
+}
   </style>
 </head>
 
