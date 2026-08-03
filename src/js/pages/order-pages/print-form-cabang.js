@@ -1,5 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════════════
    PRINT FORM CABANG — Download sebagai PDF atau JPG
+   Stok sistem dari SNAPSHOT order (bukan live)
    Logo dari file: ./public/images/logo/logo-nk.png
    ═══════════════════════════════════════════════════════════════════════ */
 
@@ -28,7 +29,6 @@ export function initPrintFormCabang() {
     + '<div class="overlay print-cabang-overlay" id="printCabangOverlay" role="dialog" aria-modal="true">'
     + '<div class="modal modal-xl print-cabang-modal">'
 
-    // Header
     + '<header class="modal-header print-cabang-modal-header">'
     + '<div class="modal-title" id="printCabangModalTitle">Preview Form Order</div>'
     + '<div class="print-cabang-modal-actions">'
@@ -50,7 +50,6 @@ export function initPrintFormCabang() {
     + '</div>'
     + '</header>'
 
-    // Body
     + '<div class="modal-body print-cabang-modal-body" id="printCabangModalBody">'
     + '<div id="printCabangPreview"></div>'
     + '</div>'
@@ -107,7 +106,6 @@ function addPrintCabangStyles() {
     + '.print-cabang-modal-body { background: #e0e0e0 !important; padding: 20px !important; overflow-y: auto; }'
     + '#printCabangPreview { background: #fff; color: #000; padding: 30px 35px; max-width: 850px; margin: 0 auto; box-shadow: 0 10px 40px rgba(0,0,0,0.3); font-family: Arial, sans-serif; font-size: 12px; min-height: 600px; }'
 
-    // Print
     + '@media print {'
     + '  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }'
     + '  body > *:not(#printCabangModalContainer) { display: none !important; }'
@@ -118,7 +116,6 @@ function addPrintCabangStyles() {
     + '  @page { size: A4; margin: 12mm; }'
     + '}'
 
-    // Responsive
     + '@media (max-width: 768px) {'
     + '  .print-cabang-modal { max-width: calc(100vw - 24px) !important; }'
     + '  #printCabangPreview { padding: 20px 15px; font-size: 11px; }'
@@ -167,10 +164,8 @@ function renderPreview() {
   var cabang = CABANG[order.ID_CABANG] || { nama: '-', pic: '-' };
   var pic = String(cabang.pic || 'SUPERVISOR').toUpperCase();
 
-  // Nomor order
   var nomorOrder = getSequentialNumberCabang(order);
 
-  // Tanggal
   var hariID = ['MINGGU', 'SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT', 'SABTU'];
   var date = parseAnyDate(order.TANGGAL_ORDER) || new Date();
   var hari = hariID[date.getDay()];
@@ -179,7 +174,6 @@ function renderPreview() {
     + String(date.getMonth() + 1).padStart(2, '0') + '/'
     + date.getFullYear();
 
-  // Status
   var status = String(order.STATUS || 'PENDING').toUpperCase();
 
   var statusBg = '#f59e0b';
@@ -190,13 +184,13 @@ function renderPreview() {
   if (status === 'APPROVED') statusLabel = 'DISETUJUI';
   if (status === 'REJECTED') statusLabel = 'DITOLAK';
 
-  // Table rows
+  // Table rows - Stok sistem dari SNAPSHOT
   var rows = items.map(function (item) {
 
-        var qty = toNumber(item.QTY);
+    var qty = toNumber(item.QTY);
     var sat = String(item.SATUAN || 'PCS').toUpperCase();
-    
-    // Ambil stok sistem dari snapshot order (bukan live)
+
+    // Ambil stok sistem dari SNAPSHOT (bukan live)
     var stokS = '0';
     if (item.STOK_SISTEM !== undefined && item.STOK_SISTEM !== '' && item.STOK_SISTEM !== null) {
       stokS = String(item.STOK_SISTEM);
@@ -204,6 +198,7 @@ function renderPreview() {
       // Fallback ke master untuk order lama
       stokS = getStokBarangCabang(item.KODE_BARANG);
     }
+
     var stokG = '0';
     if (item.STOK_GUDANG !== undefined && item.STOK_GUDANG !== '') {
       stokG = String(item.STOK_GUDANG);
@@ -229,15 +224,12 @@ function renderPreview() {
 
   }).join('');
 
-  // ── BUILD HTML ──
-
   preview.innerHTML = ''
 
-        // ══════ HEADER ══════
+    // ══════ HEADER ══════
     + '<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse; margin-bottom:0;">'
     + '<tr>'
 
-    // FORM ORDER BARANG (sejajar atas dengan logo)
     + '<td style="vertical-align:top; padding-bottom:14px; padding-top:4px;">'
     + '<div style="font-size:42px; font-weight:900; line-height:1; letter-spacing:-1px;">'
     + '<span style="color:#E67E22;">FORM</span>'
@@ -245,7 +237,6 @@ function renderPreview() {
     + '</div>'
     + '</td>'
 
-    // LOGO NK (sejajar atas)
     + '<td style="vertical-align:top; text-align:right; width:180px; padding-bottom:14px;">'
     + '<img src="./public/images/logo/logo-nk.png"'
     + ' alt="Logo Nasional Kitchen"'
@@ -258,7 +249,6 @@ function renderPreview() {
     + '</tr>'
     + '</table>'
 
-    // ══════ GARIS ══════
     + '<div style="border-top:1px solid #000; margin-bottom:12px;"></div>'
 
     // ══════ INFO ══════
@@ -358,7 +348,6 @@ async function doDownloadJpg() {
 
   try {
 
-    // Dynamic import html2canvas
     var html2canvas;
 
     try {
@@ -373,10 +362,8 @@ async function doDownloadJpg() {
       return;
     }
 
-    // Tunggu gambar logo loaded
     await waitForImages(preview);
 
-    // Render ke canvas
     var canvas = await html2canvas(preview, {
       scale: 2,
       useCORS: true,
@@ -387,10 +374,8 @@ async function doDownloadJpg() {
       height: preview.scrollHeight,
     });
 
-    // Convert ke JPG
     var jpgDataUrl = canvas.toDataURL('image/jpeg', 0.92);
 
-    // Download
     var link = document.createElement('a');
     link.href = jpgDataUrl;
     link.download = 'Form-Order-' + (printState.order?.ORDER_ID || 'unknown') + '.jpg';
@@ -411,8 +396,6 @@ async function doDownloadJpg() {
     }
   }
 }
-
-// ── Tunggu semua gambar loaded ──
 
 function waitForImages(container) {
 
@@ -444,12 +427,9 @@ function waitForImages(container) {
       }
     });
 
-    // Timeout fallback (3 detik)
     setTimeout(resolve, 3000);
   });
 }
-
-// ── Load html2canvas dari CDN (fallback) ──
 
 function loadHtml2CanvasCDN() {
 
