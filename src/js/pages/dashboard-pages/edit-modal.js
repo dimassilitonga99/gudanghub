@@ -488,7 +488,7 @@ export function showEditModal(orderId, dashboardState) {
   modalState.order = order;
   modalState.dashboardState = dashboardState;
 
-  modalState.items = (order.DETAIL || []).map((d) => ({
+    modalState.items = (order.DETAIL || []).map((d) => ({
     kode: String(d.KODE_BARANG || ''),
     nama: String(d.NAMA_BARANG || ''),
     kategori: String(d.KATEGORI || ''),
@@ -500,6 +500,9 @@ export function showEditModal(orderId, dashboardState) {
     reason: String(d.REASON || ''),
     stokGudang: d.STOK_GUDANG ?? '',
     stokToko: d.STOK_TOKO ?? '',
+    stokSistem: d.STOK_SISTEM !== undefined && d.STOK_SISTEM !== '' 
+                ? d.STOK_SISTEM 
+                : 0,
   }));
 
   modalState.originalItems = JSON.parse(JSON.stringify(modalState.items));
@@ -904,7 +907,7 @@ function addNewItem() {
     existing.qty += quantity;
     toast.info(`Qty ${existing.kode} bertambah jadi ${existing.qty}`);
   } else {
-    modalState.items.push({
+        modalState.items.push({
       kode: String(product.KODE_BARANG),
       nama: String(product.NAMA_BARANG || ''),
       kategori: String(product.KATEGORI || ''),
@@ -916,6 +919,7 @@ function addNewItem() {
       reason: 'Item baru ditambahkan admin',
       stokGudang: '',
       stokToko: '',
+      stokSistem: toInt(product.STOK) || 0,   // ← snapshot stok saat item ditambah
     });
     toast.success(`${product.NAMA_BARANG} ditambahkan`);
   }
@@ -1011,7 +1015,7 @@ async function submitEdit(sendEmail) {
     catatanAdmin,
     diprosesOleh: modalState.dashboardState.session?.nama || 'Admin Dashboard',
     kirimEmail: sendEmail,
-    items: modalState.items.map((item) => ({
+        items: modalState.items.map((item) => ({
       kode: item.kode,
       nama: item.nama,
       kategori: item.kategori,
@@ -1023,6 +1027,7 @@ async function submitEdit(sendEmail) {
       originalQty: item.originalQty,
       stokGudang: item.stokGudang,
       stokToko: item.stokToko,
+      stokSistem: item.stokSistem !== undefined ? item.stokSistem : 0,
     })),
   };
 
