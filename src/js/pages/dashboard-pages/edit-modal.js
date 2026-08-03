@@ -1,5 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════════════
    EDIT MODAL — with Lucide Icons + Print Form Feature
+   Stok sistem snapshot tersimpan per item
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, escapeHtml, formatRupiah, formatWita, toNumber, toInt } from '../../utils.js';
@@ -24,7 +25,6 @@ let modalState = {
 export function initEditModal(dashboardState) {
   modalState.dashboardState = dashboardState;
 
-  // Init print form modal
   initPrintForm();
 
   const container = $('editModalContainer');
@@ -488,7 +488,7 @@ export function showEditModal(orderId, dashboardState) {
   modalState.order = order;
   modalState.dashboardState = dashboardState;
 
-    modalState.items = (order.DETAIL || []).map((d) => ({
+  modalState.items = (order.DETAIL || []).map((d) => ({
     kode: String(d.KODE_BARANG || ''),
     nama: String(d.NAMA_BARANG || ''),
     kategori: String(d.KATEGORI || ''),
@@ -500,9 +500,7 @@ export function showEditModal(orderId, dashboardState) {
     reason: String(d.REASON || ''),
     stokGudang: d.STOK_GUDANG ?? '',
     stokToko: d.STOK_TOKO ?? '',
-    stokSistem: d.STOK_SISTEM !== undefined && d.STOK_SISTEM !== '' 
-                ? d.STOK_SISTEM 
-                : 0,
+    stokSistem: d.STOK_SISTEM !== undefined && d.STOK_SISTEM !== '' ? d.STOK_SISTEM : 0,
   }));
 
   modalState.originalItems = JSON.parse(JSON.stringify(modalState.items));
@@ -620,7 +618,6 @@ function renderModalContent() {
   renderEditRows();
   bindModalEvents();
 
-  // Re-inject icons di modal
   injectIcons(body);
 }
 
@@ -659,8 +656,9 @@ function renderEditRows() {
 
     const reasonRequired = deleted || rejected;
 
-    const stokInfo = (item.stokGudang !== '' || item.stokToko !== '') ? `
+    const stokInfo = (item.stokGudang !== '' || item.stokToko !== '' || item.stokSistem !== 0) ? `
       <div class="er-stok-info">
+        ${item.stokSistem !== undefined && item.stokSistem !== '' ? `<span>${icon('package', { size: 12 })} Sistem: <b>${item.stokSistem}</b></span>` : ''}
         ${item.stokGudang !== '' ? `<span>${icon('warehouse', { size: 12 })} Gudang: <b>${item.stokGudang}</b></span>` : ''}
         ${item.stokToko !== '' ? `<span>${icon('store', { size: 12 })} Toko: <b>${item.stokToko}</b></span>` : ''}
       </div>
@@ -907,7 +905,7 @@ function addNewItem() {
     existing.qty += quantity;
     toast.info(`Qty ${existing.kode} bertambah jadi ${existing.qty}`);
   } else {
-        modalState.items.push({
+    modalState.items.push({
       kode: String(product.KODE_BARANG),
       nama: String(product.NAMA_BARANG || ''),
       kategori: String(product.KATEGORI || ''),
@@ -919,7 +917,7 @@ function addNewItem() {
       reason: 'Item baru ditambahkan admin',
       stokGudang: '',
       stokToko: '',
-      stokSistem: toInt(product.STOK) || 0,   // ← snapshot stok saat item ditambah
+      stokSistem: toInt(product.STOK) || 0,
     });
     toast.success(`${product.NAMA_BARANG} ditambahkan`);
   }
@@ -1015,7 +1013,7 @@ async function submitEdit(sendEmail) {
     catatanAdmin,
     diprosesOleh: modalState.dashboardState.session?.nama || 'Admin Dashboard',
     kirimEmail: sendEmail,
-        items: modalState.items.map((item) => ({
+    items: modalState.items.map((item) => ({
       kode: item.kode,
       nama: item.nama,
       kategori: item.kategori,
@@ -1076,7 +1074,6 @@ function handlePrintForm() {
     return;
   }
 
-  // Filter items yang tidak DELETED
   const activeItems = modalState.items.filter((i) => i.itemStatus !== 'DELETED');
 
   if (!activeItems.length) {
