@@ -1,57 +1,62 @@
 /* ═══════════════════════════════════════════════════════════════════════
    API — Wrapper untuk komunikasi dengan Google Apps Script
+   v3.3 — Fast Login, Anti-Error, Robust Response Parser
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { API_URL, SETTINGS } from './config.js';
-import { sleep, retry } from './utils.js';
 
 // ─────────────────────────────────────────────────────────────────────────
 // STATE
 // ─────────────────────────────────────────────────────────────────────────
 
-const pendingRequests = new Map(); // deduplication
-const cache = new Map(); // simple cache
+const pendingRequests = new Map();
+const cache = new Map();
 
 // ─────────────────────────────────────────────────────────────────────────
-// RESPONSE PARSER
+// RESPONSE PARSER — Super robust
 // ─────────────────────────────────────────────────────────────────────────
 
-/**
- * Parse response text menjadi JSON dengan fallback
- * Google Apps Script kadang return HTML wrapper, kita extract JSON-nya
- */
 export function parseResponse(text) {
   if (!text || !text.trim()) {
     return { status: 'error', message: 'Respons kosong dari server.' };
   }
 
-  // Coba parse langsung
+  // Strategy 1: Direct JSON parse
   try {
     return JSON.parse(text);
   } catch {
-    // Fallback: extract JSON dari HTML/text
-    const match = text.match(/\{[\s\S]*\}/);
-    if (match) {
-      try {
-        return JSON.parse(match[0]);
-      } catch {
-        // Failed
-      }
+    // continue
+  }
+
+  // Strategy 2: Extract JSON dari HTML wrapper
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if (jsonMatch) {
+    try {
+      return JSON.parse(jsonMatch[0]);
+    } catch {
+      // continue
     }
+  }
+
+  // Strategy 3: Cek keyword auth di response
+  const lower = text.toLowerCase();
+  if (lower.includes('sign in') || lower.includes('accounts.google')) {
     return {
       status: 'error',
-      message: 'Format respons server tidak valid.',
+      message: 'Server AppScript butuh login. Cek deployment access ke "Anyone".'
     };
   }
+
+  return {
+    status: 'error',
+    message: 'Format respons server tidak valid. Cek koneksi.',
+  };
 }
 
 // ─────────────────────────────────────────────────────────────────────────
 // FETCH WITH TIMEOUT
 // ─────────────────────────────────────────────────────────────────────────
 
-/**
- * Fetch dengan timeout support
- */
 async function fetchWithTimeout(url, options = {}, timeout = SETTINGS.apiTimeout) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeout);
@@ -66,129 +71,129 @@ async function fetchWithTimeout(url, options = {}, timeout = SETTINGS.apiTimeout
   } catch (error) {
     clearTimeout(timer);
     if (error.name === 'AbortError') {
-      throw new Error('Request timeout — koneksi lambat atau server tidak merespon.');
+      throw new Error('Koneksi timeout. Cek internet Anda.');
     }
     throw error;
   }
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// LOW-LEVEL API CALLS
+// LOW-LEVEL API CALLS — Simplified, gunakan hanya 1 method (POST FormData)
 // ─────────────────────────────────────────────────────────────────────────
 
 /**
- * GET request ke API
+ * POST via FormData — paling kompatibel dengan Google Apps Script
+ * Tidak trigger CORS preflight (text/plain vs application/json)
  */
-async function apiGet(action, payload = {}) {
-  const body = JSON.stringify({ ...payload, action });
-  const url = `${API_URL}?action=${encodeURIComponent(action)}&payload=${encodeURIComponent(body)}&t=${Date.now()}`;
-
-  // Cek panjang URL (batas ± 8000 chars untuk GET)
-  if (url.length > 7000) {
-    throw new Error('Payload terlalu besar untuk GET, gunakan POST.');
-  }
-
-  const response = await fetchWithTimeout(url, { cache: 'no-store' });
-  return parseResponse(await response.text());
-}
-
-/**
- * POST request ke API (dengan FormData untuk kompatibilitas)
- */
-async function apiPost(action, payload = {}) {
+async function apiPostForm(action, payload = {}, timeout) {
   const body = JSON.stringify({ ...payload, action });
 
-  // Try POST JSON dulu (jika Apps Script support)
-  try {
-    const response = await fetchWithTimeout(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body,
-    });
-    const result = parseResponse(await response.text());
-    if (result.status) return result;
-  } catch {
-    // Fallback ke FormData
-  }
-
-  // POST FormData (paling kompatibel dengan Apps Script)
   const formData = new FormData();
   formData.append('payload', body);
 
-  const response = await fetchWithTimeout(API_URL, {
-    method: 'POST',
-    body: formData,
-  });
-  return parseResponse(await response.text());
+  const response = await fetchWithTimeout(
+    API_URL,
+    {
+      method: 'POST',
+      body: formData,
+    },
+    timeout
+  );
+
+  const text = await response.text();
+  return parseResponse(text);
 }
 
 /**
- * Smart call — auto pilih GET atau POST
+ * GET fallback (untuk read-only cepat)
  */
-export async function callApi(action, payload = {}, options = {}) {
-  const { preferMethod = 'auto', dedupe = true, cache: useCache = false, cacheTtl = SETTINGS.cacheDuration } = options;
+async function apiGetQuery(action, payload = {}, timeout) {
+  const body = JSON.stringify({ ...payload, action });
+  const url = `${API_URL}?action=${encodeURIComponent(action)}&payload=${encodeURIComponent(body)}&t=${Date.now()}`;
 
-  // Cache lookup (untuk GET-like requests)
+  if (url.length > 7000) {
+    throw new Error('Payload terlalu besar.');
+  }
+
+  const response = await fetchWithTimeout(url, { cache: 'no-store' }, timeout);
+  const text = await response.text();
+  return parseResponse(text);
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// SMART CALL — Dedup, cache, dual-strategy
+// ─────────────────────────────────────────────────────────────────────────
+
+export async function callApi(action, payload = {}, options = {}) {
+  const {
+    preferMethod = 'auto',
+    dedupe = true,
+    cache: useCache = false,
+    cacheTtl = SETTINGS.cacheDuration,
+    timeout = SETTINGS.apiTimeout,
+  } = options;
+
+  const cacheKey = `${action}::${JSON.stringify(payload)}`;
+
+  // Cache lookup
   if (useCache) {
-    const cacheKey = `${action}::${JSON.stringify(payload)}`;
     const cached = cache.get(cacheKey);
     if (cached && Date.now() - cached.time < cacheTtl) {
       return cached.data;
     }
   }
 
-  // Deduplication (cegah request ganda saat masih pending)
-  if (dedupe) {
-    const dedupeKey = `${action}::${JSON.stringify(payload)}`;
-    if (pendingRequests.has(dedupeKey)) {
-      return pendingRequests.get(dedupeKey);
-    }
-
-    const promise = executeCall(action, payload, preferMethod).finally(() => {
-      pendingRequests.delete(dedupeKey);
-    });
-
-    pendingRequests.set(dedupeKey, promise);
-
-    const result = await promise;
-
-    if (useCache && result.status === 'ok') {
-      const cacheKey = `${action}::${JSON.stringify(payload)}`;
-      cache.set(cacheKey, { data: result, time: Date.now() });
-    }
-
-    return result;
+  // Deduplication
+  if (dedupe && pendingRequests.has(cacheKey)) {
+    return pendingRequests.get(cacheKey);
   }
 
-  return executeCall(action, payload, preferMethod);
+  const promise = executeCall(action, payload, preferMethod, timeout)
+    .then((result) => {
+      if (useCache && result.status === 'ok') {
+        cache.set(cacheKey, { data: result, time: Date.now() });
+      }
+      return result;
+    })
+    .finally(() => {
+      if (dedupe) {
+        pendingRequests.delete(cacheKey);
+      }
+    });
+
+  if (dedupe) {
+    pendingRequests.set(cacheKey, promise);
+  }
+
+  return promise;
 }
 
 /**
- * Execute call dengan retry & fallback
+ * Execute dengan fallback strategy
  */
-async function executeCall(action, payload, preferMethod = 'auto') {
+async function executeCall(action, payload, preferMethod, timeout) {
   const strategies = preferMethod === 'get'
-    ? [apiGet, apiPost]
-    : preferMethod === 'post'
-    ? [apiPost, apiGet]
-    : [apiPost, apiGet]; // default: POST first
+    ? [apiGetQuery, apiPostForm]
+    : [apiPostForm, apiGetQuery];
 
   let lastError = null;
 
   for (const strategy of strategies) {
     try {
-      const result = await strategy(action, payload);
-      if (result.status === 'ok' || result.status === 'error') {
+      const result = await strategy(action, payload, timeout);
+      // Terima response apapun asal ada status
+      if (result && result.status) {
         return result;
       }
     } catch (error) {
       lastError = error;
+      console.warn(`[API] ${strategy.name} failed for ${action}:`, error.message);
     }
   }
 
   return {
     status: 'error',
-    message: lastError?.message || 'Gagal terhubung ke server. Cek koneksi internet Anda.',
+    message: lastError?.message || 'Gagal terhubung ke server.',
   };
 }
 
@@ -196,9 +201,6 @@ async function executeCall(action, payload, preferMethod = 'auto') {
 // CACHE MANAGEMENT
 // ─────────────────────────────────────────────────────────────────────────
 
-/**
- * Clear cache (semua atau by prefix)
- */
 export function clearCache(prefix = '') {
   if (!prefix) {
     cache.clear();
@@ -209,140 +211,136 @@ export function clearCache(prefix = '') {
   }
 }
 
+// Clear pending requests (untuk force retry)
+export function clearPending() {
+  pendingRequests.clear();
+}
+
 // ─────────────────────────────────────────────────────────────────────────
 // HIGH-LEVEL API METHODS
 // ─────────────────────────────────────────────────────────────────────────
 
-/**
- * ═══ AUTH ═══
- */
-
 export const auth = {
-  /**
-   * Login user
-   */
-  login({ username, password }) {
-    return callApi('login', { username, password }, { dedupe: false });
-  },
 
   /**
-   * Change password
+   * Login — HYPER FAST
+   * - Timeout 15 detik (bukan default 30)
+   * - Tidak pakai cache
+   * - Tidak pakai dedupe (setiap login harus fresh)
+   * - POST FormData langsung
    */
+  async login({ username, password }) {
+    // Clear pending sebelum login (bypass stuck request)
+    clearPending();
+
+    return callApi(
+      'login',
+      { username, password },
+      {
+        dedupe: false,
+        cache: false,
+        timeout: 15000,
+        preferMethod: 'post',
+      }
+    );
+  },
+
   changePassword({ username, passwordLama, passwordBaru }) {
-    return callApi('changePassword', { username, passwordLama, passwordBaru }, { dedupe: false });
+    return callApi(
+      'changePassword',
+      { username, passwordLama, passwordBaru },
+      { dedupe: false, timeout: 15000 }
+    );
   },
 
-  /**
-   * Forgot password (kirim reset ke admin)
-   */
   forgotPassword({ username }) {
-    return callApi('forgotPassword', { username }, { dedupe: false });
+    return callApi(
+      'forgotPassword',
+      { username },
+      { dedupe: false, timeout: 15000 }
+    );
   },
 };
 
-/**
- * ═══ KATALOG ═══
- */
-
 export const katalog = {
-  /**
-   * Get all products
-   */
   getAll(options = {}) {
-    return callApi('getBarang', {}, { cache: options.cache !== false, cacheTtl: 60000 });
+    return callApi(
+      'getBarang',
+      {},
+      { cache: options.cache !== false, cacheTtl: 60000 }
+    );
   },
 
-  /**
-   * Refresh (clear cache & fetch ulang)
-   */
   refresh() {
     clearCache('getBarang');
     return this.getAll({ cache: false });
   },
 };
 
-/**
- * ═══ CABANG ═══
- */
-
 export const cabang = {
   getAll(options = {}) {
-    return callApi('getCabang', {}, { cache: options.cache !== false, cacheTtl: 300000 }); // cache 5 menit
+    return callApi(
+      'getCabang',
+      {},
+      { cache: options.cache !== false, cacheTtl: 300000 }
+    );
   },
 };
 
-/**
- * ═══ ORDERS ═══
- */
-
 export const orders = {
-  /**
-   * Get all orders (dengan detail)
-   */
   getAll(options = {}) {
-    return callApi('getOrders', {}, { cache: options.cache !== false, cacheTtl: 30000 });
+    return callApi(
+      'getOrders',
+      {},
+      { cache: options.cache !== false, cacheTtl: 30000 }
+    );
   },
 
-  /**
-   * Get detail 1 order
-   */
   getDetail(orderId) {
     return callApi('getOrderDetail', { orderId }, { cache: false });
   },
 
-  /**
-   * Submit order baru (dari cabang)
-   */
   submit({ idCabang, catatan, items }) {
     clearCache('getOrders');
-    return callApi('submitOrder', { idCabang, catatan, items }, { dedupe: false });
+    return callApi(
+      'submitOrder',
+      { idCabang, catatan, items },
+      { dedupe: false }
+    );
   },
 
-  /**
-   * Update status order (approve/reject seluruh)
-   */
   updateStatus({ orderId, status, alasan = '' }) {
     clearCache('getOrders');
-    return callApi('updateStatus', { orderId, status, alasan }, { dedupe: false });
+    return callApi(
+      'updateStatus',
+      { orderId, status, alasan },
+      { dedupe: false }
+    );
   },
 
-  /**
-   * Edit order (per-item edit, save/send email)
-   */
   edit({ orderId, items, catatanAdmin = '', diprosesOleh = '', kirimEmail = false }) {
     clearCache('getOrders');
-    return callApi('editOrder', {
-      orderId,
-      items,
-      catatanAdmin,
-      diprosesOleh,
-      kirimEmail,
-    }, { dedupe: false });
+    return callApi(
+      'editOrder',
+      { orderId, items, catatanAdmin, diprosesOleh, kirimEmail },
+      { dedupe: false }
+    );
   },
 
-  /**
-   * Kirim ulang email notifikasi
-   */
   sendEmail({ orderId, catatanAdmin = '' }) {
-    return callApi('sendEmailNotif', { orderId, catatanAdmin }, { dedupe: false });
+    return callApi(
+      'sendEmailNotif',
+      { orderId, catatanAdmin },
+      { dedupe: false }
+    );
   },
 
-  /**
-   * Refresh (clear cache)
-   */
   refresh() {
     clearCache('getOrders');
     return this.getAll({ cache: false });
   },
 };
 
-/**
- * ═══ COMBINED (loading utility) ═══
- */
-
-/**
- * Load semua data sekaligus (parallel)
- */
 export async function loadAll(options = {}) {
   const { cache: useCache = true } = options;
 
@@ -365,14 +363,11 @@ export async function loadAll(options = {}) {
   };
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-// EXPORT DEFAULT
-// ─────────────────────────────────────────────────────────────────────────
-
 export default {
   callApi,
   parseResponse,
   clearCache,
+  clearPending,
   loadAll,
   auth,
   katalog,
