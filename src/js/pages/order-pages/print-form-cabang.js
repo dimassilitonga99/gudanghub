@@ -193,10 +193,17 @@ function renderPreview() {
   // Table rows
   var rows = items.map(function (item) {
 
-    var qty = toNumber(item.QTY);
+        var qty = toNumber(item.QTY);
     var sat = String(item.SATUAN || 'PCS').toUpperCase();
-    var stokS = getStokBarangCabang(item.KODE_BARANG);
-
+    
+    // Ambil stok sistem dari snapshot order (bukan live)
+    var stokS = '0';
+    if (item.STOK_SISTEM !== undefined && item.STOK_SISTEM !== '' && item.STOK_SISTEM !== null) {
+      stokS = String(item.STOK_SISTEM);
+    } else {
+      // Fallback ke master untuk order lama
+      stokS = getStokBarangCabang(item.KODE_BARANG);
+    }
     var stokG = '0';
     if (item.STOK_GUDANG !== undefined && item.STOK_GUDANG !== '') {
       stokG = String(item.STOK_GUDANG);
