@@ -4,7 +4,7 @@ import { resolve } from 'path';
 export default defineConfig({
   // Base path untuk GitHub Pages
   // GANTI 'gudanghub' dengan nama repository Anda di GitHub
-  base: process.env.NODE_ENV === 'production' ? '/gudanghub/' : '/',
+  base: '/',
 
   root: '.',
   publicDir: 'public',
