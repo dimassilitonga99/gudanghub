@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   LOGIN PAGE — Logic with Lucide Icons
+   LOGIN PAGE — v3.3 Instant & Smooth
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, sleep } from '../utils.js';
@@ -20,6 +20,7 @@ import { icon, injectIcons } from '../icons.js';
 
 let currentRole = 'admin';
 let errorTimer = null;
+let isLoggingIn = false; // Anti double-submit
 
 // ─────────────────────────────────────────────────────────────────────────
 // ROLE SELECTOR
@@ -61,9 +62,7 @@ function togglePw() {
   const isPassword = input.type === 'password';
   input.type = isPassword ? 'text' : 'password';
 
-  // Update icon
   eye.innerHTML = icon(isPassword ? 'eye-off' : 'eye', { size: 18 });
-
   btn?.setAttribute('aria-label', isPassword ? 'Sembunyikan password' : 'Tampilkan password');
 }
 
@@ -82,11 +81,12 @@ function showError(message) {
   clearTimeout(errorTimer);
   errorTimer = setTimeout(() => {
     el.classList.remove('show');
-  }, 4500);
+  }, 5000);
 }
 
 function hideError() {
   $('errorMsg')?.classList.remove('show');
+  clearTimeout(errorTimer);
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -139,41 +139,87 @@ function setLoadingForgotBtn(isLoading, text = 'Mengirim...') {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// LOGIN HANDLER
+// LOGIN HANDLER — INSTANT & SMOOTH
 // ─────────────────────────────────────────────────────────────────────────
 
 async function handleLogin(event) {
   event.preventDefault();
+
+  // Anti double-submit
+  if (isLoggingIn) return;
+
   hideError();
 
   const username = $('inputUser').value.trim();
   const password = $('inputPass').value;
   const rememberChecked = $('remember').checked;
 
+  // ─── VALIDASI INSTANT (client-side) ───
   if (!username || !password) {
     showError('Username dan password wajib diisi.');
     shakeCard();
     return;
   }
 
+  if (username.length < 3) {
+    showError('Username minimal 3 karakter.');
+    shakeCard();
+    return;
+  }
+
+  if (password.length < 4) {
+    showError('Password minimal 4 karakter.');
+    shakeCard();
+    return;
+  }
+
+  // ─── LOCK & LOADING ───
+  isLoggingIn = true;
   setLoadingBtn(true);
 
   try {
-    const result = await auth.login({ username, password });
+    // ─── API CALL dengan retry otomatis (max 2x) ───
+    let result = null;
+    let lastError = null;
+    const maxAttempts = 2;
 
-    if (result.status !== 'ok') {
-      showError(result.message || 'Username atau password salah.');
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        result = await auth.login({ username, password });
+
+        // Kalau result ada status → break (sukses atau error dari server)
+        if (result && result.status) {
+          break;
+        }
+      } catch (err) {
+        lastError = err;
+        console.warn(`[Login] Attempt ${attempt}/${maxAttempts} failed:`, err.message);
+
+        // Delay 500ms sebelum retry (kecuali attempt terakhir)
+        if (attempt < maxAttempts) {
+          await sleep(500);
+        }
+      }
+    }
+
+    // ─── HANDLE RESULT ───
+    if (!result || result.status !== 'ok') {
+      const msg = result?.message || lastError?.message || 'Login gagal. Coba lagi.';
+      showError(msg);
       setLoadingBtn(false);
       shakeCard();
+      isLoggingIn = false;
       return;
     }
 
     const user = result.user || {};
 
+    // ─── VALIDASI ROLE MATCH ───
     if (currentRole === 'admin' && user.role !== 'admin') {
       showError('Akun ini bukan Admin Gudang. Pilih peran "Cabang".');
       setLoadingBtn(false);
       shakeCard();
+      isLoggingIn = false;
       return;
     }
 
@@ -181,27 +227,52 @@ async function handleLogin(event) {
       showError('Akun ini bukan Cabang. Pilih peran "Admin Gudang".');
       setLoadingBtn(false);
       shakeCard();
+      isLoggingIn = false;
       return;
     }
 
-    setSession(user, result.token);
-    setLastUsername(rememberChecked ? user.username : '');
-
-    // Success animation
-    const btnText = $('btnText');
-    if (btnText) {
-      btnText.innerHTML = `${icon('check-circle', { size: 18 })} Berhasil! Mengalihkan...`;
+    // ─── CABANG WAJIB PUNYA idCabang ───
+    if (user.role === 'cabang' && !user.idCabang) {
+      showError('Akun cabang tidak punya ID cabang. Hubungi admin.');
+      setLoadingBtn(false);
+      shakeCard();
+      isLoggingIn = false;
+      return;
     }
 
-    toast.success(`Selamat datang, ${user.nama || user.username}!`);
+    // ─── SIMPAN SESSION ───
+    const sessionData = setSession(user, result.token);
+    setLastUsername(rememberChecked ? user.username : '');
 
-    await sleep(600);
+    if (!sessionData) {
+      showError('Gagal menyimpan session. Cek storage browser.');
+      setLoadingBtn(false);
+      shakeCard();
+      isLoggingIn = false;
+      return;
+    }
+
+    // ─── SUCCESS ANIMATION ───
+    const btnText = $('btnText');
+    if (btnText) {
+      btnText.innerHTML = `${icon('check-circle', { size: 18 })} Berhasil!`;
+    }
+
+    // Tampilkan toast success (non-blocking)
+    toast.success(`Selamat datang, ${user.nama || user.username}!`, {
+      duration: 2000,
+    });
+
+    // ─── REDIRECT INSTANT (300ms untuk lihat animation) ───
+    await sleep(300);
     redirectToHome({ role: user.role, idCabang: user.idCabang });
 
   } catch (error) {
+    console.error('[Login] Unexpected error:', error);
     showError(error.message || 'Terjadi kesalahan. Coba lagi.');
     setLoadingBtn(false);
     shakeCard();
+    isLoggingIn = false;
   }
 }
 
@@ -302,9 +373,33 @@ function bindEvents() {
     }
   });
 
+  // Auto-hide error saat user ketik
   ['inputUser', 'inputPass'].forEach((id) => {
     $(id)?.addEventListener('input', hideError);
   });
+
+  // Enter di password langsung submit
+  $('inputPass')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !isLoggingIn) {
+      e.preventDefault();
+      $('loginForm')?.dispatchEvent(new Event('submit'));
+    }
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// PREWARM API (biar login berikutnya lebih cepat)
+// ─────────────────────────────────────────────────────────────────────────
+
+function prewarmApi() {
+  // Fire-and-forget GET request untuk "wake up" GAS server
+  try {
+    fetch(import.meta.env?.VITE_API_URL || '', {
+      method: 'HEAD',
+      mode: 'no-cors',
+      cache: 'no-store',
+    }).catch(() => {});
+  } catch {}
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -312,11 +407,12 @@ function bindEvents() {
 // ─────────────────────────────────────────────────────────────────────────
 
 function init() {
+  // Redirect kalau sudah login
   if (redirectIfAuthenticated()) return;
 
-  // Inject semua icons dari data-icon
   injectIcons();
 
+  // Restore last username
   const lastUser = getLastUsername();
   if (lastUser) {
     const input = $('inputUser');
@@ -327,11 +423,15 @@ function init() {
 
   bindEvents();
 
+  // Auto focus
   setTimeout(() => {
     const input = $('inputUser');
     if (input && !input.value) input.focus();
     else $('inputPass')?.focus();
   }, 300);
+
+  // Prewarm API (opsional, tidak block UI)
+  prewarmApi();
 }
 
 function setVH() {
