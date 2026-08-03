@@ -481,7 +481,7 @@ async function submitOrder(state, items) {
   var payload = {
     idCabang: state.branchId,
     catatan: catatan,
-    items: items.map(function (i) {
+        items: items.map(function (i) {
       return {
         kode: i.kode,
         nama: i.nama,
@@ -491,6 +491,7 @@ async function submitOrder(state, items) {
         harga: i.harga,
         stokGudang: i.stokGudang,
         stokToko: i.stokToko,
+        stokSistem: i.stokSistem !== undefined ? i.stokSistem : 0,
       };
     }),
   };
