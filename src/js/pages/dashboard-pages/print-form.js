@@ -4,6 +4,7 @@
    Fitur:
    - Preview form order (NK Style)
    - Print / Save as PDF (via browser print)
+   - Stok sistem dari SNAPSHOT (bukan live)
    
    Logo dari file: ./public/images/logo/logo-nk.png
    ═══════════════════════════════════════════════════════════════════════ */
@@ -64,20 +65,15 @@ var SIGN_CELL_STYLE = ''
 
 export function initPrintForm() {
 
-  // Cegah duplikat
   if ($('printModalContainer')) {
     return;
   }
 
-  // Buat container
   var container = document.createElement('div');
   container.id = 'printModalContainer';
   document.body.appendChild(container);
 
-  // Build modal HTML
   var modalHtml = ''
-
-    // Overlay
     + '<div'
     + '  class="overlay print-overlay"'
     + '  id="printOverlay"'
@@ -85,10 +81,8 @@ export function initPrintForm() {
     + '  aria-modal="true"'
     + '>'
 
-    // Modal box
     + '<div class="modal modal-xl print-modal">'
 
-    // ── Header ──
     + '<header class="modal-header print-modal-header">'
 
     + '<div class="modal-title" id="printModalTitle">'
@@ -97,7 +91,6 @@ export function initPrintForm() {
 
     + '<div class="print-modal-actions">'
 
-    // Tombol Print / PDF
     + '<button'
     + '  class="btn-print-action"'
     + '  id="btnDoPrint"'
@@ -108,7 +101,6 @@ export function initPrintForm() {
     + ' Print / PDF'
     + '</button>'
 
-    // Tombol Close
     + '<button'
     + '  class="modal-close"'
     + '  id="printModalClose"'
@@ -118,10 +110,9 @@ export function initPrintForm() {
     + icon('close', { size: 16 })
     + '</button>'
 
-    + '</div>'  // end actions
+    + '</div>'
     + '</header>'
 
-    // ── Body ──
     + '<div'
     + '  class="modal-body print-modal-body"'
     + '  id="printModalBody"'
@@ -129,18 +120,14 @@ export function initPrintForm() {
     + '<div id="printPreview"></div>'
     + '</div>'
 
-    + '</div>'  // end modal
-    + '</div>';  // end overlay
+    + '</div>'
+    + '</div>';
 
   container.innerHTML = modalHtml;
 
-  // Add CSS
   addPrintStyles();
 
-  // ── Event Listeners ──
-
   $('printModalClose')?.addEventListener('click', closePrintModal);
-
   $('btnDoPrint')?.addEventListener('click', doPrint);
 
   $('printOverlay')?.addEventListener('click', function (e) {
@@ -150,7 +137,6 @@ export function initPrintForm() {
   });
 
   document.addEventListener('keydown', function (e) {
-
     if (!$('printOverlay')?.classList.contains('show')) {
       return;
     }
@@ -181,13 +167,10 @@ function addPrintStyles() {
   style.id = 'printFormStyles';
 
   style.textContent = ''
-
-    // Overlay
     + '.print-overlay {'
     + '  background: rgba(0, 0, 0, 0.85) !important;'
     + '}'
 
-    // Modal
     + '.print-modal {'
     + '  max-width: 950px !important;'
     + '  background: #f0f0f0 !important;'
@@ -195,7 +178,6 @@ function addPrintStyles() {
     + '  max-height: calc(100dvh - 40px) !important;'
     + '}'
 
-    // Header
     + '.print-modal-header {'
     + '  background: var(--ink-2) !important;'
     + '  color: var(--text) !important;'
@@ -206,14 +188,12 @@ function addPrintStyles() {
     + '  gap: 12px;'
     + '}'
 
-    // Actions
     + '.print-modal-actions {'
     + '  display: flex;'
     + '  align-items: center;'
     + '  gap: 8px;'
     + '}'
 
-    // Button Print
     + '.btn-print-action {'
     + '  background: linear-gradient(135deg, var(--orange), var(--orange-light));'
     + '  color: #fff;'
@@ -234,14 +214,12 @@ function addPrintStyles() {
     + '  transform: translateY(-1px);'
     + '}'
 
-    // Body
     + '.print-modal-body {'
     + '  background: #e0e0e0 !important;'
     + '  padding: 20px !important;'
     + '  overflow-y: auto;'
     + '}'
 
-    // Preview paper
     + '#printPreview {'
     + '  background: #fff;'
     + '  color: #000;'
@@ -254,18 +232,14 @@ function addPrintStyles() {
     + '  min-height: 600px;'
     + '}'
 
-    // ── Print media ──
     + '@media print {'
-
     + '  * {'
     + '    -webkit-print-color-adjust: exact !important;'
     + '    print-color-adjust: exact !important;'
     + '  }'
-
     + '  body > *:not(#printModalContainer) {'
     + '    display: none !important;'
     + '  }'
-
     + '  #printModalContainer,'
     + '  .print-overlay,'
     + '  .print-modal {'
@@ -278,42 +252,33 @@ function addPrintStyles() {
     + '    pointer-events: auto !important;'
     + '    transform: none !important;'
     + '  }'
-
     + '  .print-modal-header,'
     + '  .print-modal-actions {'
     + '    display: none !important;'
     + '  }'
-
     + '  .print-modal-body {'
     + '    background: #fff !important;'
     + '    padding: 0 !important;'
     + '    overflow: visible !important;'
     + '  }'
-
     + '  #printPreview {'
     + '    box-shadow: none !important;'
     + '    padding: 15px 20px !important;'
     + '  }'
-
     + '  @page {'
     + '    size: A4;'
     + '    margin: 12mm;'
     + '  }'
-
     + '}'
 
-    // ── Responsive ──
     + '@media (max-width: 768px) {'
-
     + '  .print-modal {'
     + '    max-width: calc(100vw - 24px) !important;'
     + '  }'
-
     + '  #printPreview {'
     + '    padding: 20px 15px;'
     + '    font-size: 11px;'
     + '  }'
-
     + '}';
 
   document.head.appendChild(style);
@@ -332,7 +297,6 @@ export function showPrintForm(order, items) {
 
   printState.order = order;
 
-  // Filter: hanya tampilkan yang tidak DELETED
   printState.items = items.filter(function (i) {
     return i.itemStatus !== 'DELETED';
   });
@@ -347,14 +311,12 @@ export function showPrintForm(order, items) {
 // ─────────────────────────────────────────────────────────────────────────
 
 function openModal() {
-
   $('printOverlay')?.classList.add('show');
   document.body.style.overflow = 'hidden';
 }
 
 
 function closePrintModal() {
-
   $('printOverlay')?.classList.remove('show');
   document.body.style.overflow = '';
 }
@@ -382,11 +344,7 @@ function renderPreview() {
 
   var pic = String(cabang.pic || 'SUPERVISOR').toUpperCase();
 
-  // ── Nomor order ──
-
   var nomorOrder = getSequentialNumber(order);
-
-  // ── Tanggal ──
 
   var hariID = [
     'MINGGU',
@@ -406,11 +364,7 @@ function renderPreview() {
     + String(date.getMonth() + 1).padStart(2, '0') + '/'
     + date.getFullYear();
 
-  // ── Build table rows ──
-
   var rows = buildTableRows(items);
-
-  // ── Build full HTML ──
 
   var html = '';
 
@@ -427,7 +381,6 @@ function renderPreview() {
 
   html += '<tr>';
 
-  // Kolom kiri: FORM ORDER BARANG
   html += '<td'
     + ' style="'
     + '   vertical-align: top;'
@@ -452,7 +405,6 @@ function renderPreview() {
   html += '</div>';
   html += '</td>';
 
-  // Kolom kanan: LOGO
   html += '<td'
     + ' style="'
     + '   vertical-align: top;'
@@ -480,10 +432,6 @@ function renderPreview() {
   html += '</tr>';
   html += '</table>';
 
-  // ══════════════════════════════════════════
-  //  GARIS PEMISAH
-  // ══════════════════════════════════════════
-
   html += '<div'
     + ' style="'
     + '   border-top: 1px solid #000;'
@@ -509,7 +457,6 @@ function renderPreview() {
     + ' "'
     + '>';
 
-  // DIBUAT OLEH
   html += '<tr>';
 
   html += '<td style="padding: 3px 0; width: 140px; font-weight: 700; vertical-align: top;">';
@@ -524,7 +471,6 @@ function renderPreview() {
 
   html += '</tr>';
 
-  // NOMOR ORDER + TANGGAL
   html += '<tr>';
 
   html += '<td style="padding: 3px 0; font-weight: 700; vertical-align: top;">';
@@ -558,27 +504,17 @@ function renderPreview() {
     + ' "'
     + '>';
 
-  // Table header
   html += buildTableHeader();
 
-  // Table body
   html += '<tbody>';
   html += rows;
   html += '</tbody>';
 
   html += '</table>';
 
-  // ══════════════════════════════════════════
-  //  SIGNATURE
-  // ══════════════════════════════════════════
-
   html += buildSignatureTable();
 
-  // ── Set innerHTML ──
-
   preview.innerHTML = html;
-
-  // ── Update title ──
 
   $('printModalTitle').textContent = 'Preview Form Order — ' + order.ORDER_ID;
 }
@@ -632,6 +568,7 @@ function buildTableHeader() {
 
 // ─────────────────────────────────────────────────────────────────────────
 //  BUILD TABLE ROWS
+//  Stok sistem dari SNAPSHOT order (bukan live dari master)
 // ─────────────────────────────────────────────────────────────────────────
 
 function buildTableRows(items) {
@@ -643,14 +580,14 @@ function buildTableRows(items) {
     var qty = toNumber(item.qty);
     var sat = String(item.satuan || 'PCS').toUpperCase();
 
-        // Ambil stok sistem dari snapshot order (bukan dari master live)
+    // Ambil stok sistem dari SNAPSHOT (frontend camelCase atau backend UPPERCASE)
     var stokSistem = '0';
     if (item.stokSistem !== undefined && item.stokSistem !== '' && item.stokSistem !== null) {
       stokSistem = String(item.stokSistem);
     } else if (item.STOK_SISTEM !== undefined && item.STOK_SISTEM !== '' && item.STOK_SISTEM !== null) {
       stokSistem = String(item.STOK_SISTEM);
     } else {
-      // Fallback ke master (untuk order lama yang belum punya snapshot)
+      // Fallback ke master untuk order lama yang belum punya snapshot
       stokSistem = getStokBarang(item.kode);
     }
 
@@ -670,37 +607,30 @@ function buildTableRows(items) {
 
     html += '<tr>';
 
-    // Stok Sistem
     html += '<td style="' + CELL_STYLE + '">';
     html += stokSistem;
     html += '</td>';
 
-    // Stok Gudang
     html += '<td style="' + CELL_STYLE + '">';
     html += stokGudang;
     html += '</td>';
 
-    // Stok Rak
     html += '<td style="' + CELL_STYLE + '">';
     html += stokRak;
     html += '</td>';
 
-    // Jumlah Order (hijau)
     html += '<td style="' + CELL_STYLE + ' color: #00B050; font-weight: 600;">';
     html += qty + ' ' + sat;
     html += '</td>';
 
-    // Kode Item
     html += '<td style="' + CELL_STYLE + '">';
     html += kode;
     html += '</td>';
 
-    // Nama Item
     html += '<td style="' + CELL_STYLE + '">';
     html += nama;
     html += '</td>';
 
-    // Jenis
     html += '<td style="' + CELL_STYLE + ' font-weight: 700;">';
     html += jenis;
     html += '</td>';
@@ -730,8 +660,6 @@ function buildSignatureTable() {
     + '   margin-top: 0;'
     + ' "'
     + '>';
-
-  // ── Baris 1: Labels ──
 
   html += '<tr>';
 
@@ -764,16 +692,12 @@ function buildSignatureTable() {
 
   html += '</tr>';
 
-  // ── Baris 2: Space ──
-
   html += '<tr>';
   html += '<td colspan="3" style="padding: 32px 0;">';
   html += '&nbsp;';
   html += '</td>';
   html += '</tr>';
 
-  // ── Baris 3: Garis tanda tangan ──
-
   html += '<tr>';
 
   html += '<td style="'
@@ -801,8 +725,6 @@ function buildSignatureTable() {
   html += '</td>';
 
   html += '</tr>';
-
-  // ── Baris 4: Jabatan ──
 
   html += '<tr>';
 
@@ -851,7 +773,7 @@ function doPrint() {
 
 
 // ─────────────────────────────────────────────────────────────────────────
-//  HELPER: Get Stok Barang (dari dashboard state)
+//  HELPER: Get Stok Barang (fallback dari dashboard state)
 // ─────────────────────────────────────────────────────────────────────────
 
 function getStokBarang(kode) {
@@ -901,7 +823,6 @@ function getSequentialNumber(order) {
     var targetMonth = orderDate.getMonth();
     var targetYear = orderDate.getFullYear();
 
-    // Filter bulan yang sama
     var sameMonth = dashboardState.allOrders
 
       .filter(function (o) {
@@ -920,14 +841,12 @@ function getSequentialNumber(order) {
              - parseAnyDate(b.TANGGAL_ORDER).getTime();
       });
 
-    // Cari posisi
     var idx = sameMonth.findIndex(function (o) {
       return o.ORDER_ID === order.ORDER_ID;
     });
 
     var nomor = (idx >= 0) ? (idx + 1) : (sameMonth.length + 1);
 
-    // Format 01, 02, dst
     return nomor < 10
       ? '0' + nomor
       : String(nomor);
