@@ -1,5 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════════════
    ORDER PAGE — Main Controller with Lucide Icons
+   v3.3 — STRICT AUTH: Wajib login, tidak bisa bypass via URL
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, getQueryParam } from '../utils.js';
@@ -37,37 +38,64 @@ export const state = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────
-// SESSION INIT
+// SESSION INIT — STRICT AUTH ONLY (tidak boleh bypass URL)
 // ─────────────────────────────────────────────────────────────────────────
 
 function initSession() {
   const s = getSession();
-  const urlBranch = getQueryParam('cabang');
 
-  if (s && isSessionValid(s)) {
-    if (s.role === 'admin') {
-      window.location.href = './dashboard.html';
-      return false;
-    }
-
-    state.session = s;
-    state.branchId = String(s.idCabang || urlBranch || '').toUpperCase();
-    state.branchName = s.nama || CABANG[state.branchId]?.nama || state.branchId;
-    state.branchPic = CABANG[state.branchId]?.pic || s.nama || '-';
-  } else if (urlBranch) {
-    state.branchId = String(urlBranch).toUpperCase();
-    state.branchName = CABANG[state.branchId]?.nama || state.branchId;
-    state.branchPic = CABANG[state.branchId]?.pic || '-';
-  } else {
+  // ══════ WAJIB LOGIN ══════
+  if (!s || !isSessionValid(s)) {
+    // TIDAK ADA session valid → redirect ke login
     redirectToLogin();
     return false;
   }
 
-  if (!state.branchId) {
-    redirectToLogin();
+  // ══════ ADMIN redirect ke dashboard ══════
+  if (s.role === 'admin') {
+    window.location.href = './dashboard.html';
     return false;
   }
 
+  // ══════ HANYA CABANG yang lolos ══════
+  if (s.role !== 'cabang') {
+    // Role tidak valid → logout
+    sessionLogout(true);
+    return false;
+  }
+
+  // ══════ CABANG ID WAJIB ada di session ══════
+  const sessionCabang = String(s.idCabang || '').trim().toUpperCase();
+
+  if (!sessionCabang) {
+    // Cabang tanpa idCabang → logout
+    sessionLogout(true);
+    return false;
+  }
+
+  // ══════ VALIDASI URL: harus SAMA dengan session ══════
+  const urlBranch = String(getQueryParam('cabang') || '').trim().toUpperCase();
+
+  if (urlBranch && urlBranch !== sessionCabang) {
+    // User coba akses cabang lain via URL → block!
+    console.warn('[SECURITY] URL cabang mismatch:', urlBranch, 'vs session:', sessionCabang);
+    sessionLogout(true);
+    return false;
+  }
+
+  // ══════ Set state (SELALU dari session, bukan URL) ══════
+  state.session = s;
+  state.branchId = sessionCabang;
+  state.branchName = s.nama || (CABANG[sessionCabang]?.nama) || sessionCabang;
+  state.branchPic = (CABANG[sessionCabang]?.pic) || s.nama || '-';
+
+  // Update URL agar konsisten dengan session
+  const expectedUrl = `?cabang=${sessionCabang}`;
+  if (window.location.search !== expectedUrl) {
+    window.history.replaceState({}, '', `./order.html${expectedUrl}${window.location.hash}`);
+  }
+
+  // Update label
   const label = $('branchLabel');
   if (label) {
     label.textContent = `${state.branchId} · ${state.branchPic}`;
@@ -102,9 +130,7 @@ function showTab(tabName) {
   const activePage = $(pageMap[tabName]);
   if (activePage) activePage.classList.add('active');
 
-  // Inject icons after page switch
   requestAnimationFrame(() => injectIcons());
-
   window.scrollTo(0, 0);
 
   if (tabName === 'history') {
@@ -211,10 +237,8 @@ function bindEvents() {
 async function init() {
   if (!initSession()) return;
 
-  // Inject icons di topbar & bottom-nav
   injectIcons();
 
-  // Render initial pages
   $('catalogPage').innerHTML = renderCatalogPage(state);
   $('massOrderPage').innerHTML = renderMassOrderPage(state);
   $('historyPage').innerHTML = renderHistoryPage(state);
@@ -234,7 +258,6 @@ async function init() {
   if (validTab !== 'catalog') {
     showTab(validTab);
   } else {
-    // Inject icons di catalog page yang sudah aktif
     requestAnimationFrame(() => injectIcons());
   }
 
