@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   PRINT FORM CABANG — Multi-page + Font Besar
+   PRINT FORM CABANG — Multi-page + Font Besar + Row Kompak
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, escapeHtml, formatWita, parseAnyDate, toNumber } from '../../utils.js';
@@ -105,12 +105,9 @@ function addPrintCabangStyles() {
     + '.btn-download-jpg:hover { transform: translateY(-1px); }'
     + '.btn-download-jpg.loading, .btn-download-action.loading { opacity: 0.7; pointer-events: none; }'
     + '.print-cabang-modal-body { background: #e0e0e0 !important; padding: 20px !important; overflow-y: auto; }'
-
-    // Multi-page container
-    + '.print-page { background: #fff; color: #000; padding: 30px 35px; max-width: 850px; margin: 0 auto 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); font-family: Arial, sans-serif; font-size: 14px; min-height: 600px; page-break-after: always; }'
+    + '.print-page { background: #fff; color: #000; padding: 28px 32px; max-width: 850px; margin: 0 auto 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); font-family: Arial, sans-serif; font-size: 14px; min-height: 500px; page-break-after: always; }'
     + '.print-page:last-child { page-break-after: auto; margin-bottom: 0; }'
-
-    + '.page-badge { display: inline-block; padding: 4px 12px; background: #ff6b00; color: #fff; border-radius: 4px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; }'
+    + '.page-badge { display: inline-block; padding: 3px 10px; background: #ff6b00; color: #fff; border-radius: 4px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; }'
 
     + '@media print {'
     + '  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }'
@@ -118,14 +115,14 @@ function addPrintCabangStyles() {
     + '  #printCabangModalContainer, .print-cabang-overlay, .print-cabang-modal { position: static !important; max-width: 100% !important; max-height: none !important; background: #fff !important; box-shadow: none !important; opacity: 1 !important; pointer-events: auto !important; transform: none !important; }'
     + '  .print-cabang-modal-header, .print-cabang-modal-actions { display: none !important; }'
     + '  .print-cabang-modal-body { background: #fff !important; padding: 0 !important; overflow: visible !important; }'
-    + '  .print-page { box-shadow: none !important; padding: 15px 20px !important; margin: 0 !important; page-break-after: always; }'
+    + '  .print-page { box-shadow: none !important; padding: 12px 18px !important; margin: 0 !important; page-break-after: always; }'
     + '  .print-page:last-child { page-break-after: auto; }'
-    + '  @page { size: A4; margin: 12mm; }'
+    + '  @page { size: A4; margin: 10mm; }'
     + '}'
 
     + '@media (max-width: 768px) {'
     + '  .print-cabang-modal { max-width: calc(100vw - 24px) !important; }'
-    + '  .print-page { padding: 20px 15px; font-size: 12px; }'
+    + '  .print-page { padding: 18px 12px; font-size: 12px; }'
     + '}';
 
   document.head.appendChild(style);
@@ -167,10 +164,6 @@ function closePrintCabangModal() {
   $('printCabangOverlay')?.classList.remove('show');
   document.body.style.overflow = '';
 }
-
-// ─────────────────────────────────────────────────────────────────────────
-// HELPER: Split
-// ─────────────────────────────────────────────────────────────────────────
 
 function chunkArray(arr, size) {
   var chunks = [];
@@ -240,7 +233,7 @@ function renderPreview() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// BUILD 1 HALAMAN — FONT SIZE LEBIH BESAR
+// BUILD 1 HALAMAN — Row Kompak
 // ─────────────────────────────────────────────────────────────────────────
 
 function buildPageHtml(params) {
@@ -259,12 +252,12 @@ function buildPageHtml(params) {
   var pageInfoHtml = '';
   if (totalPages > 1) {
     pageInfoHtml = ''
-      + '<span class="page-badge" style="margin-left: 8px; font-size: 13px;">'
+      + '<span class="page-badge" style="margin-left: 8px;">'
       + 'HALAMAN ' + pageNumber + ' / ' + totalPages
       + '</span>';
   }
 
-  // TABLE ROWS — FONT LEBIH BESAR
+  // TABLE ROWS — Padding kecil, font tetap besar
   var rows = pageItems.map(function (item, idx) {
 
     var qty = toNumber(item.QTY);
@@ -291,20 +284,20 @@ function buildPageHtml(params) {
 
     return ''
       + '<tr>'
-      // Stok Sistem — 16px BOLD
-      + '<td style="padding:12px 6px; text-align:center; border:1px solid #000; font-size:16px; font-weight:700; vertical-align:middle;">' + stokS + '</td>'
-      // Stok Gudang — 16px BOLD
-      + '<td style="padding:12px 6px; text-align:center; border:1px solid #000; font-size:16px; font-weight:700; vertical-align:middle;">' + stokG + '</td>'
-      // Stok Rak — 16px BOLD
-      + '<td style="padding:12px 6px; text-align:center; border:1px solid #000; font-size:16px; font-weight:700; vertical-align:middle;">' + stokR + '</td>'
-      // Jumlah Order — 16px BOLD HIJAU
-      + '<td style="padding:12px 6px; text-align:center; border:1px solid #000; font-size:16px; vertical-align:middle; color:#00B050; font-weight:800;">' + qty + ' ' + sat + '</td>'
-      // Kode Item — 14px BOLD
-      + '<td style="padding:12px 10px; text-align:center; border:1px solid #000; font-size:14px; font-weight:700; vertical-align:middle;">' + escapeHtml(item.KODE_BARANG || '') + '</td>'
-      // Nama Item — 14px BOLD
-      + '<td style="padding:12px 10px; text-align:center; border:1px solid #000; font-size:14px; font-weight:700; vertical-align:middle;">' + escapeHtml((item.NAMA_BARANG || '').toUpperCase()) + '</td>'
-      // Jenis — 14px BOLD
-      + '<td style="padding:12px 8px; text-align:center; border:1px solid #000; font-size:14px; vertical-align:middle; font-weight:800;">' + escapeHtml(jenis) + '</td>'
+      // Stok Sistem — 15px BOLD, padding 5px 4px
+      + '<td style="padding:5px 4px; text-align:center; border:1px solid #000; font-size:15px; font-weight:700; vertical-align:middle; line-height:1.2;">' + stokS + '</td>'
+      // Stok Gudang
+      + '<td style="padding:5px 4px; text-align:center; border:1px solid #000; font-size:15px; font-weight:700; vertical-align:middle; line-height:1.2;">' + stokG + '</td>'
+      // Stok Rak
+      + '<td style="padding:5px 4px; text-align:center; border:1px solid #000; font-size:15px; font-weight:700; vertical-align:middle; line-height:1.2;">' + stokR + '</td>'
+      // Jumlah Order — 15px BOLD HIJAU
+      + '<td style="padding:5px 4px; text-align:center; border:1px solid #000; font-size:15px; vertical-align:middle; color:#00B050; font-weight:800; line-height:1.2;">' + qty + ' ' + sat + '</td>'
+      // Kode Item — 13px BOLD
+      + '<td style="padding:5px 8px; text-align:center; border:1px solid #000; font-size:13px; font-weight:700; vertical-align:middle; line-height:1.2;">' + escapeHtml(item.KODE_BARANG || '') + '</td>'
+      // Nama Item — 13px BOLD
+      + '<td style="padding:5px 8px; text-align:center; border:1px solid #000; font-size:13px; font-weight:700; vertical-align:middle; line-height:1.3;">' + escapeHtml((item.NAMA_BARANG || '').toUpperCase()) + '</td>'
+      // Jenis — 13px BOLD
+      + '<td style="padding:5px 6px; text-align:center; border:1px solid #000; font-size:13px; vertical-align:middle; font-weight:800; line-height:1.2;">' + escapeHtml(jenis) + '</td>'
       + '</tr>';
 
   }).join('');
@@ -315,16 +308,16 @@ function buildPageHtml(params) {
     // HEADER
     + '<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse; margin-bottom:0;">'
     + '<tr>'
-    + '<td style="vertical-align:top; padding-bottom:14px; padding-top:4px;">'
-    + '<div style="font-size:42px; font-weight:900; line-height:1; letter-spacing:-1px;">'
+    + '<td style="vertical-align:top; padding-bottom:10px; padding-top:2px;">'
+    + '<div style="font-size:38px; font-weight:900; line-height:1; letter-spacing:-1px;">'
     + '<span style="color:#E67E22;">FORM</span>'
     + '<span style="color:#1B4F94;"> ORDER BARANG</span>'
     + '</div>'
     + '</td>'
-    + '<td style="vertical-align:top; text-align:right; width:180px; padding-bottom:14px;">'
+    + '<td style="vertical-align:top; text-align:right; width:170px; padding-bottom:10px;">'
     + '<img src="./images/logo/logo-nk.png"'
     + ' alt="Logo Nasional Kitchen"'
-    + ' style="width:160px; height:auto; display:block; margin-left:auto;"'
+    + ' style="width:140px; height:auto; display:block; margin-left:auto;"'
     + ' crossorigin="anonymous"'
     + ' onerror="this.style.display=\'none\';"'
     + '>'
@@ -332,31 +325,31 @@ function buildPageHtml(params) {
     + '</tr>'
     + '</table>'
 
-    + '<div style="border-top:1px solid #000; margin-bottom:12px;"></div>'
+    + '<div style="border-top:1px solid #000; margin-bottom:8px;"></div>'
 
-    // INFO — Font lebih besar (15px)
-    + '<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse; margin-bottom:14px; font-size:15px; color:#000;">'
+    // INFO — Font 14px, padding minim
+    + '<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse; margin-bottom:10px; font-size:14px; color:#000;">'
 
     + '<tr>'
-    + '<td style="padding:4px 0; width:160px; font-weight:700; vertical-align:top;">DIBUAT OLEH</td>'
-    + '<td style="padding:4px 0; vertical-align:top; font-weight:600;">: ' + pic + '</td>'
-    + '<td style="padding:4px 0; width:1px;"></td>'
+    + '<td style="padding:2px 0; width:150px; font-weight:700; vertical-align:top;">DIBUAT OLEH</td>'
+    + '<td style="padding:2px 0; vertical-align:top; font-weight:600;">: ' + pic + '</td>'
+    + '<td style="padding:2px 0; width:1px;"></td>'
     + '</tr>'
 
     + '<tr>'
-    + '<td style="padding:4px 0; font-weight:700; vertical-align:top;">NOMOR ORDER</td>'
-    + '<td style="padding:4px 0; vertical-align:top; font-weight:600;">'
+    + '<td style="padding:2px 0; font-weight:700; vertical-align:top;">NOMOR ORDER</td>'
+    + '<td style="padding:2px 0; vertical-align:top; font-weight:600;">'
     + ': ' + nomorOrder + pageInfoHtml
     + '</td>'
-    + '<td style="padding:4px 0; text-align:right; vertical-align:top; white-space:nowrap; font-weight:600;">'
+    + '<td style="padding:2px 0; text-align:right; vertical-align:top; white-space:nowrap; font-weight:600;">'
     + '<span style="font-weight:700;">Hari/Tgl</span> : ' + tgl
     + '</td>'
     + '</tr>'
 
     + '<tr>'
-    + '<td style="padding:4px 0; font-weight:700; vertical-align:top;">STATUS ORDER</td>'
-    + '<td style="padding:4px 0; vertical-align:top;" colspan="2">'
-    + ': <span style="display:inline-block; padding:3px 12px; border-radius:4px; font-size:13px; font-weight:700; color:#fff; background:' + statusBg + ';">'
+    + '<td style="padding:2px 0; font-weight:700; vertical-align:top;">STATUS ORDER</td>'
+    + '<td style="padding:2px 0; vertical-align:top;" colspan="2">'
+    + ': <span style="display:inline-block; padding:2px 10px; border-radius:4px; font-size:12px; font-weight:700; color:#fff; background:' + statusBg + ';">'
     + statusLabel
     + '</span>'
     + '</td>'
@@ -364,41 +357,41 @@ function buildPageHtml(params) {
 
     + '</table>'
 
-    // TABLE DATA — HEADER FONT LEBIH BESAR (14px)
-    + '<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse; border:1px solid #000; margin-bottom:30px;">'
+    // TABLE DATA — HEADER 13px BOLD 800, padding 6px 4px
+    + '<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse; border:1px solid #000; margin-bottom:20px;">'
 
     + '<thead>'
     + '<tr style="background:#B4D6F0;">'
-    + '<th style="padding:10px 6px; border:1px solid #000; font-size:14px; font-weight:800; text-align:center; width:80px; line-height:1.2; vertical-align:middle;">STOCK<br>SISTEM</th>'
-    + '<th style="padding:10px 6px; border:1px solid #000; font-size:14px; font-weight:800; text-align:center; width:80px; line-height:1.2; vertical-align:middle;">STOCK<br>(Gudang)</th>'
-    + '<th style="padding:10px 6px; border:1px solid #000; font-size:14px; font-weight:800; text-align:center; width:75px; line-height:1.2; vertical-align:middle;">STOCK<br>(Rak)</th>'
-    + '<th style="padding:10px 6px; border:1px solid #000; font-size:14px; font-weight:800; text-align:center; width:85px; line-height:1.2; vertical-align:middle;">JMLH<br>ORDER</th>'
-    + '<th style="padding:10px 10px; border:1px solid #000; font-size:14px; font-weight:800; text-align:center; width:100px; vertical-align:middle;">KODE ITEM</th>'
-    + '<th style="padding:10px 10px; border:1px solid #000; font-size:14px; font-weight:800; text-align:center; vertical-align:middle;">NAMA ITEM</th>'
-    + '<th style="padding:10px 8px; border:1px solid #000; font-size:14px; font-weight:800; text-align:center; width:100px; vertical-align:middle;">JENIS</th>'
+    + '<th style="padding:6px 4px; border:1px solid #000; font-size:13px; font-weight:800; text-align:center; width:75px; line-height:1.2; vertical-align:middle;">STOCK<br>SISTEM</th>'
+    + '<th style="padding:6px 4px; border:1px solid #000; font-size:13px; font-weight:800; text-align:center; width:75px; line-height:1.2; vertical-align:middle;">STOCK<br>(Gudang)</th>'
+    + '<th style="padding:6px 4px; border:1px solid #000; font-size:13px; font-weight:800; text-align:center; width:70px; line-height:1.2; vertical-align:middle;">STOCK<br>(Rak)</th>'
+    + '<th style="padding:6px 4px; border:1px solid #000; font-size:13px; font-weight:800; text-align:center; width:80px; line-height:1.2; vertical-align:middle;">JMLH<br>ORDER</th>'
+    + '<th style="padding:6px 8px; border:1px solid #000; font-size:13px; font-weight:800; text-align:center; width:95px; line-height:1.2; vertical-align:middle;">KODE ITEM</th>'
+    + '<th style="padding:6px 8px; border:1px solid #000; font-size:13px; font-weight:800; text-align:center; line-height:1.2; vertical-align:middle;">NAMA ITEM</th>'
+    + '<th style="padding:6px 6px; border:1px solid #000; font-size:13px; font-weight:800; text-align:center; width:95px; line-height:1.2; vertical-align:middle;">JENIS</th>'
     + '</tr>'
     + '</thead>'
 
     + '<tbody>' + rows + '</tbody>'
     + '</table>'
 
-    // SIGNATURE — Font lebih besar
+    // SIGNATURE — Padding kompak
     + '<table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #000; border-collapse:collapse;">'
     + '<tr>'
-    + '<td style="padding:20px 25px 5px; width:33%; text-align:left; font-size:14px; vertical-align:top;">pengantar,</td>'
-    + '<td style="padding:20px 10px 5px; width:34%; text-align:center; font-size:14px; vertical-align:top;">Persetujuan,</td>'
-    + '<td style="padding:20px 25px 5px; width:33%; text-align:right; font-size:14px; vertical-align:top;">Penerima,</td>'
+    + '<td style="padding:12px 20px 3px; width:33%; text-align:left; font-size:13px; vertical-align:top;">pengantar,</td>'
+    + '<td style="padding:12px 10px 3px; width:34%; text-align:center; font-size:13px; vertical-align:top;">Persetujuan,</td>'
+    + '<td style="padding:12px 20px 3px; width:33%; text-align:right; font-size:13px; vertical-align:top;">Penerima,</td>'
     + '</tr>'
-    + '<tr><td colspan="3" style="padding:36px 0;">&nbsp;</td></tr>'
+    + '<tr><td colspan="3" style="padding:25px 0;">&nbsp;</td></tr>'
     + '<tr>'
-    + '<td style="padding:0 25px 5px; text-align:left; font-size:14px; font-weight:600;">(_______________)</td>'
-    + '<td style="padding:0 10px 5px; text-align:center; font-size:14px; font-weight:600;">(_______________)</td>'
-    + '<td style="padding:0 25px 5px; text-align:right; font-size:14px; font-weight:600;">(_______________)</td>'
+    + '<td style="padding:0 20px 3px; text-align:left; font-size:13px; font-weight:600;">(_______________)</td>'
+    + '<td style="padding:0 10px 3px; text-align:center; font-size:13px; font-weight:600;">(_______________)</td>'
+    + '<td style="padding:0 20px 3px; text-align:right; font-size:13px; font-weight:600;">(_______________)</td>'
     + '</tr>'
     + '<tr>'
-    + '<td style="padding:0 25px 20px 35px; text-align:left; font-size:15px; font-weight:900;">Driver</td>'
-    + '<td style="padding:0 10px 20px; text-align:center; font-size:15px; font-weight:900;">SPV Gudang</td>'
-    + '<td style="padding:0 35px 20px 25px; text-align:right; font-size:15px; font-weight:900;">SPV Cabang</td>'
+    + '<td style="padding:0 20px 12px 30px; text-align:left; font-size:14px; font-weight:900;">Driver</td>'
+    + '<td style="padding:0 10px 12px; text-align:center; font-size:14px; font-weight:900;">SPV Gudang</td>'
+    + '<td style="padding:0 30px 12px 20px; text-align:right; font-size:14px; font-weight:900;">SPV Cabang</td>'
     + '</tr>'
     + '</table>'
 
@@ -416,7 +409,7 @@ function doDownloadPdf() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// DOWNLOAD JPG — Multi-page
+// DOWNLOAD JPG
 // ─────────────────────────────────────────────────────────────────────────
 
 async function doDownloadJpg() {
