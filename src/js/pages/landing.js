@@ -280,7 +280,7 @@ function initCabangList() {
 
             <div class="bento-image">
               <img
-                src="./public/images/cabang/${cabang.id.toLowerCase()}.jpg"
+                src="./images/cabang/${cabang.id.toLowerCase()}.jpg"
                 alt="${cabang.nama}"
                 loading="lazy"
                 onerror="this.parentElement.classList.add('no-img'); this.remove();"
