@@ -10,7 +10,7 @@ import { CABANG } from '../../config.js';
 import { icon } from '../../icons.js';
 
 // Max items per page/form
-var ITEMS_PER_PAGE = 20;
+var ITEMS_PER_PAGE = 12;
 
 var printState = {
   order: null,
