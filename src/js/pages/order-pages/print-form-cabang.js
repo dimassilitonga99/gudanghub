@@ -1,21 +1,17 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   PRINT FORM CABANG — Multi-page (max 20 items per page)
-   - Preview: scroll multi-page
-   - PDF: 1 file, multiple pages
-   - JPG: multiple files (per page)
+   PRINT FORM CABANG — Multi-page + Font Besar
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, escapeHtml, formatWita, parseAnyDate, toNumber } from '../../utils.js';
 import { CABANG } from '../../config.js';
 import { icon } from '../../icons.js';
 
-// Max items per page/form
-var ITEMS_PER_PAGE = 12;
+var ITEMS_PER_PAGE = 20;
 
 var printState = {
   order: null,
   items: [],
-  pages: [],   // items dibagi per halaman
+  pages: [],
 };
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -38,7 +34,7 @@ export function initPrintFormCabang() {
     + '<div class="modal-title" id="printCabangModalTitle">Preview Form Order</div>'
     + '<div class="print-cabang-modal-actions">'
 
-    + '<button class="btn-download-jpg" id="btnDownloadJpg" type="button" title="Download semua halaman sebagai JPG">'
+    + '<button class="btn-download-jpg" id="btnDownloadJpg" type="button" title="Download JPG">'
     + icon('download', { size: 16 })
     + ' <span id="btnJpgText">Download JPG</span>'
     + '</button>'
@@ -111,11 +107,10 @@ function addPrintCabangStyles() {
     + '.print-cabang-modal-body { background: #e0e0e0 !important; padding: 20px !important; overflow-y: auto; }'
 
     // Multi-page container
-    + '.print-page { background: #fff; color: #000; padding: 30px 35px; max-width: 850px; margin: 0 auto 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); font-family: Arial, sans-serif; font-size: 12px; min-height: 600px; page-break-after: always; }'
+    + '.print-page { background: #fff; color: #000; padding: 30px 35px; max-width: 850px; margin: 0 auto 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); font-family: Arial, sans-serif; font-size: 14px; min-height: 600px; page-break-after: always; }'
     + '.print-page:last-child { page-break-after: auto; margin-bottom: 0; }'
 
-    // Badge halaman
-    + '.page-badge { display: inline-block; padding: 4px 12px; background: #ff6b00; color: #fff; border-radius: 4px; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; }'
+    + '.page-badge { display: inline-block; padding: 4px 12px; background: #ff6b00; color: #fff; border-radius: 4px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; }'
 
     + '@media print {'
     + '  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }'
@@ -130,7 +125,7 @@ function addPrintCabangStyles() {
 
     + '@media (max-width: 768px) {'
     + '  .print-cabang-modal { max-width: calc(100vw - 24px) !important; }'
-    + '  .print-page { padding: 20px 15px; font-size: 11px; }'
+    + '  .print-page { padding: 20px 15px; font-size: 12px; }'
     + '}';
 
   document.head.appendChild(style);
@@ -146,16 +141,13 @@ export function showPrintFormCabang(order) {
 
   printState.order = order;
 
-  // Filter items (skip DELETED)
   printState.items = (order.DETAIL || []).filter(function (i) {
     var status = String(i.ITEM_STATUS || 'APPROVED').toUpperCase();
     return status !== 'DELETED';
   });
 
-  // Split items ke pages (max 20 per page)
   printState.pages = chunkArray(printState.items, ITEMS_PER_PAGE);
 
-  // Update text tombol JPG (kalau multi-page)
   var jpgText = $('btnJpgText');
   if (jpgText) {
     if (printState.pages.length > 1) {
@@ -177,7 +169,7 @@ function closePrintCabangModal() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// HELPER: Split array to chunks
+// HELPER: Split
 // ─────────────────────────────────────────────────────────────────────────
 
 function chunkArray(arr, size) {
@@ -185,11 +177,11 @@ function chunkArray(arr, size) {
   for (var i = 0; i < arr.length; i += size) {
     chunks.push(arr.slice(i, i + size));
   }
-  return chunks.length === 0 ? [[]] : chunks;  // minimal 1 page (walaupun kosong)
+  return chunks.length === 0 ? [[]] : chunks;
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// RENDER PREVIEW — Multi-page
+// RENDER PREVIEW
 // ─────────────────────────────────────────────────────────────────────────
 
 function renderPreview() {
@@ -224,7 +216,6 @@ function renderPreview() {
   if (status === 'APPROVED') statusLabel = 'DISETUJUI';
   if (status === 'REJECTED') statusLabel = 'DITOLAK';
 
-  // Render setiap halaman
   var allPagesHtml = pages.map(function (pageItems, pageIndex) {
     return buildPageHtml({
       order: order,
@@ -241,7 +232,6 @@ function renderPreview() {
 
   preview.innerHTML = allPagesHtml;
 
-  // Update title dengan info pages
   var titleText = 'Preview Form Order — ' + order.ORDER_ID;
   if (totalPages > 1) {
     titleText += ' (' + totalPages + ' halaman)';
@@ -250,12 +240,11 @@ function renderPreview() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// BUILD 1 HALAMAN FORM
+// BUILD 1 HALAMAN — FONT SIZE LEBIH BESAR
 // ─────────────────────────────────────────────────────────────────────────
 
 function buildPageHtml(params) {
 
-  var order = params.order;
   var pageItems = params.pageItems;
   var pageIndex = params.pageIndex;
   var totalPages = params.totalPages;
@@ -267,19 +256,15 @@ function buildPageHtml(params) {
 
   var pageNumber = pageIndex + 1;
 
-  // Nomor item start dari halaman berikutnya
-  var itemStartNumber = pageIndex * ITEMS_PER_PAGE + 1;
-
-  // Info halaman (kalau multi-page)
   var pageInfoHtml = '';
   if (totalPages > 1) {
     pageInfoHtml = ''
-      + '<span class="page-badge" style="margin-left: 8px;">'
+      + '<span class="page-badge" style="margin-left: 8px; font-size: 13px;">'
       + 'HALAMAN ' + pageNumber + ' / ' + totalPages
       + '</span>';
   }
 
-  // Table rows untuk halaman ini
+  // TABLE ROWS — FONT LEBIH BESAR
   var rows = pageItems.map(function (item, idx) {
 
     var qty = toNumber(item.QTY);
@@ -306,13 +291,20 @@ function buildPageHtml(params) {
 
     return ''
       + '<tr>'
-      + '<td style="padding:8px 6px; text-align:center; border:1px solid #000; font-size:12px; vertical-align:middle;">' + stokS + '</td>'
-      + '<td style="padding:8px 6px; text-align:center; border:1px solid #000; font-size:12px; vertical-align:middle;">' + stokG + '</td>'
-      + '<td style="padding:8px 6px; text-align:center; border:1px solid #000; font-size:12px; vertical-align:middle;">' + stokR + '</td>'
-      + '<td style="padding:8px 6px; text-align:center; border:1px solid #000; font-size:12px; vertical-align:middle; color:#00B050; font-weight:600;">' + qty + ' ' + sat + '</td>'
-      + '<td style="padding:8px 10px; text-align:center; border:1px solid #000; font-size:12px; vertical-align:middle;">' + escapeHtml(item.KODE_BARANG || '') + '</td>'
-      + '<td style="padding:8px 10px; text-align:center; border:1px solid #000; font-size:12px; vertical-align:middle;">' + escapeHtml((item.NAMA_BARANG || '').toUpperCase()) + '</td>'
-      + '<td style="padding:8px 8px; text-align:center; border:1px solid #000; font-size:12px; vertical-align:middle; font-weight:700;">' + escapeHtml(jenis) + '</td>'
+      // Stok Sistem — 16px BOLD
+      + '<td style="padding:12px 6px; text-align:center; border:1px solid #000; font-size:16px; font-weight:700; vertical-align:middle;">' + stokS + '</td>'
+      // Stok Gudang — 16px BOLD
+      + '<td style="padding:12px 6px; text-align:center; border:1px solid #000; font-size:16px; font-weight:700; vertical-align:middle;">' + stokG + '</td>'
+      // Stok Rak — 16px BOLD
+      + '<td style="padding:12px 6px; text-align:center; border:1px solid #000; font-size:16px; font-weight:700; vertical-align:middle;">' + stokR + '</td>'
+      // Jumlah Order — 16px BOLD HIJAU
+      + '<td style="padding:12px 6px; text-align:center; border:1px solid #000; font-size:16px; vertical-align:middle; color:#00B050; font-weight:800;">' + qty + ' ' + sat + '</td>'
+      // Kode Item — 14px BOLD
+      + '<td style="padding:12px 10px; text-align:center; border:1px solid #000; font-size:14px; font-weight:700; vertical-align:middle;">' + escapeHtml(item.KODE_BARANG || '') + '</td>'
+      // Nama Item — 14px BOLD
+      + '<td style="padding:12px 10px; text-align:center; border:1px solid #000; font-size:14px; font-weight:700; vertical-align:middle;">' + escapeHtml((item.NAMA_BARANG || '').toUpperCase()) + '</td>'
+      // Jenis — 14px BOLD
+      + '<td style="padding:12px 8px; text-align:center; border:1px solid #000; font-size:14px; vertical-align:middle; font-weight:800;">' + escapeHtml(jenis) + '</td>'
       + '</tr>';
 
   }).join('');
@@ -342,29 +334,29 @@ function buildPageHtml(params) {
 
     + '<div style="border-top:1px solid #000; margin-bottom:12px;"></div>'
 
-    // INFO
-    + '<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse; margin-bottom:14px; font-size:13px; color:#000;">'
+    // INFO — Font lebih besar (15px)
+    + '<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse; margin-bottom:14px; font-size:15px; color:#000;">'
 
     + '<tr>'
-    + '<td style="padding:3px 0; width:140px; font-weight:700; vertical-align:top;">DIBUAT OLEH</td>'
-    + '<td style="padding:3px 0; vertical-align:top;">: ' + pic + '</td>'
-    + '<td style="padding:3px 0; width:1px;"></td>'
+    + '<td style="padding:4px 0; width:160px; font-weight:700; vertical-align:top;">DIBUAT OLEH</td>'
+    + '<td style="padding:4px 0; vertical-align:top; font-weight:600;">: ' + pic + '</td>'
+    + '<td style="padding:4px 0; width:1px;"></td>'
     + '</tr>'
 
     + '<tr>'
-    + '<td style="padding:3px 0; font-weight:700; vertical-align:top;">NOMOR ORDER</td>'
-    + '<td style="padding:3px 0; vertical-align:top;">'
+    + '<td style="padding:4px 0; font-weight:700; vertical-align:top;">NOMOR ORDER</td>'
+    + '<td style="padding:4px 0; vertical-align:top; font-weight:600;">'
     + ': ' + nomorOrder + pageInfoHtml
     + '</td>'
-    + '<td style="padding:3px 0; text-align:right; vertical-align:top; white-space:nowrap;">'
+    + '<td style="padding:4px 0; text-align:right; vertical-align:top; white-space:nowrap; font-weight:600;">'
     + '<span style="font-weight:700;">Hari/Tgl</span> : ' + tgl
     + '</td>'
     + '</tr>'
 
     + '<tr>'
-    + '<td style="padding:3px 0; font-weight:700; vertical-align:top;">STATUS ORDER</td>'
-    + '<td style="padding:3px 0; vertical-align:top;" colspan="2">'
-    + ': <span style="display:inline-block; padding:2px 10px; border-radius:4px; font-size:11px; font-weight:700; color:#fff; background:' + statusBg + ';">'
+    + '<td style="padding:4px 0; font-weight:700; vertical-align:top;">STATUS ORDER</td>'
+    + '<td style="padding:4px 0; vertical-align:top;" colspan="2">'
+    + ': <span style="display:inline-block; padding:3px 12px; border-radius:4px; font-size:13px; font-weight:700; color:#fff; background:' + statusBg + ';">'
     + statusLabel
     + '</span>'
     + '</td>'
@@ -372,41 +364,41 @@ function buildPageHtml(params) {
 
     + '</table>'
 
-    // TABLE DATA
+    // TABLE DATA — HEADER FONT LEBIH BESAR (14px)
     + '<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse; border:1px solid #000; margin-bottom:30px;">'
 
     + '<thead>'
     + '<tr style="background:#B4D6F0;">'
-    + '<th style="padding:8px 6px; border:1px solid #000; font-size:12px; font-weight:700; text-align:center; width:80px; line-height:1.2; vertical-align:middle;">STOCK<br>SISTEM</th>'
-    + '<th style="padding:8px 6px; border:1px solid #000; font-size:12px; font-weight:700; text-align:center; width:80px; line-height:1.2; vertical-align:middle;">STOCK<br>(Gudang)</th>'
-    + '<th style="padding:8px 6px; border:1px solid #000; font-size:12px; font-weight:700; text-align:center; width:75px; line-height:1.2; vertical-align:middle;">STOCK<br>(Rak)</th>'
-    + '<th style="padding:8px 6px; border:1px solid #000; font-size:12px; font-weight:700; text-align:center; width:85px; line-height:1.2; vertical-align:middle;">JMLH<br>ORDER</th>'
-    + '<th style="padding:8px 10px; border:1px solid #000; font-size:12px; font-weight:700; text-align:center; width:100px; vertical-align:middle;">KODE ITEM</th>'
-    + '<th style="padding:8px 10px; border:1px solid #000; font-size:12px; font-weight:700; text-align:center; vertical-align:middle;">NAMA ITEM</th>'
-    + '<th style="padding:8px 8px; border:1px solid #000; font-size:12px; font-weight:700; text-align:center; width:100px; vertical-align:middle;">Jenis</th>'
+    + '<th style="padding:10px 6px; border:1px solid #000; font-size:14px; font-weight:800; text-align:center; width:80px; line-height:1.2; vertical-align:middle;">STOCK<br>SISTEM</th>'
+    + '<th style="padding:10px 6px; border:1px solid #000; font-size:14px; font-weight:800; text-align:center; width:80px; line-height:1.2; vertical-align:middle;">STOCK<br>(Gudang)</th>'
+    + '<th style="padding:10px 6px; border:1px solid #000; font-size:14px; font-weight:800; text-align:center; width:75px; line-height:1.2; vertical-align:middle;">STOCK<br>(Rak)</th>'
+    + '<th style="padding:10px 6px; border:1px solid #000; font-size:14px; font-weight:800; text-align:center; width:85px; line-height:1.2; vertical-align:middle;">JMLH<br>ORDER</th>'
+    + '<th style="padding:10px 10px; border:1px solid #000; font-size:14px; font-weight:800; text-align:center; width:100px; vertical-align:middle;">KODE ITEM</th>'
+    + '<th style="padding:10px 10px; border:1px solid #000; font-size:14px; font-weight:800; text-align:center; vertical-align:middle;">NAMA ITEM</th>'
+    + '<th style="padding:10px 8px; border:1px solid #000; font-size:14px; font-weight:800; text-align:center; width:100px; vertical-align:middle;">JENIS</th>'
     + '</tr>'
     + '</thead>'
 
     + '<tbody>' + rows + '</tbody>'
     + '</table>'
 
-    // SIGNATURE
+    // SIGNATURE — Font lebih besar
     + '<table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #000; border-collapse:collapse;">'
     + '<tr>'
-    + '<td style="padding:18px 25px 5px; width:33%; text-align:left; font-size:13px; vertical-align:top;">pengantar,</td>'
-    + '<td style="padding:18px 10px 5px; width:34%; text-align:center; font-size:13px; vertical-align:top;">Persetujuan,</td>'
-    + '<td style="padding:18px 25px 5px; width:33%; text-align:right; font-size:13px; vertical-align:top;">Penerima,</td>'
+    + '<td style="padding:20px 25px 5px; width:33%; text-align:left; font-size:14px; vertical-align:top;">pengantar,</td>'
+    + '<td style="padding:20px 10px 5px; width:34%; text-align:center; font-size:14px; vertical-align:top;">Persetujuan,</td>'
+    + '<td style="padding:20px 25px 5px; width:33%; text-align:right; font-size:14px; vertical-align:top;">Penerima,</td>'
     + '</tr>'
-    + '<tr><td colspan="3" style="padding:32px 0;">&nbsp;</td></tr>'
+    + '<tr><td colspan="3" style="padding:36px 0;">&nbsp;</td></tr>'
     + '<tr>'
-    + '<td style="padding:0 25px 5px; text-align:left; font-size:13px;">(_______________)</td>'
-    + '<td style="padding:0 10px 5px; text-align:center; font-size:13px;">(_______________)</td>'
-    + '<td style="padding:0 25px 5px; text-align:right; font-size:13px;">(_______________)</td>'
+    + '<td style="padding:0 25px 5px; text-align:left; font-size:14px; font-weight:600;">(_______________)</td>'
+    + '<td style="padding:0 10px 5px; text-align:center; font-size:14px; font-weight:600;">(_______________)</td>'
+    + '<td style="padding:0 25px 5px; text-align:right; font-size:14px; font-weight:600;">(_______________)</td>'
     + '</tr>'
     + '<tr>'
-    + '<td style="padding:0 25px 18px 35px; text-align:left; font-size:14px; font-weight:900;">Driver</td>'
-    + '<td style="padding:0 10px 18px; text-align:center; font-size:14px; font-weight:900;">SPV Gudang</td>'
-    + '<td style="padding:0 35px 18px 25px; text-align:right; font-size:14px; font-weight:900;">SPV Cabang</td>'
+    + '<td style="padding:0 25px 20px 35px; text-align:left; font-size:15px; font-weight:900;">Driver</td>'
+    + '<td style="padding:0 10px 20px; text-align:center; font-size:15px; font-weight:900;">SPV Gudang</td>'
+    + '<td style="padding:0 35px 20px 25px; text-align:right; font-size:15px; font-weight:900;">SPV Cabang</td>'
     + '</tr>'
     + '</table>'
 
@@ -416,7 +408,7 @@ function buildPageHtml(params) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// DOWNLOAD PDF (native browser print)
+// DOWNLOAD PDF
 // ─────────────────────────────────────────────────────────────────────────
 
 function doDownloadPdf() {
@@ -424,7 +416,7 @@ function doDownloadPdf() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// DOWNLOAD JPG — Multi-page (satu file per halaman)
+// DOWNLOAD JPG — Multi-page
 // ─────────────────────────────────────────────────────────────────────────
 
 async function doDownloadJpg() {
@@ -439,7 +431,6 @@ async function doDownloadJpg() {
 
   try {
 
-    // Load html2canvas
     var html2canvas;
 
     try {
@@ -454,7 +445,6 @@ async function doDownloadJpg() {
       return;
     }
 
-    // Get semua halaman
     var pages = document.querySelectorAll('.print-page');
 
     if (!pages.length) {
@@ -465,20 +455,16 @@ async function doDownloadJpg() {
     var totalPages = pages.length;
     var orderId = printState.order?.ORDER_ID || 'unknown';
 
-    // Loop setiap halaman → render → download
     for (var i = 0; i < totalPages; i++) {
 
       var page = pages[i];
       var pageNum = i + 1;
 
-      // Update button text
       btn.innerHTML = '<span class="spinner spinner-sm" style="color:#fff;"></span> '
         + 'Proses halaman ' + pageNum + '/' + totalPages + '...';
 
-      // Wait images (khususnya logo)
       await waitForImages(page);
 
-      // Render ke canvas
       var canvas = await html2canvas(page, {
         scale: 2,
         useCORS: true,
@@ -489,31 +475,26 @@ async function doDownloadJpg() {
         height: page.scrollHeight,
       });
 
-      // Convert ke JPG
       var jpgDataUrl = canvas.toDataURL('image/jpeg', 0.92);
 
-      // Filename dengan info halaman (kalau multi-page)
       var filename = 'Form-Order-' + orderId;
       if (totalPages > 1) {
         filename += '-Halaman-' + pageNum + '-dari-' + totalPages;
       }
       filename += '.jpg';
 
-      // Trigger download
       var link = document.createElement('a');
       link.href = jpgDataUrl;
       link.download = filename;
       document.body.appendChild(link);
       link.click();
 
-      // Cleanup
       setTimeout((function (l) {
         return function () {
           document.body.removeChild(l);
         };
       })(link), 100);
 
-      // Delay antar download supaya browser tidak reject
       if (i < totalPages - 1) {
         await sleep(600);
       }
@@ -570,7 +551,6 @@ function waitForImages(container) {
       }
     });
 
-    // Timeout fallback (3 detik)
     setTimeout(resolve, 3000);
   });
 }
