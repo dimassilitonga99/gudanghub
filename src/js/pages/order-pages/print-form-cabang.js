@@ -238,7 +238,7 @@ function renderPreview() {
     + '</td>'
 
     + '<td style="vertical-align:top; text-align:right; width:180px; padding-bottom:14px;">'
-    + '<img src="./public/images/logo/logo-nk.png"'
+    + '<img src="./images/logo/logo-nk.png"'
     + ' alt="Logo Nasional Kitchen"'
     + ' style="width:160px; height:auto; display:block; margin-left:auto;"'
     + ' crossorigin="anonymous"'
