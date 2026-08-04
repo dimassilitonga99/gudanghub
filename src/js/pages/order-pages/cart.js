@@ -1,13 +1,12 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   CART — Bottom sheet with Satuan Selector + Lucide Icons
-   NO STOCK LIMIT — stok info saja, label Gudang/Toko di atas input
-   Stok sistem snapshot tersimpan per order
+   CART — dengan Pre-Order Dialog (Nomor + Tanggal + Preview)
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, escapeHtml, formatRupiah, toInt } from '../../utils.js';
 import { orders as ordersApi } from '../../api.js';
 import { toast, confirm } from '../../ui.js';
 import { icon } from '../../icons.js';
+import { showPreOrderDialog } from './pre-order-dialog.js';
 
 var SATUAN_OPTIONS = ['PCS', 'DUS', 'KRG', 'SET', 'PACK', 'IKAT', 'GROSS'];
 
@@ -21,7 +20,7 @@ export function initCart(state) {
   $('sheetOverlay')?.addEventListener('click', closeCart);
 
   $('cartSubmitButton')?.addEventListener('click', function () {
-    confirmSubmit(state);
+    showPreviewBeforeSubmit(state);
   });
 
   $('cartItems')?.addEventListener('click', function (e) {
@@ -31,13 +30,9 @@ export function initCart(state) {
     var code = target.dataset.code;
     var action = target.dataset.cartAction;
 
-    if (action === 'delete') {
-      removeFromCart(state, code);
-    } else if (action === 'increase') {
-      changeCartQty(state, code, 1);
-    } else if (action === 'decrease') {
-      changeCartQty(state, code, -1);
-    }
+    if (action === 'delete') removeFromCart(state, code);
+    else if (action === 'increase') changeCartQty(state, code, 1);
+    else if (action === 'decrease') changeCartQty(state, code, -1);
   });
 
   $('cartItems')?.addEventListener('change', function (e) {
@@ -79,19 +74,13 @@ export function updateCartUi(state) {
   $('cartBar')?.classList.toggle('show', items.length > 0);
 
   var cartCount = $('cartCount');
-  if (cartCount) {
-    cartCount.textContent = qty + ' item · ' + formatRupiah(total);
-  }
+  if (cartCount) cartCount.textContent = qty + ' item · ' + formatRupiah(total);
 
   var cartItemCount = $('cartItemCount');
-  if (cartItemCount) {
-    cartItemCount.textContent = qty + ' item';
-  }
+  if (cartItemCount) cartItemCount.textContent = qty + ' item';
 
   var cartTotal = $('cartTotal');
-  if (cartTotal) {
-    cartTotal.textContent = formatRupiah(total);
-  }
+  if (cartTotal) cartTotal.textContent = formatRupiah(total);
 
   validateCartStocks(state);
 }
@@ -148,8 +137,13 @@ function buildCartItem(item, state) {
                       : stokSistem <= 5 ? 'stock-low'
                       : 'stock-ok';
 
-  var stokSistemText = stokSistem === 0 ? 'Habis'
-                     : 'Stok Sistem: ' + stokSistem;
+  var stokSistemText = stokSistem === 0 ? 'Habis' : 'Stok Sistem: ' + stokSistem;
+
+  // Badge manual
+  var manualBadge = '';
+  if (item.isManual) {
+    manualBadge = ' <span style="display:inline-block; margin-left:4px; padding:1px 6px; background:#f59e0b; color:#fff; border-radius:3px; font-size:9px; font-weight:700;">MANUAL</span>';
+  }
 
   var satuanOptionsHtml = SATUAN_OPTIONS.map(function (s) {
     var selected = (s === item.satuan) ? ' selected' : '';
@@ -158,91 +152,54 @@ function buildCartItem(item, state) {
 
   return ''
     + '<article class="cart-item">'
-
     + '<div class="cart-info">'
-    + '<div class="cart-name">' + escapeHtml(item.nama) + '</div>'
+    + '<div class="cart-name">' + escapeHtml(item.nama) + manualBadge + '</div>'
     + '<div class="cart-code">'
     + code
-    + ' <span class="cart-stok-sistem ' + stokSistemClass + '">' + stokSistemText + '</span>'
+    + (item.isManual ? '' : ' <span class="cart-stok-sistem ' + stokSistemClass + '">' + stokSistemText + '</span>')
     + '</div>'
-
     + '<div class="cart-price-row">'
-
     + '<span class="cart-quantity">'
     + '<button type="button" data-cart-action="decrease" data-code="' + code + '">'
     + icon('minus', { size: 12 })
     + '</button>'
-    + '<input type="number" min="1" value="' + item.qty + '"'
-    + ' data-cart-action="set-qty" data-code="' + code + '">'
+    + '<input type="number" min="1" value="' + item.qty + '" data-cart-action="set-qty" data-code="' + code + '">'
     + '<button type="button" data-cart-action="increase" data-code="' + code + '">'
     + icon('plus', { size: 12 })
     + '</button>'
     + '</span>'
-
-    + '<select class="cart-satuan-select"'
-    + ' data-cart-action="set-satuan"'
-    + ' data-code="' + code + '">'
+    + '<select class="cart-satuan-select" data-cart-action="set-satuan" data-code="' + code + '">'
     + satuanOptionsHtml
     + '</select>'
-
     + '<span>× ' + formatRupiah(item.harga) + '</span>'
     + '<span>=</span>'
     + '<span class="cart-subtotal">' + formatRupiah(item.qty * item.harga) + '</span>'
-
     + '</div>'
     + '</div>'
-
     + '<div class="cart-right">'
-
     + '<div class="stock-label">ISI STOK AKTUAL</div>'
-
     + '<div class="stock-labels-row">'
-    + '<span class="stock-mini-label">'
-    + icon('warehouse', { size: 10 })
-    + ' Gudang'
-    + '</span>'
-    + '<span class="stock-mini-label">'
-    + icon('store', { size: 10 })
-    + ' Toko'
-    + '</span>'
+    + '<span class="stock-mini-label">' + icon('warehouse', { size: 10 }) + ' Gudang</span>'
+    + '<span class="stock-mini-label">' + icon('store', { size: 10 }) + ' Toko</span>'
     + '</div>'
-
     + '<div class="cart-stock-row">'
-
-    + '<label class="stock-group ' + (gudangEmpty ? 'empty' : '') + '" title="Stok di Gudang Pusat">'
+    + '<label class="stock-group ' + (gudangEmpty ? 'empty' : '') + '" title="Stok Gudang">'
     + '<span class="stock-group-icon">' + icon('warehouse', { size: 12 }) + '</span>'
-    + '<input class="stock-input"'
-    + ' type="number"'
-    + ' min="0"'
-    + ' placeholder="0"'
+    + '<input class="stock-input" type="number" min="0" placeholder="0"'
     + ' value="' + (gudangEmpty ? '' : item.stokGudang) + '"'
-    + ' data-stock-type="gudang"'
-    + ' data-code="' + code + '">'
+    + ' data-stock-type="gudang" data-code="' + code + '">'
     + '</label>'
-
-    + '<label class="stock-group ' + (tokoEmpty ? 'empty' : '') + '" title="Stok di Toko/Cabang">'
+    + '<label class="stock-group ' + (tokoEmpty ? 'empty' : '') + '" title="Stok Toko">'
     + '<span class="stock-group-icon">' + icon('store', { size: 12 }) + '</span>'
-    + '<input class="stock-input"'
-    + ' type="number"'
-    + ' min="0"'
-    + ' placeholder="0"'
+    + '<input class="stock-input" type="number" min="0" placeholder="0"'
     + ' value="' + (tokoEmpty ? '' : item.stokToko) + '"'
-    + ' data-stock-type="toko"'
-    + ' data-code="' + code + '">'
+    + ' data-stock-type="toko" data-code="' + code + '">'
     + '</label>'
-
     + '</div>'
-
-    + '<button class="cart-delete"'
-    + ' type="button"'
-    + ' data-cart-action="delete"'
-    + ' data-code="' + code + '"'
-    + ' title="Hapus dari keranjang">'
+    + '<button class="cart-delete" type="button" data-cart-action="delete" data-code="' + code + '" title="Hapus">'
     + icon('trash', { size: 14 })
     + '</button>'
-
     + '</div>'
-
     + '</article>';
 }
 
@@ -273,21 +230,13 @@ function bindStockInputs(state) {
 function validateCartStocks(state) {
   var items = Object.values(state.cart);
 
-  var gudangMissing = items.filter(function (i) {
-    return isEmpty(i.stokGudang);
-  }).length;
-
-  var tokoMissing = items.filter(function (i) {
-    return isEmpty(i.stokToko);
-  }).length;
-
+  var gudangMissing = items.filter(function (i) { return isEmpty(i.stokGudang); }).length;
+  var tokoMissing = items.filter(function (i) { return isEmpty(i.stokToko); }).length;
   var missing = gudangMissing + tokoMissing;
   var valid = items.length > 0 && missing === 0;
 
   var submitBtn = $('cartSubmitButton');
-  if (submitBtn) {
-    submitBtn.disabled = !valid;
-  }
+  if (submitBtn) submitBtn.disabled = !valid;
 
   var warning = $('cartWarning');
   var warningText = $('cartWarningText');
@@ -295,9 +244,7 @@ function validateCartStocks(state) {
   if (warning && warningText) {
     if (!valid && items.length > 0) {
       warning.classList.add('show');
-      warningText.textContent = 'Wajib isi stok gudang ('
-        + gudangMissing + ' kosong) dan stok toko ('
-        + tokoMissing + ' kosong).';
+      warningText.textContent = 'Wajib isi stok gudang (' + gudangMissing + ' kosong) dan stok toko (' + tokoMissing + ' kosong).';
     } else {
       warning.classList.remove('show');
     }
@@ -342,7 +289,12 @@ function removeFromCart(state, code) {
   toast.info('Dihapus dari keranjang.', { duration: 1500 });
 }
 
-async function confirmSubmit(state) {
+// ─────────────────────────────────────────────────────────────────────────
+// ★ FLOW BARU: Show Preview dulu sebelum submit
+// ─────────────────────────────────────────────────────────────────────────
+
+function showPreviewBeforeSubmit(state) {
+
   var items = Object.values(state.cart);
 
   if (!items.length) {
@@ -351,46 +303,33 @@ async function confirmSubmit(state) {
   }
 
   if (!validateCartStocks(state)) {
-    toast.warning('Isi stok gudang dan stok toko untuk semua barang.', {
-      duration: 4000,
-    });
+    toast.warning('Isi stok gudang dan stok toko untuk semua barang.', { duration: 4000 });
     return;
   }
 
-  var total = items.reduce(function (s, i) {
-    return s + i.qty * i.harga;
-  }, 0);
+  // Tutup cart sheet dulu
+  closeCart();
 
-  var summary = items.map(function (i) {
-    return '• ' + i.nama + ': minta ' + i.qty + ' ' + i.satuan
-      + '\n   (Gudang: ' + i.stokGudang + ', Toko: ' + i.stokToko + ')';
-  }).join('\n');
-
-  var ok = await confirm({
-    icon: '🚀',
-    title: 'Kirim Order ke Gudang?',
-    message: items.length + ' jenis barang · Total ' + formatRupiah(total)
-      + '\n\n' + summary
-      + '\n\nKirim order untuk ' + state.branchId + '?',
-    okText: 'Ya, Kirim',
-    okVariant: 'primary',
+  // Show pre-order dialog
+  showPreOrderDialog({
+    items: items,
+    branchId: state.branchId,
+    catatan: $('cartNoteInput')?.value || '',
+    onConfirm: async function (config) {
+      // config: { nomorOrder, tanggalOrder, nomorMode, tanggalMode }
+      await submitOrder(state, items, config);
+    },
   });
-
-  if (!ok) return;
-  await submitOrder(state, items);
 }
 
-async function submitOrder(state, items) {
+// ─────────────────────────────────────────────────────────────────────────
+// SUBMIT ORDER
+// ─────────────────────────────────────────────────────────────────────────
+
+async function submitOrder(state, items, formConfig) {
+
   if (state.isSubmitting) return;
   state.isSubmitting = true;
-
-  var submitBtn = $('cartSubmitButton');
-  var originalText = submitBtn?.innerHTML;
-
-  if (submitBtn) {
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<span class="spinner spinner-sm" style="color: #fff;"></span> Mengirim...';
-  }
 
   var userNote = $('cartNoteInput')?.value.trim() || '';
 
@@ -398,9 +337,16 @@ async function submitOrder(state, items) {
     return i.kode + ': gudang ' + i.stokGudang + ', toko ' + i.stokToko;
   }).join(' | ');
 
+  // Tambah info form (nomor + tanggal)
+  var formInfo = '';
+  if (formConfig) {
+    formInfo = '[FORM] No.' + formConfig.nomorOrder
+             + ' Tgl.' + formConfig.tanggalOrder.toLocaleDateString('id-ID');
+  }
+
   var catatan = userNote
-    ? userNote + '\n\n[STOK AKTUAL] ' + stockNote
-    : '[STOK AKTUAL] ' + stockNote;
+    ? userNote + '\n\n' + formInfo + '\n\n[STOK AKTUAL] ' + stockNote
+    : formInfo + '\n\n[STOK AKTUAL] ' + stockNote;
 
   var payload = {
     idCabang: state.branchId,
@@ -416,6 +362,7 @@ async function submitOrder(state, items) {
         stokGudang: i.stokGudang,
         stokToko: i.stokToko,
         stokSistem: i.stokSistem !== undefined ? i.stokSistem : 0,
+        isManual: i.isManual || false,
       };
     }),
   };
@@ -429,7 +376,6 @@ async function submitOrder(state, items) {
       var noteInput = $('cartNoteInput');
       if (noteInput) noteInput.value = '';
 
-      closeCart();
       updateCartUi(state);
 
       var catalogModule = await import('./catalog-page.js');
@@ -441,17 +387,14 @@ async function submitOrder(state, items) {
         var historyTab = document.querySelector('[data-tab="history"]');
         historyTab?.click();
       }, 1000);
+
     } else {
-      toast.error(result.message || 'Gagal mengirim order.');
+      throw new Error(result.message || 'Gagal mengirim order.');
     }
   } catch (error) {
     toast.error(error.message || 'Terjadi kesalahan.');
+    throw error;
   } finally {
     state.isSubmitting = false;
-    if (submitBtn) {
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = originalText
-        || (icon('send', { size: 18 }) + ' Kirim Order ke Gudang');
-    }
   }
 }
