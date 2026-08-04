@@ -1,10 +1,9 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   HISTORY PAGE — with Date Filter + Lucide Icons
+   HISTORY PAGE — v3.5 Fast Load + Cache
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, escapeHtml, formatWita, parseAnyDate, sortBy } from '../../utils.js';
 import { orders as ordersApi } from '../../api.js';
-import { getStatusInfo } from '../../config.js';
 import { icon } from '../../icons.js';
 import { showPrintFormCabang, initPrintFormCabang } from './print-form-cabang.js';
 
@@ -16,6 +15,7 @@ let localState = {
   quickDate: '',
   isLoading: false,
   stateRef: null,
+  hasLoaded: false,   // ★ Track apakah sudah pernah load
 };
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -24,7 +24,6 @@ let localState = {
 
 export function renderHistoryPage(state) {
 
-  // Default dates: awal bulan ini s/d hari ini
   var today = new Date();
   var firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
 
@@ -43,7 +42,6 @@ export function renderHistoryPage(state) {
       </p>
     </header>
 
-    <!-- STATUS FILTER -->
     <div class="filter-scroll" id="historyFilter">
       <button class="filter-chip active" type="button" data-history-filter="ALL">
         ${icon('list', { size: 14 })}
@@ -63,7 +61,6 @@ export function renderHistoryPage(state) {
       </button>
     </div>
 
-    <!-- DATE FILTER -->
     <div class="date-filter-bar">
       <span class="date-filter-label">
         ${icon('calendar', { size: 14 })}
@@ -106,31 +103,24 @@ export function renderHistoryPage(state) {
       </span>
     </div>
 
-    <!-- QUICK DATE BUTTONS -->
     <div class="quick-date-bar">
       <button class="quick-date-btn" type="button" data-quick-date="today">
-        ${icon('calendar', { size: 12 })}
-        Hari Ini
+        ${icon('calendar', { size: 12 })} Hari Ini
       </button>
       <button class="quick-date-btn" type="button" data-quick-date="yesterday">
-        ${icon('calendar', { size: 12 })}
-        Kemarin
+        ${icon('calendar', { size: 12 })} Kemarin
       </button>
       <button class="quick-date-btn" type="button" data-quick-date="week">
-        ${icon('calendar-days', { size: 12 })}
-        7 Hari
+        ${icon('calendar-days', { size: 12 })} 7 Hari
       </button>
       <button class="quick-date-btn active" type="button" data-quick-date="month">
-        ${icon('calendar-days', { size: 12 })}
-        Bulan Ini
+        ${icon('calendar-days', { size: 12 })} Bulan Ini
       </button>
       <button class="quick-date-btn" type="button" data-quick-date="all">
-        ${icon('list', { size: 12 })}
-        Semua
+        ${icon('list', { size: 12 })} Semua
       </button>
     </div>
 
-    <!-- ORDER LIST -->
     <div class="history-list" id="historyList">
       <div class="empty-state">
         <div class="empty-icon">${icon('file', { size: 48, color: 'var(--muted)' })}</div>
@@ -148,7 +138,6 @@ export function initHistory(state) {
 
   localState.stateRef = state;
 
-  // Set default: bulan ini
   var today = new Date();
   var firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
 
@@ -156,12 +145,9 @@ export function initHistory(state) {
   localState.dateTo = formatDateInput(today);
   localState.quickDate = 'month';
 
-  // Init print form modal
   initPrintFormCabang();
 
-  // Status filter
   $('historyFilter')?.addEventListener('click', function (e) {
-
     var chip = e.target.closest('[data-history-filter]');
     if (!chip) return;
 
@@ -172,29 +158,23 @@ export function initHistory(state) {
     });
 
     chip.classList.add('active');
-
     renderHistoryList(state);
   });
 
-  // Apply date filter
   $('btnApplyDate')?.addEventListener('click', function () {
     applyDateFilter(state);
   });
 
-  // Reset date filter
   $('btnResetDate')?.addEventListener('click', function () {
     resetDateFilter(state);
   });
 
-  // Quick date buttons
   document.querySelectorAll('[data-quick-date]').forEach(function (btn) {
-
     btn.addEventListener('click', function () {
       applyQuickDate(btn.dataset.quickDate, state);
     });
   });
 
-  // Enter key di date input
   $('dateFrom')?.addEventListener('keydown', function (e) {
     if (e.key === 'Enter') applyDateFilter(state);
   });
@@ -205,11 +185,10 @@ export function initHistory(state) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// DATE FILTER FUNCTIONS
+// DATE FILTERS
 // ─────────────────────────────────────────────────────────────────────────
 
 function applyDateFilter(state) {
-
   var from = $('dateFrom')?.value || '';
   var to = $('dateTo')?.value || '';
 
@@ -217,7 +196,6 @@ function applyDateFilter(state) {
   localState.dateTo = to;
   localState.quickDate = '';
 
-  // Reset quick date button active
   document.querySelectorAll('[data-quick-date]').forEach(function (b) {
     b.classList.remove('active');
   });
@@ -227,7 +205,6 @@ function applyDateFilter(state) {
 }
 
 function resetDateFilter(state) {
-
   localState.dateFrom = '';
   localState.dateTo = '';
   localState.quickDate = 'all';
@@ -235,7 +212,6 @@ function resetDateFilter(state) {
   $('dateFrom').value = '';
   $('dateTo').value = '';
 
-  // Set "Semua" active
   document.querySelectorAll('[data-quick-date]').forEach(function (b) {
     b.classList.toggle('active', b.dataset.quickDate === 'all');
   });
@@ -251,29 +227,24 @@ function applyQuickDate(type, state) {
   var to = formatDateInput(today);
 
   switch (type) {
-
     case 'today':
       from = formatDateInput(today);
       break;
-
     case 'yesterday':
       var yesterday = new Date(today);
       yesterday.setDate(yesterday.getDate() - 1);
       from = formatDateInput(yesterday);
       to = formatDateInput(yesterday);
       break;
-
     case 'week':
       var weekAgo = new Date(today);
       weekAgo.setDate(weekAgo.getDate() - 7);
       from = formatDateInput(weekAgo);
       break;
-
     case 'month':
       var firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
       from = formatDateInput(firstDay);
       break;
-
     case 'all':
       from = '';
       to = '';
@@ -284,11 +255,9 @@ function applyQuickDate(type, state) {
   localState.dateTo = to;
   localState.quickDate = type;
 
-  // Update input fields
   $('dateFrom').value = from;
   $('dateTo').value = to;
 
-  // Update active button
   document.querySelectorAll('[data-quick-date]').forEach(function (b) {
     b.classList.toggle('active', b.dataset.quickDate === type);
   });
@@ -298,7 +267,6 @@ function applyQuickDate(type, state) {
 }
 
 function updateDateRangeInfo() {
-
   var infoEl = $('dateRangeInfo');
   var textEl = $('dateRangeText');
 
@@ -309,20 +277,15 @@ function updateDateRangeInfo() {
     return;
   }
 
-  var from = localState.dateFrom
-    ? formatDateReadableShort(localState.dateFrom)
-    : 'Awal';
-
-  var to = localState.dateTo
-    ? formatDateReadableShort(localState.dateTo)
-    : 'Sekarang';
+  var from = localState.dateFrom ? formatDateReadableShort(localState.dateFrom) : 'Awal';
+  var to = localState.dateTo ? formatDateReadableShort(localState.dateTo) : 'Sekarang';
 
   textEl.textContent = from + ' — ' + to;
   infoEl.classList.add('show');
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// LOAD DATA
+// LOAD DATA — FAST dengan Stale-While-Revalidate
 // ─────────────────────────────────────────────────────────────────────────
 
 export async function loadHistory(state) {
@@ -333,62 +296,88 @@ export async function loadHistory(state) {
   localState.stateRef = state;
 
   var list = $('historyList');
-  if (!list) return;
+  if (!list) {
+    localState.isLoading = false;
+    return;
+  }
 
-  list.innerHTML = `
-    <div class="empty-state">
-      <div class="loading-spinner"></div>
-      <div>Memuat riwayat...</div>
-    </div>
-  `;
+  // Show loading state HANYA kalau belum pernah load
+  if (!localState.hasLoaded) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="loading-spinner"></div>
+        <div>Memuat riwayat...</div>
+      </div>
+    `;
+  }
 
   try {
 
-    var result = await ordersApi.getAll({ cache: false });
+    // ★ FAST: Stale-while-revalidate
+    var result = await ordersApi.getAllFast(function (freshResult) {
+      // Callback saat data fresh datang di background
+      if (freshResult && freshResult.status === 'ok') {
+        console.log('[History] Fresh data received in background');
+        processOrdersData(state, freshResult.data || []);
+        renderHistoryList(state);
+      }
+    });
 
-    if (result.status !== 'ok') {
+    if (result.status !== 'ok' && !result._fromCache) {
       throw new Error(result.message || 'Riwayat gagal dimuat');
     }
 
-    var allOrders = result.data || [];
+    processOrdersData(state, result.data || []);
+    localState.hasLoaded = true;
 
-    var branchOrders = allOrders
-      .filter(function (o) {
-        return String(o.ID_CABANG || '').toUpperCase() === state.branchId;
-      })
-      .map(function (o) {
-        return Object.assign({}, o, {
-          _sortKey: parseAnyDate(o.TANGGAL_ORDER).getTime(),
-        });
-      });
-
-    localState.orders = sortBy(branchOrders, '_sortKey', 'desc');
-
-    // Cache untuk print form numbering
-    window.__cabangOrdersCache = localState.orders;
+    if (result._fromCache) {
+      console.log('[History] Loaded from cache (age:', Math.round(result._cacheAge / 1000), 's)');
+    }
 
     renderHistoryList(state);
 
   } catch (error) {
 
-    list.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">${icon('alert-triangle', { size: 48, color: 'var(--danger)' })}</div>
-        <p>Gagal memuat riwayat.</p>
-        <button class="secondary-button" id="retryHistoryBtn" type="button" style="margin-top: 16px;">
-          ${icon('refresh', { size: 14 })}
-          Coba Lagi
-        </button>
-      </div>
-    `;
+    console.error('[History] Load error:', error);
 
-    $('retryHistoryBtn')?.addEventListener('click', function () {
-      loadHistory(state);
-    });
+    if (!localState.hasLoaded) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">${icon('alert-triangle', { size: 48, color: 'var(--danger)' })}</div>
+          <p>Gagal memuat riwayat.</p>
+          <p style="font-size: 12px; color: var(--muted); margin-top: 8px;">${error.message}</p>
+          <button class="secondary-button" id="retryHistoryBtn" type="button" style="margin-top: 16px;">
+            ${icon('refresh', { size: 14 })}
+            Coba Lagi
+          </button>
+        </div>
+      `;
+
+      $('retryHistoryBtn')?.addEventListener('click', function () {
+        loadHistory(state);
+      });
+    }
 
   } finally {
     localState.isLoading = false;
   }
+}
+
+function processOrdersData(state, allOrders) {
+
+  var branchOrders = allOrders
+    .filter(function (o) {
+      return String(o.ID_CABANG || '').toUpperCase() === state.branchId;
+    })
+    .map(function (o) {
+      return Object.assign({}, o, {
+        _sortKey: parseAnyDate(o.TANGGAL_ORDER).getTime(),
+      });
+    });
+
+  localState.orders = sortBy(branchOrders, '_sortKey', 'desc');
+
+  window.__cabangOrdersCache = localState.orders;
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -400,8 +389,6 @@ function renderHistoryList(state) {
   var list = $('historyList');
   if (!list) return;
 
-  // ── Filter by status ──
-
   var filtered = localState.orders;
 
   if (localState.filter !== 'ALL') {
@@ -409,8 +396,6 @@ function renderHistoryList(state) {
       return String(o.STATUS || '').toUpperCase() === localState.filter;
     });
   }
-
-  // ── Filter by date range ──
 
   if (localState.dateFrom || localState.dateTo) {
 
@@ -422,7 +407,6 @@ function renderHistoryList(state) {
         return false;
       }
 
-      // Normalize ke tanggal saja (tanpa jam)
       var orderDateOnly = new Date(
         orderDate.getFullYear(),
         orderDate.getMonth(),
@@ -437,9 +421,7 @@ function renderHistoryList(state) {
           parseInt(fromParts[2])
         );
 
-        if (orderDateOnly < fromDate) {
-          return false;
-        }
+        if (orderDateOnly < fromDate) return false;
       }
 
       if (localState.dateTo) {
@@ -450,16 +432,12 @@ function renderHistoryList(state) {
           parseInt(toParts[2])
         );
 
-        if (orderDateOnly > toDate) {
-          return false;
-        }
+        if (orderDateOnly > toDate) return false;
       }
 
       return true;
     });
   }
-
-  // ── Render ──
 
   if (!filtered.length) {
 
@@ -495,7 +473,6 @@ function renderHistoryList(state) {
     return;
   }
 
-  // Show count
   var countInfo = filtered.length + ' order';
 
   if (localState.dateFrom || localState.dateTo) {
@@ -509,9 +486,7 @@ function renderHistoryList(state) {
     </div>
   ` + filtered.map(buildHistoryItem).join('');
 
-  // Bind download buttons
   list.querySelectorAll('[data-download-order]').forEach(function (btn) {
-
     btn.addEventListener('click', function (e) {
       e.stopPropagation();
       handleDownload(btn.dataset.downloadOrder);
@@ -595,10 +570,6 @@ function buildHistoryItem(order) {
   `;
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-// DOWNLOAD HANDLER
-// ─────────────────────────────────────────────────────────────────────────
-
 function handleDownload(orderId) {
 
   var order = localState.orders.find(function (o) {
@@ -613,34 +584,22 @@ function handleDownload(orderId) {
   showPrintFormCabang(order);
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-// HELPER FUNCTIONS
-// ─────────────────────────────────────────────────────────────────────────
-
 function cleanCatatan(catatan) {
   return String(catatan || '')
     .replace(/\[STOK AKTUAL\][\s\S]*/, '')
     .replace(/\[MASSAL\]\s*/, '')
+    .replace(/\[FORM\][^\n]*/g, '')
     .trim();
 }
 
-/**
- * Format Date object ke YYYY-MM-DD (untuk input type="date")
- */
 function formatDateInput(date) {
-
   var y = date.getFullYear();
   var m = String(date.getMonth() + 1).padStart(2, '0');
   var d = String(date.getDate()).padStart(2, '0');
-
   return y + '-' + m + '-' + d;
 }
 
-/**
- * Format YYYY-MM-DD ke "24 Jul 2026"
- */
 function formatDateReadableShort(dateStr) {
-
   if (!dateStr) return '';
 
   var months = [
