@@ -1,8 +1,15 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   PRINT FORM CABANG — Multi-page + Font Besar
+   PRINT FORM ADMIN — Multi-page + Font Besar
    ═══════════════════════════════════════════════════════════════════════ */
 
-import { $, escapeHtml, formatWita, parseAnyDate, toNumber } from '../../utils.js';
+import {
+  $,
+  escapeHtml,
+  formatWita,
+  parseAnyDate,
+  toNumber,
+} from '../../utils.js';
+
 import { CABANG } from '../../config.js';
 import { icon } from '../../icons.js';
 
@@ -14,72 +21,93 @@ var printState = {
   pages: [],
 };
 
+// CELL STYLE — Font lebih besar & bold
+var CELL_STYLE = ''
+  + 'padding: 12px 6px;'
+  + ' border: 1px solid #000;'
+  + ' font-family: Arial, sans-serif;'
+  + ' font-size: 15px;'
+  + ' font-weight: 700;'
+  + ' vertical-align: middle;'
+  + ' text-align: center;';
+
+var HEADER_CELL_STYLE = ''
+  + 'padding: 10px 6px;'
+  + ' border: 1px solid #000;'
+  + ' font-family: Arial, sans-serif;'
+  + ' font-size: 14px;'
+  + ' font-weight: 800;'
+  + ' text-align: center;'
+  + ' vertical-align: middle;'
+  + ' line-height: 1.2;';
+
+var SIGN_CELL_STYLE = ''
+  + 'text-align: center;'
+  + ' font-family: Arial, sans-serif;'
+  + ' vertical-align: top;';
+
 // ─────────────────────────────────────────────────────────────────────────
 // INIT
 // ─────────────────────────────────────────────────────────────────────────
 
-export function initPrintFormCabang() {
+export function initPrintForm() {
 
-  if ($('printCabangModalContainer')) return;
+  if ($('printModalContainer')) return;
 
   var container = document.createElement('div');
-  container.id = 'printCabangModalContainer';
+  container.id = 'printModalContainer';
   document.body.appendChild(container);
 
-  container.innerHTML = ''
-    + '<div class="overlay print-cabang-overlay" id="printCabangOverlay" role="dialog" aria-modal="true">'
-    + '<div class="modal modal-xl print-cabang-modal">'
+  var modalHtml = ''
+    + '<div class="overlay print-overlay" id="printOverlay" role="dialog" aria-modal="true">'
+    + '<div class="modal modal-xl print-modal">'
 
-    + '<header class="modal-header print-cabang-modal-header">'
-    + '<div class="modal-title" id="printCabangModalTitle">Preview Form Order</div>'
-    + '<div class="print-cabang-modal-actions">'
+    + '<header class="modal-header print-modal-header">'
+    + '<div class="modal-title" id="printModalTitle">Preview Form Order</div>'
+    + '<div class="print-modal-actions">'
 
-    + '<button class="btn-download-jpg" id="btnDownloadJpg" type="button" title="Download JPG">'
+    + '<button class="btn-print-action" id="btnDoPrint" type="button" title="Print / PDF">'
     + icon('download', { size: 16 })
-    + ' <span id="btnJpgText">Download JPG</span>'
+    + ' Print / PDF'
     + '</button>'
 
-    + '<button class="btn-download-action" id="btnDoDownloadCabang" type="button" title="Download PDF">'
-    + icon('download', { size: 16 })
-    + ' Download PDF'
-    + '</button>'
-
-    + '<button class="modal-close" id="printCabangModalClose" type="button" aria-label="Tutup">'
+    + '<button class="modal-close" id="printModalClose" type="button" aria-label="Tutup">'
     + icon('close', { size: 16 })
     + '</button>'
 
     + '</div>'
     + '</header>'
 
-    + '<div class="modal-body print-cabang-modal-body" id="printCabangModalBody">'
-    + '<div id="printCabangPreview"></div>'
+    + '<div class="modal-body print-modal-body" id="printModalBody">'
+    + '<div id="printPreview"></div>'
     + '</div>'
 
     + '</div>'
     + '</div>';
 
-  addPrintCabangStyles();
+  container.innerHTML = modalHtml;
 
-  $('printCabangModalClose')?.addEventListener('click', closePrintCabangModal);
-  $('btnDoDownloadCabang')?.addEventListener('click', doDownloadPdf);
-  $('btnDownloadJpg')?.addEventListener('click', doDownloadJpg);
+  addPrintStyles();
 
-  $('printCabangOverlay')?.addEventListener('click', function (e) {
-    if (e.target.id === 'printCabangOverlay') {
-      closePrintCabangModal();
+  $('printModalClose')?.addEventListener('click', closePrintModal);
+  $('btnDoPrint')?.addEventListener('click', doPrint);
+
+  $('printOverlay')?.addEventListener('click', function (e) {
+    if (e.target.id === 'printOverlay') {
+      closePrintModal();
     }
   });
 
   document.addEventListener('keydown', function (e) {
-    if (!$('printCabangOverlay')?.classList.contains('show')) return;
+    if (!$('printOverlay')?.classList.contains('show')) return;
 
     if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
       e.preventDefault();
-      doDownloadPdf();
+      doPrint();
     }
 
     if (e.key === 'Escape') {
-      closePrintCabangModal();
+      closePrintModal();
     }
   });
 }
@@ -88,44 +116,42 @@ export function initPrintFormCabang() {
 // STYLES
 // ─────────────────────────────────────────────────────────────────────────
 
-function addPrintCabangStyles() {
+function addPrintStyles() {
 
-  if (document.getElementById('printCabangStyles')) return;
+  if (document.getElementById('printFormStyles')) return;
 
   var style = document.createElement('style');
-  style.id = 'printCabangStyles';
+  style.id = 'printFormStyles';
+
   style.textContent = ''
-    + '.print-cabang-overlay { background: rgba(0,0,0,0.85) !important; }'
-    + '.print-cabang-modal { max-width: 950px !important; background: #f0f0f0 !important; padding: 0 !important; max-height: calc(100dvh - 40px) !important; }'
-    + '.print-cabang-modal-header { background: var(--ink-2) !important; color: var(--text) !important; padding: 12px 20px !important; display: flex; align-items: center; justify-content: space-between; gap: 8px; }'
-    + '.print-cabang-modal-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }'
-    + '.btn-download-action { background: linear-gradient(135deg, #6366f1, #4f46e5); color: #fff; border: 0; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-family: inherit; transition: transform 0.15s; }'
-    + '.btn-download-action:hover { transform: translateY(-1px); }'
-    + '.btn-download-jpg { background: linear-gradient(135deg, #16a34a, #15803d); color: #fff; border: 0; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-family: inherit; transition: transform 0.15s; }'
-    + '.btn-download-jpg:hover { transform: translateY(-1px); }'
-    + '.btn-download-jpg.loading, .btn-download-action.loading { opacity: 0.7; pointer-events: none; }'
-    + '.print-cabang-modal-body { background: #e0e0e0 !important; padding: 20px !important; overflow-y: auto; }'
+    + '.print-overlay { background: rgba(0, 0, 0, 0.85) !important; }'
+    + '.print-modal { max-width: 950px !important; background: #f0f0f0 !important; padding: 0 !important; max-height: calc(100dvh - 40px) !important; }'
+    + '.print-modal-header { background: var(--ink-2) !important; color: var(--text) !important; padding: 12px 20px !important; display: flex; align-items: center; justify-content: space-between; gap: 12px; }'
+    + '.print-modal-actions { display: flex; align-items: center; gap: 8px; }'
+    + '.btn-print-action { background: linear-gradient(135deg, var(--orange), var(--orange-light)); color: #fff; border: 0; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-family: inherit; transition: transform 0.15s; }'
+    + '.btn-print-action:hover { transform: translateY(-1px); }'
+    + '.print-modal-body { background: #e0e0e0 !important; padding: 20px !important; overflow-y: auto; }'
 
-    // Multi-page container
-    + '.print-page { background: #fff; color: #000; padding: 30px 35px; max-width: 850px; margin: 0 auto 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); font-family: Arial, sans-serif; font-size: 14px; min-height: 600px; page-break-after: always; }'
-    + '.print-page:last-child { page-break-after: auto; margin-bottom: 0; }'
+    // Multi-page
+    + '.print-page-admin { background: #fff; color: #000; padding: 30px 35px; max-width: 850px; margin: 0 auto 24px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3); font-family: Arial, sans-serif; font-size: 14px; min-height: 600px; page-break-after: always; }'
+    + '.print-page-admin:last-child { page-break-after: auto; margin-bottom: 0; }'
 
-    + '.page-badge { display: inline-block; padding: 4px 12px; background: #ff6b00; color: #fff; border-radius: 4px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; }'
+    + '.page-badge-admin { display: inline-block; padding: 4px 12px; background: #ff6b00; color: #fff; border-radius: 4px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; }'
 
     + '@media print {'
     + '  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }'
-    + '  body > *:not(#printCabangModalContainer) { display: none !important; }'
-    + '  #printCabangModalContainer, .print-cabang-overlay, .print-cabang-modal { position: static !important; max-width: 100% !important; max-height: none !important; background: #fff !important; box-shadow: none !important; opacity: 1 !important; pointer-events: auto !important; transform: none !important; }'
-    + '  .print-cabang-modal-header, .print-cabang-modal-actions { display: none !important; }'
-    + '  .print-cabang-modal-body { background: #fff !important; padding: 0 !important; overflow: visible !important; }'
-    + '  .print-page { box-shadow: none !important; padding: 15px 20px !important; margin: 0 !important; page-break-after: always; }'
-    + '  .print-page:last-child { page-break-after: auto; }'
+    + '  body > *:not(#printModalContainer) { display: none !important; }'
+    + '  #printModalContainer, .print-overlay, .print-modal { position: static !important; max-width: 100% !important; max-height: none !important; background: #fff !important; box-shadow: none !important; opacity: 1 !important; pointer-events: auto !important; transform: none !important; }'
+    + '  .print-modal-header, .print-modal-actions { display: none !important; }'
+    + '  .print-modal-body { background: #fff !important; padding: 0 !important; overflow: visible !important; }'
+    + '  .print-page-admin { box-shadow: none !important; padding: 15px 20px !important; margin: 0 !important; page-break-after: always; }'
+    + '  .print-page-admin:last-child { page-break-after: auto; }'
     + '  @page { size: A4; margin: 12mm; }'
     + '}'
 
     + '@media (max-width: 768px) {'
-    + '  .print-cabang-modal { max-width: calc(100vw - 24px) !important; }'
-    + '  .print-page { padding: 20px 15px; font-size: 12px; }'
+    + '  .print-modal { max-width: calc(100vw - 24px) !important; }'
+    + '  .print-page-admin { padding: 20px 15px; font-size: 12px; }'
     + '}';
 
   document.head.appendChild(style);
@@ -135,42 +161,31 @@ function addPrintCabangStyles() {
 // SHOW / CLOSE
 // ─────────────────────────────────────────────────────────────────────────
 
-export function showPrintFormCabang(order) {
+export function showPrintForm(order, items) {
 
-  if (!order) return;
+  if (!order || !items) return;
 
   printState.order = order;
 
-  printState.items = (order.DETAIL || []).filter(function (i) {
-    var status = String(i.ITEM_STATUS || 'APPROVED').toUpperCase();
-    return status !== 'DELETED';
+  printState.items = items.filter(function (i) {
+    return i.itemStatus !== 'DELETED';
   });
 
   printState.pages = chunkArray(printState.items, ITEMS_PER_PAGE);
 
-  var jpgText = $('btnJpgText');
-  if (jpgText) {
-    if (printState.pages.length > 1) {
-      jpgText.textContent = 'Download ' + printState.pages.length + ' JPG';
-    } else {
-      jpgText.textContent = 'Download JPG';
-    }
-  }
-
   renderPreview();
+  openModal();
+}
 
-  $('printCabangOverlay')?.classList.add('show');
+function openModal() {
+  $('printOverlay')?.classList.add('show');
   document.body.style.overflow = 'hidden';
 }
 
-function closePrintCabangModal() {
-  $('printCabangOverlay')?.classList.remove('show');
+function closePrintModal() {
+  $('printOverlay')?.classList.remove('show');
   document.body.style.overflow = '';
 }
-
-// ─────────────────────────────────────────────────────────────────────────
-// HELPER: Split
-// ─────────────────────────────────────────────────────────────────────────
 
 function chunkArray(arr, size) {
   var chunks = [];
@@ -186,7 +201,7 @@ function chunkArray(arr, size) {
 
 function renderPreview() {
 
-  var preview = $('printCabangPreview');
+  var preview = $('printPreview');
   if (!preview) return;
 
   var order = printState.order;
@@ -196,7 +211,7 @@ function renderPreview() {
   var cabang = CABANG[order.ID_CABANG] || { nama: '-', pic: '-' };
   var pic = String(cabang.pic || 'SUPERVISOR').toUpperCase();
 
-  var nomorOrder = getSequentialNumberCabang(order);
+  var nomorOrder = getSequentialNumber(order);
 
   var hariID = ['MINGGU', 'SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT', 'SABTU'];
   var date = parseAnyDate(order.TANGGAL_ORDER) || new Date();
@@ -205,16 +220,6 @@ function renderPreview() {
     + String(date.getDate()).padStart(2, '0') + '/'
     + String(date.getMonth() + 1).padStart(2, '0') + '/'
     + date.getFullYear();
-
-  var status = String(order.STATUS || 'PENDING').toUpperCase();
-
-  var statusBg = '#f59e0b';
-  if (status === 'APPROVED') statusBg = '#16a34a';
-  if (status === 'REJECTED') statusBg = '#dc2626';
-
-  var statusLabel = 'MENUNGGU';
-  if (status === 'APPROVED') statusLabel = 'DISETUJUI';
-  if (status === 'REJECTED') statusLabel = 'DITOLAK';
 
   var allPagesHtml = pages.map(function (pageItems, pageIndex) {
     return buildPageHtml({
@@ -225,8 +230,6 @@ function renderPreview() {
       pic: pic,
       nomorOrder: nomorOrder,
       tgl: tgl,
-      statusBg: statusBg,
-      statusLabel: statusLabel,
     });
   }).join('');
 
@@ -236,11 +239,11 @@ function renderPreview() {
   if (totalPages > 1) {
     titleText += ' (' + totalPages + ' halaman)';
   }
-  $('printCabangModalTitle').textContent = titleText;
+  $('printModalTitle').textContent = titleText;
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// BUILD 1 HALAMAN — FONT SIZE LEBIH BESAR
+// BUILD 1 HALAMAN
 // ─────────────────────────────────────────────────────────────────────────
 
 function buildPageHtml(params) {
@@ -251,80 +254,35 @@ function buildPageHtml(params) {
   var pic = params.pic;
   var nomorOrder = params.nomorOrder;
   var tgl = params.tgl;
-  var statusBg = params.statusBg;
-  var statusLabel = params.statusLabel;
 
   var pageNumber = pageIndex + 1;
 
   var pageInfoHtml = '';
   if (totalPages > 1) {
     pageInfoHtml = ''
-      + '<span class="page-badge" style="margin-left: 8px; font-size: 13px;">'
+      + '<span class="page-badge-admin" style="margin-left: 8px; font-size: 13px;">'
       + 'HALAMAN ' + pageNumber + ' / ' + totalPages
       + '</span>';
   }
 
-  // TABLE ROWS — FONT LEBIH BESAR
-  var rows = pageItems.map(function (item, idx) {
-
-    var qty = toNumber(item.QTY);
-    var sat = String(item.SATUAN || 'PCS').toUpperCase();
-
-    var stokS = '0';
-    if (item.STOK_SISTEM !== undefined && item.STOK_SISTEM !== '' && item.STOK_SISTEM !== null) {
-      stokS = String(item.STOK_SISTEM);
-    } else {
-      stokS = getStokBarangCabang(item.KODE_BARANG);
-    }
-
-    var stokG = '0';
-    if (item.STOK_GUDANG !== undefined && item.STOK_GUDANG !== '') {
-      stokG = String(item.STOK_GUDANG);
-    }
-
-    var stokR = '0';
-    if (item.STOK_TOKO !== undefined && item.STOK_TOKO !== '') {
-      stokR = String(item.STOK_TOKO);
-    }
-
-    var jenis = String(item.KATEGORI || 'ELEKTRONIK').toUpperCase();
-
-    return ''
-      + '<tr>'
-      // Stok Sistem — 16px BOLD
-      + '<td style="padding:12px 6px; text-align:center; border:1px solid #000; font-size:16px; font-weight:700; vertical-align:middle;">' + stokS + '</td>'
-      // Stok Gudang — 16px BOLD
-      + '<td style="padding:12px 6px; text-align:center; border:1px solid #000; font-size:16px; font-weight:700; vertical-align:middle;">' + stokG + '</td>'
-      // Stok Rak — 16px BOLD
-      + '<td style="padding:12px 6px; text-align:center; border:1px solid #000; font-size:16px; font-weight:700; vertical-align:middle;">' + stokR + '</td>'
-      // Jumlah Order — 16px BOLD HIJAU
-      + '<td style="padding:12px 6px; text-align:center; border:1px solid #000; font-size:16px; vertical-align:middle; color:#00B050; font-weight:800;">' + qty + ' ' + sat + '</td>'
-      // Kode Item — 14px BOLD
-      + '<td style="padding:12px 10px; text-align:center; border:1px solid #000; font-size:14px; font-weight:700; vertical-align:middle;">' + escapeHtml(item.KODE_BARANG || '') + '</td>'
-      // Nama Item — 14px BOLD
-      + '<td style="padding:12px 10px; text-align:center; border:1px solid #000; font-size:14px; font-weight:700; vertical-align:middle;">' + escapeHtml((item.NAMA_BARANG || '').toUpperCase()) + '</td>'
-      // Jenis — 14px BOLD
-      + '<td style="padding:12px 8px; text-align:center; border:1px solid #000; font-size:14px; vertical-align:middle; font-weight:800;">' + escapeHtml(jenis) + '</td>'
-      + '</tr>';
-
-  }).join('');
+  var rows = buildTableRows(pageItems);
 
   var html = ''
-    + '<div class="print-page" data-page="' + pageNumber + '">'
+    + '<div class="print-page-admin" data-page="' + pageNumber + '">'
 
     // HEADER
-    + '<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse; margin-bottom:0;">'
+    + '<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; margin-bottom: 0;">'
     + '<tr>'
-    + '<td style="vertical-align:top; padding-bottom:14px; padding-top:4px;">'
-    + '<div style="font-size:42px; font-weight:900; line-height:1; letter-spacing:-1px;">'
-    + '<span style="color:#E67E22;">FORM</span>'
-    + '<span style="color:#1B4F94;"> ORDER BARANG</span>'
+    + '<td style="vertical-align: top; padding-bottom: 14px; padding-top: 4px;">'
+    + '<div style="font-family: Arial, sans-serif; font-size: 42px; font-weight: 900; line-height: 1; letter-spacing: -1px;">'
+    + '<span style="color: #E67E22;">FORM</span>'
+    + '<span style="color: #1B4F94;"> ORDER BARANG</span>'
     + '</div>'
     + '</td>'
-    + '<td style="vertical-align:top; text-align:right; width:180px; padding-bottom:14px;">'
+    + '<td style="vertical-align: top; text-align: right; width: 180px; padding-bottom: 14px;">'
     + '<img src="./images/logo/logo-nk.png"'
     + ' alt="Logo Nasional Kitchen"'
-    + ' style="width:160px; height:auto; display:block; margin-left:auto;"'
+    + ' style="width: 160px; height: auto; display: block; margin-left: auto;"'
     + ' crossorigin="anonymous"'
     + ' onerror="this.style.display=\'none\';"'
     + '>'
@@ -332,75 +290,33 @@ function buildPageHtml(params) {
     + '</tr>'
     + '</table>'
 
-    + '<div style="border-top:1px solid #000; margin-bottom:12px;"></div>'
+    + '<div style="border-top: 1px solid #000; margin-bottom: 12px;"></div>'
 
     // INFO — Font lebih besar (15px)
-    + '<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse; margin-bottom:14px; font-size:15px; color:#000;">'
-
+    + '<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; margin-bottom: 14px; font-family: Arial, sans-serif; font-size: 15px; color: #000;">'
     + '<tr>'
-    + '<td style="padding:4px 0; width:160px; font-weight:700; vertical-align:top;">DIBUAT OLEH</td>'
-    + '<td style="padding:4px 0; vertical-align:top; font-weight:600;">: ' + pic + '</td>'
-    + '<td style="padding:4px 0; width:1px;"></td>'
+    + '<td style="padding: 4px 0; width: 160px; font-weight: 700; vertical-align: top;">DIBUAT OLEH</td>'
+    + '<td style="padding: 4px 0; vertical-align: top; font-weight: 600;">: ' + pic + '</td>'
+    + '<td></td>'
     + '</tr>'
-
     + '<tr>'
-    + '<td style="padding:4px 0; font-weight:700; vertical-align:top;">NOMOR ORDER</td>'
-    + '<td style="padding:4px 0; vertical-align:top; font-weight:600;">'
+    + '<td style="padding: 4px 0; font-weight: 700; vertical-align: top;">NOMOR ORDER</td>'
+    + '<td style="padding: 4px 0; vertical-align: top; font-weight: 600;">'
     + ': ' + nomorOrder + pageInfoHtml
     + '</td>'
-    + '<td style="padding:4px 0; text-align:right; vertical-align:top; white-space:nowrap; font-weight:600;">'
-    + '<span style="font-weight:700;">Hari/Tgl</span> : ' + tgl
+    + '<td style="padding: 4px 0; text-align: right; vertical-align: top; white-space: nowrap; font-weight: 600;">'
+    + '<span style="font-weight: 700;">Hari/Tgl</span> : ' + tgl
     + '</td>'
     + '</tr>'
-
-    + '<tr>'
-    + '<td style="padding:4px 0; font-weight:700; vertical-align:top;">STATUS ORDER</td>'
-    + '<td style="padding:4px 0; vertical-align:top;" colspan="2">'
-    + ': <span style="display:inline-block; padding:3px 12px; border-radius:4px; font-size:13px; font-weight:700; color:#fff; background:' + statusBg + ';">'
-    + statusLabel
-    + '</span>'
-    + '</td>'
-    + '</tr>'
-
     + '</table>'
 
-    // TABLE DATA — HEADER FONT LEBIH BESAR (14px)
-    + '<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse; border:1px solid #000; margin-bottom:30px;">'
-
-    + '<thead>'
-    + '<tr style="background:#B4D6F0;">'
-    + '<th style="padding:10px 6px; border:1px solid #000; font-size:14px; font-weight:800; text-align:center; width:80px; line-height:1.2; vertical-align:middle;">STOCK<br>SISTEM</th>'
-    + '<th style="padding:10px 6px; border:1px solid #000; font-size:14px; font-weight:800; text-align:center; width:80px; line-height:1.2; vertical-align:middle;">STOCK<br>(Gudang)</th>'
-    + '<th style="padding:10px 6px; border:1px solid #000; font-size:14px; font-weight:800; text-align:center; width:75px; line-height:1.2; vertical-align:middle;">STOCK<br>(Rak)</th>'
-    + '<th style="padding:10px 6px; border:1px solid #000; font-size:14px; font-weight:800; text-align:center; width:85px; line-height:1.2; vertical-align:middle;">JMLH<br>ORDER</th>'
-    + '<th style="padding:10px 10px; border:1px solid #000; font-size:14px; font-weight:800; text-align:center; width:100px; vertical-align:middle;">KODE ITEM</th>'
-    + '<th style="padding:10px 10px; border:1px solid #000; font-size:14px; font-weight:800; text-align:center; vertical-align:middle;">NAMA ITEM</th>'
-    + '<th style="padding:10px 8px; border:1px solid #000; font-size:14px; font-weight:800; text-align:center; width:100px; vertical-align:middle;">JENIS</th>'
-    + '</tr>'
-    + '</thead>'
-
+    // TABLE
+    + '<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; border: 1px solid #000; margin-bottom: 30px;">'
+    + buildTableHeader()
     + '<tbody>' + rows + '</tbody>'
     + '</table>'
 
-    // SIGNATURE — Font lebih besar
-    + '<table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #000; border-collapse:collapse;">'
-    + '<tr>'
-    + '<td style="padding:20px 25px 5px; width:33%; text-align:left; font-size:14px; vertical-align:top;">pengantar,</td>'
-    + '<td style="padding:20px 10px 5px; width:34%; text-align:center; font-size:14px; vertical-align:top;">Persetujuan,</td>'
-    + '<td style="padding:20px 25px 5px; width:33%; text-align:right; font-size:14px; vertical-align:top;">Penerima,</td>'
-    + '</tr>'
-    + '<tr><td colspan="3" style="padding:36px 0;">&nbsp;</td></tr>'
-    + '<tr>'
-    + '<td style="padding:0 25px 5px; text-align:left; font-size:14px; font-weight:600;">(_______________)</td>'
-    + '<td style="padding:0 10px 5px; text-align:center; font-size:14px; font-weight:600;">(_______________)</td>'
-    + '<td style="padding:0 25px 5px; text-align:right; font-size:14px; font-weight:600;">(_______________)</td>'
-    + '</tr>'
-    + '<tr>'
-    + '<td style="padding:0 25px 20px 35px; text-align:left; font-size:15px; font-weight:900;">Driver</td>'
-    + '<td style="padding:0 10px 20px; text-align:center; font-size:15px; font-weight:900;">SPV Gudang</td>'
-    + '<td style="padding:0 35px 20px 25px; text-align:right; font-size:15px; font-weight:900;">SPV Cabang</td>'
-    + '</tr>'
-    + '</table>'
+    + buildSignatureTable()
 
     + '</div>';
 
@@ -408,207 +324,234 @@ function buildPageHtml(params) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// DOWNLOAD PDF
+// BUILD TABLE HEADER — FONT LEBIH BESAR
 // ─────────────────────────────────────────────────────────────────────────
 
-function doDownloadPdf() {
-  window.print();
+function buildTableHeader() {
+
+  var html = '';
+
+  html += '<thead>';
+  html += '<tr style="background: #B4D6F0;">';
+
+  html += '<th style="' + HEADER_CELL_STYLE + ' width: 80px;">';
+  html += 'STOCK<br>SISTEM';
+  html += '</th>';
+
+  html += '<th style="' + HEADER_CELL_STYLE + ' width: 80px;">';
+  html += 'STOCK<br>(Gudang)';
+  html += '</th>';
+
+  html += '<th style="' + HEADER_CELL_STYLE + ' width: 75px;">';
+  html += 'STOCK<br>(Rak)';
+  html += '</th>';
+
+  html += '<th style="' + HEADER_CELL_STYLE + ' width: 85px;">';
+  html += 'JMLH<br>ORDER';
+  html += '</th>';
+
+  html += '<th style="' + HEADER_CELL_STYLE + ' width: 100px;">';
+  html += 'KODE ITEM';
+  html += '</th>';
+
+  html += '<th style="' + HEADER_CELL_STYLE + '">';
+  html += 'NAMA ITEM';
+  html += '</th>';
+
+  html += '<th style="' + HEADER_CELL_STYLE + ' width: 100px;">';
+  html += 'JENIS';
+  html += '</th>';
+
+  html += '</tr>';
+  html += '</thead>';
+
+  return html;
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// DOWNLOAD JPG — Multi-page
+// BUILD TABLE ROWS — FONT LEBIH BESAR
 // ─────────────────────────────────────────────────────────────────────────
 
-async function doDownloadJpg() {
+function buildTableRows(items) {
 
-  var btn = $('btnDownloadJpg');
-  if (!btn) return;
+  var html = '';
 
-  var originalText = btn.innerHTML;
-  var originalHTML = originalText;
+  items.forEach(function (item) {
 
-  btn.classList.add('loading');
+    var qty = toNumber(item.qty);
+    var sat = String(item.satuan || 'PCS').toUpperCase();
 
-  try {
-
-    var html2canvas;
-
-    try {
-      var module = await import('html2canvas');
-      html2canvas = module.default || module;
-    } catch (importErr) {
-      html2canvas = await loadHtml2CanvasCDN();
+    var stokSistem = '0';
+    if (item.stokSistem !== undefined && item.stokSistem !== '' && item.stokSistem !== null) {
+      stokSistem = String(item.stokSistem);
+    } else if (item.STOK_SISTEM !== undefined && item.STOK_SISTEM !== '' && item.STOK_SISTEM !== null) {
+      stokSistem = String(item.STOK_SISTEM);
+    } else {
+      stokSistem = getStokBarang(item.kode);
     }
 
-    if (!html2canvas) {
-      alert('Gagal memuat library. Gunakan Download PDF saja.');
-      return;
+    var stokGudang = '0';
+    if (item.stokGudang !== undefined && item.stokGudang !== '') {
+      stokGudang = String(item.stokGudang);
     }
 
-    var pages = document.querySelectorAll('.print-page');
-
-    if (!pages.length) {
-      alert('Tidak ada halaman untuk di-download.');
-      return;
+    var stokRak = '0';
+    if (item.stokToko !== undefined && item.stokToko !== '') {
+      stokRak = String(item.stokToko);
     }
 
-    var totalPages = pages.length;
-    var orderId = printState.order?.ORDER_ID || 'unknown';
+    var kode = escapeHtml(item.kode || '');
+    var nama = escapeHtml((item.nama || '').toUpperCase());
+    var jenis = escapeHtml(String(item.kategori || 'ELEKTRONIK').toUpperCase());
 
-    for (var i = 0; i < totalPages; i++) {
+    html += '<tr>';
 
-      var page = pages[i];
-      var pageNum = i + 1;
+    // Stok Sistem - 16px bold
+    html += '<td style="padding: 12px 6px; border: 1px solid #000; font-family: Arial, sans-serif; font-size: 16px; font-weight: 700; vertical-align: middle; text-align: center;">';
+    html += stokSistem;
+    html += '</td>';
 
-      btn.innerHTML = '<span class="spinner spinner-sm" style="color:#fff;"></span> '
-        + 'Proses halaman ' + pageNum + '/' + totalPages + '...';
+    // Stok Gudang - 16px bold
+    html += '<td style="padding: 12px 6px; border: 1px solid #000; font-family: Arial, sans-serif; font-size: 16px; font-weight: 700; vertical-align: middle; text-align: center;">';
+    html += stokGudang;
+    html += '</td>';
 
-      await waitForImages(page);
+    // Stok Rak - 16px bold
+    html += '<td style="padding: 12px 6px; border: 1px solid #000; font-family: Arial, sans-serif; font-size: 16px; font-weight: 700; vertical-align: middle; text-align: center;">';
+    html += stokRak;
+    html += '</td>';
 
-      var canvas = await html2canvas(page, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        logging: false,
-        width: page.scrollWidth,
-        height: page.scrollHeight,
-      });
+    // Jumlah Order - 16px extra bold hijau
+    html += '<td style="padding: 12px 6px; border: 1px solid #000; font-family: Arial, sans-serif; font-size: 16px; vertical-align: middle; text-align: center; color: #00B050; font-weight: 800;">';
+    html += qty + ' ' + sat;
+    html += '</td>';
 
-      var jpgDataUrl = canvas.toDataURL('image/jpeg', 0.92);
+    // Kode Item - 14px bold
+    html += '<td style="padding: 12px 10px; border: 1px solid #000; font-family: Arial, sans-serif; font-size: 14px; font-weight: 700; vertical-align: middle; text-align: center;">';
+    html += kode;
+    html += '</td>';
 
-      var filename = 'Form-Order-' + orderId;
-      if (totalPages > 1) {
-        filename += '-Halaman-' + pageNum + '-dari-' + totalPages;
-      }
-      filename += '.jpg';
+    // Nama Item - 14px bold
+    html += '<td style="padding: 12px 10px; border: 1px solid #000; font-family: Arial, sans-serif; font-size: 14px; font-weight: 700; vertical-align: middle; text-align: center;">';
+    html += nama;
+    html += '</td>';
 
-      var link = document.createElement('a');
-      link.href = jpgDataUrl;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
+    // Jenis - 14px extra bold
+    html += '<td style="padding: 12px 8px; border: 1px solid #000; font-family: Arial, sans-serif; font-size: 14px; font-weight: 800; vertical-align: middle; text-align: center;">';
+    html += jenis;
+    html += '</td>';
 
-      setTimeout((function (l) {
-        return function () {
-          document.body.removeChild(l);
-        };
-      })(link), 100);
+    html += '</tr>';
+  });
 
-      if (i < totalPages - 1) {
-        await sleep(600);
-      }
-    }
+  return html;
+}
 
-  } catch (err) {
-    console.error('Download JPG error:', err);
-    alert('Gagal download JPG. Error: ' + err.message);
-  } finally {
-    if (btn) {
-      btn.classList.remove('loading');
-      btn.innerHTML = originalHTML;
-    }
-  }
+// ─────────────────────────────────────────────────────────────────────────
+// SIGNATURE
+// ─────────────────────────────────────────────────────────────────────────
+
+function buildSignatureTable() {
+
+  var html = '';
+
+  html += '<table width="100%" cellpadding="0" cellspacing="0" style="border: 1px solid #000; border-collapse: collapse; margin-top: 0;">';
+
+  html += '<tr>';
+  html += '<td style="' + SIGN_CELL_STYLE + ' padding: 20px 25px 5px 25px; width: 33%; font-size: 14px;">pengantar,</td>';
+  html += '<td style="' + SIGN_CELL_STYLE + ' padding: 20px 25px 5px 25px; width: 34%; font-size: 14px;">Persetujuan,</td>';
+  html += '<td style="' + SIGN_CELL_STYLE + ' padding: 20px 25px 5px 25px; width: 33%; font-size: 14px;">Penerima,</td>';
+  html += '</tr>';
+
+  html += '<tr>';
+  html += '<td colspan="3" style="padding: 36px 0;">&nbsp;</td>';
+  html += '</tr>';
+
+  html += '<tr>';
+  html += '<td style="' + SIGN_CELL_STYLE + ' padding: 0 25px 5px 25px; font-size: 14px; font-weight: 600;">(_______________)</td>';
+  html += '<td style="' + SIGN_CELL_STYLE + ' padding: 0 25px 5px 25px; font-size: 14px; font-weight: 600;">(_______________)</td>';
+  html += '<td style="' + SIGN_CELL_STYLE + ' padding: 0 25px 5px 25px; font-size: 14px; font-weight: 600;">(_______________)</td>';
+  html += '</tr>';
+
+  html += '<tr>';
+  html += '<td style="' + SIGN_CELL_STYLE + ' padding: 0 25px 20px 25px; font-size: 15px; font-weight: 900;">Driver</td>';
+  html += '<td style="' + SIGN_CELL_STYLE + ' padding: 0 25px 20px 25px; font-size: 15px; font-weight: 900;">SPV Gudang</td>';
+  html += '<td style="' + SIGN_CELL_STYLE + ' padding: 0 25px 20px 25px; font-size: 15px; font-weight: 900;">SPV Cabang</td>';
+  html += '</tr>';
+
+  html += '</table>';
+
+  return html;
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// PRINT
+// ─────────────────────────────────────────────────────────────────────────
+
+function doPrint() {
+  window.print();
 }
 
 // ─────────────────────────────────────────────────────────────────────────
 // HELPERS
 // ─────────────────────────────────────────────────────────────────────────
 
-function sleep(ms) {
-  return new Promise(function (resolve) {
-    setTimeout(resolve, ms);
-  });
-}
+function getStokBarang(kode) {
+  try {
 
-function waitForImages(container) {
+    var dashboardState = window.__gudangHub?.state;
 
-  return new Promise(function (resolve) {
-
-    var imgs = container.querySelectorAll('img');
-
-    if (!imgs.length) {
-      resolve();
-      return;
+    if (!dashboardState || !dashboardState.allKatalog) {
+      return '0';
     }
 
-    var loaded = 0;
-    var total = imgs.length;
+    var upperKode = String(kode).trim().toUpperCase();
 
-    function check() {
-      loaded++;
-      if (loaded >= total) {
-        resolve();
-      }
-    }
-
-    imgs.forEach(function (img) {
-      if (img.complete) {
-        check();
-      } else {
-        img.addEventListener('load', check, { once: true });
-        img.addEventListener('error', check, { once: true });
-      }
+    var item = dashboardState.allKatalog.find(function (b) {
+      return String(b.KODE_BARANG).trim().toUpperCase() === upperKode;
     });
 
-    setTimeout(resolve, 3000);
-  });
-}
+    return item
+      ? String(parseInt(item.STOK) || 0)
+      : '0';
 
-function loadHtml2CanvasCDN() {
-
-  return new Promise(function (resolve, reject) {
-
-    if (window.html2canvas) {
-      resolve(window.html2canvas);
-      return;
-    }
-
-    var script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
-
-    script.onload = function () {
-      resolve(window.html2canvas);
-    };
-
-    script.onerror = function () {
-      reject(new Error('Gagal load html2canvas dari CDN'));
-    };
-
-    document.head.appendChild(script);
-  });
-}
-
-function getStokBarangCabang(kode) {
-  try {
-    var orderState = window.__gudangHubOrder?.state;
-    if (!orderState || !orderState.productByCode) return '0';
-    var product = orderState.productByCode[String(kode).trim().toUpperCase()];
-    return product ? String(parseInt(product.STOK) || 0) : '0';
   } catch (e) {
     return '0';
   }
 }
 
-function getSequentialNumberCabang(order) {
+function getSequentialNumber(order) {
   try {
-    var cachedOrders = window.__cabangOrdersCache || [];
-    if (!cachedOrders.length) return '01';
+
+    var dashboardState = window.__gudangHub?.state;
+
+    if (!dashboardState || !dashboardState.allOrders) {
+      return '01';
+    }
 
     var orderDate = parseAnyDate(order.TANGGAL_ORDER);
-    if (!orderDate || orderDate.getTime() === 0) return '01';
+
+    if (!orderDate || orderDate.getTime() === 0) {
+      return '01';
+    }
 
     var targetMonth = orderDate.getMonth();
     var targetYear = orderDate.getFullYear();
 
-    var sameMonth = cachedOrders
+    var sameMonth = dashboardState.allOrders
+
       .filter(function (o) {
+
         var d = parseAnyDate(o.TANGGAL_ORDER);
-        return d && d.getTime() !== 0
+
+        return d
+          && d.getTime() !== 0
           && d.getMonth() === targetMonth
           && d.getFullYear() === targetYear;
       })
+
       .sort(function (a, b) {
+
         return parseAnyDate(a.TANGGAL_ORDER).getTime()
              - parseAnyDate(b.TANGGAL_ORDER).getTime();
       });
@@ -617,8 +560,12 @@ function getSequentialNumberCabang(order) {
       return o.ORDER_ID === order.ORDER_ID;
     });
 
-    var nomor = idx >= 0 ? idx + 1 : sameMonth.length + 1;
-    return nomor < 10 ? '0' + nomor : String(nomor);
+    var nomor = (idx >= 0) ? (idx + 1) : (sameMonth.length + 1);
+
+    return nomor < 10
+      ? '0' + nomor
+      : String(nomor);
+
   } catch (e) {
     return '01';
   }
