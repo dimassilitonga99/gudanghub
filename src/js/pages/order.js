@@ -1,10 +1,9 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   ORDER PAGE — Main Controller
-   v3.4 — dengan Pre-Order Dialog + Barang Manual
+   ORDER PAGE — v3.5 Fast Load with Cache
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, getQueryParam } from '../utils.js';
-import { katalog as katalogApi } from '../api.js';
+import { katalog as katalogApi, prewarmAppScript } from '../api.js';
 import {
   getSession,
   isSessionValid,
@@ -34,13 +33,13 @@ export const state = {
   productByCode: {},
   cart: {},
   massItems: [],
-  manualItems: [],   // ★ BARU: untuk barang manual
+  manualItems: [],
   isSubmitting: false,
   currentTab: 'catalog',
 };
 
 // ─────────────────────────────────────────────────────────────────────────
-// SESSION INIT — STRICT AUTH
+// SESSION INIT
 // ─────────────────────────────────────────────────────────────────────────
 
 function initSession() {
@@ -71,7 +70,6 @@ function initSession() {
   const urlBranch = String(getQueryParam('cabang') || '').trim().toUpperCase();
 
   if (urlBranch && urlBranch !== sessionCabang) {
-    console.warn('[SECURITY] URL cabang mismatch:', urlBranch, 'vs session:', sessionCabang);
     sessionLogout(true);
     return false;
   }
@@ -133,29 +131,38 @@ function showTab(tabName) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// LOAD CATALOG
+// LOAD CATALOG — FAST dengan Stale-While-Revalidate
 // ─────────────────────────────────────────────────────────────────────────
 
 export async function loadCatalog() {
-  try {
-    const result = await katalogApi.getAll({ cache: true });
 
-    if (result.status !== 'ok') {
+  try {
+    // ★ FAST LOAD: langsung dari cache (INSTANT) + refresh di background
+    const result = await katalogApi.getAllFast(function (freshResult) {
+      // Callback saat data fresh datang → update state + UI
+      if (freshResult && freshResult.status === 'ok') {
+        console.log('[Catalog] Fresh data received in background');
+        state.allProducts = freshResult.data || [];
+        rebuildProductMap();
+        updateCatalogUI();
+      }
+    });
+
+    if (result.status !== 'ok' && !result._fromCache) {
       throw new Error(result.message || 'Katalog gagal dimuat');
     }
 
     state.allProducts = result.data || [];
-    state.productByCode = {};
+    rebuildProductMap();
+    updateCatalogUI();
 
-    state.allProducts.forEach((product) => {
-      const code = String(product.KODE_BARANG || '').trim().toUpperCase();
-      if (code) state.productByCode[code] = product;
-    });
-
-    const { updateCatalog } = await import('./order-pages/catalog-page.js');
-    updateCatalog(state);
+    // Info kalau dari cache
+    if (result._fromCache) {
+      console.log('[Catalog] Loaded from cache (age:', Math.round(result._cacheAge / 1000), 's)');
+    }
 
   } catch (error) {
+    console.error('[Catalog] Load error:', error);
     toast.error('Gagal memuat katalog: ' + error.message);
 
     const grid = document.querySelector('#catalogPage .catalog-grid');
@@ -164,14 +171,34 @@ export async function loadCatalog() {
         <div class="empty-state">
           <div class="empty-icon">${icon('alert-triangle', { size: 48, color: 'var(--danger)' })}</div>
           <p>Gagal memuat katalog.</p>
+          <p style="font-size: 12px; color: var(--muted); margin-top: 8px;">${error.message}</p>
           <button class="secondary-button" id="retryCatalogBtn" type="button" style="margin-top: 16px;">
             ${icon('refresh', { size: 14 })}
             Coba Lagi
           </button>
         </div>
       `;
-      $('retryCatalogBtn')?.addEventListener('click', loadCatalog);
+      $('retryCatalogBtn')?.addEventListener('click', function () {
+        loadCatalog();
+      });
     }
+  }
+}
+
+function rebuildProductMap() {
+  state.productByCode = {};
+  state.allProducts.forEach((product) => {
+    const code = String(product.KODE_BARANG || '').trim().toUpperCase();
+    if (code) state.productByCode[code] = product;
+  });
+}
+
+async function updateCatalogUI() {
+  try {
+    const { updateCatalog } = await import('./order-pages/catalog-page.js');
+    updateCatalog(state);
+  } catch (e) {
+    console.warn('[Catalog] Update UI failed:', e);
   }
 }
 
@@ -218,6 +245,13 @@ function bindEvents() {
       e.preventDefault();
     }, { passive: false });
   }
+
+  // Prewarm on visibility change (saat user kembali)
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      prewarmAppScript();
+    }
+  });
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -225,6 +259,10 @@ function bindEvents() {
 // ─────────────────────────────────────────────────────────────────────────
 
 async function init() {
+
+  // ★ PREWARM AppScript DULU (fire & forget) — bangunkan cold start
+  prewarmAppScript();
+
   if (!initSession()) return;
 
   injectIcons();
@@ -237,7 +275,7 @@ async function init() {
   initMassOrder(state);
   initHistory(state);
   initCart(state);
-  initPreOrderDialog();  // ★ BARU: init pre-order dialog
+  initPreOrderDialog();
 
   bindEvents();
 
@@ -252,6 +290,7 @@ async function init() {
     requestAnimationFrame(() => injectIcons());
   }
 
+  // Load catalog (fast dari cache dulu)
   await loadCatalog();
 
   if (validTab === 'history') {
