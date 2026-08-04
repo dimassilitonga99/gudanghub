@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   ORDER PAGE — Main Controller with Lucide Icons
-   v3.3 — STRICT AUTH: Wajib login, tidak bisa bypass via URL
+   ORDER PAGE — Main Controller
+   v3.4 — dengan Pre-Order Dialog + Barang Manual
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, getQueryParam } from '../utils.js';
@@ -19,6 +19,7 @@ import { renderCatalogPage, initCatalog } from './order-pages/catalog-page.js';
 import { renderMassOrderPage, initMassOrder } from './order-pages/mass-order-page.js';
 import { renderHistoryPage, initHistory } from './order-pages/history-page.js';
 import { initCart } from './order-pages/cart.js';
+import { initPreOrderDialog } from './order-pages/pre-order-dialog.js';
 
 // ─────────────────────────────────────────────────────────────────────────
 // STATE
@@ -33,69 +34,58 @@ export const state = {
   productByCode: {},
   cart: {},
   massItems: [],
+  manualItems: [],   // ★ BARU: untuk barang manual
   isSubmitting: false,
   currentTab: 'catalog',
 };
 
 // ─────────────────────────────────────────────────────────────────────────
-// SESSION INIT — STRICT AUTH ONLY (tidak boleh bypass URL)
+// SESSION INIT — STRICT AUTH
 // ─────────────────────────────────────────────────────────────────────────
 
 function initSession() {
   const s = getSession();
 
-  // ══════ WAJIB LOGIN ══════
   if (!s || !isSessionValid(s)) {
-    // TIDAK ADA session valid → redirect ke login
     redirectToLogin();
     return false;
   }
 
-  // ══════ ADMIN redirect ke dashboard ══════
   if (s.role === 'admin') {
     window.location.href = './dashboard.html';
     return false;
   }
 
-  // ══════ HANYA CABANG yang lolos ══════
   if (s.role !== 'cabang') {
-    // Role tidak valid → logout
     sessionLogout(true);
     return false;
   }
 
-  // ══════ CABANG ID WAJIB ada di session ══════
   const sessionCabang = String(s.idCabang || '').trim().toUpperCase();
 
   if (!sessionCabang) {
-    // Cabang tanpa idCabang → logout
     sessionLogout(true);
     return false;
   }
 
-  // ══════ VALIDASI URL: harus SAMA dengan session ══════
   const urlBranch = String(getQueryParam('cabang') || '').trim().toUpperCase();
 
   if (urlBranch && urlBranch !== sessionCabang) {
-    // User coba akses cabang lain via URL → block!
     console.warn('[SECURITY] URL cabang mismatch:', urlBranch, 'vs session:', sessionCabang);
     sessionLogout(true);
     return false;
   }
 
-  // ══════ Set state (SELALU dari session, bukan URL) ══════
   state.session = s;
   state.branchId = sessionCabang;
   state.branchName = s.nama || (CABANG[sessionCabang]?.nama) || sessionCabang;
   state.branchPic = (CABANG[sessionCabang]?.pic) || s.nama || '-';
 
-  // Update URL agar konsisten dengan session
   const expectedUrl = `?cabang=${sessionCabang}`;
   if (window.location.search !== expectedUrl) {
     window.history.replaceState({}, '', `./order.html${expectedUrl}${window.location.hash}`);
   }
 
-  // Update label
   const label = $('branchLabel');
   if (label) {
     label.textContent = `${state.branchId} · ${state.branchPic}`;
@@ -247,6 +237,7 @@ async function init() {
   initMassOrder(state);
   initHistory(state);
   initCart(state);
+  initPreOrderDialog();  // ★ BARU: init pre-order dialog
 
   bindEvents();
 
