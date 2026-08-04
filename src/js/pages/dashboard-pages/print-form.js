@@ -16,7 +16,7 @@ import {
 import { CABANG } from '../../config.js';
 import { icon } from '../../icons.js';
 
-var ITEMS_PER_PAGE = 20;
+var ITEMS_PER_PAGE = 12;
 
 var printState = {
   order: null,
