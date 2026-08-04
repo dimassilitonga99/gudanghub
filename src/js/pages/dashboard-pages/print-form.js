@@ -415,7 +415,7 @@ function renderPreview() {
     + '>';
 
   html += '<img'
-    + ' src="./public/images/logo/logo-nk.png"'
+    + ' src="./images/logo/logo-nk.png"'
     + ' alt="Logo Nasional Kitchen"'
     + ' style="'
     + '   width: 160px;'
