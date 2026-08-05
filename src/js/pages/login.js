@@ -7,7 +7,8 @@
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, sleep } from '../utils.js';
-import { auth, prewarmAppScript, API_URL } from '../api.js';
+import { auth, prewarmAppScript } from '../api.js';
+import { API_URL } from '../config.js';
 import {
   setSession,
   getLastUsername,
