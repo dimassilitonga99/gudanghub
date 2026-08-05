@@ -1,14 +1,139 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   CART — dengan Pre-Order Dialog + Catatan per Item
+   CART — v3.7 Persistent Cart (localStorage + Server Sync)
+   Cart tetap ada saat refresh, logout, beda device
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, escapeHtml, formatRupiah, toInt } from '../../utils.js';
-import { orders as ordersApi } from '../../api.js';
+import { orders as ordersApi, callApi } from '../../api.js';
 import { toast, confirm } from '../../ui.js';
 import { icon } from '../../icons.js';
 import { showPreOrderDialog } from './pre-order-dialog.js';
 
 var SATUAN_OPTIONS = ['PCS', 'DUS', 'KRG', 'SET', 'PACK', 'IKAT', 'GROSS'];
+
+// ─────────────────────────────────────────────────────────────────────────
+// CART PERSISTENCE (localStorage + Server)
+// ─────────────────────────────────────────────────────────────────────────
+
+var CART_STORAGE_KEY = 'gudanghub_cart';
+var CART_SYNC_TIMER = null;
+
+function getUsername() {
+  try {
+    var session = JSON.parse(sessionStorage.getItem('gudanghub_session') || '{}');
+    return String(session.username || '').toLowerCase();
+  } catch {
+    return '';
+  }
+}
+
+function getCartKey() {
+  var username = getUsername();
+  return username ? CART_STORAGE_KEY + '_' + username : CART_STORAGE_KEY;
+}
+
+function saveCartLocal(cart) {
+  try {
+    localStorage.setItem(getCartKey(), JSON.stringify(cart || {}));
+  } catch (e) {
+    console.warn('[Cart] Local save failed:', e.message);
+  }
+}
+
+function saveCartAndSync(state) {
+  // Simpan ke localStorage langsung (instant)
+  saveCartLocal(state.cart);
+
+  // Debounce sync ke server (2 detik setelah perubahan terakhir)
+  clearTimeout(CART_SYNC_TIMER);
+  CART_SYNC_TIMER = setTimeout(function () {
+    syncToServer(state);
+  }, 2000);
+}
+
+export function loadCartLocal() {
+  try {
+    var raw = localStorage.getItem(getCartKey());
+    if (!raw) return {};
+    var parsed = JSON.parse(raw);
+    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return {};
+    return parsed;
+  } catch {
+    return {};
+  }
+}
+
+export function clearCartAll(state) {
+  try {
+    localStorage.removeItem(getCartKey());
+  } catch {}
+
+  // Hapus dari server
+  syncToServer(state, true);
+}
+
+// ─── Server Sync ───
+
+async function syncToServer(state, isEmpty) {
+  var username = getUsername();
+  if (!username) return;
+
+  try {
+    var cartData = isEmpty ? '{}' : JSON.stringify(state.cart || {});
+
+    await callApi('syncCart', {
+      username: username,
+      cart: cartData,
+    }, {
+      dedupe: false,
+      timeout: 15000,
+      cache: false,
+    });
+
+    var count = isEmpty ? 0 : Object.keys(state.cart || {}).length;
+    console.log('[Cart] Synced to server (' + count + ' items)');
+
+  } catch (err) {
+    console.warn('[Cart] Server sync failed:', err.message);
+  }
+}
+
+export async function loadCartServer() {
+  var username = getUsername();
+  if (!username) return {};
+
+  try {
+    var result = await callApi('getCart', {
+      username: username,
+    }, {
+      dedupe: true,
+      timeout: 15000,
+      cache: false,
+    });
+
+    if (result && result.status === 'ok' && result.cart) {
+      try {
+        var parsed = JSON.parse(result.cart);
+        if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
+          var count = Object.keys(parsed).length;
+          if (count > 0) {
+            console.log('[Cart] Loaded from server (' + count + ' items)');
+          }
+          return parsed;
+        }
+      } catch {}
+    }
+
+    return {};
+  } catch (err) {
+    console.warn('[Cart] Server load failed:', err.message);
+    return {};
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────────────────────
 
 export function initCart(state) {
 
@@ -54,13 +179,13 @@ export function initCart(state) {
     }
   });
 
-  // ★ CATATAN per item — input event
   $('cartItems')?.addEventListener('input', function (e) {
     var noteTarget = e.target.closest('[data-cart-action="set-note"]');
     if (noteTarget) {
       var code = noteTarget.dataset.code;
       if (state.cart[code]) {
         state.cart[code].catatanItem = noteTarget.value;
+        saveCartAndSync(state);
       }
     }
 
@@ -79,6 +204,8 @@ export function initCart(state) {
   updateCartUi(state);
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// PUBLIC API
 // ─────────────────────────────────────────────────────────────────────────
 
 export function addToCart(state, code) {
@@ -102,7 +229,14 @@ export function updateCartUi(state) {
   if (cartTotal) cartTotal.textContent = formatRupiah(total);
 
   validateCartStocks(state);
+
+  // ★ Simpan cart setiap update
+  saveCartAndSync(state);
 }
+
+// ─────────────────────────────────────────────────────────────────────────
+// OPEN / CLOSE
+// ─────────────────────────────────────────────────────────────────────────
 
 function openCart(state) {
   renderCartSheet(state);
@@ -118,7 +252,7 @@ function closeCart() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// TOGGLE NOTE (show/hide input catatan)
+// TOGGLE NOTE
 // ─────────────────────────────────────────────────────────────────────────
 
 function toggleNote(code) {
@@ -135,7 +269,6 @@ function toggleNote(code) {
   } else {
     wrapper.style.display = 'block';
     if (button) button.classList.add('active');
-    // Focus input
     setTimeout(function () {
       var input = wrapper.querySelector('input');
       input?.focus();
@@ -143,6 +276,8 @@ function toggleNote(code) {
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// RENDER CART
 // ─────────────────────────────────────────────────────────────────────────
 
 function renderCartSheet(state) {
@@ -173,10 +308,12 @@ function renderCartSheet(state) {
 
 function buildCartItem(item, state) {
   var code = escapeHtml(item.kode);
+  var cartKey = item._cartKey || item.kode;
+  var escCartKey = escapeHtml(cartKey);
   var gudangEmpty = isEmpty(item.stokGudang);
   var tokoEmpty = isEmpty(item.stokToko);
 
-  var product = state.productByCode[String(item.kode).toUpperCase()];
+  var product = state.productByCode ? state.productByCode[String(item.kode).toUpperCase()] : null;
   var stokSistem = product ? toInt(product.STOK) : (item.stokSistem || 0);
 
   var stokSistemClass = stokSistem === 0 ? 'stock-empty'
@@ -185,17 +322,11 @@ function buildCartItem(item, state) {
 
   var stokSistemText = stokSistem === 0 ? 'Habis' : 'Stok Sistem: ' + stokSistem;
 
-  var manualBadge = '';
-  if (item.isManual) {
-    manualBadge = ' <span style="display:inline-block; margin-left:4px; padding:1px 6px; background:#f59e0b; color:#fff; border-radius:3px; font-size:9px; font-weight:700;">MANUAL</span>';
-  }
-
   var satuanOptionsHtml = SATUAN_OPTIONS.map(function (s) {
     var selected = (s === item.satuan) ? ' selected' : '';
     return '<option value="' + s + '"' + selected + '>' + s + '</option>';
   }).join('');
 
-  // ★ Catatan Item
   var catatanItem = item.catatanItem || '';
   var noteVisible = catatanItem.length > 0;
   var noteBtnClass = noteVisible ? 'note-toggle-btn active' : 'note-toggle-btn';
@@ -205,7 +336,6 @@ function buildCartItem(item, state) {
     + '<div class="cart-info">'
     + '<div class="cart-name">'
     + escapeHtml(item.nama)
-    + manualBadge
     + (catatanItem ? ' <span class="cart-note-inline">(' + escapeHtml(catatanItem) + ')</span>' : '')
     + '</div>'
     + '<div class="cart-code">'
@@ -214,15 +344,15 @@ function buildCartItem(item, state) {
     + '</div>'
     + '<div class="cart-price-row">'
     + '<span class="cart-quantity">'
-    + '<button type="button" data-cart-action="decrease" data-code="' + code + '">'
+    + '<button type="button" data-cart-action="decrease" data-code="' + escCartKey + '">'
     + icon('minus', { size: 12 })
     + '</button>'
-    + '<input type="number" min="1" value="' + item.qty + '" data-cart-action="set-qty" data-code="' + code + '">'
-    + '<button type="button" data-cart-action="increase" data-code="' + code + '">'
+    + '<input type="number" min="1" value="' + item.qty + '" data-cart-action="set-qty" data-code="' + escCartKey + '">'
+    + '<button type="button" data-cart-action="increase" data-code="' + escCartKey + '">'
     + icon('plus', { size: 12 })
     + '</button>'
     + '</span>'
-    + '<select class="cart-satuan-select" data-cart-action="set-satuan" data-code="' + code + '">'
+    + '<select class="cart-satuan-select" data-cart-action="set-satuan" data-code="' + escCartKey + '">'
     + satuanOptionsHtml
     + '</select>'
     + '<span>× ' + formatRupiah(item.harga) + '</span>'
@@ -230,15 +360,15 @@ function buildCartItem(item, state) {
     + '<span class="cart-subtotal">' + formatRupiah(item.qty * item.harga) + '</span>'
     + '</div>'
 
-    // ★ NOTE INPUT (toggleable)
-    + '<div class="cart-note-wrapper" data-note-wrapper="' + code + '" style="' + (noteVisible ? '' : 'display:none;') + '">'
+    // Note input
+    + '<div class="cart-note-wrapper" data-note-wrapper="' + escCartKey + '" style="' + (noteVisible ? '' : 'display:none;') + '">'
     + '<label class="cart-note-label">'
     + icon('message', { size: 12 })
     + ' Catatan untuk barang ini:'
     + '</label>'
     + '<input type="text" class="cart-note-input" placeholder="contoh: pesan warna merah"'
     + ' value="' + escapeHtml(catatanItem) + '"'
-    + ' data-cart-action="set-note" data-code="' + code + '"'
+    + ' data-cart-action="set-note" data-code="' + escCartKey + '"'
     + ' maxlength="80">'
     + '<div class="cart-note-hint">Max 80 karakter — akan muncul di form order</div>'
     + '</div>'
@@ -247,8 +377,7 @@ function buildCartItem(item, state) {
 
     + '<div class="cart-right">'
 
-    // Note toggle button
-    + '<button class="' + noteBtnClass + '" type="button" data-cart-action="toggle-note" data-code="' + code + '" title="Tambah catatan">'
+    + '<button class="' + noteBtnClass + '" type="button" data-cart-action="toggle-note" data-code="' + escCartKey + '" title="Tambah catatan">'
     + icon('message', { size: 14 })
     + '</button>'
 
@@ -262,16 +391,16 @@ function buildCartItem(item, state) {
     + '<span class="stock-group-icon">' + icon('warehouse', { size: 12 }) + '</span>'
     + '<input class="stock-input" type="number" min="0" placeholder="0"'
     + ' value="' + (gudangEmpty ? '' : item.stokGudang) + '"'
-    + ' data-stock-type="gudang" data-code="' + code + '">'
+    + ' data-stock-type="gudang" data-code="' + escCartKey + '">'
     + '</label>'
     + '<label class="stock-group ' + (tokoEmpty ? 'empty' : '') + '" title="Stok Toko">'
     + '<span class="stock-group-icon">' + icon('store', { size: 12 }) + '</span>'
     + '<input class="stock-input" type="number" min="0" placeholder="0"'
     + ' value="' + (tokoEmpty ? '' : item.stokToko) + '"'
-    + ' data-stock-type="toko" data-code="' + code + '">'
+    + ' data-stock-type="toko" data-code="' + escCartKey + '">'
     + '</label>'
     + '</div>'
-    + '<button class="cart-delete" type="button" data-cart-action="delete" data-code="' + code + '" title="Hapus">'
+    + '<button class="cart-delete" type="button" data-cart-action="delete" data-code="' + escCartKey + '" title="Hapus">'
     + icon('trash', { size: 14 })
     + '</button>'
     + '</div>'
@@ -324,6 +453,10 @@ function validateCartStocks(state) {
   return valid;
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// CART QTY
+// ─────────────────────────────────────────────────────────────────────────
+
 function normalizeQty(value) {
   return Math.max(1, toInt(value, 1));
 }
@@ -343,11 +476,15 @@ function setCartQty(state, code, value) {
 }
 
 function removeFromCart(state, code) {
+  var item = state.cart[code];
+  var displayCode = item ? item.kode : code;
+
   delete state.cart[code];
   updateCartUi(state);
   renderCartSheet(state);
 
-  var card = $('card-' + code);
+  // Update catalog card (kalau barang katalog)
+  var card = $('card-' + displayCode);
   if (card) {
     card.classList.remove('in-cart');
     var addBtn = card.querySelector('.add-button');
@@ -361,7 +498,7 @@ function removeFromCart(state, code) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// SHOW PREVIEW SEBELUM SUBMIT
+// PREVIEW SEBELUM SUBMIT
 // ─────────────────────────────────────────────────────────────────────────
 
 function showPreviewBeforeSubmit(state) {
@@ -430,7 +567,7 @@ async function submitOrder(state, items, formConfig) {
         stokToko: i.stokToko,
         stokSistem: i.stokSistem !== undefined ? i.stokSistem : 0,
         isManual: i.isManual || false,
-        catatanItem: i.catatanItem || '',  // ★ Catatan per item
+        catatanItem: i.catatanItem || '',
       };
     }),
   };
@@ -440,6 +577,9 @@ async function submitOrder(state, items, formConfig) {
 
     if (result.status === 'ok') {
       state.cart = {};
+
+      // ★ Hapus cart dari storage + server
+      clearCartAll(state);
 
       var noteInput = $('cartNoteInput');
       if (noteInput) noteInput.value = '';
