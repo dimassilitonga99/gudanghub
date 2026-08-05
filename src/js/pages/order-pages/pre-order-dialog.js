@@ -453,10 +453,8 @@ function buildPageHtml(params) {
         + ')</span>';
     }
 
+        // Tidak perlu badge manual — tampilkan kode apa adanya
     var manualBadge = '';
-    if (item.isManual) {
-      manualBadge = ' <span style="display:inline-block; padding:2px 6px; background:#f59e0b; color:#fff; border-radius:3px; font-size:9px; font-weight:700;">MANUAL</span>';
-    }
 
     return ''
       + '<tr>'
@@ -464,7 +462,7 @@ function buildPageHtml(params) {
       + '<td style="padding:5px 4px; text-align:center; border:1px solid #000; font-size:15px; font-weight:700; vertical-align:middle; line-height:1.2;">' + stokG + '</td>'
       + '<td style="padding:5px 4px; text-align:center; border:1px solid #000; font-size:15px; font-weight:700; vertical-align:middle; line-height:1.2;">' + stokR + '</td>'
       + '<td style="padding:5px 4px; text-align:center; border:1px solid #000; font-size:15px; vertical-align:middle; color:#00B050; font-weight:800; line-height:1.2;">' + qty + ' ' + sat + '</td>'
-      + '<td style="padding:5px 8px; text-align:center; border:1px solid #000; font-size:13px; font-weight:700; vertical-align:middle; line-height:1.2;">' + kode + manualBadge + '</td>'
+            + '<td style="padding:5px 8px; text-align:center; border:1px solid #000; font-size:13px; font-weight:700; vertical-align:middle; line-height:1.2;">' + kode + '</td>'
       + '<td style="padding:5px 8px; text-align:center; border:1px solid #000; font-size:13px; font-weight:700; vertical-align:middle; line-height:1.3;">'
       + nama + catatanHtml
       + '</td>'
