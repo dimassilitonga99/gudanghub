@@ -281,7 +281,7 @@ function buildProductCard(product, state) {
   var escCode = escapeHtml(code);
 
   // ★ Gambar produk (fallback ke icon kategori)
-  var imgSrc = './images/produk/' + code.toUpperCase() + '.jpg';
+    var imgSrc = './images/produk/' + code.toUpperCase() + '.webp';
 
   var satuanOptionsHtml = SATUAN_OPTIONS.map(function (s) {
     var selected = (s === cartSatuan) ? ' selected' : '';
