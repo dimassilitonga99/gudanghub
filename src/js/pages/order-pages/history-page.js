@@ -1,9 +1,10 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   HISTORY PAGE — v3.5 Fast Load + Cache
+   HISTORY PAGE — v3.6 Fast Load + Reset Orders + Next Order Number
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, escapeHtml, formatWita, parseAnyDate, sortBy } from '../../utils.js';
-import { orders as ordersApi } from '../../api.js';
+import { orders as ordersApi, callApi, clearLSCache } from '../../api.js';
+import { toast, confirm as confirmDialog, prompt as promptDialog } from '../../ui.js';
 import { icon } from '../../icons.js';
 import { showPrintFormCabang, initPrintFormCabang } from './print-form-cabang.js';
 
@@ -15,7 +16,7 @@ let localState = {
   quickDate: '',
   isLoading: false,
   stateRef: null,
-  hasLoaded: false,   // ★ Track apakah sudah pernah load
+  hasLoaded: false,
 };
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -32,16 +33,22 @@ export function renderHistoryPage(state) {
 
   return `
     <header class="page-heading">
-      <h1>
+      <h1 style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
         <span data-icon="file" data-icon-size="24" data-icon-color="var(--orange)"></span>
-        Riwayat Order
+        <span style="flex: 1;">Riwayat Order</span>
+        <button class="btn-reset-orders" id="btnResetOrders" type="button" title="Reset semua order">
+          ${icon('trash', { size: 14 })}
+          Reset
+        </button>
       </h1>
       <p>
         Semua order dari cabang
         <strong id="historyBranchLabel" style="color: var(--orange);">${escapeHtml(state.branchId)}</strong>
+        · <span id="nextOrderNumber" style="color: var(--muted); font-size: 12px;">Nomor order berikutnya: -</span>
       </p>
     </header>
 
+    <!-- STATUS FILTER -->
     <div class="filter-scroll" id="historyFilter">
       <button class="filter-chip active" type="button" data-history-filter="ALL">
         ${icon('list', { size: 14 })}
@@ -61,6 +68,7 @@ export function renderHistoryPage(state) {
       </button>
     </div>
 
+    <!-- DATE FILTER -->
     <div class="date-filter-bar">
       <span class="date-filter-label">
         ${icon('calendar', { size: 14 })}
@@ -103,6 +111,7 @@ export function renderHistoryPage(state) {
       </span>
     </div>
 
+    <!-- QUICK DATE BUTTONS -->
     <div class="quick-date-bar">
       <button class="quick-date-btn" type="button" data-quick-date="today">
         ${icon('calendar', { size: 12 })} Hari Ini
@@ -121,6 +130,7 @@ export function renderHistoryPage(state) {
       </button>
     </div>
 
+    <!-- ORDER LIST -->
     <div class="history-list" id="historyList">
       <div class="empty-state">
         <div class="empty-icon">${icon('file', { size: 48, color: 'var(--muted)' })}</div>
@@ -147,6 +157,7 @@ export function initHistory(state) {
 
   initPrintFormCabang();
 
+  // Status filter
   $('historyFilter')?.addEventListener('click', function (e) {
     var chip = e.target.closest('[data-history-filter]');
     if (!chip) return;
@@ -161,6 +172,7 @@ export function initHistory(state) {
     renderHistoryList(state);
   });
 
+  // Date filter
   $('btnApplyDate')?.addEventListener('click', function () {
     applyDateFilter(state);
   });
@@ -169,12 +181,14 @@ export function initHistory(state) {
     resetDateFilter(state);
   });
 
+  // Quick date
   document.querySelectorAll('[data-quick-date]').forEach(function (btn) {
     btn.addEventListener('click', function () {
       applyQuickDate(btn.dataset.quickDate, state);
     });
   });
 
+  // Enter key di date input
   $('dateFrom')?.addEventListener('keydown', function (e) {
     if (e.key === 'Enter') applyDateFilter(state);
   });
@@ -182,10 +196,115 @@ export function initHistory(state) {
   $('dateTo')?.addEventListener('keydown', function (e) {
     if (e.key === 'Enter') applyDateFilter(state);
   });
+
+  // ★ Reset Orders button
+  $('btnResetOrders')?.addEventListener('click', function () {
+    handleResetOrders(state);
+  });
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// DATE FILTERS
+// RESET ALL ORDERS — Hapus semua order dengan password admin
+// ─────────────────────────────────────────────────────────────────────────
+
+async function handleResetOrders(state) {
+
+  // Step 1: Konfirmasi awal
+  var ok = await confirmDialog({
+    icon: '⚠️',
+    title: 'Reset Semua Order?',
+    message: 'PERHATIAN! Tindakan ini akan:\n\n'
+      + '• Menghapus SEMUA order dari sistem\n'
+      + '• Nomor order kembali ke 01\n'
+      + '• Data tidak bisa dikembalikan\n\n'
+      + 'Apakah Anda yakin ingin mereset total?\n\n'
+      + '🔒 Dibutuhkan PASSWORD ADMIN untuk melanjutkan.',
+    okText: 'Ya, Lanjutkan',
+    okVariant: 'danger',
+  });
+
+  if (!ok) return;
+
+  // Step 2: Minta password admin
+  var password = await promptDialog({
+    icon: '🔒',
+    title: 'Masukkan Password Admin',
+    message: 'Ketik password admin gudang untuk mengkonfirmasi reset.\n\nPassword ini WAJIB benar untuk melanjutkan.',
+    placeholder: 'Password admin...',
+    okText: 'Konfirmasi Reset',
+    okVariant: 'danger',
+    required: true,
+  });
+
+  if (!password) return;
+
+  // Step 3: Kirim request reset ke backend
+  try {
+
+    toast.info('Memproses reset...', { duration: 10000 });
+
+    var result = await callApi('resetAllOrders', {
+      password: password,
+      idCabang: state.branchId,
+    }, {
+      dedupe: false,
+      timeout: 60000,
+    });
+
+    if (result.status !== 'ok') {
+      toast.error(result.message || 'Reset gagal. Password salah?');
+      return;
+    }
+
+    toast.success(result.message || 'Semua order berhasil direset! Nomor order kembali ke 01.', { duration: 5000 });
+
+    // Clear cache
+    clearLSCache('getOrders');
+
+    // Reload history
+    localState.orders = [];
+    localState.hasLoaded = false;
+    window.__cabangOrdersCache = [];
+
+    await loadHistory(state);
+
+  } catch (error) {
+    toast.error('Gagal reset: ' + error.message);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// UPDATE NEXT ORDER NUMBER DISPLAY
+// ─────────────────────────────────────────────────────────────────────────
+
+function updateNextOrderNumber() {
+  var el = $('nextOrderNumber');
+  if (!el) return;
+
+  try {
+    var cachedOrders = window.__cabangOrdersCache || [];
+    var now = new Date();
+    var targetMonth = now.getMonth();
+    var targetYear = now.getFullYear();
+
+    var sameMonth = cachedOrders.filter(function (o) {
+      var d = parseAnyDate(o.TANGGAL_ORDER);
+      return d && d.getTime() !== 0
+        && d.getMonth() === targetMonth
+        && d.getFullYear() === targetYear;
+    });
+
+    var nextNomor = sameMonth.length + 1;
+    var formatted = nextNomor < 10 ? '0' + nextNomor : String(nextNomor);
+
+    el.textContent = 'Nomor order berikutnya: ' + formatted;
+  } catch (e) {
+    el.textContent = 'Nomor order berikutnya: 01';
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// DATE FILTER FUNCTIONS
 // ─────────────────────────────────────────────────────────────────────────
 
 function applyDateFilter(state) {
@@ -301,7 +420,6 @@ export async function loadHistory(state) {
     return;
   }
 
-  // Show loading state HANYA kalau belum pernah load
   if (!localState.hasLoaded) {
     list.innerHTML = `
       <div class="empty-state">
@@ -313,13 +431,12 @@ export async function loadHistory(state) {
 
   try {
 
-    // ★ FAST: Stale-while-revalidate
     var result = await ordersApi.getAllFast(function (freshResult) {
-      // Callback saat data fresh datang di background
       if (freshResult && freshResult.status === 'ok') {
         console.log('[History] Fresh data received in background');
         processOrdersData(state, freshResult.data || []);
         renderHistoryList(state);
+        updateNextOrderNumber();
       }
     });
 
@@ -335,6 +452,7 @@ export async function loadHistory(state) {
     }
 
     renderHistoryList(state);
+    updateNextOrderNumber();
 
   } catch (error) {
 
@@ -570,6 +688,10 @@ function buildHistoryItem(order) {
   `;
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// DOWNLOAD HANDLER
+// ─────────────────────────────────────────────────────────────────────────
+
 function handleDownload(orderId) {
 
   var order = localState.orders.find(function (o) {
@@ -583,6 +705,10 @@ function handleDownload(orderId) {
 
   showPrintFormCabang(order);
 }
+
+// ─────────────────────────────────────────────────────────────────────────
+// HELPER FUNCTIONS
+// ─────────────────────────────────────────────────────────────────────────
 
 function cleanCatatan(catatan) {
   return String(catatan || '')
