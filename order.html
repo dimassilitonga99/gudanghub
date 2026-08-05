@@ -2148,16 +2148,17 @@
       background: rgba(59, 130, 246, 0.05);
     }
 
-        /* ═══ GAMBAR PRODUK WebP Transparan ═══ */
+        /* ═══ GAMBAR PRODUK WebP Transparan (BESAR) ═══ */
 
     .item-image-wrap {
       width: 100%;
-      height: 120px;
-      border-radius: 10px;
+      height: 180px;
+      border-radius: 12px;
       overflow: hidden;
       margin-top: 22px;
-      margin-bottom: 8px;
-      background: transparent;
+      margin-bottom: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
       position: relative;
       display: flex;
       align-items: center;
@@ -2165,11 +2166,10 @@
     }
 
     .item-image {
-      max-width: 100%;
-      max-height: 100%;
+      max-width: 90%;
+      max-height: 90%;
       object-fit: contain;
       display: block;
-      padding: 6px;
       filter: drop-shadow(0 2px 8px rgba(255, 107, 0, 0.15));
       transition: transform 0.3s ease, filter 0.3s ease;
     }
@@ -2186,7 +2186,7 @@
       place-items: center;
       background: var(--orange-dim);
       color: var(--orange);
-      border-radius: 10px;
+      border-radius: 12px;
     }
 
     .item-image + .item-icon-fallback {
@@ -2195,12 +2195,8 @@
 
     @media (max-width: 480px) {
       .item-image-wrap {
-        height: 100px;
+        height: 140px;
         margin-top: 18px;
-      }
-
-      .item-image {
-        padding: 4px;
       }
     }
   </style>
