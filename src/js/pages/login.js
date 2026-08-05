@@ -1,9 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   LOGIN PAGE — v3.8 INSTANT LOGIN
-   - Prewarm GAS saat page load
-   - Parallel request (POST + GET)
-   - Local credential cache
-   - Auto-retry agresif
+   LOGIN PAGE — v3.9 Auto-Detect Role (No Role Selector)
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, sleep } from '../utils.js';
@@ -19,19 +15,13 @@ import {
 import { toast } from '../ui.js';
 import { icon, injectIcons } from '../icons.js';
 
-// ─────────────────────────────────────────────────────────────────────────
-// STATE
-// ─────────────────────────────────────────────────────────────────────────
-
-var currentRole = 'admin';
 var errorTimer = null;
 var isLoggingIn = false;
 
-// Credential cache key
 var CRED_CACHE_KEY = 'gudanghub_login_cache';
 
 // ─────────────────────────────────────────────────────────────────────────
-// CREDENTIAL CACHE (untuk login instant setelah pertama kali)
+// CREDENTIAL CACHE
 // ─────────────────────────────────────────────────────────────────────────
 
 function getCachedLogin(username, password) {
@@ -42,13 +32,11 @@ function getCachedLogin(username, password) {
     var cache = JSON.parse(raw);
     if (!cache || !cache.hash || !cache.user || !cache.time) return null;
 
-    // Cache expire setelah 7 hari
     if (Date.now() - cache.time > 7 * 24 * 60 * 60 * 1000) {
       localStorage.removeItem(CRED_CACHE_KEY);
       return null;
     }
 
-    // Simple hash check
     var hash = simpleHash(username.toLowerCase() + ':' + password);
     if (hash !== cache.hash) return null;
 
@@ -80,23 +68,19 @@ function simpleHash(str) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// PREWARM AGRESIF (bangunkan GAS server SEBELUM user klik login)
+// PREWARM AGRESIF
 // ─────────────────────────────────────────────────────────────────────────
 
 function aggressivePrewarm() {
-  // Prewarm standard
   prewarmAppScript();
 
-  // Prewarm tambahan: kirim dummy request GET (lebih cepat dari POST)
   try {
-    var url = API_URL + '?action=ping&t=' + Date.now();
-    fetch(url, {
+    fetch(API_URL + '?action=ping&t=' + Date.now(), {
       method: 'GET',
       cache: 'no-store',
     }).catch(function () {});
   } catch {}
 
-  // Prewarm kedua setelah 2 detik (kalau yang pertama belum jalan)
   setTimeout(function () {
     try {
       fetch(API_URL + '?action=ping&t=' + Date.now(), {
@@ -105,32 +89,6 @@ function aggressivePrewarm() {
       }).catch(function () {});
     } catch {}
   }, 2000);
-}
-
-// ─────────────────────────────────────────────────────────────────────────
-// ROLE SELECTOR
-// ─────────────────────────────────────────────────────────────────────────
-
-function setRole(role) {
-  currentRole = role;
-
-  var adminBtn = $('role-admin');
-  var cabangBtn = $('role-cabang');
-  var userInput = $('inputUser');
-
-  if (adminBtn) {
-    adminBtn.classList.toggle('active', role === 'admin');
-    adminBtn.setAttribute('aria-checked', role === 'admin');
-  }
-  if (cabangBtn) {
-    cabangBtn.classList.toggle('active', role === 'cabang');
-    cabangBtn.setAttribute('aria-checked', role === 'cabang');
-  }
-  if (userInput) {
-    userInput.placeholder = role === 'admin'
-      ? 'Masukkan username admin'
-      : 'Masukkan username cabang';
-  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -220,7 +178,7 @@ function setLoadingForgotBtn(isLoading) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// ★ LOGIN HANDLER — INSTANT
+// ★ LOGIN HANDLER — AUTO DETECT ROLE
 // ─────────────────────────────────────────────────────────────────────────
 
 async function handleLogin(event) {
@@ -234,7 +192,6 @@ async function handleLogin(event) {
   var password = $('inputPass').value;
   var rememberChecked = $('remember').checked;
 
-  // Validasi cepat
   if (!username || !password) {
     showError('Username dan password wajib diisi.');
     shakeCard();
@@ -250,45 +207,33 @@ async function handleLogin(event) {
   isLoggingIn = true;
   setLoadingBtn(true, 'Memverifikasi...');
 
-  // ═══════════════════════════════════════════════════════════════
-  // STRATEGY 1: Cek credential cache dulu (INSTANT, 0ms)
-  // ═══════════════════════════════════════════════════════════════
+  // ═══ STRATEGY 1: Cache (INSTANT) ═══
 
   var cachedUser = getCachedLogin(username, password);
 
   if (cachedUser) {
     console.log('[Login] Using cached credentials (instant)');
 
-    // Validasi role match
-    var roleOk = validateRole(cachedUser);
+    setLoadingBtn(true, 'Masuk...');
 
-    if (roleOk) {
-      // INSTANT LOGIN dari cache!
-      setLoadingBtn(true, 'Masuk...');
+    setSession(cachedUser, 'cached-' + Date.now());
+    setLastUsername(rememberChecked ? cachedUser.username : '');
 
-      setSession(cachedUser, 'cached-' + Date.now());
-      setLastUsername(rememberChecked ? cachedUser.username : '');
-
-      var btnText = $('btnText');
-      if (btnText) {
-        btnText.innerHTML = icon('check-circle', { size: 18 }) + ' Berhasil!';
-      }
-
-      toast.success('Selamat datang, ' + (cachedUser.nama || cachedUser.username) + '!', { duration: 2000 });
-
-      await sleep(200);
-      redirectToHome({ role: cachedUser.role, idCabang: cachedUser.idCabang });
-
-      // Background: verify ke server (update cache kalau password berubah)
-      verifyInBackground(username, password);
-
-      return;
+    var btnText = $('btnText');
+    if (btnText) {
+      btnText.innerHTML = icon('check-circle', { size: 18 }) + ' Berhasil!';
     }
+
+    toast.success('Selamat datang, ' + (cachedUser.nama || cachedUser.username) + '!', { duration: 2000 });
+
+    await sleep(200);
+    redirectToHome({ role: cachedUser.role, idCabang: cachedUser.idCabang });
+
+    verifyInBackground(username, password);
+    return;
   }
 
-  // ═══════════════════════════════════════════════════════════════
-  // STRATEGY 2: Login ke server (dengan retry agresif)
-  // ═══════════════════════════════════════════════════════════════
+  // ═══ STRATEGY 2: Server (retry agresif) ═══
 
   var result = null;
   var lastError = null;
@@ -309,16 +254,13 @@ async function handleLogin(event) {
       console.warn('[Login] Attempt ' + attempt + '/' + maxAttempts + ' failed:', err.message);
     }
 
-    // Delay sebelum retry
     if (attempt < maxAttempts) {
       setLoadingBtn(true, 'Mencoba lagi...');
       await sleep(500);
     }
   }
 
-  // ═══════════════════════════════════════════════════════════════
-  // HANDLE RESULT
-  // ═══════════════════════════════════════════════════════════════
+  // ═══ HANDLE RESULT ═══
 
   if (!result || result.status !== 'ok') {
     var msg = (result && result.message) ? result.message : (lastError ? lastError.message : 'Login gagal. Coba lagi.');
@@ -331,15 +273,9 @@ async function handleLogin(event) {
 
   var user = result.user || {};
 
-  // Validasi role
-  if (!validateRole(user)) {
-    setLoadingBtn(false);
-    shakeCard();
-    isLoggingIn = false;
-    return;
-  }
+  // ★ AUTO-DETECT: Tidak perlu validasi role — server sudah return role yang benar
+  // Admin atau cabang otomatis dikenali dari username di USERS sheet
 
-  // Cabang wajib punya idCabang
   if (user.role === 'cabang' && !user.idCabang) {
     showError('Akun cabang tidak punya ID cabang. Hubungi admin.');
     setLoadingBtn(false);
@@ -350,7 +286,6 @@ async function handleLogin(event) {
 
   // ═══ SUKSES ═══
 
-  // Simpan credential cache (untuk login instant berikutnya)
   setCachedLogin(username, password, user);
 
   setSession(user, result.token);
@@ -367,31 +302,13 @@ async function handleLogin(event) {
   redirectToHome({ role: user.role, idCabang: user.idCabang });
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-
-function validateRole(user) {
-  if (currentRole === 'admin' && user.role !== 'admin') {
-    showError('Akun ini bukan Admin Gudang. Pilih peran "Cabang".');
-    return false;
-  }
-
-  if (currentRole === 'cabang' && user.role !== 'cabang') {
-    showError('Akun ini bukan Cabang. Pilih peran "Admin Gudang".');
-    return false;
-  }
-
-  return true;
-}
-
-// Verify login di background (update cache kalau ada perubahan)
 async function verifyInBackground(username, password) {
   try {
     var result = await auth.login({ username: username, password: password });
     if (result && result.status === 'ok' && result.user) {
       setCachedLogin(username, password, result.user);
-      console.log('[Login] Background verify OK — cache updated');
+      console.log('[Login] Background verify OK');
     } else if (result && result.status === 'error') {
-      // Password berubah di server → hapus cache
       localStorage.removeItem(CRED_CACHE_KEY);
       console.log('[Login] Background verify FAILED — cache cleared');
     }
@@ -468,9 +385,6 @@ async function submitForgot() {
 // ─────────────────────────────────────────────────────────────────────────
 
 function bindEvents() {
-  $('role-admin')?.addEventListener('click', function () { setRole('admin'); });
-  $('role-cabang')?.addEventListener('click', function () { setRole('cabang'); });
-
   $('toggleBtn')?.addEventListener('click', togglePw);
 
   $('loginForm')?.addEventListener('submit', handleLogin);
@@ -513,10 +427,25 @@ function bindEvents() {
 function init() {
   if (redirectIfAuthenticated()) return;
 
-  // ★ PREWARM AGRESIF — bangunkan GAS server SEKARANG (sebelum user ketik)
   aggressivePrewarm();
 
   injectIcons();
+
+  // ★ SEMBUNYIKAN role selector
+  var rolesDiv = document.querySelector('.roles');
+  if (rolesDiv) rolesDiv.style.display = 'none';
+
+  // ★ Update welcome text (hapus mention "pilih peran")
+  var welcomeSub = document.querySelector('.welcome-sub');
+  if (welcomeSub) {
+    welcomeSub.textContent = 'Masukkan username dan password untuk mulai mengelola order.';
+  }
+
+  // ★ Update placeholder (generic, bukan "admin" atau "cabang")
+  var inputUser = $('inputUser');
+  if (inputUser) {
+    inputUser.placeholder = 'Masukkan username Anda';
+  }
 
   var lastUser = getLastUsername();
   if (lastUser) {
@@ -528,7 +457,6 @@ function init() {
 
   bindEvents();
 
-  // Auto focus
   setTimeout(function () {
     var input = $('inputUser');
     if (input && !input.value) input.focus();
