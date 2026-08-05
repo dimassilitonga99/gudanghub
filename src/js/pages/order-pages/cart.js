@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   CART — dengan Pre-Order Dialog (Nomor + Tanggal + Preview)
+   CART — dengan Pre-Order Dialog + Catatan per Item
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, escapeHtml, formatRupiah, toInt } from '../../utils.js';
@@ -33,6 +33,7 @@ export function initCart(state) {
     if (action === 'delete') removeFromCart(state, code);
     else if (action === 'increase') changeCartQty(state, code, 1);
     else if (action === 'decrease') changeCartQty(state, code, -1);
+    else if (action === 'toggle-note') toggleNote(code);
   });
 
   $('cartItems')?.addEventListener('change', function (e) {
@@ -53,6 +54,22 @@ export function initCart(state) {
     }
   });
 
+  // ★ CATATAN per item — input event
+  $('cartItems')?.addEventListener('input', function (e) {
+    var noteTarget = e.target.closest('[data-cart-action="set-note"]');
+    if (noteTarget) {
+      var code = noteTarget.dataset.code;
+      if (state.cart[code]) {
+        state.cart[code].catatanItem = noteTarget.value;
+      }
+    }
+
+    var stockTarget = e.target.closest('[data-stock-type]');
+    if (stockTarget) {
+      handleStockInput(state, stockTarget);
+    }
+  });
+
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape' && $('cartSheet')?.classList.contains('show')) {
       closeCart();
@@ -61,6 +78,8 @@ export function initCart(state) {
 
   updateCartUi(state);
 }
+
+// ─────────────────────────────────────────────────────────────────────────
 
 export function addToCart(state, code) {
   updateCartUi(state);
@@ -98,6 +117,34 @@ function closeCart() {
   document.body.style.overflow = '';
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// TOGGLE NOTE (show/hide input catatan)
+// ─────────────────────────────────────────────────────────────────────────
+
+function toggleNote(code) {
+  var wrapper = document.querySelector('[data-note-wrapper="' + code + '"]');
+  var button = document.querySelector('[data-cart-action="toggle-note"][data-code="' + code + '"]');
+
+  if (!wrapper) return;
+
+  var isVisible = wrapper.style.display !== 'none';
+
+  if (isVisible) {
+    wrapper.style.display = 'none';
+    if (button) button.classList.remove('active');
+  } else {
+    wrapper.style.display = 'block';
+    if (button) button.classList.add('active');
+    // Focus input
+    setTimeout(function () {
+      var input = wrapper.querySelector('input');
+      input?.focus();
+    }, 50);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+
 function renderCartSheet(state) {
   var items = Object.values(state.cart);
   var wrapper = $('cartItems');
@@ -121,7 +168,6 @@ function renderCartSheet(state) {
     return buildCartItem(item, state);
   }).join('');
 
-  bindStockInputs(state);
   validateCartStocks(state);
 }
 
@@ -139,7 +185,6 @@ function buildCartItem(item, state) {
 
   var stokSistemText = stokSistem === 0 ? 'Habis' : 'Stok Sistem: ' + stokSistem;
 
-  // Badge manual
   var manualBadge = '';
   if (item.isManual) {
     manualBadge = ' <span style="display:inline-block; margin-left:4px; padding:1px 6px; background:#f59e0b; color:#fff; border-radius:3px; font-size:9px; font-weight:700;">MANUAL</span>';
@@ -150,10 +195,19 @@ function buildCartItem(item, state) {
     return '<option value="' + s + '"' + selected + '>' + s + '</option>';
   }).join('');
 
+  // ★ Catatan Item
+  var catatanItem = item.catatanItem || '';
+  var noteVisible = catatanItem.length > 0;
+  var noteBtnClass = noteVisible ? 'note-toggle-btn active' : 'note-toggle-btn';
+
   return ''
     + '<article class="cart-item">'
     + '<div class="cart-info">'
-    + '<div class="cart-name">' + escapeHtml(item.nama) + manualBadge + '</div>'
+    + '<div class="cart-name">'
+    + escapeHtml(item.nama)
+    + manualBadge
+    + (catatanItem ? ' <span class="cart-note-inline">(' + escapeHtml(catatanItem) + ')</span>' : '')
+    + '</div>'
     + '<div class="cart-code">'
     + code
     + (item.isManual ? '' : ' <span class="cart-stok-sistem ' + stokSistemClass + '">' + stokSistemText + '</span>')
@@ -175,8 +229,29 @@ function buildCartItem(item, state) {
     + '<span>=</span>'
     + '<span class="cart-subtotal">' + formatRupiah(item.qty * item.harga) + '</span>'
     + '</div>'
+
+    // ★ NOTE INPUT (toggleable)
+    + '<div class="cart-note-wrapper" data-note-wrapper="' + code + '" style="' + (noteVisible ? '' : 'display:none;') + '">'
+    + '<label class="cart-note-label">'
+    + icon('message', { size: 12 })
+    + ' Catatan untuk barang ini:'
+    + '</label>'
+    + '<input type="text" class="cart-note-input" placeholder="contoh: pesan warna merah"'
+    + ' value="' + escapeHtml(catatanItem) + '"'
+    + ' data-cart-action="set-note" data-code="' + code + '"'
+    + ' maxlength="80">'
+    + '<div class="cart-note-hint">Max 80 karakter — akan muncul di form order</div>'
     + '</div>'
+
+    + '</div>'
+
     + '<div class="cart-right">'
+
+    // Note toggle button
+    + '<button class="' + noteBtnClass + '" type="button" data-cart-action="toggle-note" data-code="' + code + '" title="Tambah catatan">'
+    + icon('message', { size: 14 })
+    + '</button>'
+
     + '<div class="stock-label">ISI STOK AKTUAL</div>'
     + '<div class="stock-labels-row">'
     + '<span class="stock-mini-label">' + icon('warehouse', { size: 10 }) + ' Gudang</span>'
@@ -207,24 +282,20 @@ function isEmpty(value) {
   return value === '' || value === undefined || value === null;
 }
 
-function bindStockInputs(state) {
-  document.querySelectorAll('[data-stock-type]').forEach(function (input) {
-    input.addEventListener('input', function () {
-      var code = input.dataset.code;
-      var type = input.dataset.stockType;
-      var value = input.value.trim();
+function handleStockInput(state, input) {
+  var code = input.dataset.code;
+  var type = input.dataset.stockType;
+  var value = input.value.trim();
 
-      var numeric = value === '' ? '' : Math.max(0, toInt(value, 0));
-      var field = type === 'gudang' ? 'stokGudang' : 'stokToko';
+  var numeric = value === '' ? '' : Math.max(0, toInt(value, 0));
+  var field = type === 'gudang' ? 'stokGudang' : 'stokToko';
 
-      if (state.cart[code]) {
-        state.cart[code][field] = numeric;
-      }
+  if (state.cart[code]) {
+    state.cart[code][field] = numeric;
+  }
 
-      input.closest('.stock-group')?.classList.toggle('empty', value === '');
-      validateCartStocks(state);
-    });
-  });
+  input.closest('.stock-group')?.classList.toggle('empty', value === '');
+  validateCartStocks(state);
 }
 
 function validateCartStocks(state) {
@@ -290,7 +361,7 @@ function removeFromCart(state, code) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// ★ FLOW BARU: Show Preview dulu sebelum submit
+// SHOW PREVIEW SEBELUM SUBMIT
 // ─────────────────────────────────────────────────────────────────────────
 
 function showPreviewBeforeSubmit(state) {
@@ -307,16 +378,13 @@ function showPreviewBeforeSubmit(state) {
     return;
   }
 
-  // Tutup cart sheet dulu
   closeCart();
 
-  // Show pre-order dialog
   showPreOrderDialog({
     items: items,
     branchId: state.branchId,
     catatan: $('cartNoteInput')?.value || '',
     onConfirm: async function (config) {
-      // config: { nomorOrder, tanggalOrder, nomorMode, tanggalMode }
       await submitOrder(state, items, config);
     },
   });
@@ -337,7 +405,6 @@ async function submitOrder(state, items, formConfig) {
     return i.kode + ': gudang ' + i.stokGudang + ', toko ' + i.stokToko;
   }).join(' | ');
 
-  // Tambah info form (nomor + tanggal)
   var formInfo = '';
   if (formConfig) {
     formInfo = '[FORM] No.' + formConfig.nomorOrder
@@ -363,6 +430,7 @@ async function submitOrder(state, items, formConfig) {
         stokToko: i.stokToko,
         stokSistem: i.stokSistem !== undefined ? i.stokSistem : 0,
         isManual: i.isManual || false,
+        catatanItem: i.catatanItem || '',  // ★ Catatan per item
       };
     }),
   };
