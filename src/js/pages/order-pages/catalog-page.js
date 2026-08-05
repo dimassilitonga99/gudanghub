@@ -280,6 +280,9 @@ function buildProductCard(product, state) {
   var stockText = stock === 0 ? 'Habis' : stock <= 5 ? 'Sisa ' + stock : 'Stok: ' + stock;
   var escCode = escapeHtml(code);
 
+  // ★ Gambar produk (fallback ke icon kategori)
+  var imgSrc = './images/produk/' + code.toUpperCase() + '.jpg';
+
   var satuanOptionsHtml = SATUAN_OPTIONS.map(function (s) {
     var selected = (s === cartSatuan) ? ' selected' : '';
     return '<option value="' + s + '"' + selected + '>' + s + '</option>';
@@ -288,7 +291,16 @@ function buildProductCard(product, state) {
   return ''
     + '<article class="item-card ' + (inCart ? 'in-cart' : '') + '" id="card-' + escCode + '">'
     + '<span class="item-stock-badge ' + stockClass + '">' + stockText + '</span>'
-    + '<div class="item-icon">' + kategoriIcon(category, { size: 24 }) + '</div>'
+
+    // ★ GAMBAR PRODUK dengan fallback
+    + '<div class="item-image-wrap">'
+    + '<img class="item-image" src="' + imgSrc + '" alt="' + escapeHtml(name) + '" loading="lazy"'
+    + ' onerror="this.style.display=\'none\'; this.nextElementSibling.style.display=\'grid\';">'
+    + '<div class="item-icon-fallback" style="display:none;">'
+    + kategoriIcon(category, { size: 24 })
+    + '</div>'
+    + '</div>'
+
     + '<div class="item-code">' + escCode + '</div>'
     + '<div class="item-name">' + escapeHtml(name) + '</div>'
     + '<div class="item-category">' + escapeHtml(category) + '</div>'
@@ -306,7 +318,6 @@ function buildProductCard(product, state) {
     + '</button>'
     + '</article>';
 }
-
 function appendLoadMoreButton(remaining) {
   var wrapper = document.createElement('div');
   wrapper.dataset.loadMore = 'true';
