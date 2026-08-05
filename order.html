@@ -2150,14 +2150,37 @@
 
         /* ═══ GAMBAR PRODUK DI CARD ═══ */
 
+        /* ═══ GAMBAR PRODUK DI CARD (kompak) ═══ */
+
     .item-image-wrap {
-      width: 100%;
-      aspect-ratio: 1;
+      width: 56px;
+      height: 56px;
       border-radius: 10px;
       overflow: hidden;
       margin-bottom: 8px;
       background: var(--ink-3);
       position: relative;
+      flex-shrink: 0;
+    }
+
+    .item-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .item-icon-fallback {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      place-items: center;
+      background: var(--orange-dim);
+      color: var(--orange);
+    }
+
+    .item-image + .item-icon-fallback {
+      display: none;
     }
 
     .item-image {
