@@ -2148,13 +2148,14 @@
       background: rgba(59, 130, 246, 0.05);
     }
 
-            /* ═══ GAMBAR PRODUK DI CARD (proporsional) ═══ */
+        /* ═══ GAMBAR PRODUK DI CARD (portrait, turun dari atas) ═══ */
 
     .item-image-wrap {
       width: 100%;
-      height: 90px;
+      height: 120px;
       border-radius: 10px;
       overflow: hidden;
+      margin-top: 22px;
       margin-bottom: 8px;
       background: var(--ink-3);
       position: relative;
@@ -2165,12 +2166,7 @@
       height: 100%;
       object-fit: contain;
       display: block;
-      padding: 6px;
-      transition: transform 0.3s ease;
-    }
-
-    .item-card:hover .item-image {
-      transform: scale(1.05);
+      padding: 8px;
     }
 
     .item-icon-fallback {
@@ -2188,11 +2184,12 @@
 
     @media (max-width: 480px) {
       .item-image-wrap {
-        height: 70px;
+        height: 100px;
+        margin-top: 18px;
       }
 
       .item-image {
-        padding: 4px;
+        padding: 6px;
       }
     }
   </style>
