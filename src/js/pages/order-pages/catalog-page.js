@@ -293,9 +293,12 @@ function buildProductCard(product, state) {
     + '<span class="item-stock-badge ' + stockClass + '">' + stockText + '</span>'
 
     // ★ GAMBAR PRODUK dengan fallback
+        // Gambar produk: utama + hover (gambar kedua)
     + '<div class="item-image-wrap">'
-    + '<img class="item-image" src="' + imgSrc + '" alt="' + escapeHtml(name) + '" loading="lazy"'
-    + ' onerror="this.style.display=\'none\'; this.nextElementSibling.style.display=\'grid\';">'
+    + '<img class="item-image item-image-main" src="' + imgSrc + '" alt="' + escapeHtml(name) + '" loading="lazy"'
+    + ' onerror="this.style.display=\'none\'; this.parentElement.querySelector(\'.item-icon-fallback\').style.display=\'grid\';">'
+    + '<img class="item-image item-image-hover" src="' + imgSrc.replace('.webp', '_2.webp') + '" alt="" loading="lazy"'
+    + ' onerror="this.remove();">'
     + '<div class="item-icon-fallback" style="display:none;">'
     + kategoriIcon(category, { size: 24 })
     + '</div>'
