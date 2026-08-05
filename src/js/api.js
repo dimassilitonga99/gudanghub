@@ -1,17 +1,20 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   API — v3.6 Ultra Fast + Reliable + Reset Orders
+   API — v3.8 Ultra Fast + Reliable + Cart Sync + Reset
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { API_URL, SETTINGS } from './config.js';
+
+// Re-export API_URL agar bisa diimport dari api.js
+export { API_URL };
 
 // ─────────────────────────────────────────────────────────────────────────
 // STATE
 // ─────────────────────────────────────────────────────────────────────────
 
-const pendingRequests = new Map();
-const memCache = new Map();
+var pendingRequests = new Map();
+var memCache = new Map();
 
-const LS_CACHE_PREFIX = 'gudanghub_cache_';
+var LS_CACHE_PREFIX = 'gudanghub_cache_';
 
 // ─────────────────────────────────────────────────────────────────────────
 // LOCAL STORAGE CACHE
@@ -224,7 +227,7 @@ export async function callApi(action, payload, options) {
 
   var promise = executeWithRetry(action, payload, timeout)
     .then(function (result) {
-      if (useCache && result.status === 'ok') {
+      if (useCache && result.status === 'ok' && result.data && result.data.length > 0) {
         memCache.set(cacheKey, { data: result, time: Date.now() });
         setLSCache(action, result);
       }
@@ -268,7 +271,7 @@ export async function callApiStale(action, payload, options) {
     // Stale cache — return + refresh in background
     setTimeout(function () {
       executeWithRetry(action, payload, timeout).then(function (freshResult) {
-        if (freshResult && freshResult.status === 'ok') {
+        if (freshResult && freshResult.status === 'ok' && freshResult.data && freshResult.data.length > 0) {
           setLSCache(action, freshResult);
           memCache.set(action + '::' + JSON.stringify(payload), {
             data: freshResult,
@@ -292,7 +295,7 @@ export async function callApiStale(action, payload, options) {
   // No cache — fetch fresh
   var result = await executeWithRetry(action, payload, timeout);
 
-  if (result && result.status === 'ok') {
+  if (result && result.status === 'ok' && result.data && result.data.length > 0) {
     setLSCache(action, result);
     memCache.set(action + '::' + JSON.stringify(payload), {
       data: result,
@@ -331,9 +334,11 @@ export function clearCache(prefix) {
     memCache.clear();
     return;
   }
+  var keysToDelete = [];
   for (var key of memCache.keys()) {
-    if (key.startsWith(prefix)) memCache.delete(key);
+    if (key.startsWith(prefix)) keysToDelete.push(key);
   }
+  keysToDelete.forEach(function (k) { memCache.delete(k); });
 }
 
 export function clearPending() {
@@ -351,7 +356,7 @@ export var auth = {
     return callApi('login', data, {
       dedupe: false,
       cache: false,
-      timeout: 20000,
+      timeout: 15000,
     });
   },
 
@@ -521,6 +526,7 @@ export async function loadAll(options) {
 // ─────────────────────────────────────────────────────────────────────────
 
 export default {
+  API_URL: API_URL,
   callApi: callApi,
   callApiStale: callApiStale,
   parseResponse: parseResponse,
