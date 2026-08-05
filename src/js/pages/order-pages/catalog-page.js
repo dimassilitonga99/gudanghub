@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   CATALOG PAGE — with Lucide Icons + Satuan Selector
-   NO STOCK LIMIT — stok hanya sebagai info visual
+   CATALOG PAGE — dengan Tab "Barang Manual" (untuk barang baru)
+   Cart terpadu: barang katalog + barang manual dalam 1 keranjang
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, escapeHtml, formatRupiah, debounce, toInt, unique } from '../../utils.js';
@@ -8,14 +8,11 @@ import { icon, kategoriIcon, injectIcons } from '../../icons.js';
 import { toast } from '../../ui.js';
 import { addToCart, updateCartUi } from './cart.js';
 
-var SATUAN_OPTIONS = [
-  'PCS',
-  'DUS',
-  'KRG',
-  'SET',
-  'PACK',
-  'IKAT',
-  'GROSS',
+var SATUAN_OPTIONS = ['PCS', 'DUS', 'KRG', 'SET', 'PACK', 'IKAT', 'GROSS'];
+
+var KATEGORI_MANUAL = [
+  'PLASTIK', 'ELEKTRONIK', 'ALUMUNIUM', 'STAINLESS', 'KACA',
+  'BATU', 'KAYU', 'BESI', 'KAIN', 'KERAMIK', 'LAINNYA'
 ];
 
 var localState = {
@@ -25,6 +22,10 @@ var localState = {
   visibleCount: 0,
   itemsPerPage: 40,
 };
+
+// ─────────────────────────────────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────────────────────────────────
 
 export function renderCatalogPage(state) {
   return `
@@ -48,6 +49,10 @@ export function renderCatalogPage(state) {
         ${icon('list', { size: 14 })}
         Semua
       </button>
+      <button class="filter-chip filter-chip-manual" type="button" data-category="__MANUAL__">
+        ${icon('edit', { size: 14 })}
+        Barang Manual
+      </button>
     </div>
 
     <div class="section-label" id="sectionLabel">
@@ -60,8 +65,15 @@ export function renderCatalogPage(state) {
         <div>Memuat katalog barang...</div>
       </div>
     </div>
+
+    <!-- ══ MANUAL FORM (hidden, muncul saat tab Manual aktif) ══ -->
+    <div id="manualFormWrapper" style="display: none;"></div>
   `;
 }
+
+// ─────────────────────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────────────────────
 
 export function initCatalog(state) {
 
@@ -77,6 +89,7 @@ export function initCatalog(state) {
     searchInput.addEventListener('input', handleSearch);
   }
 
+  // ★ Filter chips — termasuk "Barang Manual"
   $('filterScroll')?.addEventListener('click', function (e) {
     var chip = e.target.closest('[data-category]');
     if (!chip) return;
@@ -88,8 +101,15 @@ export function initCatalog(state) {
     });
 
     chip.classList.add('active');
-    filterCatalog(state);
-    renderCatalog(state);
+
+    // Kalau klik "Barang Manual" → tampilkan form manual
+    if (localState.activeCategory === '__MANUAL__') {
+      showManualForm(state);
+    } else {
+      hideManualForm();
+      filterCatalog(state);
+      renderCatalog(state);
+    }
   });
 
   $('catalogGrid')?.addEventListener('click', function (e) {
@@ -128,11 +148,19 @@ export function initCatalog(state) {
   });
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// UPDATE (dipanggil setelah loadCatalog)
+// ─────────────────────────────────────────────────────────────────────────
+
 export function updateCatalog(state) {
   buildCategoryFilters(state);
   filterCatalog(state);
   renderCatalog(state);
 }
+
+// ─────────────────────────────────────────────────────────────────────────
+// BUILD CATEGORY FILTERS
+// ─────────────────────────────────────────────────────────────────────────
 
 function buildCategoryFilters(state) {
   var wrapper = $('filterScroll');
@@ -144,12 +172,18 @@ function buildCategoryFilters(state) {
       .filter(Boolean)
   ).sort();
 
-  wrapper.innerHTML = ''
+  var html = ''
     + '<button class="filter-chip '
     + (localState.activeCategory === '' ? 'active' : '')
     + '" type="button" data-category="">'
     + icon('list', { size: 14 })
     + ' Semua'
+    + '</button>'
+    + '<button class="filter-chip filter-chip-manual '
+    + (localState.activeCategory === '__MANUAL__' ? 'active' : '')
+    + '" type="button" data-category="__MANUAL__">'
+    + icon('edit', { size: 14 })
+    + ' Barang Manual'
     + '</button>'
     + categories.map(function (cat) {
         return '<button class="filter-chip '
@@ -159,13 +193,21 @@ function buildCategoryFilters(state) {
           + ' ' + escapeHtml(cat)
           + '</button>';
       }).join('');
+
+  wrapper.innerHTML = html;
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// FILTER & RENDER
+// ─────────────────────────────────────────────────────────────────────────
+
 function filterCatalog(state) {
+
   var query = localState.searchQuery.toLowerCase().trim();
   var activeCat = localState.activeCategory.toLowerCase();
 
   localState.visibleProducts = state.allProducts.filter(function (product) {
+
     var code = String(product.KODE_BARANG || '').toLowerCase();
     var name = String(product.NAMA_BARANG || '').toLowerCase();
     var category = String(product.KATEGORI || '').toLowerCase();
@@ -182,6 +224,7 @@ function filterCatalog(state) {
 }
 
 function renderCatalog(state) {
+
   var grid = $('catalogGrid');
   var label = $('sectionLabel');
   if (!grid) return;
@@ -339,6 +382,10 @@ function loadMore(state) {
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// CART ACTIONS
+// ─────────────────────────────────────────────────────────────────────────
+
 function normalizeQty(value) {
   return Math.max(1, toInt(value, 1));
 }
@@ -369,6 +416,7 @@ function addItemToCart(state, code) {
     stokSistem: toInt(product.STOK),
     stokGudang: '',
     stokToko: '',
+    isManual: false,
   };
 
   updateCartUi(state);
@@ -403,4 +451,263 @@ function setQty(state, code, value) {
     state.cart[code].qty = newQty;
     updateCartUi(state);
   }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// ★ MANUAL FORM — Tampilkan form ketik barang baru
+// ═══════════════════════════════════════════════════════════════════════
+
+function showManualForm(state) {
+
+  // Sembunyikan katalog grid
+  var grid = $('catalogGrid');
+  var label = $('sectionLabel');
+  if (grid) grid.style.display = 'none';
+  if (label) label.style.display = 'none';
+
+  // Tampilkan form manual
+  var wrapper = $('manualFormWrapper');
+  if (!wrapper) return;
+
+  wrapper.style.display = 'block';
+  wrapper.innerHTML = ''
+    + '<div class="manual-info-box">'
+    + icon('alert-triangle', { size: 16, color: 'var(--warning)' })
+    + ' <b>Barang Manual</b> — untuk barang baru yang belum ada di katalog. Harga otomatis Rp 0.'
+    + '</div>'
+
+    + '<div class="manual-form-catalog">'
+
+    + '<div class="manual-form-row">'
+    + '<div class="manual-field">'
+    + '<label class="manual-label">Nama Barang <span style="color:var(--danger)">*</span></label>'
+    + '<input type="text" class="manual-input" id="mfNama" placeholder="Contoh: Wajan Anti Lengket 30cm">'
+    + '</div>'
+    + '</div>'
+
+    + '<div class="manual-form-row">'
+    + '<div class="manual-field">'
+    + '<label class="manual-label">Kode Barang (opsional)</label>'
+    + '<input type="text" class="manual-input" id="mfKode" placeholder="Kosongkan untuk auto-generate">'
+    + '</div>'
+    + '<div class="manual-field">'
+    + '<label class="manual-label">Kategori</label>'
+    + '<select class="manual-input" id="mfKategori">'
+    + KATEGORI_MANUAL.map(function(k) {
+        return '<option value="' + k + '">' + k + '</option>';
+      }).join('')
+    + '</select>'
+    + '</div>'
+    + '</div>'
+
+    + '<div class="manual-form-row">'
+    + '<div class="manual-field">'
+    + '<label class="manual-label">Jumlah <span style="color:var(--danger)">*</span></label>'
+    + '<input type="number" class="manual-input" id="mfQty" min="1" value="1" placeholder="1">'
+    + '</div>'
+    + '<div class="manual-field">'
+    + '<label class="manual-label">Satuan</label>'
+    + '<select class="manual-input" id="mfSatuan">'
+    + SATUAN_OPTIONS.map(function(s) {
+        return '<option value="' + s + '">' + s + '</option>';
+      }).join('')
+    + '</select>'
+    + '</div>'
+    + '</div>'
+
+    + '<div class="manual-form-row">'
+    + '<div class="manual-field">'
+    + '<label class="manual-label">'
+    + icon('warehouse', { size: 12 })
+    + ' Stok Gudang <span style="color:var(--danger)">*</span>'
+    + '</label>'
+    + '<input type="number" class="manual-input" id="mfStokGudang" min="0" placeholder="0">'
+    + '</div>'
+    + '<div class="manual-field">'
+    + '<label class="manual-label">'
+    + icon('store', { size: 12 })
+    + ' Stok Toko <span style="color:var(--danger)">*</span>'
+    + '</label>'
+    + '<input type="number" class="manual-input" id="mfStokToko" min="0" placeholder="0">'
+    + '</div>'
+    + '</div>'
+
+    + '<button class="btn-add-manual-catalog" id="btnAddManualCatalog" type="button">'
+    + icon('plus', { size: 16 })
+    + ' Tambah ke Keranjang'
+    + '</button>'
+
+    + '</div>'
+
+    // List manual items yang sudah ditambahkan
+    + '<div class="manual-added-title">'
+    + icon('list', { size: 14 })
+    + ' Barang Manual di Keranjang'
+    + '</div>'
+    + '<div id="manualAddedList"></div>';
+
+  // Bind add button
+  $('btnAddManualCatalog')?.addEventListener('click', function () {
+    addManualToCart(state);
+  });
+
+  // Enter key di field terakhir → submit
+  $('mfStokToko')?.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addManualToCart(state);
+    }
+  });
+
+  // Render list yang sudah ditambahkan
+  renderManualAddedList(state);
+
+  // Focus ke input pertama
+  setTimeout(function () {
+    $('mfNama')?.focus();
+  }, 100);
+}
+
+function hideManualForm() {
+  var grid = $('catalogGrid');
+  var label = $('sectionLabel');
+  var wrapper = $('manualFormWrapper');
+
+  if (grid) grid.style.display = '';
+  if (label) label.style.display = '';
+  if (wrapper) {
+    wrapper.style.display = 'none';
+    wrapper.innerHTML = '';
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// ADD MANUAL ITEM KE CART
+// ─────────────────────────────────────────────────────────────────────────
+
+function addManualToCart(state) {
+
+  var nama = $('mfNama')?.value.trim() || '';
+  var kode = $('mfKode')?.value.trim() || '';
+  var kategori = $('mfKategori')?.value || 'LAINNYA';
+  var qty = Math.max(1, toInt($('mfQty')?.value, 1));
+  var satuan = $('mfSatuan')?.value || 'PCS';
+  var stokGudang = $('mfStokGudang')?.value.trim();
+  var stokToko = $('mfStokToko')?.value.trim();
+
+  // Validasi
+  if (!nama) {
+    toast.error('Nama barang wajib diisi.');
+    $('mfNama')?.focus();
+    return;
+  }
+
+  if (stokGudang === '' || stokToko === '') {
+    toast.error('Stok gudang dan stok toko wajib diisi.');
+    if (stokGudang === '') $('mfStokGudang')?.focus();
+    else $('mfStokToko')?.focus();
+    return;
+  }
+
+  // Auto-generate kode kalau kosong
+  var finalKode = kode || ('MAN-' + Date.now().toString().slice(-6));
+
+  // Cek duplikat di cart
+  if (state.cart[finalKode]) {
+    toast.warning('Kode "' + finalKode + '" sudah ada di keranjang. Ganti kode.');
+    $('mfKode')?.focus();
+    return;
+  }
+
+  // Tambah ke cart (bareng barang katalog)
+  state.cart[finalKode] = {
+    kode: finalKode,
+    nama: nama,
+    kategori: kategori,
+    harga: 0, // Manual selalu 0
+    satuan: satuan,
+    qty: qty,
+    stokSistem: 0,
+    stokGudang: Math.max(0, toInt(stokGudang, 0)),
+    stokToko: Math.max(0, toInt(stokToko, 0)),
+    isManual: true,  // ★ Flag manual
+    catatanItem: '',
+  };
+
+  toast.success('"' + nama + '" ditambahkan ke keranjang.', { duration: 2000 });
+
+  // Reset form
+  $('mfNama').value = '';
+  $('mfKode').value = '';
+  $('mfQty').value = 1;
+  $('mfStokGudang').value = '';
+  $('mfStokToko').value = '';
+  $('mfNama')?.focus();
+
+  // Update UI
+  updateCartUi(state);
+  renderManualAddedList(state);
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// RENDER MANUAL ADDED LIST
+// ─────────────────────────────────────────────────────────────────────────
+
+function renderManualAddedList(state) {
+
+  var wrapper = $('manualAddedList');
+  if (!wrapper) return;
+
+  // Filter cart untuk barang manual saja
+  var manualItems = Object.values(state.cart).filter(function (i) {
+    return i.isManual;
+  });
+
+  if (!manualItems.length) {
+    wrapper.innerHTML = ''
+      + '<div class="empty-state" style="border: 1px dashed var(--line-soft); border-radius: 14px; padding: 30px 20px;">'
+      + '<div class="empty-icon" style="opacity:0.4;">'
+      + icon('edit', { size: 40, color: 'var(--muted)' })
+      + '</div>'
+      + '<div style="font-size: 13px;">Belum ada barang manual di keranjang.</div>'
+      + '</div>';
+    return;
+  }
+
+  wrapper.innerHTML = manualItems.map(function (item) {
+    return ''
+      + '<article class="manual-added-item">'
+      + '<div class="manual-added-icon">'
+      + icon('edit', { size: 18, color: 'var(--warning)' })
+      + '</div>'
+      + '<div class="manual-added-info">'
+      + '<div class="manual-added-name">'
+      + escapeHtml(item.nama)
+      + ' <span class="manual-badge">MANUAL</span>'
+      + '</div>'
+      + '<div class="manual-added-meta">'
+      + escapeHtml(item.kode) + ' · ' + escapeHtml(item.kategori) + ' · '
+      + item.qty + ' ' + escapeHtml(item.satuan)
+      + '</div>'
+      + '<div class="manual-added-stock">'
+      + icon('warehouse', { size: 10 }) + ' Gudang: <b>' + item.stokGudang + '</b> · '
+      + icon('store', { size: 10 }) + ' Toko: <b>' + item.stokToko + '</b>'
+      + '</div>'
+      + '</div>'
+      + '<button class="manual-added-delete" type="button" data-manual-remove="' + escapeHtml(item.kode) + '" title="Hapus">'
+      + icon('trash', { size: 14 })
+      + '</button>'
+      + '</article>';
+  }).join('');
+
+  // Bind delete buttons
+  wrapper.querySelectorAll('[data-manual-remove]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var code = btn.dataset.manualRemove;
+      delete state.cart[code];
+      updateCartUi(state);
+      renderManualAddedList(state);
+      toast.info('Dihapus dari keranjang.', { duration: 1500 });
+    });
+  });
 }
