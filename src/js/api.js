@@ -459,6 +459,16 @@ export const orders = {
         timeout: 45000,
       }
     );
+       // ★ RESET semua order (butuh password admin)
+  resetAll({ password, idCabang }) {
+    clearCache('getOrders');
+    clearLSCache('getOrders');
+    return callApi(
+      'resetAllOrders',
+      { password, idCabang },
+      { dedupe: false, timeout: 60000 }
+    );
+  },
   },
 
   // ★ FAST: Stale-while-revalidate untuk orders
