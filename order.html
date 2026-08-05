@@ -2147,6 +2147,51 @@
       border-color: #3b82f6 !important;
       background: rgba(59, 130, 246, 0.05);
     }
+
+        /* ═══ GAMBAR PRODUK DI CARD ═══ */
+
+    .item-image-wrap {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 8px;
+      background: var(--ink-3);
+      position: relative;
+    }
+
+    .item-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s ease;
+    }
+
+    .item-card:hover .item-image {
+      transform: scale(1.05);
+    }
+
+    .item-icon-fallback {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      place-items: center;
+      background: var(--orange-dim);
+      color: var(--orange);
+    }
+
+    /* Kalau gambar ada, icon fallback hidden */
+    .item-image + .item-icon-fallback {
+      display: none;
+    }
+
+    /* Mobile: aspect ratio lebih kecil */
+    @media (max-width: 480px) {
+      .item-image-wrap {
+        aspect-ratio: 4/3;
+      }
+    }
   </style>
 </head>
 
