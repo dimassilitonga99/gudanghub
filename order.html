@@ -2148,7 +2148,7 @@
       background: rgba(59, 130, 246, 0.05);
     }
 
-        /* ═══ GAMBAR PRODUK WebP Transparan (BESAR) ═══ */
+      /* ═══ GAMBAR PRODUK — Hover Switch (gambar 1 → gambar 2) ═══ */
 
     .item-image-wrap {
       width: 100%;
@@ -2165,20 +2165,51 @@
       justify-content: center;
     }
 
-    .item-image {
+    /* Gambar utama */
+    .item-image-main {
       max-width: 90%;
       max-height: 90%;
       object-fit: contain;
       display: block;
       filter: drop-shadow(0 2px 8px rgba(255, 107, 0, 0.15));
-      transition: transform 0.3s ease, filter 0.3s ease;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      position: relative;
+      z-index: 2;
     }
 
-    .item-card:hover .item-image {
+    /* Gambar hover (kedua) — hidden by default */
+    .item-image-hover {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.95);
+      max-width: 90%;
+      max-height: 90%;
+      object-fit: contain;
+      opacity: 0;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      filter: drop-shadow(0 4px 16px rgba(255, 107, 0, 0.25));
+      z-index: 1;
+    }
+
+    /* Hover: gambar utama hilang, gambar kedua muncul */
+    .item-image-wrap:hover .item-image-main {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+
+    .item-image-wrap:hover .item-image-hover {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    /* Kalau tidak ada gambar hover, tetap zoom gambar utama */
+    .item-image-wrap:not(:has(.item-image-hover)):hover .item-image-main {
+      opacity: 1;
       transform: scale(1.08);
-      filter: drop-shadow(0 4px 16px rgba(255, 107, 0, 0.3));
     }
 
+    /* Fallback icon */
     .item-icon-fallback {
       width: 100%;
       height: 100%;
@@ -2189,8 +2220,20 @@
       border-radius: 12px;
     }
 
-    .item-image + .item-icon-fallback {
+    .item-image-main + .item-image-hover + .item-icon-fallback {
       display: none;
+    }
+
+    /* Mobile: disable hover effect (tidak ada mouse) */
+    @media (hover: none) {
+      .item-image-hover {
+        display: none !important;
+      }
+
+      .item-image-wrap:hover .item-image-main {
+        opacity: 1;
+        transform: none;
+      }
     }
 
     @media (max-width: 480px) {
