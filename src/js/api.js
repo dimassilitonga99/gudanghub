@@ -2,8 +2,7 @@
    API — v3.6 Ultra Fast + Reliable + Reset Orders
    ═══════════════════════════════════════════════════════════════════════ */
 
-import { auth, prewarmAppScript } from '../api.js';
-import { API_URL } from '../config.js';
+import { API_URL, SETTINGS } from './config.js';
 
 // ─────────────────────────────────────────────────────────────────────────
 // STATE
