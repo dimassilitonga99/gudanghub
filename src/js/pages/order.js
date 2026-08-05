@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   ORDER PAGE — v3.5 Fast Load with Cache
+   ORDER PAGE — v3.7 Persistent Cart + Server Sync
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, getQueryParam } from '../utils.js';
@@ -17,14 +17,14 @@ import { icon, injectIcons } from '../icons.js';
 import { renderCatalogPage, initCatalog } from './order-pages/catalog-page.js';
 import { renderMassOrderPage, initMassOrder } from './order-pages/mass-order-page.js';
 import { renderHistoryPage, initHistory } from './order-pages/history-page.js';
-import { initCart } from './order-pages/cart.js';
+import { initCart, updateCartUi, loadCartLocal, loadCartServer } from './order-pages/cart.js';
 import { initPreOrderDialog } from './order-pages/pre-order-dialog.js';
 
 // ─────────────────────────────────────────────────────────────────────────
 // STATE
 // ─────────────────────────────────────────────────────────────────────────
 
-export const state = {
+export var state = {
   session: null,
   branchId: '',
   branchName: '',
@@ -43,7 +43,7 @@ export const state = {
 // ─────────────────────────────────────────────────────────────────────────
 
 function initSession() {
-  const s = getSession();
+  var s = getSession();
 
   if (!s || !isSessionValid(s)) {
     redirectToLogin();
@@ -60,33 +60,34 @@ function initSession() {
     return false;
   }
 
-  const sessionCabang = String(s.idCabang || '').trim().toUpperCase();
+  var sessionCabang = String(s.idCabang || '').trim().toUpperCase();
 
   if (!sessionCabang) {
     sessionLogout(true);
     return false;
   }
 
-  const urlBranch = String(getQueryParam('cabang') || '').trim().toUpperCase();
+  var urlBranch = String(getQueryParam('cabang') || '').trim().toUpperCase();
 
   if (urlBranch && urlBranch !== sessionCabang) {
+    console.warn('[SECURITY] URL cabang mismatch:', urlBranch, 'vs session:', sessionCabang);
     sessionLogout(true);
     return false;
   }
 
   state.session = s;
   state.branchId = sessionCabang;
-  state.branchName = s.nama || (CABANG[sessionCabang]?.nama) || sessionCabang;
-  state.branchPic = (CABANG[sessionCabang]?.pic) || s.nama || '-';
+  state.branchName = s.nama || (CABANG[sessionCabang] ? CABANG[sessionCabang].nama : sessionCabang);
+  state.branchPic = (CABANG[sessionCabang] ? CABANG[sessionCabang].pic : '') || s.nama || '-';
 
-  const expectedUrl = `?cabang=${sessionCabang}`;
+  var expectedUrl = '?cabang=' + sessionCabang;
   if (window.location.search !== expectedUrl) {
-    window.history.replaceState({}, '', `./order.html${expectedUrl}${window.location.hash}`);
+    window.history.replaceState({}, '', './order.html' + expectedUrl + window.location.hash);
   }
 
-  const label = $('branchLabel');
+  var label = $('branchLabel');
   if (label) {
-    label.textContent = `${state.branchId} · ${state.branchPic}`;
+    label.textContent = state.branchId + ' · ' + state.branchPic;
   }
 
   return true;
@@ -101,29 +102,29 @@ function showTab(tabName) {
 
   state.currentTab = tabName;
 
-  document.querySelectorAll('.nav-tab').forEach((tab) => {
+  document.querySelectorAll('.nav-tab').forEach(function (tab) {
     tab.classList.toggle('active', tab.dataset.tab === tabName);
   });
 
-  document.querySelectorAll('.page').forEach((page) => {
+  document.querySelectorAll('.page').forEach(function (page) {
     page.classList.remove('active');
   });
 
-  const pageMap = {
+  var pageMap = {
     catalog: 'catalogPage',
     massOrder: 'massOrderPage',
     history: 'historyPage',
   };
 
-  const activePage = $(pageMap[tabName]);
+  var activePage = $(pageMap[tabName]);
   if (activePage) activePage.classList.add('active');
 
-  requestAnimationFrame(() => injectIcons());
+  requestAnimationFrame(function () { injectIcons(); });
   window.scrollTo(0, 0);
 
   if (tabName === 'history') {
-    import('./order-pages/history-page.js').then(({ loadHistory }) => {
-      loadHistory(state);
+    import('./order-pages/history-page.js').then(function (mod) {
+      mod.loadHistory(state);
     });
   }
 
@@ -131,15 +132,12 @@ function showTab(tabName) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// LOAD CATALOG — FAST dengan Stale-While-Revalidate
+// LOAD CATALOG
 // ─────────────────────────────────────────────────────────────────────────
 
 export async function loadCatalog() {
-
   try {
-    // ★ FAST LOAD: langsung dari cache (INSTANT) + refresh di background
-    const result = await katalogApi.getAllFast(function (freshResult) {
-      // Callback saat data fresh datang → update state + UI
+    var result = await katalogApi.getAllFast(function (freshResult) {
       if (freshResult && freshResult.status === 'ok') {
         console.log('[Catalog] Fresh data received in background');
         state.allProducts = freshResult.data || [];
@@ -156,7 +154,6 @@ export async function loadCatalog() {
     rebuildProductMap();
     updateCatalogUI();
 
-    // Info kalau dari cache
     if (result._fromCache) {
       console.log('[Catalog] Loaded from cache (age:', Math.round(result._cacheAge / 1000), 's)');
     }
@@ -165,19 +162,18 @@ export async function loadCatalog() {
     console.error('[Catalog] Load error:', error);
     toast.error('Gagal memuat katalog: ' + error.message);
 
-    const grid = document.querySelector('#catalogPage .catalog-grid');
+    var grid = document.querySelector('#catalogPage .catalog-grid');
     if (grid) {
-      grid.innerHTML = `
-        <div class="empty-state">
-          <div class="empty-icon">${icon('alert-triangle', { size: 48, color: 'var(--danger)' })}</div>
-          <p>Gagal memuat katalog.</p>
-          <p style="font-size: 12px; color: var(--muted); margin-top: 8px;">${error.message}</p>
-          <button class="secondary-button" id="retryCatalogBtn" type="button" style="margin-top: 16px;">
-            ${icon('refresh', { size: 14 })}
-            Coba Lagi
-          </button>
-        </div>
-      `;
+      grid.innerHTML = ''
+        + '<div class="empty-state">'
+        + '<div class="empty-icon">' + icon('alert-triangle', { size: 48, color: 'var(--danger)' }) + '</div>'
+        + '<p>Gagal memuat katalog.</p>'
+        + '<p style="font-size: 12px; color: var(--muted); margin-top: 8px;">' + error.message + '</p>'
+        + '<button class="secondary-button" id="retryCatalogBtn" type="button" style="margin-top: 16px;">'
+        + icon('refresh', { size: 14 })
+        + ' Coba Lagi'
+        + '</button>'
+        + '</div>';
       $('retryCatalogBtn')?.addEventListener('click', function () {
         loadCatalog();
       });
@@ -187,16 +183,16 @@ export async function loadCatalog() {
 
 function rebuildProductMap() {
   state.productByCode = {};
-  state.allProducts.forEach((product) => {
-    const code = String(product.KODE_BARANG || '').trim().toUpperCase();
+  state.allProducts.forEach(function (product) {
+    var code = String(product.KODE_BARANG || '').trim().toUpperCase();
     if (code) state.productByCode[code] = product;
   });
 }
 
 async function updateCatalogUI() {
   try {
-    const { updateCatalog } = await import('./order-pages/catalog-page.js');
-    updateCatalog(state);
+    var mod = await import('./order-pages/catalog-page.js');
+    mod.updateCatalog(state);
   } catch (e) {
     console.warn('[Catalog] Update UI failed:', e);
   }
@@ -207,10 +203,10 @@ async function updateCatalogUI() {
 // ─────────────────────────────────────────────────────────────────────────
 
 async function handleLogout() {
-  const ok = await confirm({
+  var ok = await confirm({
     icon: '🚪',
     title: 'Keluar dari GudangHub?',
-    message: 'Anda akan diarahkan ke halaman login.\n\nJika ada item di keranjang, akan hilang.',
+    message: 'Anda akan diarahkan ke halaman login.\n\nKeranjang tetap tersimpan.',
     okText: 'Ya, Keluar',
     okVariant: 'danger',
   });
@@ -225,29 +221,28 @@ async function handleLogout() {
 // ─────────────────────────────────────────────────────────────────────────
 
 function bindEvents() {
-  document.querySelectorAll('.nav-tab').forEach((tab) => {
-    tab.addEventListener('click', () => showTab(tab.dataset.tab));
+  document.querySelectorAll('.nav-tab').forEach(function (tab) {
+    tab.addEventListener('click', function () { showTab(tab.dataset.tab); });
   });
 
   $('logoutButton')?.addEventListener('click', handleLogout);
 
-  window.addEventListener('hashchange', () => {
-    const hash = window.location.hash.replace('#', '');
-    if (['catalog', 'massOrder', 'history'].includes(hash) && hash !== state.currentTab) {
+  window.addEventListener('hashchange', function () {
+    var hash = window.location.hash.replace('#', '');
+    if (['catalog', 'massOrder', 'history'].indexOf(hash) !== -1 && hash !== state.currentTab) {
       showTab(hash);
     }
   });
 
-  const sheet = $('cartSheet');
+  var sheet = $('cartSheet');
   if (sheet) {
-    sheet.addEventListener('touchmove', (e) => {
+    sheet.addEventListener('touchmove', function (e) {
       if (e.target.closest('.cart-items')) return;
       e.preventDefault();
     }, { passive: false });
   }
 
-  // Prewarm on visibility change (saat user kembali)
-  document.addEventListener('visibilitychange', () => {
+  document.addEventListener('visibilitychange', function () {
     if (!document.hidden) {
       prewarmAppScript();
     }
@@ -260,13 +255,20 @@ function bindEvents() {
 
 async function init() {
 
-  // ★ PREWARM AppScript DULU (fire & forget) — bangunkan cold start
   prewarmAppScript();
 
   if (!initSession()) return;
 
   injectIcons();
 
+  // ★ RESTORE CART: localStorage dulu (instant)
+  var savedCart = loadCartLocal();
+  if (savedCart && Object.keys(savedCart).length > 0) {
+    state.cart = savedCart;
+    console.log('[Cart] Restored', Object.keys(savedCart).length, 'items from local');
+  }
+
+  // Render pages
   $('catalogPage').innerHTML = renderCatalogPage(state);
   $('massOrderPage').innerHTML = renderMassOrderPage(state);
   $('historyPage').innerHTML = renderHistoryPage(state);
@@ -279,23 +281,59 @@ async function init() {
 
   bindEvents();
 
-  const initialTab = window.location.hash.replace('#', '') || 'catalog';
-  const validTab = ['catalog', 'massOrder', 'history'].includes(initialTab)
+  var initialTab = window.location.hash.replace('#', '') || 'catalog';
+  var validTab = ['catalog', 'massOrder', 'history'].indexOf(initialTab) !== -1
     ? initialTab
     : 'catalog';
 
   if (validTab !== 'catalog') {
     showTab(validTab);
   } else {
-    requestAnimationFrame(() => injectIcons());
+    requestAnimationFrame(function () { injectIcons(); });
   }
 
-  // Load catalog (fast dari cache dulu)
+  // Load catalog
   await loadCatalog();
 
+  // ★ BACKGROUND: Load cart dari server (sync antar device)
+  loadCartServer().then(function (serverCart) {
+    if (!serverCart || Object.keys(serverCart).length === 0) return;
+
+    var localCount = Object.keys(state.cart).length;
+    var serverCount = Object.keys(serverCart).length;
+
+    var needUpdate = false;
+
+    if (localCount === 0 && serverCount > 0) {
+      // Local kosong, pakai server
+      state.cart = serverCart;
+      needUpdate = true;
+      console.log('[Cart] Using server cart (' + serverCount + ' items)');
+    } else if (serverCount > localCount) {
+      // Server lebih banyak → merge (tambah yang belum ada)
+      Object.keys(serverCart).forEach(function (key) {
+        if (!state.cart[key]) {
+          state.cart[key] = serverCart[key];
+        }
+      });
+      needUpdate = true;
+      console.log('[Cart] Merged server cart (total: ' + Object.keys(state.cart).length + ')');
+    }
+
+    if (needUpdate) {
+      updateCartUi(state);
+
+      import('./order-pages/catalog-page.js').then(function (catMod) {
+        catMod.updateCatalog(state);
+      }).catch(function () {});
+    }
+  }).catch(function () {});
+
+  // Load history kalau tab aktif
   if (validTab === 'history') {
-    const { loadHistory } = await import('./order-pages/history-page.js');
-    loadHistory(state);
+    import('./order-pages/history-page.js').then(function (mod) {
+      mod.loadHistory(state);
+    });
   }
 }
 
@@ -305,4 +343,4 @@ if (document.readyState === 'loading') {
   init();
 }
 
-window.__gudangHubOrder = { state, loadCatalog, showTab };
+window.__gudangHubOrder = { state: state, loadCatalog: loadCatalog, showTab: showTab };
