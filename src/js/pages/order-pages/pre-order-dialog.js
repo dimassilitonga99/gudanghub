@@ -1,6 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   PRE-ORDER DIALOG — Nomor Order Custom + Tanggal + Preview
-   Muncul SEBELUM kirim order ke gudang
+   PRE-ORDER DIALOG — dengan Catatan Item di Preview
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, escapeHtml, parseAnyDate, toNumber } from '../../utils.js';
@@ -10,14 +9,14 @@ import { icon } from '../../icons.js';
 var ITEMS_PER_PAGE = 20;
 
 var dialogState = {
-  items: [],       // items yang akan di-order
+  items: [],
   branchId: '',
   catatan: '',
   pages: [],
-  nomorMode: 'auto',    // 'auto' atau 'manual'
+  nomorMode: 'auto',
   nomorManual: '',
-  tanggalMode: 'today', // 'today' atau 'tomorrow'
-  onConfirm: null,      // callback saat user klik "Kirim ke Gudang"
+  tanggalMode: 'today',
+  onConfirm: null,
 };
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -36,7 +35,6 @@ export function initPreOrderDialog() {
     + '<div class="overlay pre-order-overlay" id="preOrderOverlay" role="dialog" aria-modal="true">'
     + '<div class="modal modal-xl pre-order-modal">'
 
-    // Header
     + '<header class="modal-header pre-order-header">'
     + '<div class="modal-title" id="preOrderTitle">'
     + icon('file', { size: 20, color: 'var(--orange)' })
@@ -61,10 +59,8 @@ export function initPreOrderDialog() {
     + '</div>'
     + '</header>'
 
-    // Body
     + '<div class="modal-body pre-order-body">'
 
-    // ══ SETTINGS PANEL (Nomor + Tanggal) ══
     + '<div class="preorder-settings">'
 
     + '<div class="preorder-setting-group">'
@@ -111,7 +107,6 @@ export function initPreOrderDialog() {
 
     + '</div>'
 
-    // ══ PREVIEW AREA ══
     + '<div class="preorder-preview" id="preOrderPreview"></div>'
 
     + '</div>'
@@ -121,7 +116,6 @@ export function initPreOrderDialog() {
 
   addPreOrderStyles();
 
-  // Event listeners
   $('preOrderClose')?.addEventListener('click', closePreOrderDialog);
   $('btnPreOrderJpg')?.addEventListener('click', downloadJpg);
   $('btnPreOrderSend')?.addEventListener('click', confirmSend);
@@ -132,7 +126,6 @@ export function initPreOrderDialog() {
     }
   });
 
-  // Radio nomor
   $('radioAuto')?.addEventListener('change', function () {
     dialogState.nomorMode = 'auto';
     $('nomorManualInput').style.display = 'none';
@@ -157,7 +150,6 @@ export function initPreOrderDialog() {
     updatePreview();
   });
 
-  // Radio tanggal
   $('radioToday')?.addEventListener('change', function () {
     dialogState.tanggalMode = 'today';
     $('tanggalCustomInput').style.display = 'none';
@@ -186,7 +178,6 @@ export function initPreOrderDialog() {
     $('radioTomorrowLabel').classList.remove('active');
     $('radioCustomLabel').classList.add('active');
 
-    // Default: today
     if (!$('tanggalCustomInput').value) {
       var today = new Date();
       $('tanggalCustomInput').value = today.toISOString().split('T')[0];
@@ -217,18 +208,13 @@ function addPreOrderStyles() {
     + '.pre-order-modal { max-width: 950px !important; background: #f0f0f0 !important; padding: 0 !important; max-height: calc(100dvh - 40px) !important; }'
     + '.pre-order-header { background: var(--ink-2) !important; color: var(--text) !important; padding: 12px 20px !important; display: flex; align-items: center; justify-content: space-between; gap: 8px; }'
     + '.pre-order-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }'
-
     + '.btn-preorder-jpg { background: linear-gradient(135deg, #16a34a, #15803d); color: #fff; border: 0; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-family: inherit; transition: transform 0.15s; }'
     + '.btn-preorder-jpg:hover { transform: translateY(-1px); }'
     + '.btn-preorder-jpg.loading { opacity: 0.7; pointer-events: none; }'
-
     + '.btn-preorder-send { background: linear-gradient(135deg, var(--orange), var(--orange-light)); color: #fff; border: 0; padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-family: inherit; transition: transform 0.15s; box-shadow: 0 4px 12px rgba(255,107,0,0.3); }'
     + '.btn-preorder-send:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,107,0,0.5); }'
     + '.btn-preorder-send:disabled { opacity: 0.6; cursor: not-allowed; }'
-
     + '.pre-order-body { background: #e0e0e0 !important; padding: 0 !important; overflow-y: auto; }'
-
-    // Settings panel
     + '.preorder-settings { background: var(--ink-2); padding: 20px; border-bottom: 2px solid var(--orange); display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }'
     + '.preorder-setting-group { display: flex; flex-direction: column; gap: 8px; }'
     + '.preorder-label { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: var(--orange); text-transform: uppercase; letter-spacing: 0.05em; }'
@@ -240,13 +226,10 @@ function addPreOrderStyles() {
     + '.preorder-input { background: var(--ink-3); border: 1px solid var(--line-soft); border-radius: 8px; padding: 10px 14px; color: var(--text); font-family: inherit; font-size: 14px; outline: none; min-height: 42px; transition: border-color 0.15s; }'
     + '.preorder-input:focus { border-color: var(--orange); }'
     + '.preorder-hint { font-size: 11px; color: var(--muted); font-style: italic; }'
-
-    // Preview area
     + '.preorder-preview { padding: 20px; }'
     + '.preorder-page { background: #fff; color: #000; padding: 28px 32px; max-width: 850px; margin: 0 auto 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); font-family: Arial, sans-serif; font-size: 14px; min-height: 500px; page-break-after: always; }'
     + '.preorder-page:last-child { page-break-after: auto; margin-bottom: 0; }'
     + '.preorder-page-badge { display: inline-block; padding: 3px 10px; background: #ff6b00; color: #fff; border-radius: 4px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; }'
-
     + '@media (max-width: 768px) {'
     + '  .pre-order-modal { max-width: calc(100vw - 24px) !important; }'
     + '  .preorder-settings { grid-template-columns: 1fr; padding: 14px; }'
@@ -263,21 +246,17 @@ function addPreOrderStyles() {
 
 export function showPreOrderDialog(config) {
 
-  if (!config || !config.items || !config.items.length) {
-    return;
-  }
+  if (!config || !config.items || !config.items.length) return;
 
   dialogState.items = config.items;
   dialogState.branchId = config.branchId || '';
   dialogState.catatan = config.catatan || '';
   dialogState.onConfirm = config.onConfirm || null;
 
-  // Reset settings
   dialogState.nomorMode = 'auto';
   dialogState.nomorManual = '';
   dialogState.tanggalMode = 'today';
 
-  // Reset radio buttons
   var radioAuto = $('radioAuto');
   var radioToday = $('radioToday');
   if (radioAuto) radioAuto.checked = true;
@@ -297,10 +276,8 @@ export function showPreOrderDialog(config) {
   $('nomorHint').textContent = 'Nomor akan di-generate otomatis dari sistem';
   $('tanggalHint').textContent = 'Form akan menggunakan tanggal hari ini';
 
-  // Split items ke pages
   dialogState.pages = chunkArray(dialogState.items, ITEMS_PER_PAGE);
 
-  // Update JPG button text
   var jpgText = $('btnPreOrderJpgText');
   if (jpgText) {
     if (dialogState.pages.length > 1) {
@@ -332,7 +309,7 @@ function chunkArray(arr, size) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// GET NOMOR ORDER (dari input atau auto)
+// GET NOMOR & TANGGAL
 // ─────────────────────────────────────────────────────────────────────────
 
 function getNomorOrder() {
@@ -341,11 +318,8 @@ function getNomorOrder() {
     return dialogState.nomorManual || '01';
   }
 
-  // Auto: dari cache atau default
   try {
     var cachedOrders = window.__cabangOrdersCache || [];
-
-    // Filter bulan ini
     var now = new Date();
     var targetMonth = now.getMonth();
     var targetYear = now.getFullYear();
@@ -363,10 +337,6 @@ function getNomorOrder() {
     return '01';
   }
 }
-
-// ─────────────────────────────────────────────────────────────────────────
-// GET TANGGAL ORDER
-// ─────────────────────────────────────────────────────────────────────────
 
 function getTanggalOrder() {
 
@@ -429,7 +399,7 @@ function updatePreview() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// BUILD 1 HALAMAN
+// BUILD 1 HALAMAN — dengan Catatan Item
 // ─────────────────────────────────────────────────────────────────────────
 
 function buildPageHtml(params) {
@@ -475,7 +445,14 @@ function buildPageHtml(params) {
     var nama = escapeHtml((item.nama || '').toUpperCase());
     var jenis = escapeHtml(String(item.kategori || 'ELEKTRONIK').toUpperCase());
 
-    // Badge untuk barang manual
+    // ★ Catatan Item (di samping/bawah nama)
+    var catatanHtml = '';
+    if (item.catatanItem && item.catatanItem.trim()) {
+      catatanHtml = ' <span style="color:#DC2626; font-weight:800; font-style:italic;">('
+        + escapeHtml(item.catatanItem.trim())
+        + ')</span>';
+    }
+
     var manualBadge = '';
     if (item.isManual) {
       manualBadge = ' <span style="display:inline-block; padding:2px 6px; background:#f59e0b; color:#fff; border-radius:3px; font-size:9px; font-weight:700;">MANUAL</span>';
@@ -488,7 +465,9 @@ function buildPageHtml(params) {
       + '<td style="padding:5px 4px; text-align:center; border:1px solid #000; font-size:15px; font-weight:700; vertical-align:middle; line-height:1.2;">' + stokR + '</td>'
       + '<td style="padding:5px 4px; text-align:center; border:1px solid #000; font-size:15px; vertical-align:middle; color:#00B050; font-weight:800; line-height:1.2;">' + qty + ' ' + sat + '</td>'
       + '<td style="padding:5px 8px; text-align:center; border:1px solid #000; font-size:13px; font-weight:700; vertical-align:middle; line-height:1.2;">' + kode + manualBadge + '</td>'
-      + '<td style="padding:5px 8px; text-align:center; border:1px solid #000; font-size:13px; font-weight:700; vertical-align:middle; line-height:1.3;">' + nama + '</td>'
+      + '<td style="padding:5px 8px; text-align:center; border:1px solid #000; font-size:13px; font-weight:700; vertical-align:middle; line-height:1.3;">'
+      + nama + catatanHtml
+      + '</td>'
       + '<td style="padding:5px 6px; text-align:center; border:1px solid #000; font-size:13px; vertical-align:middle; font-weight:800; line-height:1.2;">' + jenis + '</td>'
       + '</tr>';
 
@@ -663,23 +642,20 @@ async function downloadJpg() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// CONFIRM SEND (kirim ke gudang)
+// CONFIRM SEND
 // ─────────────────────────────────────────────────────────────────────────
 
 async function confirmSend() {
 
-  // Validasi nomor manual
   if (dialogState.nomorMode === 'manual' && !dialogState.nomorManual) {
     alert('Nomor order manual wajib diisi.');
     $('nomorManualInput')?.focus();
     return;
   }
 
-  // Get final values
   var finalNomor = getNomorOrder();
   var finalTanggal = getTanggalOrder();
 
-  // Callback ke pemanggil (cart.js atau mass-order-page.js)
   if (typeof dialogState.onConfirm === 'function') {
 
     var btn = $('btnPreOrderSend');
@@ -696,7 +672,6 @@ async function confirmSend() {
         tanggalMode: dialogState.tanggalMode,
       });
 
-      // Sukses → close dialog
       closePreOrderDialog();
 
     } catch (err) {
