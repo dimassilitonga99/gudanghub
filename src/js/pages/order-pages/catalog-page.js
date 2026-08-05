@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   CATALOG PAGE — dengan Tab "Barang Manual" (untuk barang baru)
-   Cart terpadu: barang katalog + barang manual dalam 1 keranjang
+   CATALOG PAGE — dengan Tab "Barang Manual"
+   Kode barang manual tampil apa adanya (tanpa badge MANUAL)
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, escapeHtml, formatRupiah, debounce, toInt, unique } from '../../utils.js';
@@ -66,7 +66,7 @@ export function renderCatalogPage(state) {
       </div>
     </div>
 
-    <!-- ══ MANUAL FORM (hidden, muncul saat tab Manual aktif) ══ -->
+    <!-- MANUAL FORM (hidden, muncul saat tab Manual aktif) -->
     <div id="manualFormWrapper" style="display: none;"></div>
   `;
 }
@@ -82,6 +82,14 @@ export function initCatalog(state) {
   if (searchInput) {
     var handleSearch = debounce(function (e) {
       localState.searchQuery = e.target.value;
+
+      // Kalau sedang di tab manual, switch ke semua dulu
+      if (localState.activeCategory === '__MANUAL__') {
+        localState.activeCategory = '';
+        hideManualForm();
+        buildCategoryFilters(state);
+      }
+
       filterCatalog(state);
       renderCatalog(state);
     }, 200);
@@ -89,7 +97,7 @@ export function initCatalog(state) {
     searchInput.addEventListener('input', handleSearch);
   }
 
-  // ★ Filter chips — termasuk "Barang Manual"
+  // Filter chips — termasuk "Barang Manual"
   $('filterScroll')?.addEventListener('click', function (e) {
     var chip = e.target.closest('[data-category]');
     if (!chip) return;
@@ -154,8 +162,12 @@ export function initCatalog(state) {
 
 export function updateCatalog(state) {
   buildCategoryFilters(state);
-  filterCatalog(state);
-  renderCatalog(state);
+
+  // Jangan render katalog kalau sedang di tab manual
+  if (localState.activeCategory !== '__MANUAL__') {
+    filterCatalog(state);
+    renderCatalog(state);
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -229,6 +241,10 @@ function renderCatalog(state) {
   var label = $('sectionLabel');
   if (!grid) return;
 
+  // Pastikan grid visible (kalau baru dari tab manual)
+  grid.style.display = '';
+  if (label) label.style.display = '';
+
   var count = localState.visibleProducts.length;
   var firstBatch = localState.visibleProducts.slice(0, localState.itemsPerPage);
   var remaining = count - firstBatch.length;
@@ -259,6 +275,7 @@ function renderCatalog(state) {
       localState.activeCategory = '';
       var searchInput = $('searchInput');
       if (searchInput) searchInput.value = '';
+      hideManualForm();
       buildCategoryFilters(state);
       filterCatalog(state);
       renderCatalog(state);
@@ -417,6 +434,7 @@ function addItemToCart(state, code) {
     stokGudang: '',
     stokToko: '',
     isManual: false,
+    catatanItem: '',
   };
 
   updateCartUi(state);
@@ -454,7 +472,7 @@ function setQty(state, code, value) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// ★ MANUAL FORM — Tampilkan form ketik barang baru
+// MANUAL FORM — Tampilkan form ketik barang baru
 // ═══════════════════════════════════════════════════════════════════════
 
 function showManualForm(state) {
@@ -488,7 +506,7 @@ function showManualForm(state) {
     + '<div class="manual-form-row">'
     + '<div class="manual-field">'
     + '<label class="manual-label">Kode Barang (opsional)</label>'
-    + '<input type="text" class="manual-input" id="mfKode" placeholder="Kosongkan untuk auto-generate">'
+    + '<input type="text" class="manual-input" id="mfKode" placeholder="Kosongkan atau isi - atau 0">'
     + '</div>'
     + '<div class="manual-field">'
     + '<label class="manual-label">Kategori</label>'
@@ -609,29 +627,36 @@ function addManualToCart(state) {
     return;
   }
 
-  // Auto-generate kode kalau kosong
-  var finalKode = kode || ('MAN-' + Date.now().toString().slice(-6));
+  // Kode sesuai yang user ketik (bisa -, 0, kosong)
+  var displayKode = kode || '-';
 
-  // Cek duplikat di cart
-  if (state.cart[finalKode]) {
-    toast.warning('Kode "' + finalKode + '" sudah ada di keranjang. Ganti kode.');
+  // Cart key harus unique (untuk internal tracking)
+  var cartKey = kode;
+  if (!cartKey || cartKey === '-' || cartKey === '0') {
+    cartKey = '_manual_' + Date.now().toString().slice(-8) + '_' + Math.random().toString(36).slice(2, 6);
+  }
+
+  // Cek duplikat di cart (hanya untuk kode yang spesifik/user-defined)
+  if (kode && kode !== '-' && kode !== '0' && state.cart[cartKey]) {
+    toast.warning('Kode "' + kode + '" sudah ada di keranjang. Ganti kode.');
     $('mfKode')?.focus();
     return;
   }
 
   // Tambah ke cart (bareng barang katalog)
-  state.cart[finalKode] = {
-    kode: finalKode,
+  state.cart[cartKey] = {
+    kode: displayKode,  // Tampilkan kode apa adanya
     nama: nama,
     kategori: kategori,
-    harga: 0, // Manual selalu 0
+    harga: 0,
     satuan: satuan,
     qty: qty,
     stokSistem: 0,
     stokGudang: Math.max(0, toInt(stokGudang, 0)),
     stokToko: Math.max(0, toInt(stokToko, 0)),
-    isManual: true,  // ★ Flag manual
+    isManual: true,
     catatanItem: '',
+    _cartKey: cartKey,  // Internal key
   };
 
   toast.success('"' + nama + '" ditambahkan ke keranjang.', { duration: 2000 });
@@ -659,9 +684,18 @@ function renderManualAddedList(state) {
   if (!wrapper) return;
 
   // Filter cart untuk barang manual saja
-  var manualItems = Object.values(state.cart).filter(function (i) {
-    return i.isManual;
-  });
+  var manualItems = [];
+  var cartKeys = Object.keys(state.cart);
+
+  for (var i = 0; i < cartKeys.length; i++) {
+    var item = state.cart[cartKeys[i]];
+    if (item.isManual) {
+      manualItems.push({
+        item: item,
+        key: cartKeys[i],
+      });
+    }
+  }
 
   if (!manualItems.length) {
     wrapper.innerHTML = ''
@@ -674,37 +708,46 @@ function renderManualAddedList(state) {
     return;
   }
 
-  wrapper.innerHTML = manualItems.map(function (item) {
-    return ''
-      + '<article class="manual-added-item">'
-      + '<div class="manual-added-icon">'
-      + icon('edit', { size: 18, color: 'var(--warning)' })
-      + '</div>'
-      + '<div class="manual-added-info">'
-      + '<div class="manual-added-name">'
-      + escapeHtml(item.nama)
-      + ' <span class="manual-badge">MANUAL</span>'
-      + '</div>'
-      + '<div class="manual-added-meta">'
-      + escapeHtml(item.kode) + ' · ' + escapeHtml(item.kategori) + ' · '
-      + item.qty + ' ' + escapeHtml(item.satuan)
-      + '</div>'
-      + '<div class="manual-added-stock">'
-      + icon('warehouse', { size: 10 }) + ' Gudang: <b>' + item.stokGudang + '</b> · '
-      + icon('store', { size: 10 }) + ' Toko: <b>' + item.stokToko + '</b>'
-      + '</div>'
-      + '</div>'
-      + '<button class="manual-added-delete" type="button" data-manual-remove="' + escapeHtml(item.kode) + '" title="Hapus">'
-      + icon('trash', { size: 14 })
-      + '</button>'
-      + '</article>';
-  }).join('');
+  wrapper.innerHTML = ''
+    + '<div style="display: flex; gap: 8px; margin-bottom: 10px;">'
+    + '<span style="padding: 4px 12px; border-radius: 20px; background: rgba(245,158,11,0.15); color: var(--warning); font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">'
+    + icon('edit', { size: 12 })
+    + ' ' + manualItems.length + ' barang manual'
+    + '</span>'
+    + '</div>'
+    + manualItems.map(function (entry) {
+      var item = entry.item;
+      var key = entry.key;
+
+      return ''
+        + '<article class="manual-added-item">'
+        + '<div class="manual-added-icon">'
+        + icon('edit', { size: 18, color: 'var(--warning)' })
+        + '</div>'
+        + '<div class="manual-added-info">'
+        + '<div class="manual-added-name">'
+        + escapeHtml(item.nama)
+        + '</div>'
+        + '<div class="manual-added-meta">'
+        + 'Kode: ' + escapeHtml(item.kode) + ' · ' + escapeHtml(item.kategori) + ' · '
+        + item.qty + ' ' + escapeHtml(item.satuan)
+        + '</div>'
+        + '<div class="manual-added-stock">'
+        + icon('warehouse', { size: 10 }) + ' Gudang: <b>' + item.stokGudang + '</b> · '
+        + icon('store', { size: 10 }) + ' Toko: <b>' + item.stokToko + '</b>'
+        + '</div>'
+        + '</div>'
+        + '<button class="manual-added-delete" type="button" data-manual-remove="' + escapeHtml(key) + '" title="Hapus">'
+        + icon('trash', { size: 14 })
+        + '</button>'
+        + '</article>';
+    }).join('');
 
   // Bind delete buttons
   wrapper.querySelectorAll('[data-manual-remove]').forEach(function (btn) {
     btn.addEventListener('click', function () {
-      var code = btn.dataset.manualRemove;
-      delete state.cart[code];
+      var key = btn.dataset.manualRemove;
+      delete state.cart[key];
       updateCartUi(state);
       renderManualAddedList(state);
       toast.info('Dihapus dari keranjang.', { duration: 1500 });
