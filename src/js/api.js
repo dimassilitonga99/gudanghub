@@ -1,9 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   API — v3.5 Ultra Fast + Reliable
-   - LocalStorage cache (stale-while-revalidate)
-   - Prewarm AppScript
-   - Auto-retry dengan exponential backoff
-   - Parallel loading
+   API — v3.6 Ultra Fast + Reliable + Reset Orders
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { API_URL, SETTINGS } from './config.js';
@@ -15,13 +11,7 @@ import { API_URL, SETTINGS } from './config.js';
 const pendingRequests = new Map();
 const memCache = new Map();
 
-// LocalStorage cache prefix
 const LS_CACHE_PREFIX = 'gudanghub_cache_';
-const LS_CACHE_TTL = {
-  getBarang: 5 * 60 * 1000,        // 5 menit
-  getOrders: 60 * 1000,             // 1 menit
-  getCabang: 30 * 60 * 1000,        // 30 menit
-};
 
 // ─────────────────────────────────────────────────────────────────────────
 // LOCAL STORAGE CACHE
@@ -29,11 +19,11 @@ const LS_CACHE_TTL = {
 
 function getLSCache(action) {
   try {
-    const key = LS_CACHE_PREFIX + action;
-    const raw = localStorage.getItem(key);
+    var key = LS_CACHE_PREFIX + action;
+    var raw = localStorage.getItem(key);
     if (!raw) return null;
 
-    const parsed = JSON.parse(raw);
+    var parsed = JSON.parse(raw);
     if (!parsed || !parsed.time || !parsed.data) return null;
 
     return {
@@ -48,13 +38,12 @@ function getLSCache(action) {
 
 function setLSCache(action, data) {
   try {
-    const key = LS_CACHE_PREFIX + action;
+    var key = LS_CACHE_PREFIX + action;
     localStorage.setItem(key, JSON.stringify({
       time: Date.now(),
       data: data,
     }));
   } catch (e) {
-    // localStorage full, ignore
     console.warn('[API] LS cache write failed:', e.message);
   }
 }
@@ -64,8 +53,7 @@ export function clearLSCache(action) {
     if (action) {
       localStorage.removeItem(LS_CACHE_PREFIX + action);
     } else {
-      // Clear all
-      Object.keys(localStorage).forEach(k => {
+      Object.keys(localStorage).forEach(function (k) {
         if (k.startsWith(LS_CACHE_PREFIX)) {
           localStorage.removeItem(k);
         }
@@ -89,7 +77,7 @@ export function parseResponse(text) {
     // continue
   }
 
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  var jsonMatch = text.match(/\{[\s\S]*\}/);
   if (jsonMatch) {
     try {
       return JSON.parse(jsonMatch[0]);
@@ -98,11 +86,11 @@ export function parseResponse(text) {
     }
   }
 
-  const lower = text.toLowerCase();
+  var lower = text.toLowerCase();
   if (lower.includes('sign in') || lower.includes('accounts.google')) {
     return {
       status: 'error',
-      message: 'Server AppScript butuh login. Cek deployment access ke "Anyone".'
+      message: 'Server AppScript butuh login. Cek deployment access ke "Anyone".',
     };
   }
 
@@ -116,15 +104,16 @@ export function parseResponse(text) {
 // FETCH WITH TIMEOUT
 // ─────────────────────────────────────────────────────────────────────────
 
-async function fetchWithTimeout(url, options = {}, timeout = 45000) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeout);
+async function fetchWithTimeout(url, options, timeout) {
+  if (!timeout) timeout = 45000;
+
+  var controller = new AbortController();
+  var timer = setTimeout(function () { controller.abort(); }, timeout);
 
   try {
-    const response = await fetch(url, {
-      ...options,
+    var response = await fetch(url, Object.assign({}, options, {
       signal: controller.signal,
-    });
+    }));
     clearTimeout(timer);
     return response;
   } catch (error) {
@@ -140,112 +129,108 @@ async function fetchWithTimeout(url, options = {}, timeout = 45000) {
 // LOW-LEVEL API CALLS
 // ─────────────────────────────────────────────────────────────────────────
 
-async function apiPostForm(action, payload = {}, timeout) {
-  const body = JSON.stringify({ ...payload, action });
+async function apiPostForm(action, payload, timeout) {
+  var body = JSON.stringify(Object.assign({}, payload, { action: action }));
 
-  const formData = new FormData();
+  var formData = new FormData();
   formData.append('payload', body);
 
-  const response = await fetchWithTimeout(
+  var response = await fetchWithTimeout(
     API_URL,
     { method: 'POST', body: formData },
     timeout
   );
 
-  const text = await response.text();
+  var text = await response.text();
   return parseResponse(text);
 }
 
-async function apiGetQuery(action, payload = {}, timeout) {
-  const body = JSON.stringify({ ...payload, action });
-  const url = `${API_URL}?action=${encodeURIComponent(action)}&payload=${encodeURIComponent(body)}&t=${Date.now()}`;
+async function apiGetQuery(action, payload, timeout) {
+  var body = JSON.stringify(Object.assign({}, payload, { action: action }));
+  var url = API_URL + '?action=' + encodeURIComponent(action) + '&payload=' + encodeURIComponent(body) + '&t=' + Date.now();
 
   if (url.length > 7000) {
     throw new Error('Payload terlalu besar.');
   }
 
-  const response = await fetchWithTimeout(url, { cache: 'no-store' }, timeout);
-  const text = await response.text();
+  var response = await fetchWithTimeout(url, { cache: 'no-store' }, timeout);
+  var text = await response.text();
   return parseResponse(text);
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// SMART CALL dengan Auto-Retry
+// EXECUTE WITH RETRY
 // ─────────────────────────────────────────────────────────────────────────
 
-async function executeWithRetry(action, payload, timeout = 45000, maxRetries = 2) {
+async function executeWithRetry(action, payload, timeout, maxRetries) {
+  if (!timeout) timeout = 45000;
+  if (!maxRetries) maxRetries = 2;
 
-  let lastError = null;
+  var lastError = null;
+  var strategies = [apiPostForm, apiGetQuery];
 
-  // Strategy: POST first, then GET as fallback
-  const strategies = [apiPostForm, apiGetQuery];
-
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-
-    for (const strategy of strategies) {
+  for (var attempt = 1; attempt <= maxRetries; attempt++) {
+    for (var s = 0; s < strategies.length; s++) {
       try {
-        const result = await strategy(action, payload, timeout);
+        var result = await strategies[s](action, payload, timeout);
         if (result && result.status) {
           return result;
         }
       } catch (error) {
         lastError = error;
-        console.warn(`[API] ${strategy.name} attempt ${attempt} failed:`, error.message);
+        console.warn('[API] ' + strategies[s].name + ' attempt ' + attempt + ' failed:', error.message);
       }
     }
 
-    // Delay before next attempt (exponential backoff)
     if (attempt < maxRetries) {
-      const delayMs = Math.min(1000 * Math.pow(2, attempt - 1), 3000);
-      await new Promise(r => setTimeout(r, delayMs));
+      var delayMs = Math.min(1000 * Math.pow(2, attempt - 1), 3000);
+      await new Promise(function (r) { setTimeout(r, delayMs); });
     }
   }
 
   return {
     status: 'error',
-    message: lastError?.message || 'Gagal terhubung ke server.',
+    message: lastError ? lastError.message : 'Gagal terhubung ke server.',
   };
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// PUBLIC: callApi dengan Stale-While-Revalidate
+// PUBLIC: callApi
 // ─────────────────────────────────────────────────────────────────────────
 
-export async function callApi(action, payload = {}, options = {}) {
+export async function callApi(action, payload, options) {
+  if (!payload) payload = {};
+  if (!options) options = {};
 
-  const {
-    dedupe = true,
-    cache: useCache = false,
-    cacheTtl = SETTINGS.cacheDuration,
-    timeout = 45000,
-    onStaleData = null,   // Callback saat ada stale data (untuk stale-while-revalidate)
-  } = options;
+  var dedupe = options.dedupe !== undefined ? options.dedupe : true;
+  var useCache = options.cache || false;
+  var cacheTtl = options.cacheTtl || SETTINGS.cacheDuration;
+  var timeout = options.timeout || 45000;
 
-  const cacheKey = `${action}::${JSON.stringify(payload)}`;
+  var cacheKey = action + '::' + JSON.stringify(payload);
 
-  // ═══ MEMORY CACHE ═══
+  // Memory cache
   if (useCache) {
-    const cached = memCache.get(cacheKey);
+    var cached = memCache.get(cacheKey);
     if (cached && Date.now() - cached.time < cacheTtl) {
       return cached.data;
     }
   }
 
-  // ═══ DEDUPLICATION ═══
+  // Deduplication
   if (dedupe && pendingRequests.has(cacheKey)) {
     return pendingRequests.get(cacheKey);
   }
 
-  const promise = executeWithRetry(action, payload, timeout)
-    .then((result) => {
+  var promise = executeWithRetry(action, payload, timeout)
+    .then(function (result) {
       if (useCache && result.status === 'ok') {
         memCache.set(cacheKey, { data: result, time: Date.now() });
-        // Save to localStorage too (persistent)
         setLSCache(action, result);
       }
       return result;
     })
-    .finally(() => {
+    .finally(function () {
       if (dedupe) pendingRequests.delete(cacheKey);
     });
 
@@ -255,70 +240,61 @@ export async function callApi(action, payload = {}, options = {}) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// STALE-WHILE-REVALIDATE PATTERN
+// STALE-WHILE-REVALIDATE
 // ─────────────────────────────────────────────────────────────────────────
 
-/**
- * Fetch dengan stale-while-revalidate:
- * 1. Return cache langsung (kalau ada) → INSTANT
- * 2. Fetch baru di background → update cache
- * 3. Panggil onFresh callback saat data baru siap
- */
-export async function callApiStale(action, payload = {}, options = {}) {
+export async function callApiStale(action, payload, options) {
+  if (!payload) payload = {};
+  if (!options) options = {};
 
-  const {
-    ttl = 5 * 60 * 1000,           // 5 menit (untuk cache expire)
-    maxAge = 24 * 60 * 60 * 1000,  // 24 jam (batas maksimal cache)
-    onFresh = null,                 // Callback saat data fresh datang
-    timeout = 45000,
-  } = options;
+  var ttl = options.ttl || 5 * 60 * 1000;
+  var maxAge = options.maxAge || 24 * 60 * 60 * 1000;
+  var onFresh = options.onFresh || null;
+  var timeout = options.timeout || 45000;
 
-  // ═══ Check LocalStorage cache ═══
-  const cached = getLSCache(action);
+  // Check localStorage cache
+  var cached = getLSCache(action);
 
   if (cached && cached.age < maxAge) {
 
-    // Fresh cache → return langsung
+    // Fresh cache
     if (cached.age < ttl) {
-      return {
-        ...cached.data,
+      return Object.assign({}, cached.data, {
         _fromCache: true,
         _cacheAge: cached.age,
-      };
+      });
     }
 
-    // Stale cache → return + refresh di background
-    setTimeout(() => {
-      executeWithRetry(action, payload, timeout).then(freshResult => {
+    // Stale cache — return + refresh in background
+    setTimeout(function () {
+      executeWithRetry(action, payload, timeout).then(function (freshResult) {
         if (freshResult && freshResult.status === 'ok') {
           setLSCache(action, freshResult);
-          memCache.set(`${action}::${JSON.stringify(payload)}`, {
+          memCache.set(action + '::' + JSON.stringify(payload), {
             data: freshResult,
             time: Date.now(),
           });
 
-          // Panggil callback jika ada
           if (typeof onFresh === 'function') {
             onFresh(freshResult);
           }
         }
-      }).catch(() => {});
+      }).catch(function () {});
     }, 100);
 
-    return {
-      ...cached.data,
+    return Object.assign({}, cached.data, {
       _fromCache: true,
       _cacheAge: cached.age,
       _stale: true,
-    };
+    });
   }
 
-  // ═══ No cache → fetch fresh ═══
-  const result = await executeWithRetry(action, payload, timeout);
+  // No cache — fetch fresh
+  var result = await executeWithRetry(action, payload, timeout);
 
   if (result && result.status === 'ok') {
     setLSCache(action, result);
-    memCache.set(`${action}::${JSON.stringify(payload)}`, {
+    memCache.set(action + '::' + JSON.stringify(payload), {
       data: result,
       time: Date.now(),
     });
@@ -328,22 +304,21 @@ export async function callApiStale(action, payload = {}, options = {}) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// PREWARM APPSCRIPT (bangunkan cold start)
+// PREWARM
 // ─────────────────────────────────────────────────────────────────────────
 
-let prewarmDone = false;
+var prewarmDone = false;
 
 export function prewarmAppScript() {
   if (prewarmDone) return;
   prewarmDone = true;
 
-  // Fire-and-forget ping ke AppScript
   try {
     fetch(API_URL + '?ping=1&t=' + Date.now(), {
       method: 'GET',
       mode: 'no-cors',
       cache: 'no-store',
-    }).catch(() => {});
+    }).catch(function () {});
   } catch {}
 }
 
@@ -351,12 +326,12 @@ export function prewarmAppScript() {
 // CACHE MANAGEMENT
 // ─────────────────────────────────────────────────────────────────────────
 
-export function clearCache(prefix = '') {
+export function clearCache(prefix) {
   if (!prefix) {
     memCache.clear();
     return;
   }
-  for (const key of memCache.keys()) {
+  for (var key of memCache.keys()) {
     if (key.startsWith(prefix)) memCache.delete(key);
   }
 }
@@ -369,55 +344,44 @@ export function clearPending() {
 // HIGH-LEVEL API METHODS
 // ─────────────────────────────────────────────────────────────────────────
 
-export const auth = {
+export var auth = {
 
-  async login({ username, password }) {
+  login: function (data) {
     clearPending();
-    return callApi(
-      'login',
-      { username, password },
-      {
-        dedupe: false,
-        cache: false,
-        timeout: 20000,
-      }
-    );
+    return callApi('login', data, {
+      dedupe: false,
+      cache: false,
+      timeout: 20000,
+    });
   },
 
-  changePassword({ username, passwordLama, passwordBaru }) {
-    return callApi(
-      'changePassword',
-      { username, passwordLama, passwordBaru },
-      { dedupe: false, timeout: 20000 }
-    );
+  changePassword: function (data) {
+    return callApi('changePassword', data, {
+      dedupe: false,
+      timeout: 20000,
+    });
   },
 
-  forgotPassword({ username }) {
-    return callApi(
-      'forgotPassword',
-      { username },
-      { dedupe: false, timeout: 20000 }
-    );
+  forgotPassword: function (data) {
+    return callApi('forgotPassword', data, {
+      dedupe: false,
+      timeout: 20000,
+    });
   },
 };
 
-export const katalog = {
+export var katalog = {
 
-  // Regular fetch (bisa slow)
-  getAll(options = {}) {
-    return callApi(
-      'getBarang',
-      {},
-      {
-        cache: options.cache !== false,
-        cacheTtl: 5 * 60 * 1000,  // 5 menit memory
-        timeout: 45000,
-      }
-    );
+  getAll: function (options) {
+    if (!options) options = {};
+    return callApi('getBarang', {}, {
+      cache: options.cache !== false,
+      cacheTtl: 5 * 60 * 1000,
+      timeout: 45000,
+    });
   },
 
-  // ★ FAST: Stale-while-revalidate (INSTANT dari cache)
-  getAllFast(onFresh) {
+  getAllFast: function (onFresh) {
     return callApiStale('getBarang', {}, {
       ttl: 5 * 60 * 1000,
       maxAge: 24 * 60 * 60 * 1000,
@@ -426,53 +390,37 @@ export const katalog = {
     });
   },
 
-  refresh() {
+  refresh: function () {
     clearCache('getBarang');
     clearLSCache('getBarang');
     return this.getAll({ cache: false });
   },
 };
 
-export const cabang = {
-  getAll(options = {}) {
-    return callApi(
-      'getCabang',
-      {},
-      {
-        cache: options.cache !== false,
-        cacheTtl: 30 * 60 * 1000,
-        timeout: 45000,
-      }
-    );
+export var cabang = {
+
+  getAll: function (options) {
+    if (!options) options = {};
+    return callApi('getCabang', {}, {
+      cache: options.cache !== false,
+      cacheTtl: 30 * 60 * 1000,
+      timeout: 45000,
+    });
   },
 };
 
-export const orders = {
+export var orders = {
 
-  getAll(options = {}) {
-    return callApi(
-      'getOrders',
-      {},
-      {
-        cache: options.cache !== false,
-        cacheTtl: 30 * 1000,
-        timeout: 45000,
-      }
-    );
-       // ★ RESET semua order (butuh password admin)
-  resetAll({ password, idCabang }) {
-    clearCache('getOrders');
-    clearLSCache('getOrders');
-    return callApi(
-      'resetAllOrders',
-      { password, idCabang },
-      { dedupe: false, timeout: 60000 }
-    );
+  getAll: function (options) {
+    if (!options) options = {};
+    return callApi('getOrders', {}, {
+      cache: options.cache !== false,
+      cacheTtl: 30 * 1000,
+      timeout: 45000,
+    });
   },
 
-
-  // ★ FAST: Stale-while-revalidate untuk orders
-  getAllFast(onFresh) {
+  getAllFast: function (onFresh) {
     return callApiStale('getOrders', {}, {
       ttl: 30 * 1000,
       maxAge: 60 * 60 * 1000,
@@ -481,66 +429,78 @@ export const orders = {
     });
   },
 
-  getDetail(orderId) {
-    return callApi('getOrderDetail', { orderId }, { cache: false, timeout: 30000 });
+  getDetail: function (orderId) {
+    return callApi('getOrderDetail', { orderId: orderId }, {
+      cache: false,
+      timeout: 30000,
+    });
   },
 
-  submit({ idCabang, catatan, items }) {
+  submit: function (data) {
     clearCache('getOrders');
     clearLSCache('getOrders');
-    return callApi(
-      'submitOrder',
-      { idCabang, catatan, items },
-      { dedupe: false, timeout: 60000 }
-    );
+    return callApi('submitOrder', data, {
+      dedupe: false,
+      timeout: 60000,
+    });
   },
 
-  updateStatus({ orderId, status, alasan = '' }) {
+  updateStatus: function (data) {
     clearCache('getOrders');
     clearLSCache('getOrders');
-    return callApi(
-      'updateStatus',
-      { orderId, status, alasan },
-      { dedupe: false, timeout: 30000 }
-    );
+    return callApi('updateStatus', data, {
+      dedupe: false,
+      timeout: 30000,
+    });
   },
 
-  edit({ orderId, items, catatanAdmin = '', diprosesOleh = '', kirimEmail = false }) {
+  edit: function (data) {
     clearCache('getOrders');
     clearLSCache('getOrders');
-    return callApi(
-      'editOrder',
-      { orderId, items, catatanAdmin, diprosesOleh, kirimEmail },
-      { dedupe: false, timeout: 60000 }
-    );
+    return callApi('editOrder', data, {
+      dedupe: false,
+      timeout: 60000,
+    });
   },
 
-  sendEmail({ orderId, catatanAdmin = '' }) {
-    return callApi(
-      'sendEmailNotif',
-      { orderId, catatanAdmin },
-      { dedupe: false, timeout: 30000 }
-    );
+  sendEmail: function (data) {
+    return callApi('sendEmailNotif', data, {
+      dedupe: false,
+      timeout: 30000,
+    });
   },
 
-  refresh() {
+  refresh: function () {
     clearCache('getOrders');
     clearLSCache('getOrders');
     return this.getAll({ cache: false });
   },
+
+  resetAll: function (data) {
+    clearCache('getOrders');
+    clearLSCache('getOrders');
+    return callApi('resetAllOrders', data, {
+      dedupe: false,
+      timeout: 60000,
+    });
+  },
 };
 
 // ─────────────────────────────────────────────────────────────────────────
-// LOAD ALL (parallel + stale-while-revalidate)
+// LOAD ALL (parallel)
 // ─────────────────────────────────────────────────────────────────────────
 
-export async function loadAll(options = {}) {
-  const { cache: useCache = true } = options;
+export async function loadAll(options) {
+  if (!options) options = {};
+  var useCache = options.cache !== undefined ? options.cache : true;
 
-  const [ordersRes, katalogRes] = await Promise.allSettled([
+  var results = await Promise.allSettled([
     orders.getAll({ cache: useCache }),
     katalog.getAll({ cache: useCache }),
   ]);
+
+  var ordersRes = results[0];
+  var katalogRes = results[1];
 
   return {
     orders: ordersRes.status === 'fulfilled' && ordersRes.value.status === 'ok'
@@ -556,17 +516,21 @@ export async function loadAll(options = {}) {
   };
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// EXPORT DEFAULT
+// ─────────────────────────────────────────────────────────────────────────
+
 export default {
-  callApi,
-  callApiStale,
-  parseResponse,
-  clearCache,
-  clearLSCache,
-  clearPending,
-  prewarmAppScript,
-  loadAll,
-  auth,
-  katalog,
-  cabang,
-  orders,
+  callApi: callApi,
+  callApiStale: callApiStale,
+  parseResponse: parseResponse,
+  clearCache: clearCache,
+  clearLSCache: clearLSCache,
+  clearPending: clearPending,
+  prewarmAppScript: prewarmAppScript,
+  loadAll: loadAll,
+  auth: auth,
+  katalog: katalog,
+  cabang: cabang,
+  orders: orders,
 };
