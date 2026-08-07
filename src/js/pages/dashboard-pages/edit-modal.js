@@ -501,6 +501,7 @@ export function showEditModal(orderId, dashboardState) {
     stokGudang: d.STOK_GUDANG ?? '',
     stokToko: d.STOK_TOKO ?? '',
     stokSistem: d.STOK_SISTEM !== undefined && d.STOK_SISTEM !== '' ? d.STOK_SISTEM : 0,
+   stokPicker: d.STOK_PICKER !== undefined && d.STOK_PICKER !== '' ? d.STOK_PICKER : '',
   }));
 
   modalState.originalItems = JSON.parse(JSON.stringify(modalState.items));
@@ -656,11 +657,14 @@ function renderEditRows() {
 
     const reasonRequired = deleted || rejected;
 
-    const stokInfo = (item.stokGudang !== '' || item.stokToko !== '' || item.stokSistem !== 0) ? `
+        const stokPicker = item.stokPicker !== undefined && item.stokPicker !== '' ? item.stokPicker : (item.STOK_PICKER !== undefined && item.STOK_PICKER !== '' ? item.STOK_PICKER : '');
+
+    const stokInfo = (item.stokGudang !== '' || item.stokToko !== '' || item.stokSistem !== 0 || stokPicker !== '') ? `
       <div class="er-stok-info">
         ${item.stokSistem !== undefined && item.stokSistem !== '' ? `<span>${icon('package', { size: 12 })} Sistem: <b>${item.stokSistem}</b></span>` : ''}
         ${item.stokGudang !== '' ? `<span>${icon('warehouse', { size: 12 })} Gudang: <b>${item.stokGudang}</b></span>` : ''}
         ${item.stokToko !== '' ? `<span>${icon('store', { size: 12 })} Toko: <b>${item.stokToko}</b></span>` : ''}
+        ${stokPicker !== '' ? `<span style="color: #3b82f6; font-weight: 700;">${icon('check-check', { size: 12 })} Picker: <b>${stokPicker}</b></span>` : ''}
       </div>
     ` : '';
 
