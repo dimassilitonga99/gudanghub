@@ -131,6 +131,16 @@ export function requireCabang() {
   return s;
 }
 
+export function requirePicker() {
+  var s = requireAuth();
+  if (!s) return null;
+  if (s.role !== 'picker') {
+    redirectToHome(s);
+    return null;
+  }
+  return s;
+}
+
 export function redirectIfAuthenticated() {
   const s = getSession();
   if (s && isSessionValid(s)) {
@@ -145,14 +155,27 @@ export function redirectToLogin() {
   window.location.href = ROUTES.login;
 }
 
-export function redirectToHome(currentSession = null) {
-  const s = currentSession || getSession();
+export function redirectToHome(currentSession) {
+  var s = currentSession || getSession();
   if (!s) return redirectToLogin();
 
-  const route = getHomeRouteFromConfig(s.role);
-  const url = s.role === 'cabang' && s.idCabang
-    ? `${route}?cabang=${encodeURIComponent(s.idCabang)}`
-    : route;
+  var route;
+
+  if (s.role === 'admin') {
+    route = ROUTES.dashboard;
+  } else if (s.role === 'picker') {
+    route = 'picker.html';
+  } else if (s.role === 'cabang') {
+    route = ROUTES.order;
+  } else {
+    return redirectToLogin();
+  }
+
+  var url = route;
+
+  if (s.role === 'cabang' && s.idCabang) {
+    url = route + '?cabang=' + encodeURIComponent(s.idCabang);
+  }
 
   window.location.href = url;
 }
@@ -204,4 +227,5 @@ export default {
   logout,
   onSessionChange,
   watchSessionExpiry,
+   requirePicker,
 };
