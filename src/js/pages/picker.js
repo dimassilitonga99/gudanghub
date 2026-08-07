@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   PICKER DASHBOARD — v3 Lock Input + Edit History + Konfirmasi
+   PICKER DASHBOARD — v4 Lock Input + History + Filter Toko & Tanggal
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, escapeHtml, formatWita, parseAnyDate, sortBy } from '../utils.js';
@@ -81,6 +81,144 @@ function unlockItem(orderId, idx) {
 function padZ(n) { return String(n).padStart(2, '0'); }
 
 // ─────────────────────────────────────────────────────────────────────────
+// FILTER HELPERS
+// ─────────────────────────────────────────────────────────────────────────
+
+function populateTokoFilter() {
+  var select = $('filterToko');
+  if (!select) return;
+
+  // Hitung order per cabang
+  var counts = {};
+  state.allOrders.forEach(function (o) {
+    var id = String(o.ID_CABANG || '').toUpperCase();
+    counts[id] = (counts[id] || 0) + 1;
+  });
+
+  var html = '<option value="">Semua Toko (' + state.assignedCabang.length + ' cabang, ' + state.allOrders.length + ' order)</option>';
+
+  state.assignedCabang.forEach(function (cabangId) {
+    var info = CABANG[cabangId] || {};
+    var nama = info.nama || cabangId;
+    var count = counts[cabangId] || 0;
+    var selected = state.filterToko === cabangId ? ' selected' : '';
+    html += '<option value="' + cabangId + '"' + selected + '>'
+      + cabangId + ' — ' + escapeHtml(nama) + ' (' + count + ' order)'
+      + '</option>';
+  });
+
+  select.innerHTML = html;
+}
+
+function applyQuickDate(type) {
+  var today = new Date();
+  var from = '';
+  var to = formatDateInput(today);
+
+  switch (type) {
+    case 'today':
+      from = formatDateInput(today);
+      break;
+    case 'yesterday':
+      var yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      from = formatDateInput(yesterday);
+      to = formatDateInput(yesterday);
+      break;
+    case 'week':
+      var weekAgo = new Date(today);
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      from = formatDateInput(weekAgo);
+      break;
+    case 'month':
+      var firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+      from = formatDateInput(firstDay);
+      break;
+    case 'all':
+      from = '';
+      to = '';
+      break;
+  }
+
+  state.filterDateFrom = from;
+  state.filterDateTo = to;
+  state.filterQuick = type;
+
+  var dateFromEl = $('filterDateFrom');
+  var dateToEl = $('filterDateTo');
+  if (dateFromEl) dateFromEl.value = from;
+  if (dateToEl) dateToEl.value = to;
+
+  document.querySelectorAll('[data-quick]').forEach(function (b) {
+    b.classList.toggle('active', b.dataset.quick === type);
+  });
+
+  renderOrders();
+}
+
+function clearQuickActive() {
+  state.filterQuick = '';
+  document.querySelectorAll('[data-quick]').forEach(function (b) {
+    b.classList.remove('active');
+  });
+}
+
+function formatDateInput(date) {
+  var y = date.getFullYear();
+  var m = String(date.getMonth() + 1).padStart(2, '0');
+  var d = String(date.getDate()).padStart(2, '0');
+  return y + '-' + m + '-' + d;
+}
+
+function getFilteredOrders() {
+  var filtered = state.allOrders;
+
+  // Filter status
+  if (state.filter !== 'ALL') {
+    filtered = filtered.filter(function (o) {
+      return String(o.STATUS || '').toUpperCase() === state.filter;
+    });
+  }
+
+  // Filter toko
+  if (state.filterToko) {
+    filtered = filtered.filter(function (o) {
+      return String(o.ID_CABANG || '').toUpperCase() === state.filterToko;
+    });
+  }
+
+  // Filter tanggal
+  if (state.filterDateFrom || state.filterDateTo) {
+    filtered = filtered.filter(function (o) {
+      var orderDate = parseAnyDate(o.TANGGAL_ORDER);
+      if (!orderDate || orderDate.getTime() === 0) return false;
+
+      var orderDateOnly = new Date(
+        orderDate.getFullYear(),
+        orderDate.getMonth(),
+        orderDate.getDate()
+      );
+
+      if (state.filterDateFrom) {
+        var fromParts = state.filterDateFrom.split('-');
+        var fromDate = new Date(parseInt(fromParts[0]), parseInt(fromParts[1]) - 1, parseInt(fromParts[2]));
+        if (orderDateOnly < fromDate) return false;
+      }
+
+      if (state.filterDateTo) {
+        var toParts = state.filterDateTo.split('-');
+        var toDate = new Date(parseInt(toParts[0]), parseInt(toParts[1]) - 1, parseInt(toParts[2]));
+        if (orderDateOnly > toDate) return false;
+      }
+
+      return true;
+    });
+  }
+
+  return filtered;
+}
+
+// ─────────────────────────────────────────────────────────────────────────
 // INIT
 // ─────────────────────────────────────────────────────────────────────────
 
@@ -107,14 +245,19 @@ async function init() {
     state.assignedCabang = Object.keys(CABANG);
   }
 
-  // Load picker data dari localStorage
   state.pickerData = loadPickerData();
 
   bindEvents();
   await loadOrders();
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// EVENTS
+// ─────────────────────────────────────────────────────────────────────────
+
 function bindEvents() {
+
+  // Status filter
   $('pickerFilter')?.addEventListener('click', function (e) {
     var btn = e.target.closest('[data-filter]');
     if (!btn) return;
@@ -124,29 +267,30 @@ function bindEvents() {
     renderOrders();
   });
 
+  // Logout
   $('btnLogout')?.addEventListener('click', async function () {
     var ok = await confirmDialog({ icon: '🚪', title: 'Keluar?', message: 'Anda akan diarahkan ke halaman login.', okText: 'Ya, Keluar', okVariant: 'danger' });
     if (ok) logout(true);
   });
 
+  // Refresh
   $('btnRefreshPicker')?.addEventListener('click', function () { loadOrders(); });
-     // Filter toko
+
+  // Filter toko
   $('filterToko')?.addEventListener('change', function (e) {
     state.filterToko = e.target.value;
     renderOrders();
   });
 
-  // Filter tanggal
+  // Filter tanggal manual
   $('filterDateFrom')?.addEventListener('change', function () {
     state.filterDateFrom = $('filterDateFrom').value;
-    state.filterQuick = '';
     clearQuickActive();
     renderOrders();
   });
 
   $('filterDateTo')?.addEventListener('change', function () {
     state.filterDateTo = $('filterDateTo').value;
-    state.filterQuick = '';
     clearQuickActive();
     renderOrders();
   });
@@ -156,6 +300,15 @@ function bindEvents() {
     btn.addEventListener('click', function () {
       applyQuickDate(btn.dataset.quick);
     });
+  });
+
+  // Enter key di date input
+  $('filterDateFrom')?.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { clearQuickActive(); renderOrders(); }
+  });
+
+  $('filterDateTo')?.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { clearQuickActive(); renderOrders(); }
   });
 }
 
@@ -178,12 +331,18 @@ async function loadOrders() {
       }), '_sortKey', 'desc'
     );
 
-    updateStats();
-    renderOrders();
+    // Populate toko filter
+    populateTokoFilter();
+
+    // Apply default quick date (bulan ini)
+    applyQuickDate(state.filterQuick || 'month');
+
   } catch (error) {
     var container = $('pickerOrders');
     if (container) {
-      container.innerHTML = '<div class="picker-empty"><p>Gagal: ' + error.message + '</p>'
+      container.innerHTML = '<div class="picker-empty">'
+        + '<div class="picker-empty-icon">' + icon('alert-triangle', { size: 48, color: 'var(--danger)' }) + '</div>'
+        + '<p>Gagal: ' + escapeHtml(error.message) + '</p>'
         + '<button class="picker-filter-btn" id="btnRetry" type="button" style="margin-top:12px;">'
         + icon('refresh', { size: 14 }) + ' Coba Lagi</button></div>';
       $('btnRetry')?.addEventListener('click', loadOrders);
@@ -191,18 +350,30 @@ async function loadOrders() {
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// UPDATE STATS (based on filtered)
+// ─────────────────────────────────────────────────────────────────────────
+
 function updateStats() {
-  var p = 0, pk = 0, a = 0;
-  state.allOrders.forEach(function (o) {
+  var filtered = getFilteredOrders();
+
+  var pending = 0;
+  var picked = 0;
+  var approved = 0;
+  var rejected = 0;
+
+  filtered.forEach(function (o) {
     var s = String(o.STATUS).toUpperCase();
-    if (s === 'PENDING') p++;
-    else if (s === 'PICKED') pk++;
-    else if (s === 'APPROVED') a++;
+    if (s === 'PENDING') pending++;
+    else if (s === 'PICKED') picked++;
+    else if (s === 'APPROVED') approved++;
+    else if (s === 'REJECTED') rejected++;
   });
-  $('statPending').textContent = p;
-  $('statPicked').textContent = pk;
-  $('statApproved').textContent = a;
-  $('statTotal').textContent = state.allOrders.length;
+
+  $('statPending').textContent = pending;
+  $('statPicked').textContent = picked;
+  $('statApproved').textContent = approved;
+  $('statTotal').textContent = filtered.length;
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -210,21 +381,43 @@ function updateStats() {
 // ─────────────────────────────────────────────────────────────────────────
 
 function renderOrders() {
+  updateStats();
+
   var container = $('pickerOrders');
   if (!container) return;
 
-  var filtered = state.allOrders;
-  if (state.filter !== 'ALL') {
-    filtered = filtered.filter(function (o) { return String(o.STATUS || '').toUpperCase() === state.filter; });
-  }
+  var filtered = getFilteredOrders();
 
   if (!filtered.length) {
-    container.innerHTML = '<div class="picker-empty"><div class="picker-empty-icon">'
-      + icon('package', { size: 48, color: 'var(--muted)' }) + '</div><p>Tidak ada order.</p></div>';
+    var emptyMsg = 'Tidak ada order';
+    if (state.filter !== 'ALL') emptyMsg += ' status "' + state.filter + '"';
+    if (state.filterToko) {
+      var tokoInfo = CABANG[state.filterToko];
+      emptyMsg += ' dari ' + (tokoInfo ? tokoInfo.nama : state.filterToko);
+    }
+    if (state.filterDateFrom || state.filterDateTo) emptyMsg += ' pada periode terpilih';
+    emptyMsg += '.';
+
+    container.innerHTML = '<div class="picker-empty">'
+      + '<div class="picker-empty-icon">' + icon('package', { size: 48, color: 'var(--muted)' }) + '</div>'
+      + '<p>' + emptyMsg + '</p>'
+      + '</div>';
     return;
   }
 
-  container.innerHTML = filtered.map(buildOrderCard).join('');
+  // Info jumlah
+  var countInfo = filtered.length + ' order';
+  if (state.filterToko || state.filterDateFrom || state.filterDateTo || state.filter !== 'ALL') {
+    countInfo += ' (difilter)';
+  }
+
+  container.innerHTML = ''
+    + '<div style="padding: 0 0 8px; font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 6px;">'
+    + icon('package', { size: 12 })
+    + countInfo
+    + '</div>'
+    + filtered.map(buildOrderCard).join('');
+
   bindCardEvents(container);
   injectIcons(container);
 }
@@ -252,8 +445,22 @@ function buildOrderCard(order) {
     : icon('check-check', { size: 16 }) + ' Kirim Verifikasi ke Admin';
   var btnClass = status === 'PICKED' ? 'btn-picker-resubmit' : 'btn-picker-submit';
 
+  // Hitung progress
+  var totalItems = details.length;
+  var filledItems = 0;
+  details.forEach(function (item, idx) {
+    var data = getItemData(order.ORDER_ID, idx);
+    var serverPicker = item.STOK_PICKER !== undefined && item.STOK_PICKER !== '' ? String(item.STOK_PICKER) : '';
+    if (data.value !== '' || serverPicker !== '') filledItems++;
+  });
+
+  var progressPct = totalItems > 0 ? Math.round((filledItems / totalItems) * 100) : 0;
+  var progressColor = progressPct === 100 ? 'var(--success)' : progressPct > 0 ? '#3b82f6' : 'var(--muted)';
+
   return ''
     + '<article class="picker-order-card ' + statusClass + '">'
+
+    // Header
     + '<div class="picker-order-header">'
     + '<div>'
     + '<div class="picker-order-id">' + escapeHtml(order.ORDER_ID) + '</div>'
@@ -262,7 +469,15 @@ function buildOrderCard(order) {
     + ' · PIC: ' + escapeHtml(branch.pic || '-')
     + ' · ' + icon('calendar-clock', { size: 12 }) + ' ' + escapeHtml(formatWita(order.TANGGAL_ORDER, false))
     + ' · ' + details.length + ' item'
-    + '</div></div>'
+    + '</div>'
+    // Progress bar
+    + '<div class="picker-progress">'
+    + '<div class="picker-progress-bar" style="width: ' + progressPct + '%; background: ' + progressColor + ';"></div>'
+    + '</div>'
+    + '<div class="picker-progress-text" style="color: ' + progressColor + ';">'
+    + filledItems + '/' + totalItems + ' diisi (' + progressPct + '%)'
+    + '</div>'
+    + '</div>'
     + '<span class="picker-order-status ' + statusClass + '">'
     + icon(statusIconName, { size: 12 }) + ' ' + statusLabel + '</span>'
     + '</div>'
@@ -296,7 +511,7 @@ function buildOrderCard(order) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// BUILD ITEM ROW — dengan Lock, History, Status Visual
+// BUILD ITEM ROW
 // ─────────────────────────────────────────────────────────────────────────
 
 function buildItemRow(order, item, idx, canEdit) {
@@ -305,14 +520,12 @@ function buildItemRow(order, item, idx, canEdit) {
 
   var qtyOrder = parseInt(item.QTY) || 0;
 
-  // Prioritas: pickerData lokal > server STOK_PICKER > kosong
   var serverPicker = item.STOK_PICKER !== undefined && item.STOK_PICKER !== '' ? String(item.STOK_PICKER) : '';
   var currentValue = itemData.value !== '' ? itemData.value : serverPicker;
   var isLocked = itemData.locked || (serverPicker !== '' && itemData.value === '');
   var isFilled = currentValue !== '';
   var editCount = itemData.history.length;
 
-  // Sync dari server kalau lokal kosong
   if (itemData.value === '' && serverPicker !== '') {
     itemData.value = serverPicker;
     itemData.locked = true;
@@ -325,23 +538,21 @@ function buildItemRow(order, item, idx, canEdit) {
   // Status visual
   var statusHtml = '';
   if (isFilled && isLocked) {
-    statusHtml = '<div class="picker-status-icon locked" title="Terkunci — sudah diisi">' + icon('check-circle', { size: 18 }) + '</div>';
+    statusHtml = '<div class="picker-status-icon locked" title="Terkunci">' + icon('check-circle', { size: 18 }) + '</div>';
   } else if (isFilled && !isLocked) {
     statusHtml = '<div class="picker-status-icon editing" title="Sedang diedit">' + icon('edit-2', { size: 18 }) + '</div>';
   } else {
     statusHtml = '<div class="picker-status-icon empty" title="Belum diisi">' + icon('circle', { size: 18 }) + '</div>';
   }
 
-  // Warna qty: merah kalau picker < order
   var pickerInt = parseInt(currentValue) || 0;
   var qtyColor = isFilled && pickerInt < qtyOrder ? 'var(--danger)' : isFilled ? 'var(--success)' : 'var(--orange)';
 
-  // History tooltip
+  // History
   var historyHtml = '';
   if (editCount > 0) {
     var lastEntry = itemData.history[itemData.history.length - 1];
-    historyHtml = ''
-      + '<div class="picker-history-badge" title="' + buildHistoryTooltip(itemData.history) + '">'
+    historyHtml = '<div class="picker-history-badge" title="' + escapeHtml(buildHistoryTooltip(itemData.history)) + '">'
       + (editCount === 1 ? '1x' : editCount + 'x')
       + '<br><span class="picker-history-time">' + escapeHtml(lastEntry.time) + '</span>'
       + '</div>';
@@ -354,21 +565,17 @@ function buildItemRow(order, item, idx, canEdit) {
   return ''
     + '<div class="picker-item ' + (isLocked ? 'locked' : '') + ' ' + (isFilled ? 'filled' : '') + '">'
 
-    // Status icon
     + '<div class="picker-item-status">' + statusHtml + '</div>'
 
-    // Info barang
     + '<div class="picker-item-info">'
     + '<div class="picker-item-name">' + escapeHtml(item.NAMA_BARANG || '-') + '</div>'
     + '<div class="picker-item-code">' + escapeHtml(item.KODE_BARANG || '-') + ' · ' + escapeHtml(item.SATUAN || 'PCS') + '</div>'
     + '</div>'
 
-    // Qty order
     + '<div class="picker-item-qty-section">'
     + '<div class="picker-qty-value" style="color: var(--orange);">' + qtyOrder + '</div>'
     + '</div>'
 
-    // Input disiapkan (dengan lock)
     + '<div class="picker-item-stok">'
     + '<div class="picker-stok-input-wrap ' + (isLocked ? 'is-locked' : '') + '">'
     + '<input type="number" class="picker-stok-input ' + (isFilled ? 'filled' : '') + '"'
@@ -390,7 +597,6 @@ function buildItemRow(order, item, idx, canEdit) {
     + '</div>'
     + '</div>'
 
-    // History
     + '<div class="picker-item-history">' + historyHtml + '</div>'
 
     + '</div>';
@@ -418,7 +624,7 @@ function getPickerNote(order) {
 
 function bindCardEvents(container) {
 
-  // Input stok — auto lock setelah blur (keluar dari input)
+  // Input stok — auto lock setelah blur
   container.querySelectorAll('.picker-stok-input').forEach(function (input) {
     input.addEventListener('blur', function () {
       if (input.readOnly || input.disabled) return;
@@ -429,12 +635,7 @@ function bindCardEvents(container) {
 
       if (value !== '') {
         setItemValue(orderId, idx, value);
-        input.readOnly = true;
-        input.classList.add('filled');
-
-        // Re-render item row
         renderOrders();
-
         toast.success('Item dikunci ✓', { duration: 1000 });
       }
     });
@@ -447,7 +648,7 @@ function bindCardEvents(container) {
     });
   });
 
-  // Unlock button — konfirmasi sebelum edit
+  // Unlock button
   container.querySelectorAll('[data-unlock-order]').forEach(function (btn) {
     btn.addEventListener('click', async function () {
       var orderId = btn.dataset.unlockOrder;
@@ -472,7 +673,7 @@ function bindCardEvents(container) {
     });
   });
 
-  // Lock button (manual lock)
+  // Lock button
   container.querySelectorAll('[data-lock-order]').forEach(function (btn) {
     btn.addEventListener('click', function () {
       var orderId = btn.dataset.lockOrder;
