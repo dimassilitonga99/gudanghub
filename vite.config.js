@@ -24,6 +24,7 @@ export default defineConfig({
         login: resolve(__dirname, 'login.html'),
         dashboard: resolve(__dirname, 'dashboard.html'),
         order: resolve(__dirname, 'order.html'),
+        picker: resolve(__dirname, 'picker.html'),
         gantiPassword: resolve(__dirname, 'ganti-password.html'),
         laporan: resolve(__dirname, 'laporan.html'),
         profil: resolve(__dirname, 'profil.html'),
