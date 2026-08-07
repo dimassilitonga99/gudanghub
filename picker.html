@@ -795,6 +795,118 @@
       .picker-items-header > div:nth-child(5),
       .picker-item-history { display: none; }
     }
+
+        /* ═══ FILTER TOKO & TANGGAL ═══ */
+
+    .picker-toko-filter,
+    .picker-date-filter {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 0 12px;
+      flex-wrap: wrap;
+    }
+
+    .picker-filter-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .picker-select {
+      background: var(--card);
+      border: 1px solid var(--line-soft);
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+      outline: none;
+      min-height: 36px;
+      min-width: 200px;
+      transition: border-color 0.15s;
+      -webkit-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2'%3e%3cpath d='M6 9l6 6 6-6'/%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      background-size: 14px;
+      padding-right: 28px;
+    }
+
+    .picker-select:focus {
+      border-color: #3b82f6;
+    }
+
+    .picker-date-input {
+      background: var(--card);
+      border: 1px solid var(--line-soft);
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+      outline: none;
+      min-height: 36px;
+      min-width: 130px;
+      transition: border-color 0.15s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .picker-date-input:focus {
+      border-color: #3b82f6;
+    }
+
+    .picker-date-input::-webkit-calendar-picker-indicator {
+      filter: invert(0.7);
+      cursor: pointer;
+    }
+
+    .picker-quick-dates {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .picker-quick-btn {
+      padding: 6px 12px;
+      border: 1px solid var(--line-soft);
+      border-radius: 20px;
+      background: var(--card);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+      white-space: nowrap;
+      min-height: 30px;
+    }
+
+    .picker-quick-btn:hover {
+      color: var(--text);
+    }
+
+    .picker-quick-btn.active {
+      border-color: #3b82f6;
+      background: rgba(59, 130, 246, 0.12);
+      color: #3b82f6;
+    }
+
+    @media (max-width: 600px) {
+      .picker-select {
+        min-width: 100%;
+      }
+      .picker-date-input {
+        min-width: 100px;
+        flex: 1;
+      }
+    }
   </style>
 </head>
 
@@ -872,7 +984,36 @@
       </div>
     </div>
 
-    <!-- FILTER -->
+        <!-- FILTER TOKO -->
+    <div class="picker-toko-filter" id="pickerTokoFilter">
+      <span class="picker-filter-label">
+        <span data-icon="store" data-icon-size="14"></span>
+        Toko:
+      </span>
+      <select class="picker-select" id="filterToko">
+        <option value="">Semua Toko</option>
+      </select>
+    </div>
+
+    <!-- FILTER TANGGAL -->
+    <div class="picker-date-filter">
+      <span class="picker-filter-label">
+        <span data-icon="calendar" data-icon-size="14"></span>
+        Tanggal:
+      </span>
+      <input type="date" class="picker-date-input" id="filterDateFrom" title="Dari">
+      <span style="color: var(--muted); font-size: 12px;">s/d</span>
+      <input type="date" class="picker-date-input" id="filterDateTo" title="Sampai">
+
+      <div class="picker-quick-dates">
+        <button class="picker-quick-btn active" type="button" data-quick="month">Bulan Ini</button>
+        <button class="picker-quick-btn" type="button" data-quick="week">7 Hari</button>
+        <button class="picker-quick-btn" type="button" data-quick="today">Hari Ini</button>
+        <button class="picker-quick-btn" type="button" data-quick="all">Semua</button>
+      </div>
+    </div>
+
+    <!-- FILTER STATUS -->
     <div class="picker-filter" id="pickerFilter">
       <button class="picker-filter-btn active" type="button" data-filter="ALL">
         <span data-icon="list" data-icon-size="14"></span>
