@@ -13,8 +13,12 @@ var state = {
   session: null,
   allOrders: [],
   filter: 'ALL',
+  filterToko: '',
+  filterDateFrom: '',
+  filterDateTo: '',
+  filterQuick: 'month',
   assignedCabang: [],
-  pickerData: {},  // { orderId_idx: { value, locked, history: [{value, time, action}] } }
+  pickerData: {},
 };
 
 var PICKER_DATA_KEY = 'gudanghub_picker_data';
@@ -126,6 +130,33 @@ function bindEvents() {
   });
 
   $('btnRefreshPicker')?.addEventListener('click', function () { loadOrders(); });
+     // Filter toko
+  $('filterToko')?.addEventListener('change', function (e) {
+    state.filterToko = e.target.value;
+    renderOrders();
+  });
+
+  // Filter tanggal
+  $('filterDateFrom')?.addEventListener('change', function () {
+    state.filterDateFrom = $('filterDateFrom').value;
+    state.filterQuick = '';
+    clearQuickActive();
+    renderOrders();
+  });
+
+  $('filterDateTo')?.addEventListener('change', function () {
+    state.filterDateTo = $('filterDateTo').value;
+    state.filterQuick = '';
+    clearQuickActive();
+    renderOrders();
+  });
+
+  // Quick date buttons
+  document.querySelectorAll('[data-quick]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      applyQuickDate(btn.dataset.quick);
+    });
+  });
 }
 
 // ─────────────────────────────────────────────────────────────────────────
