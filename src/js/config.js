@@ -132,6 +132,13 @@ export const STATUS = {
     color: 'warning',
     badge: 'badge-warning',
   },
+  PICKED: {
+    label: 'Diverifikasi Picker',
+    icon: '📋',
+    iconName: 'check-check',
+    color: 'info',
+    badge: 'badge-info',
+  },
   APPROVED: {
     label: 'Disetujui',
     icon: '✅',
