@@ -567,8 +567,11 @@ function buildItemRow(order, item, idx, canEdit) {
 
     + '<div class="picker-item-status">' + statusHtml + '</div>'
 
-    + '<div class="picker-item-info">'
-    + '<div class="picker-item-name">' + escapeHtml(item.NAMA_BARANG || '-') + '</div>'
+        + '<div class="picker-item-info">'
+    + '<div class="picker-item-name">'
+    + escapeHtml(item.NAMA_BARANG || '-')
+    + (item.CATATAN_ITEM ? ' <span style="color:#DC2626; font-weight:700; font-style:italic;">(' + escapeHtml(item.CATATAN_ITEM) + ')</span>' : '')
+    + '</div>'
     + '<div class="picker-item-code">' + escapeHtml(item.KODE_BARANG || '-') + ' · ' + escapeHtml(item.SATUAN || 'PCS') + '</div>'
     + '</div>'
 
