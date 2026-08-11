@@ -648,12 +648,12 @@ function renderModalContent() {
       <span class="edit-section-count" id="editSectionCount">${modalState.items.length} item</span>
     </div>
 
-    <div class="er-column-headers">
+        <div class="er-column-headers">
       <div>BARANG</div>
       <div style="text-align:center;">ORDER</div>
       <div style="text-align:center; color:#3b82f6;">PICKER</div>
       <div style="text-align:right;">SUBTOTAL</div>
-      <div>AKSI</div>
+      <div style="text-align:center;">AKSI</div>
     </div>
 
     <div id="editRows"></div>
