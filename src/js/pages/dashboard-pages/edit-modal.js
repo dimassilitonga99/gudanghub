@@ -1,6 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   EDIT MODAL — with Lucide Icons + Print Form Feature
-   Stok sistem snapshot tersimpan per item
+   EDIT MODAL — with Picker Qty Column + Print Form
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, escapeHtml, formatRupiah, formatWita, toNumber, toInt } from '../../utils.js';
@@ -17,6 +16,30 @@ let modalState = {
   originalItems: [],
   dashboardState: null,
 };
+
+// ─────────────────────────────────────────────────────────────────────────
+// HELPER: Get Picker Qty Display
+// ─────────────────────────────────────────────────────────────────────────
+
+function getPickerQtyDisplay(item) {
+  var stokPicker = '';
+
+  if (item.stokPicker !== undefined && item.stokPicker !== '') {
+    stokPicker = String(item.stokPicker);
+  } else if (item.STOK_PICKER !== undefined && item.STOK_PICKER !== '') {
+    stokPicker = String(item.STOK_PICKER);
+  }
+
+  if (stokPicker === '') {
+    return '<span class="er-picker-empty">—</span>';
+  }
+
+  var pickerInt = parseInt(stokPicker) || 0;
+  var qtyOrder = item.qty || 0;
+  var color = pickerInt >= qtyOrder ? 'var(--success)' : 'var(--danger)';
+
+  return '<span class="er-picker-value" style="color: ' + color + ';">' + stokPicker + '</span>';
+}
 
 // ─────────────────────────────────────────────────────────────────────────
 // INIT
@@ -106,6 +129,20 @@ function addEditModalStyles() {
       font-weight: 700;
     }
 
+    .er-column-headers {
+      display: grid;
+      grid-template-columns: 1fr 60px 60px 90px auto;
+      gap: 8px;
+      padding: 6px 12px;
+      margin-bottom: 4px;
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--line-soft);
+    }
+
     .edit-row {
       padding: 12px;
       border: 1px solid var(--line-soft);
@@ -140,7 +177,7 @@ function addEditModalStyles() {
 
     .er-top {
       display: grid;
-      grid-template-columns: 1fr 60px 90px auto;
+      grid-template-columns: 1fr 60px 60px 90px auto;
       gap: 8px;
       align-items: center;
     }
@@ -189,6 +226,35 @@ function addEditModalStyles() {
 
     .er-qty:focus { border-color: var(--orange); }
     .er-qty:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .er-picker-qty {
+      text-align: center;
+      font-size: 16px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .er-picker-value {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 34px;
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .er-picker-empty {
+      color: var(--muted);
+      font-size: 12px;
+      opacity: 0.5;
+    }
 
     .er-sub {
       font-size: 12px;
@@ -459,7 +525,7 @@ function addEditModalStyles() {
         grid-template-columns: 1fr auto;
         gap: 8px;
       }
-      .er-qty, .er-sub {
+      .er-qty, .er-picker-qty, .er-sub {
         grid-column: 1 / -1;
       }
       .er-qty { text-align: center; }
@@ -467,11 +533,11 @@ function addEditModalStyles() {
       .mf-save, .mf-email, .mf-print, .mf-cancel { min-width: 100%; }
       .add-row { grid-template-columns: 1fr; gap: 6px; }
       .btn-add-item { width: 100%; justify-content: center; }
+      .er-column-headers { display: none; }
     }
   `;
   document.head.appendChild(style);
 }
-
 // ─────────────────────────────────────────────────────────────────────────
 // SHOW MODAL
 // ─────────────────────────────────────────────────────────────────────────
@@ -501,7 +567,7 @@ export function showEditModal(orderId, dashboardState) {
     stokGudang: d.STOK_GUDANG ?? '',
     stokToko: d.STOK_TOKO ?? '',
     stokSistem: d.STOK_SISTEM !== undefined && d.STOK_SISTEM !== '' ? d.STOK_SISTEM : 0,
-   stokPicker: d.STOK_PICKER !== undefined && d.STOK_PICKER !== '' ? d.STOK_PICKER : '',
+    stokPicker: d.STOK_PICKER !== undefined && d.STOK_PICKER !== '' ? d.STOK_PICKER : '',
   }));
 
   modalState.originalItems = JSON.parse(JSON.stringify(modalState.items));
@@ -566,6 +632,14 @@ function renderModalContent() {
       <span class="edit-section-count" id="editSectionCount">${modalState.items.length} item</span>
     </div>
 
+    <div class="er-column-headers">
+      <div>BARANG</div>
+      <div style="text-align:center;">ORDER</div>
+      <div style="text-align:center; color:#3b82f6;">PICKER</div>
+      <div style="text-align:right;">SUBTOTAL</div>
+      <div>AKSI</div>
+    </div>
+
     <div id="editRows"></div>
 
     <div class="add-row">
@@ -618,7 +692,6 @@ function renderModalContent() {
 
   renderEditRows();
   bindModalEvents();
-
   injectIcons(body);
 }
 
@@ -657,7 +730,7 @@ function renderEditRows() {
 
     const reasonRequired = deleted || rejected;
 
-        const stokPicker = item.stokPicker !== undefined && item.stokPicker !== '' ? item.stokPicker : (item.STOK_PICKER !== undefined && item.STOK_PICKER !== '' ? item.STOK_PICKER : '');
+    const stokPicker = item.stokPicker !== undefined && item.stokPicker !== '' ? item.stokPicker : (item.STOK_PICKER !== undefined && item.STOK_PICKER !== '' ? item.STOK_PICKER : '');
 
     const stokInfo = (item.stokGudang !== '' || item.stokToko !== '' || item.stokSistem !== 0 || stokPicker !== '') ? `
       <div class="er-stok-info">
@@ -702,6 +775,10 @@ function renderEditRows() {
             data-qty-index="${index}"
             ${deleted || rejected ? 'disabled' : ''}
           >
+
+          <div class="er-picker-qty">
+            ${getPickerQtyDisplay(item)}
+          </div>
 
           <div class="er-sub">
             ${deleted || rejected ? '-' : formatRupiah(item.qty * item.harga)}
@@ -817,10 +894,7 @@ async function editQuantity(index) {
 async function rejectItem(index) {
   const item = modalState.items[index];
 
-  if (item.itemStatus === 'REJECTED') {
-    restoreItem(index);
-    return;
-  }
+  if (item.itemStatus === 'REJECTED') { restoreItem(index); return; }
 
   const reason = await prompt({
     icon: '🚫',
@@ -843,10 +917,7 @@ async function rejectItem(index) {
 async function deleteItem(index) {
   const item = modalState.items[index];
 
-  if (item.itemStatus === 'DELETED') {
-    restoreItem(index);
-    return;
-  }
+  if (item.itemStatus === 'DELETED') { restoreItem(index); return; }
 
   const reason = await prompt({
     icon: '🗑️',
@@ -885,24 +956,16 @@ function addNewItem() {
   const code = kodeSelect.value.trim();
   const quantity = Math.max(1, toInt(qtyInput.value, 1));
 
-  if (!code) {
-    toast.warning('Pilih barang dulu.');
-    return;
-  }
+  if (!code) { toast.warning('Pilih barang dulu.'); return; }
 
   const product = modalState.dashboardState.allKatalog.find(
     (item) => String(item.KODE_BARANG).toUpperCase() === code.toUpperCase()
   );
 
-  if (!product) {
-    toast.error('Barang tidak ditemukan di katalog.');
-    return;
-  }
+  if (!product) { toast.error('Barang tidak ditemukan di katalog.'); return; }
 
   const existing = modalState.items.find(
-    (item) =>
-      item.kode.toUpperCase() === code.toUpperCase() &&
-      item.itemStatus === 'APPROVED'
+    (item) => item.kode.toUpperCase() === code.toUpperCase() && item.itemStatus === 'APPROVED'
   );
 
   if (existing) {
@@ -922,6 +985,7 @@ function addNewItem() {
       stokGudang: '',
       stokToko: '',
       stokSistem: toInt(product.STOK) || 0,
+      stokPicker: '',
     });
     toast.success(`${product.NAMA_BARANG} ditambahkan`);
   }
@@ -941,8 +1005,7 @@ function validateItems() {
   modalState.items.forEach((item, index) => {
     if (item.itemStatus === 'REJECTED' || item.itemStatus === 'DELETED') {
       if (!item.reason || !item.reason.trim()) {
-        errors.push(`${item.kode} (${item.itemStatus === 'REJECTED' ? 'ditolak' : 'dihapus'}) belum ada alasan`);
-
+        errors.push(`${item.kode} belum ada alasan`);
         const textarea = document.querySelector(`[data-reason-index="${index}"]`);
         if (textarea) textarea.classList.add('required-empty');
       }
@@ -957,16 +1020,11 @@ function validateItems() {
 // ─────────────────────────────────────────────────────────────────────────
 
 async function handleSave(sendEmail) {
-  if (!modalState.items.length) {
-    toast.warning('Pesanan kosong. Tambahkan minimal 1 item.');
-    return;
-  }
+  if (!modalState.items.length) { toast.warning('Pesanan kosong.'); return; }
 
   const errors = validateItems();
   if (errors.length > 0) {
-    toast.error(`${errors.length} item ditolak/dihapus wajib punya alasan.`, {
-      duration: 5000,
-    });
+    toast.error(`${errors.length} item wajib punya alasan.`, { duration: 5000 });
     return;
   }
 
@@ -977,8 +1035,8 @@ async function handleSave(sendEmail) {
   const total = approved.reduce((s, i) => s + i.qty * i.harga, 0);
 
   const confirmMsg = sendEmail
-    ? `Order ${modalState.orderId}\n\nStatus akan menjadi ${approved.length === 0 ? 'REJECTED' : 'APPROVED'}.\nEmail akan dikirim ke cabang.\n\n${approved.length} disetujui (${edited.length} diedit)\n${rejected.length} ditolak\n${deleted.length} dihapus\n\nTotal: ${formatRupiah(total)}`
-    : `Order ${modalState.orderId}\n\nStatus order TETAP (tidak berubah).\nEmail belum dikirim.\n\n${approved.length} disetujui (${edited.length} diedit)\n${rejected.length} ditolak\n${deleted.length} dihapus\n\nTotal: ${formatRupiah(total)}`;
+    ? `Order ${modalState.orderId}\n\nStatus: ${approved.length === 0 ? 'REJECTED' : 'APPROVED'}.\nEmail dikirim ke cabang.\n\n${approved.length} disetujui (${edited.length} diedit)\n${rejected.length} ditolak\n${deleted.length} dihapus\n\nTotal: ${formatRupiah(total)}`
+    : `Order ${modalState.orderId}\n\nStatus TETAP.\n\n${approved.length} disetujui (${edited.length} diedit)\n${rejected.length} ditolak\n${deleted.length} dihapus\n\nTotal: ${formatRupiah(total)}`;
 
   const ok = await confirm({
     icon: sendEmail ? '📧' : '💾',
@@ -989,7 +1047,6 @@ async function handleSave(sendEmail) {
   });
 
   if (!ok) return;
-
   await submitEdit(sendEmail);
 }
 
@@ -1030,6 +1087,7 @@ async function submitEdit(sendEmail) {
       stokGudang: item.stokGudang,
       stokToko: item.stokToko,
       stokSistem: item.stokSistem !== undefined ? item.stokSistem : 0,
+      stokPicker: item.stokPicker !== undefined ? item.stokPicker : '',
     })),
   };
 
@@ -1037,8 +1095,7 @@ async function submitEdit(sendEmail) {
     const result = await ordersApi.edit(payload);
 
     if (result.status !== 'ok') {
-      toast.error(result.message || 'Gagal menyimpan perubahan.');
-
+      toast.error(result.message || 'Gagal menyimpan.');
       if (saveBtn) saveBtn.disabled = false;
       if (emailBtn) emailBtn.disabled = false;
       if (printBtn) printBtn.disabled = false;
@@ -1047,11 +1104,7 @@ async function submitEdit(sendEmail) {
       return;
     }
 
-    toast.success(sendEmail
-      ? 'Perubahan tersimpan & email terkirim!'
-      : 'Perubahan tersimpan!'
-    );
-
+    toast.success(sendEmail ? 'Tersimpan & email terkirim!' : 'Perubahan tersimpan!');
     closeEditModal();
 
     const { loadData } = await import('../dashboard.js');
@@ -1059,7 +1112,6 @@ async function submitEdit(sendEmail) {
 
   } catch (error) {
     toast.error(error.message || 'Terjadi kesalahan.');
-
     if (saveBtn) saveBtn.disabled = false;
     if (emailBtn) emailBtn.disabled = false;
     if (printBtn) printBtn.disabled = false;
@@ -1073,17 +1125,10 @@ async function submitEdit(sendEmail) {
 // ─────────────────────────────────────────────────────────────────────────
 
 function handlePrintForm() {
-  if (!modalState.items.length) {
-    toast.warning('Pesanan kosong. Tambahkan minimal 1 item.');
-    return;
-  }
+  if (!modalState.items.length) { toast.warning('Pesanan kosong.'); return; }
 
   const activeItems = modalState.items.filter((i) => i.itemStatus !== 'DELETED');
-
-  if (!activeItems.length) {
-    toast.warning('Tidak ada item aktif untuk di-print.');
-    return;
-  }
+  if (!activeItems.length) { toast.warning('Tidak ada item aktif.'); return; }
 
   showPrintForm(modalState.order, modalState.items);
 }
@@ -1100,9 +1145,6 @@ function bindModalEvents() {
   $('btnCloseModal')?.addEventListener('click', closeEditModal);
 
   $('addQty')?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      addNewItem();
-    }
+    if (e.key === 'Enter') { e.preventDefault(); addNewItem(); }
   });
 }
