@@ -400,6 +400,10 @@ function buildTableRows(items) {
 
     var kode = escapeHtml(item.kode || '');
     var nama = escapeHtml((item.nama || '').toUpperCase());
+        var catatanItem = '';
+    if (item.catatanItem && String(item.catatanItem).trim()) {
+      catatanItem = ' <span style="color:#DC2626; font-weight:800; font-style:italic;">(' + escapeHtml(String(item.catatanItem).trim()) + ')</span>';
+    } 
     var jenis = escapeHtml(String(item.kategori || 'ELEKTRONIK').toUpperCase());
 
     html += '<tr>';
@@ -431,7 +435,7 @@ function buildTableRows(items) {
 
     // Nama Item — 13px BOLD
     html += '<td style="padding: 5px 8px; border: 1px solid #000; font-family: Arial, sans-serif; font-size: 13px; font-weight: 700; vertical-align: middle; text-align: center; line-height: 1.3;">';
-    html += nama;
+    html += nama + catatanItem;
     html += '</td>';
 
     // Jenis — 13px EXTRA BOLD
