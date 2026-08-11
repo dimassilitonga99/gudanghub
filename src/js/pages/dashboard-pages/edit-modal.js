@@ -137,18 +137,32 @@ function addEditModalStyles() {
       font-weight: 700;
     }
 
-    .er-column-headers {
+        .er-column-headers {
       display: grid;
       grid-template-columns: 1fr 60px 60px 90px auto;
       gap: 8px;
-      padding: 6px 12px;
-      margin-bottom: 4px;
+      padding: 6px 12px 6px 12px;
+      margin: 0 0 4px 0;
       font-size: 9px;
       font-weight: 700;
       color: var(--muted);
       text-transform: uppercase;
       letter-spacing: 0.5px;
       border-bottom: 1px solid var(--line-soft);
+      align-items: center;
+    }
+
+    .er-column-headers > div:nth-child(2),
+    .er-column-headers > div:nth-child(3) {
+      text-align: center;
+    }
+
+    .er-column-headers > div:nth-child(4) {
+      text-align: right;
+    }
+
+    .er-column-headers > div:nth-child(5) {
+      text-align: center;
     }
 
     .edit-row {
