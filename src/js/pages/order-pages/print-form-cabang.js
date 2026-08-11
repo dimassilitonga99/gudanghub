@@ -281,6 +281,7 @@ function buildPageHtml(params) {
     }
 
     var jenis = String(item.KATEGORI || 'ELEKTRONIK').toUpperCase();
+    var catatanItem = String(item.CATATAN_ITEM || '').trim();
 
     return ''
       + '<tr>'
@@ -295,7 +296,8 @@ function buildPageHtml(params) {
       // Kode Item — 13px BOLD
       + '<td style="padding:5px 8px; text-align:center; border:1px solid #000; font-size:13px; font-weight:700; vertical-align:middle; line-height:1.2;">' + escapeHtml(item.KODE_BARANG || '') + '</td>'
       // Nama Item — 13px BOLD
-      + '<td style="padding:5px 8px; text-align:center; border:1px solid #000; font-size:13px; font-weight:700; vertical-align:middle; line-height:1.3;">' + escapeHtml((item.NAMA_BARANG || '').toUpperCase()) + '</td>'
+      + '<td style="padding:5px 8px; text-align:center; border:1px solid #000; font-size:13px; font-weight:700; vertical-align:middle; line-height:1.3;">'       + escapeHtml((item.NAMA_BARANG || '').toUpperCase())
+      + (catatanItem ? ' <span style="color:#DC2626; font-weight:800; font-style:italic;">(' + escapeHtml(catatanItem) + ')</span>' : '') + '</td>'
       // Jenis — 13px BOLD
       + '<td style="padding:5px 6px; text-align:center; border:1px solid #000; font-size:13px; vertical-align:middle; font-weight:800; line-height:1.2;">' + escapeHtml(jenis) + '</td>'
       + '</tr>';
