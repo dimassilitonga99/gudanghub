@@ -22,12 +22,20 @@ let modalState = {
 // ─────────────────────────────────────────────────────────────────────────
 
 function getPickerQtyDisplay(item) {
+  // Cek semua kemungkinan field name
   var stokPicker = '';
 
-  if (item.stokPicker !== undefined && item.stokPicker !== '') {
+  if (item.stokPicker !== undefined && item.stokPicker !== '' && item.stokPicker !== null) {
     stokPicker = String(item.stokPicker);
-  } else if (item.STOK_PICKER !== undefined && item.STOK_PICKER !== '') {
+  }
+
+  if (stokPicker === '' && item.STOK_PICKER !== undefined && item.STOK_PICKER !== '' && item.STOK_PICKER !== null) {
     stokPicker = String(item.STOK_PICKER);
+  }
+
+  // Cek juga dari STOK_GUDANG yang mungkin diupdate picker
+  if (stokPicker === '' && item.stokGudang !== undefined && item.stokGudang !== '' && item.stokGudang !== null) {
+    // Jangan pakai stokGudang sebagai picker — biarkan kosong
   }
 
   if (stokPicker === '') {
@@ -35,7 +43,7 @@ function getPickerQtyDisplay(item) {
   }
 
   var pickerInt = parseInt(stokPicker) || 0;
-  var qtyOrder = item.qty || 0;
+  var qtyOrder = toNumber(item.qty) || toNumber(item.QTY) || 0;
   var color = pickerInt >= qtyOrder ? 'var(--success)' : 'var(--danger)';
 
   return '<span class="er-picker-value" style="color: ' + color + ';">' + stokPicker + '</span>';
@@ -567,7 +575,9 @@ export function showEditModal(orderId, dashboardState) {
     stokGudang: d.STOK_GUDANG ?? '',
     stokToko: d.STOK_TOKO ?? '',
     stokSistem: d.STOK_SISTEM !== undefined && d.STOK_SISTEM !== '' ? d.STOK_SISTEM : 0,
-    stokPicker: d.STOK_PICKER !== undefined && d.STOK_PICKER !== '' ? d.STOK_PICKER : '',
+        stokPicker: (d.STOK_PICKER !== undefined && d.STOK_PICKER !== '' && d.STOK_PICKER !== null)
+      ? String(d.STOK_PICKER)
+      : '',
   }));
 
   modalState.originalItems = JSON.parse(JSON.stringify(modalState.items));
