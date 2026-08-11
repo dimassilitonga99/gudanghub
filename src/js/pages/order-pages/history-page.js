@@ -628,9 +628,13 @@ function buildHistoryItem(order) {
 
   var details = order.DETAIL || [];
 
-  var itemText = details.length
+    var itemText = details.length
     ? details.slice(0, 3).map(function (d) {
-        return escapeHtml(d.KODE_BARANG) + ' × ' + escapeHtml(d.QTY);
+        var txt = escapeHtml(d.KODE_BARANG) + ' × ' + escapeHtml(d.QTY);
+        if (d.CATATAN_ITEM) {
+          txt += ' <span style="color:#DC2626; font-style:italic;">(' + escapeHtml(d.CATATAN_ITEM) + ')</span>';
+        }
+        return txt;
       }).join(', ') + (details.length > 3 ? ' +' + (details.length - 3) + ' lagi' : '')
     : 'detail tidak tersedia';
 
