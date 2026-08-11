@@ -584,6 +584,7 @@ export function showEditModal(orderId, dashboardState) {
         stokPicker: (d.STOK_PICKER !== undefined && d.STOK_PICKER !== '' && d.STOK_PICKER !== null)
       ? String(d.STOK_PICKER)
       : '',
+         catatanItem: String(d.CATATAN_ITEM || ''),
   }));
 
   modalState.originalItems = JSON.parse(JSON.stringify(modalState.items));
@@ -778,7 +779,10 @@ function renderEditRows() {
         <div class="er-top">
           <div>
             <div class="er-kode">${escapeHtml(item.kode)}${badge}</div>
-            <div class="er-nama">${escapeHtml(item.nama || '(tanpa nama)')}</div>
+                        <div class="er-nama">
+              ${escapeHtml(item.nama || '(tanpa nama)')}
+              ${item.catatanItem ? ' <span style="color:#DC2626; font-weight:700; font-style:italic; font-size:11px;">(' + escapeHtml(item.catatanItem) + ')</span>' : ''}
+            </div>
             <div class="er-harga">${formatRupiah(item.harga)} / ${escapeHtml(item.satuan)}</div>
             ${stokInfo}
           </div>
@@ -1104,6 +1108,7 @@ async function submitEdit(sendEmail) {
       stokToko: item.stokToko,
       stokSistem: item.stokSistem !== undefined ? item.stokSistem : 0,
       stokPicker: item.stokPicker !== undefined ? item.stokPicker : '',
+             catatanItem: item.catatanItem || '',
     })),
   };
 
