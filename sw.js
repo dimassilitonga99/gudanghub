@@ -22,8 +22,8 @@ const PRECACHE_URLS = [
   './notifikasi.html',
   './settings.html',
   './manifest.json',
-  './public/icons/icon-192.png',
-  './public/icons/icon-512.png',
+  './android-chrome-192x192.png',
+  './android-chrome-512x512.png',
 ];
 
 // Domain API (untuk network-first strategy)
@@ -325,8 +325,8 @@ self.addEventListener('push', (event) => {
   const title = data.title || 'GudangHub';
   const options = {
     body: data.body || 'Anda mendapat notifikasi baru',
-    icon: './public/icons/icon-192.png',
-    badge: './public/icons/icon-192.png',
+    icon: './android-chrome-192x192.png',
+    badge: './android-chrome-192x192.png',
     vibrate: [200, 100, 200],
     tag: data.tag || 'gudanghub-push',
     data: data.data || {},

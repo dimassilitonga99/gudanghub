@@ -18,54 +18,11 @@ import { icon, injectIcons } from '../icons.js';
 var errorTimer = null;
 var isLoggingIn = false;
 
-var CRED_CACHE_KEY = 'gudanghub_login_cache';
-
 // ─────────────────────────────────────────────────────────────────────────
-// CREDENTIAL CACHE
+// KEAMANAN: login SELALU divalidasi ke server (Apps Script).
+// Tidak ada cache kredensial di localStorage yang bisa memberi akses tanpa
+// validasi server — cegah bypass akun nonaktif / password sudah diganti.
 // ─────────────────────────────────────────────────────────────────────────
-
-function getCachedLogin(username, password) {
-  try {
-    var raw = localStorage.getItem(CRED_CACHE_KEY);
-    if (!raw) return null;
-
-    var cache = JSON.parse(raw);
-    if (!cache || !cache.hash || !cache.user || !cache.time) return null;
-
-    if (Date.now() - cache.time > 7 * 24 * 60 * 60 * 1000) {
-      localStorage.removeItem(CRED_CACHE_KEY);
-      return null;
-    }
-
-    var hash = simpleHash(username.toLowerCase() + ':' + password);
-    if (hash !== cache.hash) return null;
-
-    return cache.user;
-  } catch {
-    return null;
-  }
-}
-
-function setCachedLogin(username, password, user) {
-  try {
-    var hash = simpleHash(username.toLowerCase() + ':' + password);
-    localStorage.setItem(CRED_CACHE_KEY, JSON.stringify({
-      hash: hash,
-      user: user,
-      time: Date.now(),
-    }));
-  } catch {}
-}
-
-function simpleHash(str) {
-  var hash = 0;
-  for (var i = 0; i < str.length; i++) {
-    var char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash;
-  }
-  return 'h' + Math.abs(hash).toString(36);
-}
 
 // ─────────────────────────────────────────────────────────────────────────
 // PREWARM AGRESIF
@@ -207,33 +164,9 @@ async function handleLogin(event) {
   isLoggingIn = true;
   setLoadingBtn(true, 'Memverifikasi...');
 
-  // ═══ STRATEGY 1: Cache (INSTANT) ═══
-
-  var cachedUser = getCachedLogin(username, password);
-
-  if (cachedUser) {
-    console.log('[Login] Using cached credentials (instant)');
-
-    setLoadingBtn(true, 'Masuk...');
-
-    setSession(cachedUser, 'cached-' + Date.now());
-    setLastUsername(rememberChecked ? cachedUser.username : '');
-
-    var btnText = $('btnText');
-    if (btnText) {
-      btnText.innerHTML = icon('check-circle', { size: 18 }) + ' Berhasil!';
-    }
-
-    toast.success('Selamat datang, ' + (cachedUser.nama || cachedUser.username) + '!', { duration: 2000 });
-
-    await sleep(200);
-    redirectToHome({ role: cachedUser.role, idCabang: cachedUser.idCabang });
-
-    verifyInBackground(username, password);
-    return;
-  }
-
-  // ═══ STRATEGY 2: Server (retry agresif) ═══
+  // ═══ VALIDASI SERVER (otoritas tunggal) ═══
+  // Login instan via cache localStorage DIHAPUS — akun nonaktif / password
+  // sudah berubah tidak boleh bisa masuk lewat cache.
 
   var result = null;
   var lastError = null;
@@ -286,8 +219,6 @@ async function handleLogin(event) {
 
   // ═══ SUKSES ═══
 
-  setCachedLogin(username, password, user);
-
   setSession(user, result.token);
   setLastUsername(rememberChecked ? user.username : '');
 
@@ -300,19 +231,6 @@ async function handleLogin(event) {
 
   await sleep(200);
   redirectToHome({ role: user.role, idCabang: user.idCabang });
-}
-
-async function verifyInBackground(username, password) {
-  try {
-    var result = await auth.login({ username: username, password: password });
-    if (result && result.status === 'ok' && result.user) {
-      setCachedLogin(username, password, result.user);
-      console.log('[Login] Background verify OK');
-    } else if (result && result.status === 'error') {
-      localStorage.removeItem(CRED_CACHE_KEY);
-      console.log('[Login] Background verify FAILED — cache cleared');
-    }
-  } catch {}
 }
 
 // ─────────────────────────────────────────────────────────────────────────

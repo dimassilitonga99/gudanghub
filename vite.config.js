@@ -2,9 +2,9 @@ import { defineConfig } from 'vite';
 import { resolve } from 'path';
 
 export default defineConfig({
-  // Base path untuk GitHub Pages
-  // GANTI 'gudanghub' dengan nama repository Anda di GitHub
-  base: '/',
+  // Base path untuk GitHub Pages (subpath /gudanghub/ saat production)
+  // Dev pakai '/', build pakai '/gudanghub/' agar asset tidak 404 di GitHub Pages
+  base: process.env.NODE_ENV === 'production' ? '/gudanghub/' : '/',
 
   root: '.',
   publicDir: 'public',
