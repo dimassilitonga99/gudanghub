@@ -1,9 +1,9 @@
-/* ═══════════════════════════════════════════════════════════════════════
-   SERVICE WORKER — GudangHub v3.0
+﻿/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   SERVICE WORKER â€” GudangHub v3.0
    Offline support + smart caching + update notification
-   ═══════════════════════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-const APP_VERSION = 'v3.1.0';
+const APP_VERSION = 'v4.0.0';
 const CACHE_PREFIX = 'gudanghub';
 const STATIC_CACHE = `${CACHE_PREFIX}-static-${APP_VERSION}`;
 const DYNAMIC_CACHE = `${CACHE_PREFIX}-dynamic-${APP_VERSION}`;
@@ -38,9 +38,9 @@ const FONT_DOMAINS = [
   'fonts.gstatic.com',
 ];
 
-// ─────────────────────────────────────────────────────────────────────────
-// INSTALL — Precache shell aplikasi
-// ─────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// INSTALL â€” Precache shell aplikasi
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 self.addEventListener('install', (event) => {
   console.log('[SW] Installing version:', APP_VERSION);
@@ -66,9 +66,9 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// ─────────────────────────────────────────────────────────────────────────
-// ACTIVATE — Cleanup cache lama
-// ─────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ACTIVATE â€” Cleanup cache lama
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 self.addEventListener('activate', (event) => {
   console.log('[SW] Activating version:', APP_VERSION);
@@ -108,9 +108,9 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// ─────────────────────────────────────────────────────────────────────────
-// FETCH — Smart caching strategies
-// ─────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// FETCH â€” Smart caching strategies
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 self.addEventListener('fetch', (event) => {
   const { request } = event;
@@ -129,34 +129,34 @@ self.addEventListener('fetch', (event) => {
 
   if (!isSameOrigin && !isApi && !isFont) return;
 
-  // ─── STRATEGY 1: API — Network First (fresh data prioritized) ───
+  // â”€â”€â”€ STRATEGY 1: API â€” Network First (fresh data prioritized) â”€â”€â”€
   if (isApi) {
     event.respondWith(networkFirst(request, API_CACHE));
     return;
   }
 
-  // ─── STRATEGY 2: Fonts — Cache First (jarang berubah) ───
+  // â”€â”€â”€ STRATEGY 2: Fonts â€” Cache First (jarang berubah) â”€â”€â”€
   if (isFont) {
     event.respondWith(cacheFirst(request, DYNAMIC_CACHE));
     return;
   }
 
-  // ─── STRATEGY 3: HTML pages — Network First (fresh content) ───
+  // â”€â”€â”€ STRATEGY 3: HTML pages â€” Network First (fresh content) â”€â”€â”€
   if (request.destination === 'document' || request.headers.get('accept')?.includes('text/html')) {
     event.respondWith(networkFirst(request, STATIC_CACHE));
     return;
   }
 
-  // ─── STRATEGY 4: Assets (CSS, JS, images) — Cache First with revalidation ───
+  // â”€â”€â”€ STRATEGY 4: Assets (CSS, JS, images) â€” Cache First with revalidation â”€â”€â”€
   event.respondWith(staleWhileRevalidate(request, DYNAMIC_CACHE));
 });
 
-// ─────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // CACHING STRATEGIES
-// ─────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /**
- * Network First — coba network dulu, fallback ke cache
+ * Network First â€” coba network dulu, fallback ke cache
  * Cocok untuk: API, HTML pages
  */
 async function networkFirst(request, cacheName) {
@@ -173,7 +173,7 @@ async function networkFirst(request, cacheName) {
 
     return networkResponse;
   } catch (error) {
-    // Network gagal → fallback ke cache
+    // Network gagal â†’ fallback ke cache
     console.log('[SW] Network failed, using cache:', request.url);
     const cachedResponse = await cache.match(request);
 
@@ -181,7 +181,7 @@ async function networkFirst(request, cacheName) {
       return cachedResponse;
     }
 
-    // Cache juga tidak ada → fallback ke offline page
+    // Cache juga tidak ada â†’ fallback ke offline page
     if (request.destination === 'document') {
       return caches.match('./index.html');
     }
@@ -202,7 +202,7 @@ async function networkFirst(request, cacheName) {
 }
 
 /**
- * Cache First — coba cache dulu, fallback ke network
+ * Cache First â€” coba cache dulu, fallback ke network
  * Cocok untuk: fonts, static images
  */
 async function cacheFirst(request, cacheName) {
@@ -228,7 +228,7 @@ async function cacheFirst(request, cacheName) {
 }
 
 /**
- * Stale While Revalidate — return cache immediately, update in background
+ * Stale While Revalidate â€” return cache immediately, update in background
  * Cocok untuk: CSS, JS, images (yang bisa berubah tapi cache OK)
  */
 async function staleWhileRevalidate(request, cacheName) {
@@ -249,9 +249,9 @@ async function staleWhileRevalidate(request, cacheName) {
   return cachedResponse || fetchPromise;
 }
 
-// ─────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // HELPERS
-// ─────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function fetchWithTimeout(request, timeout = 8000) {
   return new Promise((resolve, reject) => {
@@ -271,9 +271,9 @@ function fetchWithTimeout(request, timeout = 8000) {
   });
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-// MESSAGES — Handle commands from client
-// ─────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// MESSAGES â€” Handle commands from client
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 self.addEventListener('message', (event) => {
   if (!event.data) return;
@@ -308,9 +308,9 @@ async function clearAllCaches() {
   console.log('[SW] All caches cleared');
 }
 
-// ─────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // PUSH NOTIFICATION (untuk masa depan)
-// ─────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 self.addEventListener('push', (event) => {
   if (!event.data) return;
@@ -363,3 +363,4 @@ self.addEventListener('notificationclick', (event) => {
 });
 
 console.log('[SW] GudangHub Service Worker loaded:', APP_VERSION);
+
