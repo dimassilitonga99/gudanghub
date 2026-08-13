@@ -163,8 +163,8 @@ async function networkFirst(request, cacheName) {
   const cache = await caches.open(cacheName);
 
   try {
-    // Try network with 8 second timeout
-    const networkResponse = await fetchWithTimeout(request, 8000);
+// Try network with generous timeout (Apps Script bisa lambat saat cold start)
+  const networkResponse = await fetchWithTimeout(request, 60000);
 
     // Cache the response (kalau valid)
     if (networkResponse && networkResponse.ok) {
