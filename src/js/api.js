@@ -122,7 +122,7 @@ async function fetchWithTimeout(url, options, timeout) {
   } catch (error) {
     clearTimeout(timer);
     if (error.name === 'AbortError') {
-      throw new Error('Koneksi timeout. Server AppScript lambat.');
+      throw new Error('Server lambat (timeout). Coba lagi dalam beberapa detik.');
     }
     throw error;
   }
@@ -209,6 +209,7 @@ export async function callApi(action, payload, options) {
   var useCache = options.cache || false;
   var cacheTtl = options.cacheTtl || SETTINGS.cacheDuration;
   var timeout = options.timeout || 45000;
+  var maxRetries = options.maxRetries || 2;
 
   var cacheKey = action + '::' + JSON.stringify(payload);
 
@@ -225,7 +226,7 @@ export async function callApi(action, payload, options) {
     return pendingRequests.get(cacheKey);
   }
 
-  var promise = executeWithRetry(action, payload, timeout)
+  var promise = executeWithRetry(action, payload, timeout, maxRetries)
     .then(function (result) {
       if (useCache && result.status === 'ok' && result.data && result.data.length > 0) {
         memCache.set(cacheKey, { data: result, time: Date.now() });
@@ -356,7 +357,8 @@ export var auth = {
     return callApi('login', data, {
       dedupe: false,
       cache: false,
-      timeout: 15000,
+      timeout: 30000,
+      maxRetries: 1,
     });
   },
 

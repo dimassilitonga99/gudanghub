@@ -170,11 +170,11 @@ async function handleLogin(event) {
 
   var result = null;
   var lastError = null;
-  var maxAttempts = 3;
+  var maxAttempts = 2;
 
   for (var attempt = 1; attempt <= maxAttempts; attempt++) {
 
-    setLoadingBtn(true, 'Memverifikasi... (' + attempt + '/' + maxAttempts + ')');
+    setLoadingBtn(true, 'Membangunkan server... (' + attempt + '/' + maxAttempts + ')');
 
     try {
       result = await auth.login({ username: username, password: password });
@@ -188,8 +188,8 @@ async function handleLogin(event) {
     }
 
     if (attempt < maxAttempts) {
-      setLoadingBtn(true, 'Mencoba lagi...');
-      await sleep(500);
+      setLoadingBtn(true, 'Server lambat, coba lagi...');
+      await sleep(1500);
     }
   }
 
