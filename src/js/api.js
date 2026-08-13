@@ -3,6 +3,7 @@
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { API_URL, SETTINGS } from './config.js';
+import { getSession } from './session.js';
 
 // Re-export API_URL agar bisa diimport dari api.js
 export { API_URL };
@@ -15,6 +16,21 @@ var pendingRequests = new Map();
 var memCache = new Map();
 
 var LS_CACHE_PREFIX = 'gudanghub_cache_';
+
+// ─────────────────────────────────────────────────────────────────────────
+// AUTH — Sesi token wajib untuk semua action kecuali login/forgotPassword
+// ─────────────────────────────────────────────────────────────────────────
+
+var PUBLIC_ACTIONS = ['login', 'forgotPassword', 'ping'];
+
+function attachToken(action, payload) {
+  if (PUBLIC_ACTIONS.indexOf(action) !== -1) return payload;
+  var s = getSession();
+  if (s && s.token) {
+    return Object.assign({}, payload, { token: s.token });
+  }
+  return payload;
+}
 
 // ─────────────────────────────────────────────────────────────────────────
 // LOCAL STORAGE CACHE
@@ -133,7 +149,7 @@ async function fetchWithTimeout(url, options, timeout) {
 // ─────────────────────────────────────────────────────────────────────────
 
 async function apiPostForm(action, payload, timeout) {
-  var body = JSON.stringify(Object.assign({}, payload, { action: action }));
+  var body = JSON.stringify(Object.assign({}, attachToken(action, payload), { action: action }));
 
   var formData = new FormData();
   formData.append('payload', body);
@@ -149,7 +165,7 @@ async function apiPostForm(action, payload, timeout) {
 }
 
 async function apiGetQuery(action, payload, timeout) {
-  var body = JSON.stringify(Object.assign({}, payload, { action: action }));
+  var body = JSON.stringify(Object.assign({}, attachToken(action, payload), { action: action }));
   var url = API_URL + '?action=' + encodeURIComponent(action) + '&payload=' + encodeURIComponent(body) + '&t=' + Date.now();
 
   if (url.length > 7000) {
@@ -228,6 +244,12 @@ export async function callApi(action, payload, options) {
 
   var promise = executeWithRetry(action, payload, timeout, maxRetries)
     .then(function (result) {
+      // Sesi expired/invalid dari server → bersihkan sesi lokal
+      if (result && result.code === 'AUTH_REQUIRED' && PUBLIC_ACTIONS.indexOf(action) === -1) {
+        try {
+          sessionStorage.removeItem('gudanghub_session');
+        } catch {}
+      }
       if (useCache && result.status === 'ok' && result.data && result.data.length > 0) {
         memCache.set(cacheKey, { data: result, time: Date.now() });
         setLSCache(action, result);
