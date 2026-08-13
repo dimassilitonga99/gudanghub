@@ -3,7 +3,7 @@
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { $, sleep } from '../utils.js';
-import { auth, prewarmAppScript } from '../api.js';
+import { auth, prewarmAppScript, katalog } from '../api.js';
 import { API_URL } from '../config.js';
 import {
   setSession,
@@ -246,6 +246,15 @@ async function handleLogin(event) {
   toast.success('Selamat datang, ' + (user.nama || user.username) + '!', { duration: 2000 });
 
   await sleep(200);
+
+  // Hangatkan cache server (getBarang) sambil pindah halaman → katalog instan
+  try {
+    prewarmAppScript();
+    if (user.role !== 'admin') {
+      katalog.getAll({ cache: false, timeout: 45000, maxRetries: 0 }).catch(function () {});
+    }
+  } catch {}
+
   redirectToHome({ role: user.role, idCabang: user.idCabang });
 }
 

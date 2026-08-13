@@ -99,24 +99,49 @@ export function clearLSCache(action) {
 // RESPONSE PARSER
 // ─────────────────────────────────────────────────────────────────────────
 
-export function parseResponse(text) {
+// ─────────────────────────────────────────────────────────────────────────
+// RESPONSE PARSING (mendukung respons GZIP 'GZ1:' dari server)
+// ─────────────────────────────────────────────────────────────────────────
+
+async function decompressGz(text) {
+  if (!text || text.indexOf('GZ1:') !== 0) return text;
+
+  var b64 = text.slice(4);
+  var bin = atob(b64);
+  var bytes = new Uint8Array(bin.length);
+  for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+
+  if (typeof DecompressionStream === 'undefined') {
+    throw new Error('Browser tidak mendukung dekompresi.');
+  }
+
+  var ds = new DecompressionStream('gzip');
+  var stream = new Blob([bytes]).stream().pipeThrough(ds);
+  return await new Response(stream).text();
+}
+
+export async function parseResponse(text) {
   if (!text || !text.trim()) {
     return { status: 'error', message: 'Respons kosong dari server.' };
   }
 
   try {
+    if (text.indexOf('GZ1:') === 0) {
+      var plain = await decompressGz(text);
+      return JSON.parse(plain);
+    }
     return JSON.parse(text);
   } catch {
     // continue
   }
 
-  var jsonMatch = text.match(/\{[\s\S]*\}/);
-  if (jsonMatch) {
-    try {
+  try {
+    var jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
       return JSON.parse(jsonMatch[0]);
-    } catch {
-      // continue
     }
+  } catch {
+    // continue
   }
 
   var lower = text.toLowerCase();
@@ -175,7 +200,7 @@ async function apiPostForm(action, payload, timeout) {
   );
 
   var text = await response.text();
-  return parseResponse(text);
+  return await parseResponse(text);
 }
 
 async function apiGetQuery(action, payload, timeout) {
@@ -188,7 +213,7 @@ async function apiGetQuery(action, payload, timeout) {
 
   var response = await fetchWithTimeout(url, { cache: 'no-store' }, timeout);
   var text = await response.text();
-  return parseResponse(text);
+  return await parseResponse(text);
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -362,13 +387,38 @@ export function prewarmAppScript() {
   prewarmDone = true;
 
   try {
-    fetch(API_URL + '?ping=1&t=' + Date.now(), {
+    fetch(API_URL + '?action=ping&t=' + Date.now(), {
       method: 'GET',
       mode: 'no-cors',
       cache: 'no-store',
     }).catch(function () {});
   } catch {}
 }
+
+// ─────────────────────────────────────────────────────────────────────────
+// KEEP-ALIVE — Jaga server Apps Script tetap panas (idle ~6 menit)
+// Ping publik & tanpa data → aman, tidak bocor apa pun
+// ─────────────────────────────────────────────────────────────────────────
+
+var keepAliveTimer = null;
+
+export function startKeepAlive(intervalMs) {
+  if (keepAliveTimer) return;
+  keepAliveTimer = setInterval(function () {
+    try {
+      if (!document.hidden) {
+        fetch(API_URL + '?action=ping&t=' + Date.now(), {
+          method: 'GET',
+          mode: 'no-cors',
+          cache: 'no-store',
+        }).catch(function () {});
+      }
+    } catch {}
+  }, intervalMs || 4 * 60 * 1000);
+}
+
+// Auto-start di semua halaman yang memuat api.js
+startKeepAlive();
 
 // ─────────────────────────────────────────────────────────────────────────
 // CACHE MANAGEMENT
@@ -429,6 +479,7 @@ export var katalog = {
       cache: options.cache !== false,
       cacheTtl: 5 * 60 * 1000,
       timeout: 45000,
+      maxRetries: options.maxRetries !== undefined ? options.maxRetries : undefined,
     });
   },
 
