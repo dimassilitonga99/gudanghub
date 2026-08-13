@@ -186,7 +186,8 @@ async function executeWithRetry(action, payload, timeout, maxRetries) {
   if (!maxRetries) maxRetries = 2;
 
   var lastError = null;
-  var strategies = [apiPostForm, apiGetQuery];
+  // Login TIDAK boleh fallback ke GET query — password tidak boleh lewat URL
+  var strategies = (action === 'login') ? [apiPostForm] : [apiPostForm, apiGetQuery];
 
   for (var attempt = 1; attempt <= maxRetries; attempt++) {
     for (var s = 0; s < strategies.length; s++) {

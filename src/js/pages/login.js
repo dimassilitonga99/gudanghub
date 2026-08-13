@@ -48,6 +48,22 @@ function aggressivePrewarm() {
   }, 2000);
 }
 
+// Prewarm ulang saat user mulai mengetik (server mungkin sudah "tidur" lagi)
+function prewarmOnTyping() {
+  var lastPrewarm = 0;
+  return function () {
+    var now = Date.now();
+    if (now - lastPrewarm < 30000) return;
+    lastPrewarm = now;
+    try {
+      fetch(API_URL + '?action=ping&t=' + Date.now(), {
+        method: 'GET',
+        cache: 'no-store',
+      }).catch(function () {});
+    } catch {}
+  };
+}
+
 // ─────────────────────────────────────────────────────────────────────────
 // TOGGLE PASSWORD
 // ─────────────────────────────────────────────────────────────────────────
@@ -174,7 +190,7 @@ async function handleLogin(event) {
 
   for (var attempt = 1; attempt <= maxAttempts; attempt++) {
 
-    setLoadingBtn(true, 'Membangunkan server... (' + attempt + '/' + maxAttempts + ')');
+    setLoadingBtn(true, 'Menghubungi server... (' + attempt + '/' + maxAttempts + ')');
 
     try {
       result = await auth.login({ username: username, password: password });
@@ -188,7 +204,7 @@ async function handleLogin(event) {
     }
 
     if (attempt < maxAttempts) {
-      setLoadingBtn(true, 'Server lambat, coba lagi...');
+      setLoadingBtn(true, 'Server sedang bangun, coba lagi...');
       await sleep(1500);
     }
   }
@@ -328,6 +344,12 @@ function bindEvents() {
 
   ['inputUser', 'inputPass'].forEach(function (id) {
     $(id)?.addEventListener('input', hideError);
+  });
+
+  // Prewarm server saat user mengetik (server Apps Script tidur setelah 6 menit idle)
+  var onTyping = prewarmOnTyping();
+  ['inputUser', 'inputPass'].forEach(function (id) {
+    $(id)?.addEventListener('input', onTyping);
   });
 
   $('inputPass')?.addEventListener('keydown', function (e) {
