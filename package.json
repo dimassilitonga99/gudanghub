@@ -1,11 +1,11 @@
 {
   "name": "gudanghub",
   "version": "3.0.0",
-  "description": "GudangHub - Sistem operasional PT Central Perabot Utama",
+  "description": "GudangHub - Sistem operasional PT Central Perabut Utama",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node -e \"require('fs').copyFileSync('sw.js', 'dist/sw.js')\"",
     "preview": "vite preview",
     "deploy": "npm run build && gh-pages -d dist"
   },
@@ -14,7 +14,7 @@
     "terser": "^5.49.0",
     "vite": "^5.4.10"
   },
-  "author": "PT Central Perabot Utama",
+  "author": "PT Central Perabut Utama",
   "license": "UNLICENSED",
   "dependencies": {
     "lucide": "^1.26.0",
