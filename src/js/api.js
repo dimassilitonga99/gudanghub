@@ -23,6 +23,20 @@ var LS_CACHE_PREFIX = 'gudanghub_cache_';
 
 var PUBLIC_ACTIONS = ['login', 'forgotPassword', 'ping'];
 
+// Sesi ditolak server (token lama/kadaluwarsa) → logout & arahkan ke login
+function handleAuthRequired() {
+  try {
+    sessionStorage.removeItem('gudanghub_session');
+    localStorage.removeItem('gudanghub_session');
+  } catch {}
+  try {
+    var isLoginPage = window.location.pathname.indexOf('login') !== -1;
+    if (!isLoginPage && !window.location.hash) {
+      window.location.href = './login.html';
+    }
+  } catch {}
+}
+
 function attachToken(action, payload) {
   if (PUBLIC_ACTIONS.indexOf(action) !== -1) return payload;
   var s = getSession();
@@ -245,11 +259,9 @@ export async function callApi(action, payload, options) {
 
   var promise = executeWithRetry(action, payload, timeout, maxRetries)
     .then(function (result) {
-      // Sesi expired/invalid dari server → bersihkan sesi lokal
+      // Sesi expired/invalid dari server → logout & arahkan ke login
       if (result && result.code === 'AUTH_REQUIRED' && PUBLIC_ACTIONS.indexOf(action) === -1) {
-        try {
-          sessionStorage.removeItem('gudanghub_session');
-        } catch {}
+        handleAuthRequired();
       }
       if (useCache && result.status === 'ok' && result.data && result.data.length > 0) {
         memCache.set(cacheKey, { data: result, time: Date.now() });
@@ -295,6 +307,10 @@ export async function callApiStale(action, payload, options) {
     // Stale cache — return + refresh in background
     setTimeout(function () {
       executeWithRetry(action, payload, timeout).then(function (freshResult) {
+        if (freshResult && freshResult.code === 'AUTH_REQUIRED' && PUBLIC_ACTIONS.indexOf(action) === -1) {
+          handleAuthRequired();
+          return;
+        }
         if (freshResult && freshResult.status === 'ok' && freshResult.data && freshResult.data.length > 0) {
           setLSCache(action, freshResult);
           memCache.set(action + '::' + JSON.stringify(payload), {
@@ -318,6 +334,11 @@ export async function callApiStale(action, payload, options) {
 
   // No cache — fetch fresh
   var result = await executeWithRetry(action, payload, timeout);
+
+  if (result && result.code === 'AUTH_REQUIRED' && PUBLIC_ACTIONS.indexOf(action) === -1) {
+    handleAuthRequired();
+    return result;
+  }
 
   if (result && result.status === 'ok' && result.data && result.data.length > 0) {
     setLSCache(action, result);

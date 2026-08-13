@@ -3,7 +3,7 @@
    Offline support + smart caching + update notification
    ═══════════════════════════════════════════════════════════════════════ */
 
-const APP_VERSION = 'v3.0.0';
+const APP_VERSION = 'v3.1.0';
 const CACHE_PREFIX = 'gudanghub';
 const STATIC_CACHE = `${CACHE_PREFIX}-static-${APP_VERSION}`;
 const DYNAMIC_CACHE = `${CACHE_PREFIX}-dynamic-${APP_VERSION}`;
