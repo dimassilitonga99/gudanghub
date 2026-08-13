@@ -2,9 +2,9 @@ import { defineConfig } from 'vite';
 import { resolve } from 'path';
 
 export default defineConfig({
-  // Base path untuk GitHub Pages (subpath /gudanghub/ saat production)
-  // Dev pakai '/', build pakai '/gudanghub/' agar asset tidak 404 di GitHub Pages
-  base: process.env.NODE_ENV === 'production' ? '/gudanghub/' : '/',
+  // Base path: '/' — deploy di Cloudflare Pages (root domain).
+  // JANGAN ganti ke subpath (/gudanghub/) karena Cloudflare serve di root.
+  base: '/',
 
   root: '.',
   publicDir: 'public',
