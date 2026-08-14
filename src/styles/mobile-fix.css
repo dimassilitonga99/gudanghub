@@ -638,21 +638,6 @@
     font-size: 14px !important;
   }
 
-  /* Steps */
-  .steps-grid {
-    grid-template-columns: 1fr !important;
-  }
-
-  .step {
-    border-right: none !important;
-    border-bottom: 1px solid rgba(255,255,255,0.05) !important;
-    padding: 24px 0 !important;
-  }
-
-  .step-icon {
-    background: #1a1a35 !important;
-  }
-
   /* About */
   .about-inner {
     grid-template-columns: 1fr !important;

@@ -8,6 +8,9 @@ import {
   Bed,
   Boxes,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  ClipboardList,
   CookingPot,
   FileText,
   Info,
@@ -19,8 +22,9 @@ import {
   Monitor,
   Package,
   Palette,
+  Pause,
   Phone,
-  Search,
+  Play,
   ShieldCheck,
   ShoppingBag,
   ShoppingCart,
@@ -57,30 +61,62 @@ const STATS = [
   { value: 24, suffix: '/7', label: 'Sistem selalu siap' },
 ];
 
-const STEPS = [
+const WORKFLOW_STEPS = [
   {
-    icon: Search,
+    icon: Store,
     num: '/ 01',
-    title: 'Telusuri Katalog',
-    desc: 'Cabang menjelajah katalog lengkap dengan kode, harga, dan stok real-time. Semua transparan.',
+    title: 'Toko Mengorder',
+    status: 'DRAFT DIBUAT',
+    tags: ['KATALOG LIVE', 'FORM ORDER', 'DRAFT'],
+    desc: 'Cabang memilih barang dari katalog real-time, melengkapi jumlah, lalu menyimpan draft sebelum dikirim ke pusat.',
+    points: [
+      'Stok dan harga tampil real-time dari satu sumber terpusat',
+      'Tambah item satu per satu, atau massal dari Excel',
+      'Catatan untuk pusat dilampirkan di tiap order',
+      'Draft tersimpan otomatis — aman walau jaringan putus',
+    ],
   },
   {
-    icon: ShoppingCart,
+    icon: ClipboardList,
     num: '/ 02',
-    title: 'Susun Order',
-    desc: 'Tambahkan barang satu per satu atau kirim massal — copy-paste dari Excel pun jalan.',
+    title: 'Order Masuk Antrean',
+    status: 'DALAM ANTREAN',
+    tags: ['NOTIFIKASI', 'PRIORITAS', 'JEJAK LOG'],
+    desc: 'Order terkirim ke pusat dan masuk antrean verifikasi — terlihat oleh semua pihak, tidak ada order yang hilang.',
+    points: [
+      'Notifikasi instan ke pusat begitu order masuk',
+      'Antrean verifikasi terurut dari order terbaru',
+      'Status berubah otomatis: DRAFT → SUBMITTED',
+      'Riwayat lengkap: siapa mengubah, kapan, dan apa',
+    ],
   },
   {
     icon: ShieldCheck,
     num: '/ 03',
-    title: 'Verifikasi Pusat',
-    desc: 'Pusat meninjau, menyesuaikan, atau menolak pesanan. Semua ada jejaknya.',
+    title: 'Verifikasi Stok',
+    status: 'DIVERIFIKASI',
+    tags: ['COCOK STOK', 'APPROVED / TOLAK', 'PICKER'],
+    desc: 'Stok dicocokkan di gudang. Order disetujui, jumlahnya disesuaikan, atau ditolak dengan alasan — semua berjejak.',
+    points: [
+      'Cek kesediaan stok per rak gudang',
+      'Approve, sesuaikan, atau tolak dengan alasan',
+      'Picker memverifikasi fisik sebelum dikirim',
+      'Setiap keputusan tercatat di jejak audit',
+    ],
   },
   {
     icon: Truck,
     num: '/ 04',
     title: 'Barang Meluncur',
-    desc: 'Order approved masuk antrean pengiriman. Cabang dapat notifikasi email otomatis.',
+    status: 'SIAP DIKIRIM',
+    tags: ['STATUS PICKED', 'NOTIF REAL-TIME', 'LAPORAN'],
+    desc: 'Order approved diverifikasi picker dan siap kirim. Cabang mendapat notifikasi real-time di semua perangkat.',
+    points: [
+      'Status bergerak otomatis: PICKED → SENT',
+      'Notifikasi real-time ke cabang dan pusat',
+      'Laporan rekap nilai otomatis per cabang',
+      'Sinkron di semua perangkat, online atau offline',
+    ],
   },
 ];
 
@@ -431,34 +467,120 @@ function StatNum({ value, suffix }: { value: number; suffix: string }) {
 }
 
 function StepsSection() {
+  const [active, setActive] = useState(0);
+  const [playing, setPlaying] = useState(true);
+
+  useEffect(() => {
+    if (!playing) return;
+    const t = setInterval(() => {
+      setActive((a) => (a + 1) % WORKFLOW_STEPS.length);
+    }, 5600);
+    return () => clearInterval(t);
+  }, [playing]);
+
+  const go = (i: number) => {
+    setActive(((i % WORKFLOW_STEPS.length) + WORKFLOW_STEPS.length) % WORKFLOW_STEPS.length);
+  };
+
+  const fill = (active / (WORKFLOW_STEPS.length - 1)) * 100;
+  const step = WORKFLOW_STEPS[active];
+
   return (
-    <section className="steps mx-auto max-w-5xl px-4" id="cara" aria-labelledby="cara-title">
+    <section className="wf mx-auto max-w-5xl px-4" id="cara" aria-labelledby="cara-title">
       <Reveal>
         <header className="section-head">
-          <span className="section-kicker">Alur Operasional</span>
+          <span className="section-kicker">Sistem Animasi · Alur Operasional</span>
           <h2 id="cara-title">
-            Empat langkah, satu <em>alur mulus</em>.
+            Satu alur, <em>empat gerakan</em>.
           </h2>
           <p>
-            Setiap proses dirancang untuk memangkas waktu dan menghilangkan kebingungan — dari toko
-            cabang hingga rak pusat.
+            Putar animasinya dan lihat bagaimana setiap order bergerak — dari toko cabang, diperiksa
+            di pusat, hingga siap dikirim. Detail tiap tahap ada di panel.
           </p>
         </header>
       </Reveal>
-      <div className="steps-grid">
-        {STEPS.map((s, i) => (
-          <Reveal key={s.num} delay={String((i % 3) + 1)}>
-            <article className="step">
-              <div className="step-num">{s.num}</div>
-              <div className="step-icon">
-                <s.icon className="h-[26px] w-[26px]" />
-              </div>
-              <h3>{s.title}</h3>
-              <p>{s.desc}</p>
-            </article>
-          </Reveal>
-        ))}
-      </div>
+
+      <Reveal>
+        <div className="wf-system">
+          <div className="wf-rail" role="tablist" aria-label="Tahapan cara kerja">
+            <div className="wf-line" aria-hidden="true">
+              <span className="wf-line-fill" style={{ width: `${fill}%` }} />
+              <span className="wf-packet" key={`pkt-${active}`} style={{ left: `${fill}%` }}>
+                <span className="wf-packet-core" />
+              </span>
+            </div>
+            {WORKFLOW_STEPS.map((s, i) => (
+              <button
+                key={s.num}
+                type="button"
+                role="tab"
+                aria-selected={i === active}
+                className={cn(
+                  'wf-node',
+                  i === active ? 'is-active' : i < active ? 'is-done' : 'is-todo',
+                )}
+                onClick={() => go(i)}
+                aria-label={`Langkah ${i + 1}: ${s.title}`}
+              >
+                <span className="wf-node-icon">
+                  <s.icon className="h-5 w-5" />
+                </span>
+                <span className="wf-node-label">{s.title}</span>
+              </button>
+            ))}
+          </div>
+
+          <div className="wf-stage" key={`stage-${active}`}>
+            <div className="wf-stage-meta">
+              <span className="wf-num">{step.num}</span>
+              <span className="wf-status">
+                <span className="wf-status-dot" />
+                {step.status}
+              </span>
+            </div>
+            <div className="wf-tags">
+              {step.tags.map((t) => (
+                <span key={t} className="wf-tag">
+                  {t}
+                </span>
+              ))}
+            </div>
+            <h3 className="wf-title">{step.title}</h3>
+            <p className="wf-desc">{step.desc}</p>
+            <ul className="wf-points">
+              {step.points.map((p, i) => (
+                <li key={p} style={{ '--i': i } as React.CSSProperties}>
+                  <CheckCircle2 className="h-4 w-4" />
+                  {p}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="wf-controls">
+            <button type="button" className="wf-ctl" onClick={() => go(active - 1)} aria-label="Langkah sebelumnya">
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              className="wf-ctl wf-ctl-play"
+              onClick={() => setPlaying((p) => !p)}
+              aria-label={playing ? 'Jeda animasi' : 'Putar animasi'}
+            >
+              {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+            </button>
+            <button type="button" className="wf-ctl" onClick={() => go(active + 1)} aria-label="Langkah berikutnya">
+              <ChevronRight className="h-4 w-4" />
+            </button>
+            <span className="wf-counter">
+              {String(active + 1).padStart(2, '0')} <i>/</i> {String(WORKFLOW_STEPS.length).padStart(2, '0')}
+            </span>
+            <div className="wf-timer" aria-hidden="true">
+              <span key={`bar-${active}-${playing}`} className={playing ? 'is-running' : ''} />
+            </div>
+          </div>
+        </div>
+      </Reveal>
     </section>
   );
 }
