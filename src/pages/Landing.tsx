@@ -14,7 +14,6 @@ import {
   LayoutDashboard,
   LayoutGrid,
   LogIn,
-  Mail,
   MapPin,
   Menu,
   Monitor,
@@ -36,7 +35,7 @@ import {
   X,
   Zap,
 } from 'lucide-react';
-import { CABANG_LIST } from '@/lib/config';
+import { CABANG_LIST, ROUTES } from '@/lib/config';
 import { useAuth } from '@/context/AuthContext';
 import { GradientShimmer } from '@/components/ui/gradient-shimmer';
 import { Button } from '@/components/ui/button';
@@ -45,9 +44,9 @@ import { cn } from '@/lib/utils';
 const FEATURES = [
   { icon: ShoppingCart, title: 'Order Cepat', desc: 'Pesan barang dari katalog dalam hitungan detik, kapan saja.' },
   { icon: Zap, title: 'Kinerja Tinggi', desc: 'Ditenagai cache proxy cloud untuk respons instan di jaringan 3G.' },
-  { icon: LayoutDashboard, title: 'Dashboard Admin', desc: 'Kelola semua order cabang dari satu layar terpusat.' },
+  { icon: LayoutDashboard, title: 'Kontrol Pusat', desc: 'Kelola semua order cabang dari satu layar terpusat.' },
   { icon: BarChart3, title: 'Laporan Lengkap', desc: 'Rekap per cabang, status, dan nilai otomatis.' },
-  { icon: Timer, title: 'Verifikasi Picker', desc: 'Cek stok barang sebelum order diproses admin.' },
+  { icon: Timer, title: 'Verifikasi Picker', desc: 'Cek stok barang sebelum order diproses.' },
   { icon: Package, title: 'Katalog Terpusat', desc: 'Harga dan stok selalu sinkron dari satu sumber data.' },
 ];
 
@@ -74,8 +73,8 @@ const STEPS = [
   {
     icon: ShieldCheck,
     num: '/ 03',
-    title: 'Admin Verifikasi',
-    desc: 'Gudang pusat meninjau, menyesuaikan, atau menolak dari dashboard. Semua ada jejaknya.',
+    title: 'Verifikasi Pusat',
+    desc: 'Pusat meninjau, menyesuaikan, atau menolak pesanan. Semua ada jejaknya.',
   },
   {
     icon: Truck,
@@ -102,7 +101,7 @@ const ABOUT_ITEMS = [
   {
     icon: Zap,
     title: 'Keputusan dalam Sekejap',
-    desc: 'Admin approve, edit, atau tolak dari mana saja. Perubahan tersinkron instan.',
+    desc: 'Tinjauan pusat menyetujui, menyesuaikan, atau menolak dari mana saja. Perubahan tersinkron instan.',
   },
   {
     icon: BarChart3,
@@ -442,7 +441,7 @@ function StepsSection() {
           </h2>
           <p>
             Setiap proses dirancang untuk memangkas waktu dan menghilangkan kebingungan — dari toko
-            cabang hingga rak gudang pusat.
+            cabang hingga rak pusat.
           </p>
         </header>
       </Reveal>
@@ -560,7 +559,7 @@ function AboutSection() {
 
           <Reveal delay="1">
             <Link to="/login" className="btn-about">
-              Masuk ke Dashboard
+              Masuk ke Aplikasi
               <ArrowRight className="h-4 w-4" />
             </Link>
           </Reveal>
@@ -632,28 +631,25 @@ function FooterSection() {
           </div>
 
           <div className="footer-col">
-            <h5>Sistem</h5>
+            <h5>Akses</h5>
             <Link to="/login">
-              <LogIn className="h-[14px] w-[14px]" /> Masuk Cabang
+              <LogIn className="h-[14px] w-[14px]" /> Masuk Aplikasi
             </Link>
-            <Link to="/login">
-              <LogIn className="h-[14px] w-[14px]" /> Masuk Admin
+            <Link to="/order">
+              <ShoppingCart className="h-[14px] w-[14px]" /> Lacak Order
             </Link>
-            <Link to="/dashboard">
-              <LayoutDashboard className="h-[14px] w-[14px]" /> Dashboard
-            </Link>
+            <a href="#katalog" onClick={smoothScroll('#katalog')}>
+              <LayoutGrid className="h-[14px] w-[14px]" /> Lihat Katalog
+            </a>
           </div>
 
           <div className="footer-col">
             <h5>Terhubung</h5>
             <a href="#top" onClick={smoothScroll('#top')}>
-              <MapPin className="h-[14px] w-[14px]" /> Gudang Pusat NTT
+              <MapPin className="h-[14px] w-[14px]" /> PT Central Perabot Utama · NTT
             </a>
             <a href="tel:+6281234567890">
               <Phone className="h-[14px] w-[14px]" /> +62 812 3456 7890
-            </a>
-            <a href="mailto:silitongadimas@gmail.com">
-              <Mail className="h-[14px] w-[14px]" /> silitongadimas@gmail.com
             </a>
           </div>
         </div>
@@ -891,6 +887,13 @@ function ParticlesCanvas() {
 export default function Landing() {
   const { session } = useAuth();
   const navigate = useNavigate();
+  const homeRoute = session
+    ? session.role === 'admin'
+      ? ROUTES.dashboard
+      : session.role === 'picker'
+        ? ROUTES.picker
+        : ROUTES.order
+    : ROUTES.login;
   const [splash, setSplash] = useState(true);
   const [splashHidden, setSplashHidden] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -1083,8 +1086,8 @@ export default function Landing() {
           <div className="hidden items-center gap-2 md:flex">
             {session ? (
               <Button asChild size="sm">
-                <Link to="/dashboard">
-                  Dashboard
+                <Link to={homeRoute}>
+                  Buka Aplikasi
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
@@ -1157,8 +1160,8 @@ export default function Landing() {
         <div className="mt-4 flex flex-col gap-2">
           {session ? (
             <Button asChild className="w-full">
-              <Link to="/dashboard" onClick={() => setDrawerOpen(false)}>
-                Dashboard
+              <Link to={homeRoute} onClick={() => setDrawerOpen(false)}>
+                Buka Aplikasi
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
@@ -1339,7 +1342,7 @@ export default function Landing() {
           <div className="rounded-2xl border border-border bg-card p-6 sm:p-8">
             <h2 className="font-display text-center text-2xl font-bold sm:text-3xl">Hubungi Kami</h2>
             <p className="mt-2 text-center text-sm text-muted-foreground">
-              PT Central Perabot Utama · NTT · silitongadimas@gmail.com
+              PT Central Perabot Utama · NTT
             </p>
             <div className="mx-auto mt-6 grid max-w-lg grid-cols-1 gap-3 text-center text-sm sm:grid-cols-3">
               <div className="rounded-xl border border-border bg-muted/30 p-4">
@@ -1370,9 +1373,9 @@ export default function Landing() {
               Siap beroperasi lebih cepat?
             </GradientShimmer>
             <div className="mt-4">
-              <Button asChild size="lg" onClick={() => (session ? navigate('/dashboard') : navigate('/login'))}>
-                <Link to={session ? '/dashboard' : '/login'}>
-                  {session ? 'Buka Dashboard' : 'Mulai Sekarang'}
+              <Button asChild size="lg" onClick={() => navigate(homeRoute)}>
+                <Link to={homeRoute}>
+                  {session ? 'Buka Aplikasi' : 'Mulai Sekarang'}
                   <ArrowRight className="h-5 w-5" />
                 </Link>
               </Button>

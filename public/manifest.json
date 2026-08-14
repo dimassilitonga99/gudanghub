@@ -29,13 +29,6 @@
 
   "shortcuts": [
     {
-      "name": "Dashboard Admin",
-      "short_name": "Dashboard",
-      "description": "Buka dashboard admin gudang",
-      "url": "./dashboard",
-      "icons": [{ "src": "./android-chrome-192x192.png", "sizes": "192x192" }]
-    },
-    {
       "name": "Order Barang",
       "short_name": "Order",
       "description": "Buat order dari cabang",
