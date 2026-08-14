@@ -596,8 +596,8 @@ function DemoSection() {
             Lihat alurnya <em>langsung</em>.
           </h2>
           <p>
-            Rekaman pemakaian nyata aplikasi — cabang kirim pesanan, picker verifikasi stok, hingga
-            peninjauan pesanan oleh pusat.
+            Rekaman pemakaian nyata aplikasi — dari login, pilih barang, isi stok aktual toko &
+            gudang, kirim order, hingga pantau statusnya di riwayat.
           </p>
         </header>
         <div className="demo-frame">
@@ -613,7 +613,7 @@ function DemoSection() {
             <source src="./demo/gudanghub-demo.mp4" type="video/mp4" />
             <source src="./demo/gudanghub-demo.webm" type="video/webm" />
           </video>
-          <div className="demo-caption">Login → pesan → verifikasi picker → tinjauan pusat</div>
+          <div className="demo-caption">Login → pilih barang → isi stok aktual → kirim order → pantau status</div>
         </div>
       </Reveal>
     </section>
