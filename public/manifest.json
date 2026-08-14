@@ -2,7 +2,7 @@
   "name": "GudangHub — PT Central Perabot Utama",
   "short_name": "GudangHub",
   "description": "Sistem operasional order barang antar cabang",
-  "start_url": "./index.html",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
@@ -32,21 +32,21 @@
       "name": "Dashboard Admin",
       "short_name": "Dashboard",
       "description": "Buka dashboard admin gudang",
-      "url": "./dashboard.html",
+      "url": "./dashboard",
       "icons": [{ "src": "./android-chrome-192x192.png", "sizes": "192x192" }]
     },
     {
       "name": "Order Barang",
       "short_name": "Order",
       "description": "Buat order dari cabang",
-      "url": "./order.html",
+      "url": "./order",
       "icons": [{ "src": "./android-chrome-192x192.png", "sizes": "192x192" }]
     },
     {
       "name": "Laporan",
       "short_name": "Laporan",
       "description": "Lihat laporan order",
-      "url": "./laporan.html",
+      "url": "./laporan",
       "icons": [{ "src": "./android-chrome-192x192.png", "sizes": "192x192" }]
     }
   ],

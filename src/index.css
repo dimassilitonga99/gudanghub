@@ -1,0 +1,332 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 29% 8%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 29% 8%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 29% 8%;
+    --primary: 24 100% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 240 29% 8%;
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 4% 46%;
+    --accent: 24 100% 96%;
+    --accent-foreground: 24 100% 30%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 6% 90%;
+    --input: 240 6% 90%;
+    --ring: 24 100% 50%;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 240 29% 8%;
+    --foreground: 0 0% 98%;
+    --card: 240 24% 11%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 24% 11%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 24 100% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 24% 16%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 24% 16%;
+    --muted-foreground: 240 5% 65%;
+    --accent: 240 24% 18%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 24% 20%;
+    --input: 240 24% 20%;
+    --ring: 24 100% 50%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}
+
+@layer components {
+  .app-container {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+}
+
+@keyframes gudanghub-shake {
+  10%,
+  90% {
+    transform: translateX(-1px);
+  }
+  20%,
+  80% {
+    transform: translateX(2px);
+  }
+  30%,
+  50%,
+  70% {
+    transform: translateX(-4px);
+  }
+  40%,
+  60% {
+    transform: translateX(4px);
+  }
+}
+
+.animate-shake {
+  animation: gudanghub-shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+/* ─── Landing: splash screen ─── */
+.splash-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse 60% 60% at 50% 50%, #1b4b5a 0%, #123b4a 40%, #0a1f2e 70%, #08151c 100%);
+  transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+
+.splash-overlay.hide {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.splash-logo {
+  animation: splashGlowPulse 2s ease-in-out 0.5s infinite;
+}
+
+@keyframes splashGlowPulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 8px rgba(127, 219, 255, 0.3));
+  }
+  50% {
+    filter: drop-shadow(0 0 20px rgba(58, 222, 222, 0.6));
+  }
+}
+
+.splash-brand {
+  opacity: 0;
+  animation: splashTextIn 0.8s ease 0.6s forwards;
+  font-size: clamp(24px, 5vw, 36px);
+  font-weight: 900;
+  letter-spacing: 0.3em;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.splash-tagline {
+  opacity: 0;
+  animation: splashTextIn 0.8s ease 1.1s forwards;
+  font-size: clamp(11px, 1.5vw, 14px);
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-top: 8px;
+}
+
+@keyframes splashTextIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.splash-spark {
+  opacity: 0;
+}
+
+@keyframes splashSparkle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.5);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .splash-overlay {
+    display: none !important;
+  }
+}
+
+/* ─── Landing: cursor glow ─── */
+.cursor-glow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 3;
+  background: radial-gradient(circle, rgba(255, 140, 56, 0.12) 0%, rgba(255, 107, 0, 0.06) 25%, rgba(255, 107, 0, 0.02) 50%, transparent 70%);
+  transform: translate(-50%, -50%);
+  opacity: 1;
+  transition: opacity 0.3s ease;
+  mix-blend-mode: screen;
+  will-change: transform;
+}
+
+.cursor-glow.hide {
+  opacity: 0;
+}
+
+/* ─── Landing: scroll progress ─── */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  width: 0%;
+  background: linear-gradient(90deg, #ff6b00, #ff8c38, #ff6b00);
+  z-index: 100;
+  box-shadow: 0 0 12px rgba(255, 107, 0, 0.6);
+  pointer-events: none;
+}
+
+/* ─── Landing: reveal on scroll ─── */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal.in {
+  opacity: 1;
+  transform: none;
+}
+
+.reveal[data-delay='1'] {
+  transition-delay: 0.1s;
+}
+
+.reveal[data-delay='2'] {
+  transition-delay: 0.2s;
+}
+
+.reveal[data-delay='3'] {
+  transition-delay: 0.3s;
+}
+
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.94);
+  transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-scale.in {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ─── Landing: bento card ─── */
+.bento-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+  transform-style: preserve-3d;
+  transition: transform 0.2s ease;
+  will-change: transform;
+}
+
+.bento-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  background: radial-gradient(300px circle at var(--mx, 50%) var(--my, 50%), var(--card-color, #ff6b00) 0%, transparent 65%);
+  mix-blend-mode: screen;
+}
+
+.bento-card:hover .bento-glow {
+  opacity: 0.35;
+}
+
+.bento-signal-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #34d399;
+  position: relative;
+}
+
+.bento-signal-dot::after {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  border: 1px solid rgba(52, 211, 153, 0.6);
+  animation: bentoPulse 2s ease-out infinite;
+}
+
+@keyframes bentoPulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+.bento-line {
+  stroke-dasharray: 6 8;
+  animation: bentoDash 30s linear infinite;
+}
+
+@keyframes bentoDash {
+  to {
+    stroke-dashoffset: -560;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bento-line {
+    animation: none;
+  }
+  .bento-signal-dot::after {
+    animation: none;
+  }
+}
+
+/* ─── Landing: mobile drawer overlay ─── */
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.drawer-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}

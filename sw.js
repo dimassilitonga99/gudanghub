@@ -3,24 +3,16 @@
    Offline support + smart caching + update notification
    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-const APP_VERSION = 'v4.0.0';
+const APP_VERSION = 'v5.0.0-react';
 const CACHE_PREFIX = 'gudanghub';
 const STATIC_CACHE = `${CACHE_PREFIX}-static-${APP_VERSION}`;
 const DYNAMIC_CACHE = `${CACHE_PREFIX}-dynamic-${APP_VERSION}`;
 const API_CACHE = `${CACHE_PREFIX}-api-${APP_VERSION}`;
 
-// Files yang di-precache saat install (shell aplikasi)
+// Files yang di-precache saat install (shell aplikasi SPA)
 const PRECACHE_URLS = [
   './',
   './index.html',
-  './login.html',
-  './dashboard.html',
-  './order.html',
-  './ganti-password.html',
-  './laporan.html',
-  './profil.html',
-  './notifikasi.html',
-  './settings.html',
   './manifest.json',
   './android-chrome-192x192.png',
   './android-chrome-512x512.png',
@@ -30,6 +22,7 @@ const PRECACHE_URLS = [
 const API_DOMAINS = [
   'script.google.com',
   'script.googleusercontent.com',
+  'workers.dev',
 ];
 
 // Domain fonts (cache-first, jarang berubah)
