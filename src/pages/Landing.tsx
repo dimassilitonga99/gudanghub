@@ -9,19 +9,30 @@ import {
   Boxes,
   CheckCircle2,
   CookingPot,
+  FileText,
+  Info,
   LayoutDashboard,
+  LayoutGrid,
+  LogIn,
+  Mail,
   MapPin,
   Menu,
   Monitor,
   Package,
   Palette,
+  Phone,
+  Search,
+  ShieldCheck,
+  ShoppingBag,
   ShoppingCart,
   Sofa,
   Sparkles,
   Store,
   Timer,
+  Truck,
   Utensils,
   Warehouse,
+  Wrench,
   X,
   Zap,
 } from 'lucide-react';
@@ -41,10 +52,63 @@ const FEATURES = [
 ];
 
 const STATS = [
-  { label: 'Barang Aktif', value: 4764 },
-  { label: 'Cabang Terhubung', value: CABANG_LIST.length },
-  { label: 'Pesan/hari', value: 40 },
-  { label: 'Akses API', value: 98 },
+  { value: 4, suffix: '', label: 'Cabang aktif di NTT' },
+  { value: 9, suffix: '', label: 'Kategori furnitur' },
+  { value: 500, suffix: '+', label: 'Item dalam katalog' },
+  { value: 24, suffix: '/7', label: 'Sistem selalu siap' },
+];
+
+const STEPS = [
+  {
+    icon: Search,
+    num: '/ 01',
+    title: 'Telusuri Katalog',
+    desc: 'Cabang menjelajah katalog lengkap dengan kode, harga, dan stok real-time. Semua transparan.',
+  },
+  {
+    icon: ShoppingCart,
+    num: '/ 02',
+    title: 'Susun Order',
+    desc: 'Tambahkan barang satu per satu atau kirim massal — copy-paste dari Excel pun jalan.',
+  },
+  {
+    icon: ShieldCheck,
+    num: '/ 03',
+    title: 'Admin Verifikasi',
+    desc: 'Gudang pusat meninjau, menyesuaikan, atau menolak dari dashboard. Semua ada jejaknya.',
+  },
+  {
+    icon: Truck,
+    num: '/ 04',
+    title: 'Barang Meluncur',
+    desc: 'Order approved masuk antrean pengiriman. Cabang dapat notifikasi email otomatis.',
+  },
+];
+
+const GALLERY = [
+  { src: './images/display-1.jpg', tag: 'Showroom Utama', caption: 'Display Furniture Premium', big: true },
+  { src: './images/display-2.jpg', tag: 'Rak Display', caption: 'Peralatan Rumah Tangga', big: false },
+  { src: './images/display-3.jpg', tag: 'Koleksi Baru', caption: 'Elektronik & Kitchen', big: false },
+  { src: './images/display-4.jpg', tag: 'Area Dapur', caption: 'Peralatan Masak Lengkap', big: false },
+  { src: './images/display-5.jpg', tag: 'Cabang Terbaru', caption: 'Toko Siap Melayani', big: true },
+];
+
+const ABOUT_ITEMS = [
+  {
+    icon: FileText,
+    title: 'Terdokumentasi Sempurna',
+    desc: 'Setiap permintaan memiliki jejak audit — dari siapa, kapan, dan alasannya.',
+  },
+  {
+    icon: Zap,
+    title: 'Keputusan dalam Sekejap',
+    desc: 'Admin approve, edit, atau tolak dari mana saja. Perubahan tersinkron instan.',
+  },
+  {
+    icon: BarChart3,
+    title: 'Wawasan Berbasis Data',
+    desc: 'Laporan cabang, rate persetujuan, dan pola order — semua dalam satu layar.',
+  },
 ];
 
 const KATEGORI_MARQUEE: { name: string; icon: typeof Armchair }[] = [
@@ -63,10 +127,78 @@ const KATEGORI_MARQUEE: { name: string; icon: typeof Armchair }[] = [
 ];
 
 const NAV_LINKS = [
-  { label: 'Fitur', href: '#fitur' },
+  { label: 'Cara Kerja', href: '#cara' },
+  { label: 'Katalog', href: '#katalog' },
+  { label: 'Tentang', href: '#tentang' },
   { label: 'Cabang', href: '#cabang' },
-  { label: 'Kontak', href: '#kontak' },
 ];
+
+const TIM_CARDS = [
+  {
+    img: './images/tim/ceo.png',
+    alt: 'CEO',
+    placeholder: 'CEO',
+    variant: 'tim-card-ceo' as const,
+    row: 'top' as const,
+    quote: 'Memimpin adalah menjadi contoh — bahkan saat tak ada yang melihat.',
+    author: '— IBU HRD',
+  },
+  {
+    img: './images/tim/manager-1.png',
+    alt: 'Manager 1',
+    placeholder: 'MGR',
+    variant: 'tim-card-mid' as const,
+    row: 'mid' as const,
+    quote: 'Kerja keras tidak pernah mengkhianati hasil.',
+    author: '— BAPAK ANAK SATU',
+  },
+  {
+    img: './images/tim/manager-2.png',
+    alt: 'Manager 2',
+    placeholder: 'MGR',
+    variant: 'tim-card-mid' as const,
+    row: 'mid' as const,
+    quote: 'Melayani dengan tulus, bekerja dengan jujur.',
+    author: '— Garda Terdepan',
+  },
+  {
+    img: './images/tim/staff-1.png',
+    alt: 'Staff 1',
+    placeholder: 'PIC',
+    variant: 'tim-card-front' as const,
+    row: 'front' as const,
+    quote: 'Setiap barang membawa harapan keluarga.',
+    author: '— HATI YANG TERLUKA',
+  },
+  {
+    img: './images/tim/staff-2.png',
+    alt: 'Staff 2',
+    placeholder: 'PIC',
+    variant: 'tim-card-front tim-card-center' as const,
+    row: 'front' as const,
+    quote: 'Senyum pelanggan adalah gaji terbaik.',
+    author: '— JIWA PELAYAN',
+  },
+  {
+    img: './images/tim/staff-3.png',
+    alt: 'Staff 3',
+    placeholder: 'PIC',
+    variant: 'tim-card-front' as const,
+    row: 'front' as const,
+    quote: 'Mengirim janji — tepat waktu, tepat hati.',
+    author: '— SALES BOKEP',
+  },
+];
+
+function smoothScroll(href: string) {
+  return (e: React.MouseEvent) => {
+    e.preventDefault();
+    const target = document.querySelector(href);
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+}
 
 function useCountUp(target: number, start: boolean, duration = 1800) {
   const [value, setValue] = useState(0);
@@ -138,7 +270,136 @@ function Reveal({
   );
 }
 
-function StatBox({ label, target }: { label: string; target: number }) {
+function TimCard({
+  img,
+  alt,
+  placeholder,
+  variant,
+  quote,
+  author,
+}: {
+  img: string;
+  alt: string;
+  placeholder: string;
+  variant: string;
+  quote: string;
+  author: string;
+}) {
+  const [flipped, setFlipped] = useState(false);
+  const [failed, setFailed] = useState(false);
+  return (
+    <div
+      className={cn('tim-card', variant, flipped && 'flipped')}
+      onClick={() => setFlipped((f) => !f)}
+    >
+      <div className="tim-card-inner">
+        <div className="tim-card-front-side">
+          <div className="tim-card-frame">
+            {failed ? (
+              <div className="tim-card-placeholder">
+                <span>{placeholder}</span>
+              </div>
+            ) : (
+              <img src={img} alt={alt} loading="lazy" onError={() => setFailed(true)} />
+            )}
+          </div>
+        </div>
+        <div className="tim-card-back">
+          <div className="tim-card-quote">
+            <div className="tim-quote-mark">&quot;</div>
+            <p>{quote}</p>
+            <div className="tim-quote-author">{author}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TeamSection() {
+  return (
+    <section className="tim-section" id="tim" aria-labelledby="tim-title">
+      <div className="tim-bg-decor" aria-hidden="true">
+        <div className="tim-skyline tim-skyline-left" />
+        <div className="tim-skyline tim-skyline-right" />
+        <div className="tim-sparkle tim-sparkle-1" />
+        <div className="tim-sparkle tim-sparkle-2" />
+        <div className="tim-sparkle tim-sparkle-3" />
+        <div className="tim-gold-block tim-gold-1" />
+        <div className="tim-gold-block tim-gold-2" />
+        <div className="tim-gold-block tim-gold-3" />
+        <div className="tim-gold-block tim-gold-4" />
+      </div>
+      <div className="tim-ribbon" aria-hidden="true" />
+
+      <div className="mx-auto max-w-5xl px-4">
+        <Reveal>
+          <div className="tim-brand">
+            <div className="tim-brand-mark">
+              <Warehouse className="h-6 w-6" />
+            </div>
+            <div className="tim-brand-name">
+              GUDANG<span>HUB</span>
+            </div>
+          </div>
+        </Reveal>
+
+        <Reveal>
+          <div className="tim-cards">
+            {(['top', 'mid', 'front'] as const).map((row) => (
+              <div key={row} className={cn('tim-row', `tim-row-${row}`)}>
+                {TIM_CARDS.filter((c) => c.row === row).map((c) => (
+                  <TimCard
+                    key={c.alt}
+                    img={c.img}
+                    alt={c.alt}
+                    placeholder={c.placeholder}
+                    variant={c.variant}
+                    quote={c.quote}
+                    author={c.author}
+                  />
+                ))}
+              </div>
+            ))}
+          </div>
+        </Reveal>
+
+        <Reveal delay="1">
+          <div className="tim-title-block">
+            <h2 className="tim-title" id="tim-title">
+              <span className="tim-title-line1">TIM</span>
+              <span className="tim-title-line2">BALIK LAYAR</span>
+            </h2>
+            <p className="tim-subtitle">
+              Di balik setiap order yang lancar, ada manusia-manusia luar biasa
+              yang bekerja tanpa henti — memastikan setiap detail sempurna.
+            </p>
+            <p className="tim-quote">
+              &quot;Bukan sekadar sistem. Kami adalah keluarga yang membangun
+              kepercayaan satu order di satu waktu.&quot;
+            </p>
+          </div>
+        </Reveal>
+
+        <Reveal delay="2">
+          <div className="tim-info-bar">
+            <div className="tim-info-item">
+              <span className="tim-info-label">Visi</span>
+              <span className="tim-info-value">Satu Gudang, Empat Cabang, Satu Tujuan</span>
+            </div>
+            <div className="tim-info-divider" />
+            <div className="tim-info-item">
+              <span className="tim-info-label">Misi</span>
+              <span className="tim-info-value">Melayani NTT dengan Sepenuh Hati</span>
+            </div>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+function StatNum({ value, suffix }: { value: number; suffix: string }) {
   const [visible, setVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -160,15 +421,251 @@ function StatBox({ label, target }: { label: string; target: number }) {
     return () => clearTimeout(t);
   }, []);
 
-  const value = useCountUp(target, visible);
+  const n = useCountUp(value, visible);
 
   return (
-    <div ref={ref} className="rounded-xl border border-border p-4 text-center">
-      <div className="font-display text-2xl font-bold text-primary tabular-nums">
-        {value.toLocaleString('id-ID')}
-      </div>
-      <div className="mt-1 text-xs text-muted-foreground">{label}</div>
+    <div ref={ref} className="stat-num">
+      <span className="val">{n.toLocaleString('id-ID')}</span>
+      {suffix && <span className="suf">{suffix}</span>}
     </div>
+  );
+}
+
+function StepsSection() {
+  return (
+    <section className="steps mx-auto max-w-5xl px-4" id="cara" aria-labelledby="cara-title">
+      <Reveal>
+        <header className="section-head">
+          <span className="section-kicker">Alur Operasional</span>
+          <h2 id="cara-title">
+            Empat langkah, satu <em>alur mulus</em>.
+          </h2>
+          <p>
+            Setiap proses dirancang untuk memangkas waktu dan menghilangkan kebingungan — dari toko
+            cabang hingga rak gudang pusat.
+          </p>
+        </header>
+      </Reveal>
+      <div className="steps-grid">
+        {STEPS.map((s, i) => (
+          <Reveal key={s.num} delay={String((i % 3) + 1)}>
+            <article className="step">
+              <div className="step-num">{s.num}</div>
+              <div className="step-icon">
+                <s.icon className="h-[26px] w-[26px]" />
+              </div>
+              <h3>{s.title}</h3>
+              <p>{s.desc}</p>
+            </article>
+          </Reveal>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function GallerySection() {
+  return (
+    <section className="gallery-section mx-auto max-w-5xl px-4" id="katalog" aria-labelledby="gallery-title">
+      <Reveal>
+        <header className="section-head">
+          <span className="section-kicker">Showroom Kami</span>
+          <h2 id="gallery-title">
+            Display toko yang <em>menginspirasi</em>.
+          </h2>
+          <p>
+            Lihat langsung bagaimana produk furniture kami tertata rapi di setiap cabang — siap
+            menyambut pelanggan setiap hari.
+          </p>
+        </header>
+      </Reveal>
+
+      <div className="gallery-grid">
+        {GALLERY.map((g, i) => (
+          <Reveal
+            key={g.src}
+            scale
+            delay={i === 0 ? undefined : String(i === 4 ? 2 : (i % 3) + 1)}
+            className={cn('gallery-item', g.big && 'gallery-big')}
+          >
+            <img src={g.src} alt={g.tag} loading="lazy" />
+            <div className="gallery-overlay">
+              <div className="gallery-label">
+                <span className="gallery-tag">{g.tag}</span>
+                <span className="gallery-caption">{g.caption}</span>
+              </div>
+            </div>
+          </Reveal>
+        ))}
+      </div>
+
+      <Reveal delay="1">
+        <div className="gallery-cta">
+          <Link to="/login" className="gallery-cta-btn">
+            <ShoppingBag className="h-[18px] w-[18px]" />
+            Lihat Katalog Lengkap
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </Reveal>
+    </section>
+  );
+}
+
+function AboutSection() {
+  return (
+    <section className="about" id="tentang" aria-labelledby="tentang-title">
+      <div className="about-inner mx-auto max-w-5xl px-4">
+        <Reveal className="about-media">
+          <div className="about-media-main">
+            <div className="about-media-icon">
+              <Warehouse className="h-16 w-16" />
+            </div>
+            <img src="./images/filosofi.jpg" alt="Filosofi GudangHub" className="about-image" loading="lazy" />
+          </div>
+        </Reveal>
+
+        <div>
+          <Reveal>
+            <span className="section-kicker">Filosofi Kami</span>
+          </Reveal>
+          <Reveal delay="1">
+            <h2 id="tentang-title">
+              Satu sumber, <em>banyak dampak</em>.
+            </h2>
+          </Reveal>
+          <Reveal delay="1">
+            <p className="about-lead">
+              GudangHub bukan hanya alat — ia adalah cara baru berkolaborasi. Menghilangkan pesan
+              yang tercecer, mempercepat keputusan, dan membuat setiap orang di garis depan bekerja
+              dengan data yang sama.
+            </p>
+          </Reveal>
+
+          <div className="about-list">
+            {ABOUT_ITEMS.map((item, i) => (
+              <Reveal key={item.title} delay={String(i + 1)}>
+                <div className="about-item">
+                  <span className="about-item-icon">
+                    <item.icon className="h-[22px] w-[22px]" />
+                  </span>
+                  <div>
+                    <h4>{item.title}</h4>
+                    <p>{item.desc}</p>
+                  </div>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+
+          <Reveal delay="1">
+            <Link to="/login" className="btn-about">
+              Masuk ke Dashboard
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </Reveal>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function StatsSection() {
+  return (
+    <section className="stats mx-auto max-w-5xl px-4" aria-labelledby="stats-title">
+      <Reveal>
+        <header className="section-head">
+          <span className="section-kicker">Skala Operasi</span>
+          <h2 id="stats-title">
+            Angka yang <em>berbicara</em>.
+          </h2>
+          <p>Jaringan yang tumbuh, kepercayaan yang terjaga, dan sistem yang tidak pernah tidur.</p>
+        </header>
+      </Reveal>
+
+      <div className="stats-grid">
+        {STATS.map((s, i) => (
+          <Reveal key={s.label} delay={i ? String(i) : undefined}>
+            <div className="stat">
+              <StatNum value={s.value} suffix={s.suffix} />
+              <div className="stat-lbl">{s.label}</div>
+            </div>
+          </Reveal>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function FooterSection() {
+  return (
+    <footer className="footer" role="contentinfo">
+      <div className="mx-auto max-w-5xl px-4">
+        <div className="footer-top">
+          <div className="footer-about">
+            <Link to="/" className="inline-flex items-center gap-2 font-display text-lg font-bold">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/60 text-white">
+                <Warehouse className="h-4 w-4" />
+              </span>
+              Gudang<em>Hub</em>
+            </Link>
+            <p>
+              Platform kolaborasi cabang-gudang untuk PT Central Perabot Utama. Dibangun dari
+              Kupang, untuk NTT.
+            </p>
+          </div>
+
+          <div className="footer-col">
+            <h5>Jelajahi</h5>
+            <a href="#cara" onClick={smoothScroll('#cara')}>
+              <Wrench className="h-[14px] w-[14px]" /> Cara Kerja
+            </a>
+            <a href="#katalog" onClick={smoothScroll('#katalog')}>
+              <LayoutGrid className="h-[14px] w-[14px]" /> Katalog
+            </a>
+            <a href="#tentang" onClick={smoothScroll('#tentang')}>
+              <Info className="h-[14px] w-[14px]" /> Tentang
+            </a>
+            <a href="#cabang" onClick={smoothScroll('#cabang')}>
+              <Store className="h-[14px] w-[14px]" /> Cabang
+            </a>
+          </div>
+
+          <div className="footer-col">
+            <h5>Sistem</h5>
+            <Link to="/login">
+              <LogIn className="h-[14px] w-[14px]" /> Masuk Cabang
+            </Link>
+            <Link to="/login">
+              <LogIn className="h-[14px] w-[14px]" /> Masuk Admin
+            </Link>
+            <Link to="/dashboard">
+              <LayoutDashboard className="h-[14px] w-[14px]" /> Dashboard
+            </Link>
+          </div>
+
+          <div className="footer-col">
+            <h5>Terhubung</h5>
+            <a href="#top" onClick={smoothScroll('#top')}>
+              <MapPin className="h-[14px] w-[14px]" /> Gudang Pusat NTT
+            </a>
+            <a href="tel:+6281234567890">
+              <Phone className="h-[14px] w-[14px]" /> +62 812 3456 7890
+            </a>
+            <a href="mailto:silitongadimas@gmail.com">
+              <Mail className="h-[14px] w-[14px]" /> silitongadimas@gmail.com
+            </a>
+          </div>
+        </div>
+
+        <div className="footer-bottom">
+          <span>
+            <b>GudangHub v3.0</b> · PT Central Perabot Utama · Waktu WITA
+          </span>
+          <span>© 2025 GudangHub. Dibangun dengan hati.</span>
+        </div>
+      </div>
+    </footer>
   );
 }
 
@@ -509,14 +1006,6 @@ export default function Landing() {
     };
   }, []);
 
-  const smoothScroll = (href: string) => (e: React.MouseEvent) => {
-    e.preventDefault();
-    const target = document.querySelector(href);
-    if (target) {
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
-
   return (
     <div className="relative min-h-dvh">
       {/* Splash screen */}
@@ -726,14 +1215,8 @@ export default function Landing() {
         </Reveal>
       </section>
 
-      {/* STATS */}
-      <section className="mx-auto mt-14 max-w-5xl px-4">
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {STATS.map((s) => (
-            <StatBox key={s.label} label={s.label} target={s.value} />
-          ))}
-        </div>
-      </section>
+      {/* STEPS — Cara Kerja */}
+      <StepsSection />
 
       {/* MARQUEE KATEGORI */}
       <section className="mt-14 overflow-hidden border-y border-border/50 py-3">
@@ -754,6 +1237,18 @@ export default function Landing() {
           })}
         </div>
       </section>
+
+      {/* GALERI — Katalog */}
+      <GallerySection />
+
+      {/* TIM */}
+      <TeamSection />
+
+      {/* TENTANG — Filosofi */}
+      <AboutSection />
+
+      {/* STATS — Skala Operasi */}
+      <StatsSection />
 
       {/* FITUR */}
       <section id="fitur" className="mx-auto max-w-5xl scroll-mt-16 px-4 py-16">
@@ -881,9 +1376,7 @@ export default function Landing() {
         </div>
       </section>
 
-      <footer className="border-t border-border/50 py-6 text-center text-xs text-muted-foreground">
-        GudangHub v5 (React) · Silitonga Dimas · API cache-proxy
-      </footer>
+      <FooterSection />
     </div>
   );
 }
