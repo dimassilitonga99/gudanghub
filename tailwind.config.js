@@ -55,9 +55,9 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Manrope', 'system-ui', 'sans-serif'],
+        sans: ['Geist Variable', 'Manrope', 'system-ui', 'sans-serif'],
         display: ['Fraunces', 'serif'],
-        mono: ['JetBrains Mono', 'monospace'],
+        mono: ['Geist Mono Variable', 'JetBrains Mono', 'monospace'],
       },
       borderRadius: {
         lg: 'var(--radius)',

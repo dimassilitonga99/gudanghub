@@ -2,6 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from 'sonner';
+import '@fontsource-variable/geist';
+import '@fontsource-variable/geist-mono';
 import App from './App';
 import { AuthProvider } from './context/AuthContext';
 import { prewarmAppScript, startKeepAlive } from './lib/api';
@@ -27,7 +29,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           position="top-center"
           richColors
           toastOptions={{
-            style: { fontFamily: 'Manrope, sans-serif' },
+            style: { fontFamily: 'Geist Variable, Manrope, sans-serif' },
           }}
         />
       </AuthProvider>

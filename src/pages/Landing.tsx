@@ -712,39 +712,44 @@ function BentoCard({ index }: { index: number }) {
         />
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-muted/40 text-muted-foreground">
           <Store className="h-14 w-14" strokeWidth={1.2} />
-          <span className="text-xs font-bold">{cabang.id}</span>
+          <span className="font-mono text-xs font-medium">{cabang.id}</span>
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10" />
-        <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-black/50 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur">
-          <MapPin className="h-2.5 w-2.5" />
-          {cabang.id}
-        </div>
-        <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-full bg-black/40 px-2 py-1 backdrop-blur">
+        <div className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-black/45 px-2 py-1 backdrop-blur">
           <span className="bento-signal-dot" />
-          <span className="text-[10px] font-semibold text-emerald-300">Aktif</span>
+          <span className="font-mono text-[10px] font-medium uppercase tracking-wider text-emerald-300">
+            Aktif
+          </span>
         </div>
       </div>
 
       <div className="relative p-4">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
           <span
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-base font-bold text-white"
+            className="h-1.5 w-1.5 rounded-full"
             style={{ backgroundColor: cabang.color }}
-          >
-            {cabang.pic.charAt(0)}
-          </span>
-          <div className="min-w-0 flex-1">
-            <div className="text-[10px] uppercase tracking-wide text-muted-foreground">PIC</div>
-            <div className="truncate text-sm font-semibold">{cabang.pic}</div>
-          </div>
+          />
+          Cabang {cabang.id}
         </div>
-        <h3 className="mt-3 truncate font-display text-base font-bold">{cabang.nama}</h3>
-        <div className="mt-3 flex items-center justify-between">
-          <span className="inline-flex items-center gap-1.5 text-xs text-emerald-400">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-            Aktif
-          </span>
-          <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary opacity-0 transition-opacity group-hover:opacity-100">
+        <h3 className="mt-2 truncate text-lg font-semibold tracking-tight text-foreground">
+          {cabang.nama}
+        </h3>
+        <div className="mt-4 flex items-center justify-between border-t border-border/60 pt-3">
+          <div className="flex min-w-0 items-center gap-2">
+            <span
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold text-white"
+              style={{ backgroundColor: cabang.color }}
+            >
+              {cabang.pic.charAt(0)}
+            </span>
+            <div className="min-w-0">
+              <div className="font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground">
+                PIC
+              </div>
+              <div className="truncate text-xs font-medium text-foreground/90">{cabang.pic}</div>
+            </div>
+          </div>
+          <span className="inline-flex items-center gap-1 font-mono text-[10px] font-medium uppercase tracking-wider text-primary opacity-0 transition-opacity group-hover:opacity-100">
             Kelola
             <ArrowUpRight className="h-3 w-3" />
           </span>
@@ -1278,7 +1283,7 @@ export default function Landing() {
       {/* CABANG — bento */}
       <section id="cabang" className="mx-auto max-w-5xl scroll-mt-16 px-4 pb-16">
         <Reveal>
-          <h2 className="font-display text-center text-2xl font-bold sm:text-3xl">
+          <h2 className="text-center text-2xl font-semibold tracking-tight sm:text-3xl">
             Jaringan Cabang
           </h2>
           <p className="mt-2 text-center text-sm text-muted-foreground">
