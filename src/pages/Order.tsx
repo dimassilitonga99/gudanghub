@@ -137,6 +137,7 @@ function fmtStock(v: number | ''): string {
 
 function ProductImage({ kode, nama, kategori }: { kode: string; nama: string; kategori: string }) {
   const [failed, setFailed] = useState(false);
+  const [hoverFailed, setHoverFailed] = useState(false);
   const src = `./images/produk/${String(kode).toUpperCase()}.webp`;
   const hoverSrc = src.replace('.webp', '_2.webp');
   if (failed) {
@@ -155,13 +156,15 @@ function ProductImage({ kode, nama, kategori }: { kode: string; nama: string; ka
         className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
         onError={() => setFailed(true)}
       />
-      <img
-        src={hoverSrc}
-        alt=""
-        loading="lazy"
-        className="absolute inset-0 h-full w-full object-contain opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-        onError={(e) => e.currentTarget.remove()}
-      />
+      {!hoverFailed && (
+        <img
+          src={hoverSrc}
+          alt=""
+          loading="lazy"
+          className="absolute inset-0 h-full w-full object-contain opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+          onError={() => setHoverFailed(true)}
+        />
+      )}
     </div>
   );
 }

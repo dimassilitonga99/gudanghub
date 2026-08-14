@@ -97,8 +97,8 @@ export default function Login() {
       return;
     }
 
-    const role = session?.role;
-    const idCabang = session?.idCabang;
+    const role = result?.role;
+    const idCabang = result?.idCabang;
 
     if (role === 'cabang' && !idCabang) {
       setError('Akun cabang tidak punya ID cabang. Hubungi admin.');
