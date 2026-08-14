@@ -586,9 +586,17 @@ function StepsSection() {
   );
 }
 
+const DEMO_CLIPS = [
+  { num: '01', file: '01-masuk.mp4', poster: 'poster-01.jpg', title: 'Masuk', desc: 'Cabang login dengan akun toko masing-masing.' },
+  { num: '02', file: '02-pilih-barang.mp4', poster: 'poster-02.jpg', title: 'Pilih Barang', desc: 'Tambah barang yang stoknya mulai menipis dari katalog.' },
+  { num: '03', file: '03-stok-aktual.mp4', poster: 'poster-03.jpg', title: 'Stok Aktual', desc: 'Isi stok nyata gudang & toko untuk tiap item.' },
+  { num: '04', file: '04-kirim-order.mp4', poster: 'poster-04.jpg', title: 'Kirim Order', desc: 'Order dikirim ke gudang — tercatat otomatis.' },
+  { num: '05', file: '05-riwayat.mp4', poster: 'poster-05.jpg', title: 'Riwayat', desc: 'Status order langsung terpantau: menunggu verifikasi.' },
+];
+
 function DemoSection() {
   return (
-    <section className="mx-auto max-w-5xl px-4 pb-16" id="demo" aria-labelledby="demo-title">
+    <section className="mx-auto max-w-6xl px-4 pb-16" id="demo" aria-labelledby="demo-title">
       <Reveal>
         <header className="section-head">
           <span className="section-kicker">Live Demo</span>
@@ -596,24 +604,30 @@ function DemoSection() {
             Lihat alurnya <em>langsung</em>.
           </h2>
           <p>
-            Rekaman pemakaian nyata aplikasi — dari login, pilih barang, isi stok aktual toko &
-            gudang, kirim order, hingga pantau statusnya di riwayat.
+            Lima langkah pemakaian nyata — dari login, pilih barang, isi stok aktual toko & gudang,
+            kirim order, hingga pantau statusnya di riwayat.
           </p>
         </header>
-        <div className="demo-frame">
-          <video
-            className="demo-video"
-            controls
-            playsInline
-            muted
-            loop
-            preload="metadata"
-            poster="./demo/poster.jpg"
-          >
-            <source src="./demo/gudanghub-demo.mp4" type="video/mp4" />
-            <source src="./demo/gudanghub-demo.webm" type="video/webm" />
-          </video>
-          <div className="demo-caption">Login → pilih barang → isi stok aktual → kirim order → pantau status</div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {DEMO_CLIPS.map((c) => (
+            <div key={c.num} className="demo-frame">
+              <video
+                className="demo-video"
+                controls
+                playsInline
+                muted
+                loop
+                preload="metadata"
+                poster={`./demo/${c.poster}`}
+              >
+                <source src={`./demo/${c.file}`} type="video/mp4" />
+              </video>
+              <div className="demo-caption">
+                <b>{c.num} · {c.title}</b>
+                <span>{c.desc}</span>
+              </div>
+            </div>
+          ))}
         </div>
       </Reveal>
     </section>
