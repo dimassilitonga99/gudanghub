@@ -163,6 +163,7 @@ const KATEGORI_MARQUEE: { name: string; icon: typeof Armchair }[] = [
 
 const NAV_LINKS = [
   { label: 'Cara Kerja', href: '#cara' },
+  { label: 'Demo', href: '#demo' },
   { label: 'Katalog', href: '#katalog' },
   { label: 'Tentang', href: '#tentang' },
   { label: 'Cabang', href: '#cabang' },
@@ -579,6 +580,40 @@ function StepsSection() {
               <span key={`bar-${active}-${playing}`} className={playing ? 'is-running' : ''} />
             </div>
           </div>
+        </div>
+      </Reveal>
+    </section>
+  );
+}
+
+function DemoSection() {
+  return (
+    <section className="mx-auto max-w-5xl px-4 pb-16" id="demo" aria-labelledby="demo-title">
+      <Reveal>
+        <header className="section-head">
+          <span className="section-kicker">Live Demo</span>
+          <h2 id="demo-title">
+            Lihat alurnya <em>langsung</em>.
+          </h2>
+          <p>
+            Rekaman pemakaian nyata aplikasi — cabang kirim pesanan, picker verifikasi stok, hingga
+            peninjauan pesanan oleh pusat.
+          </p>
+        </header>
+        <div className="demo-frame">
+          <video
+            className="demo-video"
+            controls
+            playsInline
+            muted
+            loop
+            preload="metadata"
+            poster="./demo/poster.jpg"
+          >
+            <source src="./demo/gudanghub-demo.mp4" type="video/mp4" />
+            <source src="./demo/gudanghub-demo.webm" type="video/webm" />
+          </video>
+          <div className="demo-caption">Login → pesan → verifikasi picker → tinjauan pusat</div>
         </div>
       </Reveal>
     </section>
@@ -1347,6 +1382,9 @@ export default function Landing() {
 
       {/* STEPS — Cara Kerja */}
       <StepsSection />
+
+      {/* LIVE DEMO */}
+      <DemoSection />
 
       {/* MARQUEE KATEGORI */}
       <section className="mt-14 overflow-hidden border-y border-border/50 py-3">
