@@ -595,6 +595,29 @@ const DEMO_CLIPS = [
 ];
 
 function DemoSection() {
+  useEffect(() => {
+    let timer;
+    const tryPlay = () => {
+      Array.from(document.querySelectorAll('.demo-frame video')).forEach((v) => {
+        v.muted = true;
+        const p = v.play();
+        if (p) p.catch(() => {});
+      });
+    };
+    tryPlay();
+    timer = setInterval(tryPlay, 1200);
+    const evs = ['pointerdown', 'keydown', 'touchstart', 'scroll', 'wheel'];
+    const offs = evs.map((ev) => {
+      const h = () => tryPlay();
+      window.addEventListener(ev, h);
+      return () => window.removeEventListener(ev, h);
+    });
+    return () => {
+      clearInterval(timer);
+      offs.forEach((f) => f());
+    };
+  }, []);
+
   return (
     <section className="mx-auto max-w-6xl px-4 pb-16" id="demo" aria-labelledby="demo-title">
       <Reveal>
@@ -613,11 +636,12 @@ function DemoSection() {
             <div key={c.num} className="demo-frame">
               <video
                 className="demo-video"
-                controls
-                playsInline
+                autoPlay
                 muted
                 loop
-                preload="metadata"
+                playsInline
+                preload="auto"
+                disablePictureInPicture
                 poster={`./demo/${c.poster}`}
               >
                 <source src={`./demo/${c.file}`} type="video/mp4" />
