@@ -29,6 +29,7 @@
   "author": "PT Central Perabut Utama",
   "license": "UNLICENSED",
   "dependencies": {
+    "@flaticon/flaticon-uicons": "^3.3.1",
     "@fontsource-variable/geist": "^5.3.0",
     "@fontsource-variable/geist-mono": "^5.3.0",
     "@radix-ui/react-alert-dialog": "^1.1.23",
@@ -43,8 +44,6 @@
     "@radix-ui/react-tabs": "^1.1.21",
     "@radix-ui/react-tooltip": "^1.2.16",
     "html2canvas": "^1.4.1",
-    "lucide": "^1.26.0",
-    "lucide-react": "^1.31.0",
     "next-themes": "^0.4.6",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",

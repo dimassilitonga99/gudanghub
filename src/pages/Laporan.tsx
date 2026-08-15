@@ -1,18 +1,7 @@
+import { Icon } from '../components/ui/icon';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import {
-  BarChart3,
-  CheckCircle2,
-  Clock,
-  Download,
-  FileText,
-  List,
-  Package,
-  PieChart,
-  Store,
-  User,
-  XCircle,
-} from 'lucide-react';
+
 import { orders as ordersApi } from '@/lib/api';
 import { CABANG, type Order } from '@/lib/config';
 import { formatRupiah, formatWita, parseAnyDate, cn } from '@/lib/utils';
@@ -174,7 +163,7 @@ export default function Laporan() {
       {/* Header laporan */}
       <Card className="p-5 sm:p-6 print:border print:border-gray-300 print:bg-white">
         <h1 className="font-display flex items-center gap-2 text-xl font-bold sm:text-2xl print:text-black">
-          <BarChart3 className="h-6 w-6 text-primary print:hidden" />
+          <Icon name="chart-histogram" size={24} className="text-primary print:hidden" />
           Laporan Order — <span>{PERIODS[filterPeriod] || 'Semua Periode'}</span>
         </h1>
         <p className="mt-1 text-sm text-muted-foreground print:text-gray-600">
@@ -184,28 +173,28 @@ export default function Laporan() {
         <div className="mt-4 grid grid-cols-1 gap-3 border-t border-border pt-4 text-xs sm:grid-cols-2 lg:grid-cols-4 print:border-gray-300 print:pt-2">
           <div>
             <div className="flex items-center gap-1 text-[11px] uppercase tracking-wide text-muted-foreground print:text-gray-500">
-              <User className="h-3 w-3" />
+              <Icon name="user" size={12} />
               Dibuat oleh
             </div>
             <div className="mt-0.5 font-bold">{metaCreatedBy}</div>
           </div>
           <div>
             <div className="flex items-center gap-1 text-[11px] uppercase tracking-wide text-muted-foreground print:text-gray-500">
-              <Clock className="h-3 w-3" />
+              <Icon name="clock" size={12} />
               Waktu cetak
             </div>
             <div className="mt-0.5 font-bold">{formatWita(printedAt)}</div>
           </div>
           <div>
             <div className="flex items-center gap-1 text-[11px] uppercase tracking-wide text-muted-foreground print:text-gray-500">
-              <Package className="h-3 w-3" />
+              <Icon name="package" size={12} />
               Total order
             </div>
             <div className="mt-0.5 font-bold">{stats.total} order</div>
           </div>
           <div>
             <div className="flex items-center gap-1 text-[11px] uppercase tracking-wide text-muted-foreground print:text-gray-500">
-              <CheckCircle2 className="h-3 w-3" />
+              <Icon name="check-circle" size={12} />
               Rate persetujuan
             </div>
             <div className="mt-0.5 font-bold">{stats.approvalRate}%</div>
@@ -217,7 +206,7 @@ export default function Laporan() {
       <div className="grid grid-cols-1 gap-3 rounded-xl border border-border bg-card p-4 print:hidden sm:grid-cols-3">
         <div>
           <label className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-            <Store className="h-3 w-3" />
+            <Icon name="shop" size={12} />
             Cabang
           </label>
           <Select value={filterCabang} onValueChange={setFilterCabang}>
@@ -236,7 +225,7 @@ export default function Laporan() {
         </div>
         <div>
           <label className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-            <Clock className="h-3 w-3" />
+            <Icon name="clock" size={12} />
             Periode
           </label>
           <Select value={filterPeriod} onValueChange={setFilterPeriod}>
@@ -254,7 +243,7 @@ export default function Laporan() {
         </div>
         <div>
           <label className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-            <List className="h-3 w-3" />
+            <Icon name="list" size={12} />
             Status
           </label>
           <Select value={filterStatus} onValueChange={setFilterStatus}>
@@ -283,7 +272,7 @@ export default function Laporan() {
           <div className="grid grid-cols-2 gap-3 print:grid-cols-4 lg:grid-cols-4">
             <Card className="p-4 print:border print:border-gray-300 print:bg-white">
               <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-muted-foreground print:text-gray-500">
-                <Package className="h-3 w-3" />
+                <Icon name="package" size={12} />
                 Total Order
               </div>
               <div className="mt-2 text-[26px] font-extrabold leading-none text-primary tabular-nums print:text-black">
@@ -293,7 +282,7 @@ export default function Laporan() {
             </Card>
             <Card className="p-4 print:border print:border-gray-300 print:bg-white">
               <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-muted-foreground print:text-gray-500">
-                <CheckCircle2 className="h-3 w-3" />
+                <Icon name="check-circle" size={12} />
                 Disetujui
               </div>
               <div className="mt-2 text-[26px] font-extrabold leading-none text-success tabular-nums print:text-black">
@@ -305,7 +294,7 @@ export default function Laporan() {
             </Card>
             <Card className="p-4 print:border print:border-gray-300 print:bg-white">
               <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-muted-foreground print:text-gray-500">
-                <Clock className="h-3 w-3" />
+                <Icon name="clock" size={12} />
                 Tertunda
               </div>
               <div className="mt-2 text-[26px] font-extrabold leading-none text-warning tabular-nums print:text-black">
@@ -317,7 +306,7 @@ export default function Laporan() {
             </Card>
             <Card className="p-4 print:border print:border-gray-300 print:bg-white">
               <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-muted-foreground print:text-gray-500">
-                <XCircle className="h-3 w-3" />
+                <Icon name="circle-xmark" size={12} />
                 Ditolak
               </div>
               <div className="mt-2 text-[26px] font-extrabold leading-none text-danger tabular-nums print:text-black">
@@ -332,7 +321,7 @@ export default function Laporan() {
           {/* Rekap per Cabang */}
           <Card className="overflow-hidden print:border print:border-gray-300 print:bg-white">
             <div className="flex items-center gap-2 border-b border-border px-4 py-3.5 print:border-gray-300">
-              <PieChart className="h-4 w-4 text-primary print:hidden" />
+              <Icon name="chart-pie" size={16} className="text-primary print:hidden" />
               <h2 className="font-display text-[15px] font-bold">Rekap per Cabang</h2>
             </div>
             <div className="overflow-x-auto">
@@ -354,7 +343,7 @@ export default function Laporan() {
                     <tr key={r.id} className="border-b border-border/40 hover:bg-muted/30">
                       <td className="px-3.5 py-3">
                         <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-xs font-bold">
-                          <Store className="h-3 w-3" />
+                          <Icon name="shop" size={12} />
                           {r.id}
                         </span>
                       </td>
@@ -406,14 +395,14 @@ export default function Laporan() {
           <Card className="overflow-hidden print:border print:border-gray-300 print:bg-white">
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3.5 print:border-gray-300">
               <div className="flex items-center gap-2">
-                <List className="h-4 w-4 text-primary print:hidden" />
+                <Icon name="list" size={16} className="text-primary print:hidden" />
                 <h2 className="font-display text-[15px] font-bold">Detail Order</h2>
               </div>
               <span className="text-xs text-muted-foreground">{stats.total} order</span>
             </div>
             {sorted.length === 0 ? (
               <div className="py-14 text-center text-muted-foreground">
-                <FileText className="mx-auto mb-3 h-12 w-12 opacity-50" />
+                <Icon name="file" size={48} className="mx-auto mb-3 opacity-50" />
                 <p className="text-sm">Tidak ada data yang cocok dengan filter.</p>
               </div>
             ) : (
@@ -438,11 +427,11 @@ export default function Laporan() {
                       const total = calcTotal(order);
                       const statusIcon =
                         status === 'APPROVED' ? (
-                          <CheckCircle2 className="h-3 w-3" />
+                          <Icon name="check-circle" size={12} />
                         ) : status === 'REJECTED' ? (
-                          <XCircle className="h-3 w-3" />
+                          <Icon name="circle-xmark" size={12} />
                         ) : (
-                          <Clock className="h-3 w-3" />
+                          <Icon name="clock" size={12} />
                         );
                       const statusCls =
                         status === 'APPROVED'
@@ -460,7 +449,7 @@ export default function Laporan() {
                           </td>
                           <td className="px-3.5 py-3">
                             <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-xs font-bold">
-                              <Store className="h-3 w-3" />
+                              <Icon name="shop" size={12} />
                               {order.ID_CABANG}
                             </span>
                             <div className="mt-0.5 text-[11px] text-muted-foreground">{branch.pic}</div>
@@ -487,7 +476,7 @@ export default function Laporan() {
 
           <div className="flex justify-end print:hidden">
             <Button size="sm" onClick={printReport}>
-              <Download className="h-4 w-4" />
+              <Icon name="download" size={16} />
               Print / PDF
             </Button>
           </div>

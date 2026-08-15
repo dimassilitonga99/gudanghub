@@ -1,34 +1,7 @@
+import { Icon } from '../components/ui/icon';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import {
-  AlertTriangle,
-  Calendar,
-  CalendarClock,
-  Check,
-  CheckCircle2,
-  ChevronDown,
-  ClipboardPaste,
-  Clock,
-  Download,
-  Edit2,
-  FileText,
-  Filter,
-  List,
-  MessageSquare,
-  Minus,
-  Package,
-  Plus,
-  RefreshCw,
-  Search,
-  Send,
-  ShoppingCart,
-  Store,
-  Trash2,
-  Warehouse,
-  X,
-  XCircle,
-  Zap,
-} from 'lucide-react';
+
 import { katalog as katalogApi, orders as ordersApi, cart as cartApi, callApi } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import {
@@ -236,7 +209,7 @@ function ProductCard({
           onClick={onDecrease}
           aria-label="Kurangi"
         >
-          <Minus className="h-3.5 w-3.5" />
+          <Icon name="minus" size={14} />
         </Button>
         <Input
           type="number"
@@ -250,7 +223,7 @@ function ProductCard({
           className="h-7 w-12 px-1 text-center text-sm"
         />
         <Button variant="outline" size="icon" className="h-7 w-7" onClick={onIncrease} aria-label="Tambah qty">
-          <Plus className="h-3.5 w-3.5" />
+          <Icon name="plus" size={14} />
         </Button>
       </div>
 
@@ -272,11 +245,11 @@ function ProductCard({
       <Button size="sm" variant={inCart ? 'secondary' : 'default'} onClick={onAdd} disabled={!inCart && stock <= 0}>
         {inCart ? (
           <>
-            <Check className="h-4 w-4" /> Di Keranjang
+            <Icon name="check" size={16} /> Di Keranjang
           </>
         ) : (
           <>
-            <Plus className="h-4 w-4" /> Tambah
+            <Icon name="plus" size={16} /> Tambah
           </>
         )}
       </Button>
@@ -362,7 +335,7 @@ function ManualForm({
   return (
     <div className="space-y-4">
       <div className="flex items-start gap-2 rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm text-warning">
-        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+        <Icon name="triangle-warning" size={16} className="mt-0.5 shrink-0" />
         <div>
           <b>Barang Manual</b> — untuk barang baru yang belum ada di katalog. Harga otomatis Rp 0.
         </div>
@@ -374,7 +347,7 @@ function ManualForm({
             <div className="text-sm font-bold">{isEditing ? '✏️ Edit Barang Manual' : '➕ Tambah Barang Manual'}</div>
             {isEditing && (
               <Button variant="ghost" size="sm" onClick={onCancelEdit}>
-                <X className="h-4 w-4" /> Batal Edit
+                <Icon name="circle-xmark" size={16} /> Batal Edit
               </Button>
             )}
           </div>
@@ -438,13 +411,13 @@ function ManualForm({
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-xs font-medium">
-                <Warehouse className="mr-1 inline h-3 w-3" /> Stok Gudang <span className="text-danger">*</span>
+                <Icon name="warehouse-alt" size={12} className="mr-1 inline" /> Stok Gudang <span className="text-danger">*</span>
               </label>
               <Input type="number" min={0} value={stokGudang} onChange={(e) => setStokGudang(e.target.value)} placeholder="0" />
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium">
-                <Store className="mr-1 inline h-3 w-3" /> Stok Toko <span className="text-danger">*</span>
+                <Icon name="shop" size={12} className="mr-1 inline" /> Stok Toko <span className="text-danger">*</span>
               </label>
               <Input
                 type="number"
@@ -463,14 +436,14 @@ function ManualForm({
           </div>
 
           <Button onClick={submit} className="w-full">
-            {isEditing ? <SaveIcon /> : <Plus className="h-4 w-4" />}
+            {isEditing ? <SaveIcon /> : <Icon name="plus" size={16} />}
             {isEditing ? 'Simpan Perubahan' : 'Tambah ke Keranjang'}
           </Button>
         </CardContent>
       </Card>
 
       <div className="flex items-center gap-2 text-sm font-bold">
-        <List className="h-4 w-4 text-brand" /> Barang Manual di Keranjang
+        <Icon name="list" size={16} className="text-brand" /> Barang Manual di Keranjang
         {manualItems.length > 0 && (
           <Badge variant="outline" className="bg-warning/15 text-warning">
             {manualItems.length} barang manual
@@ -494,7 +467,7 @@ function ManualForm({
             >
               <div className="flex items-start gap-2">
                 <span className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-lg bg-warning/15 text-warning">
-                  <Edit2 className="h-4 w-4" />
+                  <Icon name="edit" size={16} />
                 </span>
                 <div className="min-w-0">
                   <div className="text-sm font-semibold">{item.nama}</div>
@@ -502,14 +475,14 @@ function ManualForm({
                     Kode: {item.kode} · {item.kategori} · {item.qty} {item.satuan}
                   </div>
                   <div className="mt-0.5 text-xs text-muted-foreground">
-                    <Warehouse className="mr-0.5 inline h-3 w-3" /> Gudang: <b>{item.stokGudang}</b> ·{' '}
-                    <Store className="mr-0.5 inline h-3 w-3" /> Toko: <b>{item.stokToko}</b>
+                    <Icon name="warehouse-alt" size={12} className="mr-0.5 inline" /> Gudang: <b>{item.stokGudang}</b> ·{' '}
+                    <Icon name="shop" size={12} className="mr-0.5 inline" /> Toko: <b>{item.stokToko}</b>
                   </div>
                 </div>
               </div>
               <div className="flex items-center gap-1">
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onStartEdit(key)} title="Edit">
-                  <Edit2 className="h-4 w-4" />
+                  <Icon name="edit" size={16} />
                 </Button>
                 <Button
                   variant="ghost"
@@ -518,7 +491,7 @@ function ManualForm({
                   onClick={() => onDelete(key)}
                   title="Hapus"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Icon name="trash" size={16} />
                 </Button>
               </div>
             </div>
@@ -530,13 +503,7 @@ function ManualForm({
 }
 
 function SaveIcon() {
-  return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-      <polyline points="17 21 17 13 7 13 7 21" />
-      <polyline points="7 3 7 8 15 8" />
-    </svg>
-  );
+  return <Icon name="floppy-disks" size={16} />;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -604,17 +571,17 @@ function CartSheet({
         <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-muted" />
         <header className="flex items-center justify-between border-b border-border px-4 py-3">
           <div className="flex items-center gap-2 text-sm font-bold">
-            <ShoppingCart className="h-4 w-4 text-brand" /> Keranjang Order
+            <Icon name="shopping-cart" size={16} className="text-brand" /> Keranjang Order
           </div>
           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onClose} aria-label="Tutup">
-            <X className="h-4 w-4" />
+            <Icon name="circle-xmark" size={16} />
           </Button>
         </header>
 
         <div className="min-h-0 flex-1 space-y-2 overflow-y-auto p-4">
           {items.length === 0 ? (
             <div className="py-10 text-center text-sm text-muted-foreground">
-              <ShoppingCart className="mx-auto mb-2 h-10 w-10 text-muted" />
+              <Icon name="shopping-cart" size={40} className="mx-auto mb-2 text-muted" />
               <div>Keranjang kosong.</div>
               <div className="mt-1 text-xs">Tambahkan barang dari katalog dulu ya!</div>
             </div>
@@ -649,7 +616,7 @@ function CartSheet({
                     <div className="mt-2 flex flex-wrap items-center gap-2">
                       <div className="flex items-center gap-1">
                         <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => onQty(key, -1)}>
-                          <Minus className="h-3 w-3" />
+                          <Icon name="minus" size={12} />
                         </Button>
                         <Input
                           type="number"
@@ -659,7 +626,7 @@ function CartSheet({
                           className="h-7 w-14 px-1 text-center text-sm"
                         />
                         <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => onQty(key, 1)}>
-                          <Plus className="h-3 w-3" />
+                          <Icon name="plus" size={12} />
                         </Button>
                       </div>
                       <select
@@ -681,7 +648,7 @@ function CartSheet({
                     {noteVisible && (
                       <div className="mt-2 rounded-lg bg-muted/40 p-2">
                         <label className="mb-1 flex items-center gap-1 text-xs font-medium">
-                          <MessageSquare className="h-3 w-3" /> Catatan untuk barang ini:
+                          <Icon name="message-text" size={12} /> Catatan untuk barang ini:
                         </label>
                         <Input
                           value={item.catatanItem || ''}
@@ -708,7 +675,7 @@ function CartSheet({
                         )}
                         title="Stok Gudang"
                       >
-                        <Warehouse className="h-3 w-3 text-muted-foreground" />
+                        <Icon name="warehouse-alt" size={12} className="text-muted-foreground" />
                         <Input
                           type="number"
                           min={0}
@@ -727,7 +694,7 @@ function CartSheet({
                         )}
                         title="Stok Toko"
                       >
-                        <Store className="h-3 w-3 text-muted-foreground" />
+                        <Icon name="shop" size={12} className="text-muted-foreground" />
                         <Input
                           type="number"
                           min={0}
@@ -748,7 +715,7 @@ function CartSheet({
                         onClick={() => toggleNote(key)}
                         title="Tambah catatan"
                       >
-                        <MessageSquare className="h-4 w-4" />
+                        <Icon name="message-text" size={16} />
                       </Button>
                       <Button
                         variant="ghost"
@@ -757,7 +724,7 @@ function CartSheet({
                         onClick={() => onDelete(key)}
                         title="Hapus"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Icon name="trash" size={16} />
                       </Button>
                     </div>
                   </div>
@@ -770,7 +737,7 @@ function CartSheet({
         <div className="space-y-2 border-t border-border p-4">
           {!valid && items.length > 0 && (
             <div className="flex items-start gap-2 rounded-lg border border-warning/30 bg-warning/10 p-2 text-xs text-warning">
-              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+              <Icon name="triangle-warning" size={14} className="mt-0.5 shrink-0" />
               <span>
                 Wajib isi stok gudang ({gudangMissing} kosong) dan stok toko ({tokoMissing} kosong).
               </span>
@@ -791,7 +758,7 @@ function CartSheet({
             placeholder="Catatan untuk admin (opsional)..."
           />
           <Button className="w-full" onClick={onSubmit} disabled={!valid || submitting}>
-            <Send className="h-4 w-4" />
+            <Icon name="paper-plane" size={16} />
             {submitting ? 'Mengirim...' : 'Kirim Order ke Gudang'}
           </Button>
         </div>
@@ -924,15 +891,15 @@ function PreOrderDialog({
       <DialogContent className="max-h-[90dvh] max-w-[950px] overflow-y-auto bg-muted/40 p-0">
         <DialogHeader className="sticky top-0 z-10 flex flex-row items-center justify-between gap-2 rounded-t-lg border-b border-border bg-background px-4 py-3">
           <DialogTitle className="flex items-center gap-2 text-base">
-            <FileText className="h-4 w-4 text-brand" /> Preview Form Order
+            <Icon name="file" size={16} className="text-brand" /> Preview Form Order
           </DialogTitle>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" className="bg-success text-white hover:bg-success/90" onClick={() => void downloadJpg()} disabled={jpgBusy}>
-              <Download className="h-4 w-4" />
+              <Icon name="download" size={16} />
               {jpgProgress || (pages.length > 1 ? `Download ${pages.length} JPG` : 'Download JPG')}
             </Button>
             <Button size="sm" onClick={() => void send()} disabled={sending}>
-              <Send className="h-4 w-4" />
+              <Icon name="paper-plane" size={16} />
               {sending ? 'Mengirim...' : 'Kirim ke Gudang'}
             </Button>
           </div>
@@ -973,7 +940,7 @@ function PreOrderDialog({
 
             <div className="space-y-2">
               <label className="flex items-center gap-1 text-xs font-bold uppercase tracking-wide text-brand">
-                <Calendar className="h-3.5 w-3.5" /> Tanggal Form
+                <Icon name="calendar" size={14} /> Tanggal Form
               </label>
               <div className="flex flex-wrap gap-1.5">
                 {(['today', 'tomorrow', 'custom'] as const).map((m) => (
@@ -1289,7 +1256,7 @@ function HistoryTab({
           </p>
         </div>
         <Button variant="destructive" size="sm" onClick={onReset} title="Reset semua order">
-          <Trash2 className="h-4 w-4" /> Reset
+          <Icon name="trash" size={16} /> Reset
         </Button>
       </div>
 
@@ -1311,7 +1278,7 @@ function HistoryTab({
               filter === value ? 'border-brand bg-brand/10 text-brand' : 'border-border text-muted-foreground',
             )}
           >
-            {value === 'ALL' ? <List className="h-3.5 w-3.5" /> : value === 'PENDING' ? <Clock className="h-3.5 w-3.5" /> : value === 'APPROVED' ? <CheckCircle2 className="h-3.5 w-3.5" /> : <XCircle className="h-3.5 w-3.5" />}
+            {value === 'ALL' ? <Icon name="list" size={14} /> : value === 'PENDING' ? <Icon name="clock" size={14} /> : value === 'APPROVED' ? <Icon name="check-circle" size={14} /> : <Icon name="circle-xmark" size={14} />}
             {label}
           </button>
         ))}
@@ -1321,7 +1288,7 @@ function HistoryTab({
         <CardContent className="space-y-3 p-4">
           <div className="flex flex-wrap items-center gap-2">
             <span className="flex items-center gap-1 text-xs font-semibold">
-              <Calendar className="h-3.5 w-3.5" /> Tanggal:
+              <Icon name="calendar" size={14} /> Tanggal:
             </span>
             <Input
               type="date"
@@ -1346,7 +1313,7 @@ function HistoryTab({
                   setQuickDate('');
                 }}
               >
-                <Filter className="h-3.5 w-3.5" /> Terapkan
+                <Icon name="filter" size={14} /> Terapkan
               </Button>
               <Button
                 variant="ghost"
@@ -1357,12 +1324,12 @@ function HistoryTab({
                   setQuickDate('all');
                 }}
               >
-                <RefreshCw className="h-3.5 w-3.5" /> Reset
+                <Icon name="refresh" size={14} /> Reset
               </Button>
             </div>
             {hasDateFilter && (
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                <CalendarClock className="h-3 w-3" />
+                <Icon name="calendar-clock" size={12} />
                 {dateFrom ? new Date(dateFrom).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Awal'} —{' '}
                 {dateTo ? new Date(dateTo).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Sekarang'}
               </span>
@@ -1388,7 +1355,7 @@ function HistoryTab({
                   quickDate === value ? 'border-brand bg-brand/10 text-brand' : 'border-border text-muted-foreground',
                 )}
               >
-                <Calendar className="h-3 w-3" /> {label}
+                <Icon name="calendar" size={12} /> {label}
               </button>
             ))}
           </div>
@@ -1404,7 +1371,7 @@ function HistoryTab({
       ) : filtered.length === 0 ? (
         <Card>
           <CardContent className="py-10 text-center">
-            <FileText className="mx-auto mb-2 h-10 w-10 text-muted" />
+            <Icon name="file" size={40} className="mx-auto mb-2 text-muted" />
             <p className="text-sm text-muted-foreground">
               Tidak ada order{filter !== 'ALL' ? ` dengan status "${filter}"` : ''}
               {hasDateFilter ? ' pada rentang tanggal yang dipilih' : ''}.
@@ -1420,7 +1387,7 @@ function HistoryTab({
                   setQuickDate('all');
                 }}
               >
-                <RefreshCw className="h-4 w-4" /> Tampilkan Semua
+                <Icon name="refresh" size={16} /> Tampilkan Semua
               </Button>
             )}
           </CardContent>
@@ -1428,7 +1395,7 @@ function HistoryTab({
       ) : (
         <div className="space-y-2">
           <div className="flex items-center gap-1.5 px-1 text-[11px] text-muted-foreground">
-            <Package className="h-3 w-3" />
+            <Icon name="package" size={12} />
             {filtered.length} order{hasDateFilter ? ' (difilter)' : ''}
           </div>
           {filtered.map((o) => {
@@ -1443,7 +1410,7 @@ function HistoryTab({
                 <CardContent className="space-y-2 p-4">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2 text-sm font-bold">
-                      <FileText className="h-4 w-4 text-muted-foreground" />
+                      <Icon name="file" size={16} className="text-muted-foreground" />
                       {o.ORDER_ID}
                     </div>
                     <Badge
@@ -1459,10 +1426,10 @@ function HistoryTab({
                     </Badge>
                   </div>
                   <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <CalendarClock className="h-3 w-3" /> {formatWita(o.TANGGAL_ORDER)}
+                    <Icon name="calendar-clock" size={12} /> {formatWita(o.TANGGAL_ORDER)}
                   </div>
                   <div className="flex items-start gap-1 text-xs">
-                    <Package className="mt-0.5 h-3 w-3 shrink-0 text-muted-foreground" />
+                    <Icon name="package" size={12} className="mt-0.5 shrink-0 text-muted-foreground" />
                     <span className="text-foreground/80">
                       {details.length
                         ? details.slice(0, 3).map((d) => (
@@ -1483,12 +1450,12 @@ function HistoryTab({
                   )}
                   {catatanClean && (
                     <div className="flex items-start gap-1 rounded bg-muted/50 px-2 py-1 text-xs">
-                      <MessageSquare className="mt-0.5 h-3 w-3 shrink-0 text-muted-foreground" /> {catatanClean}
+                      <Icon name="message-text" size={12} className="mt-0.5 shrink-0 text-muted-foreground" /> {catatanClean}
                     </div>
                   )}
                   <div className="pt-1">
                     <Button variant="outline" size="sm" onClick={() => onDownload(o)}>
-                      <Download className="h-4 w-4" /> Download Form
+                      <Icon name="download" size={16} /> Download Form
                     </Button>
                   </div>
                 </CardContent>
@@ -1654,10 +1621,10 @@ function MassOrderTab({
             NN00003;3
           </div>
           <div className="flex items-start gap-1 text-xs text-muted-foreground">
-            <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" /> Separator bisa ; , atau Tab. Isi juga stok gudang dan stok toko sebelum kirim.
+            <Icon name="triangle-warning" size={12} className="mt-0.5 shrink-0" /> Separator bisa ; , atau Tab. Isi juga stok gudang dan stok toko sebelum kirim.
           </div>
           <div className="flex items-start gap-1 text-xs text-warning">
-            <Edit2 className="mt-0.5 h-3 w-3 shrink-0" /> Untuk barang baru (belum di katalog), gunakan tab <b>Katalog → Barang Manual</b>.
+            <Icon name="edit" size={12} className="mt-0.5 shrink-0" /> Untuk barang baru (belum di katalog), gunakan tab <b>Katalog → Barang Manual</b>.
           </div>
         </CardContent>
       </Card>
@@ -1673,7 +1640,7 @@ function MassOrderTab({
           />
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" onClick={() => void pasteFromClipboard()}>
-              <ClipboardPaste className="h-4 w-4" /> Paste dari Clipboard
+              <Icon name="paste" size={16} /> Paste dari Clipboard
             </Button>
             <Button
               variant="ghost"
@@ -1682,7 +1649,7 @@ function MassOrderTab({
                 setItems([]);
               }}
             >
-              <Trash2 className="h-4 w-4" /> Hapus
+              <Icon name="trash" size={16} /> Hapus
             </Button>
           </div>
         </CardContent>
@@ -1692,18 +1659,18 @@ function MassOrderTab({
         <div className="mb-2 text-sm font-bold">Preview Barang</div>
         {items.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-            <Zap className="mx-auto mb-2 h-10 w-10 text-muted" />
+            <Icon name="bolt" size={40} className="mx-auto mb-2 text-muted" />
             Mulai ketik atau paste kode di atas.
           </div>
         ) : (
           <div className="space-y-2">
             <div className="flex flex-wrap gap-1.5">
               <Badge variant="outline" className="bg-success/15 text-success">
-                <CheckCircle2 className="h-3 w-3" /> {validItems.length} valid
+                <Icon name="check-circle" size={12} /> {validItems.length} valid
               </Badge>
               {invalidCount > 0 && (
                 <Badge variant="outline" className="bg-danger/15 text-danger">
-                  <XCircle className="h-3 w-3" /> {invalidCount} error
+                  <Icon name="circle-xmark" size={12} /> {invalidCount} error
                 </Badge>
               )}
             </div>
@@ -1711,7 +1678,7 @@ function MassOrderTab({
               !item.valid ? (
                 <div key={index} className="flex items-center justify-between gap-2 rounded-xl border border-danger/30 bg-danger/5 p-3">
                   <div className="flex items-center gap-2">
-                    <XCircle className="h-5 w-5 text-danger" />
+                    <Icon name="circle-xmark" size={20} className="text-danger" />
                     <div>
                       <div className="font-mono text-sm font-bold">{item.kode || '?'}</div>
                       <div className="text-xs text-danger">{item.error}</div>
@@ -1730,7 +1697,7 @@ function MassOrderTab({
                       });
                     }}
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Icon name="trash" size={16} />
                   </Button>
                 </div>
               ) : (
@@ -1738,9 +1705,9 @@ function MassOrderTab({
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-start gap-2">
                       {item.warning ? (
-                        <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-warning" />
+                        <Icon name="triangle-warning" size={20} className="mt-0.5 shrink-0 text-warning" />
                       ) : (
-                        <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-success" />
+                        <Icon name="check-circle" size={20} className="mt-0.5 shrink-0 text-success" />
                       )}
                       <div className="min-w-0">
                         <div className="font-mono text-sm font-bold">{item.kode}</div>
@@ -1750,7 +1717,7 @@ function MassOrderTab({
                         </div>
                         {item.warning && (
                           <div className="text-xs text-warning">
-                            <AlertTriangle className="mr-1 inline h-3 w-3" />
+                            <Icon name="triangle-warning" size={12} className="mr-1 inline" />
                             {item.warning}
                           </div>
                         )}
@@ -1760,7 +1727,7 @@ function MassOrderTab({
                       <div className="text-sm font-bold">{formatRupiah(item.qty * item.harga)}</div>
                       <div className="flex items-center gap-1">
                         <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => updateItem(index, { qty: Math.max(1, item.qty - 1) })}>
-                          <Minus className="h-3 w-3" />
+                          <Icon name="minus" size={12} />
                         </Button>
                         <Input
                           type="number"
@@ -1770,11 +1737,11 @@ function MassOrderTab({
                           className="h-6 w-14 px-1 text-center text-xs"
                         />
                         <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => updateItem(index, { qty: item.qty + 1 })}>
-                          <Plus className="h-3 w-3" />
+                          <Icon name="plus" size={12} />
                         </Button>
                       </div>
                       <label className={cn('flex items-center gap-1 rounded-lg border border-border bg-background px-2 py-1', item.stokGudang === '' && 'border-danger/50')} title="Stok Gudang">
-                        <Warehouse className="h-3 w-3 text-muted-foreground" />
+                        <Icon name="warehouse-alt" size={12} className="text-muted-foreground" />
                         <Input
                           type="number"
                           min={0}
@@ -1787,7 +1754,7 @@ function MassOrderTab({
                         />
                       </label>
                       <label className={cn('flex items-center gap-1 rounded-lg border border-border bg-background px-2 py-1', item.stokToko === '' && 'border-danger/50')} title="Stok Toko">
-                        <Store className="h-3 w-3 text-muted-foreground" />
+                        <Icon name="shop" size={12} className="text-muted-foreground" />
                         <Input
                           type="number"
                           min={0}
@@ -1812,7 +1779,7 @@ function MassOrderTab({
                           });
                         }}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Icon name="trash" size={16} />
                       </Button>
                     </div>
                   </div>
@@ -1826,7 +1793,7 @@ function MassOrderTab({
       <div className="space-y-3">
         {validItems.length > 0 && (gudangMissing > 0 || tokoMissing > 0) && (
           <div className="flex items-start gap-2 rounded-lg border border-warning/30 bg-warning/10 p-2 text-xs text-warning">
-            <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+            <Icon name="triangle-warning" size={14} className="mt-0.5 shrink-0" />
             <span>
               Wajib isi stok gudang ({gudangMissing} kosong) dan stok toko ({tokoMissing} kosong).
             </span>
@@ -1839,7 +1806,7 @@ function MassOrderTab({
           placeholder="Catatan untuk admin (opsional)..."
         />
         <Button onClick={submit} disabled={!canSubmit} className="w-full">
-          <FileText className="h-4 w-4" />
+          <Icon name="file" size={16} />
           Preview Form Order ({validItems.length} item)
         </Button>
         <div className="flex items-center justify-between rounded-lg border border-border bg-card px-3 py-2 text-sm">
@@ -2271,7 +2238,7 @@ export default function Order() {
           </p>
         </div>
         <Button variant="outline" size="sm" onClick={() => void loadData()}>
-          <RefreshCw className="h-4 w-4" /> Muat Ulang
+          <Icon name="refresh" size={16} /> Muat Ulang
         </Button>
       </div>
 
@@ -2346,7 +2313,7 @@ export default function Order() {
           <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2">
             <Button onClick={() => setCartOpen(true)} className="flex-1 justify-between sm:flex-none">
               <span className="flex items-center gap-2">
-                <ShoppingCart className="h-4 w-4" /> Lihat Keranjang
+                <Icon name="shopping-cart" size={16} /> Lihat Keranjang
               </span>
               <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs font-bold">
                 {cartCount} item · {formatRupiah(cartTotal)}
@@ -2512,7 +2479,7 @@ function CatalogTabBody({
   return (
     <div className="space-y-4">
       <div className="relative">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Icon name="search" size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
         <Input
           value={search}
           onChange={(e) => handleSearch(e.target.value)}
@@ -2535,7 +2502,7 @@ function CatalogTabBody({
             category === '' ? 'border-brand bg-brand/10 text-brand' : 'border-border text-muted-foreground',
           )}
         >
-          <List className="h-3.5 w-3.5" /> Semua
+          <Icon name="list" size={14} /> Semua
         </button>
         <button
           type="button"
@@ -2548,7 +2515,7 @@ function CatalogTabBody({
             category === '__MANUAL__' ? 'border-warning bg-warning/10 text-warning' : 'border-border text-muted-foreground',
           )}
         >
-          <Edit2 className="h-3.5 w-3.5" /> Barang Manual
+          <Icon name="edit" size={14} /> Barang Manual
         </button>
         {kategoriList.map((k) => (
           <button
@@ -2598,11 +2565,11 @@ function CatalogTabBody({
             </div>
           ) : filtered.length === 0 ? (
             <div className="rounded-xl border border-border p-10 text-center">
-              <Search className="mx-auto mb-2 h-10 w-10 text-muted" />
+              <Icon name="search" size={40} className="mx-auto mb-2 text-muted" />
               <p className="text-sm text-muted-foreground">Barang tidak ditemukan.</p>
               {(search || category) && (
                 <Button variant="outline" size="sm" className="mt-3" onClick={resetFilter}>
-                  <RefreshCw className="h-4 w-4" /> Reset Filter
+                  <Icon name="refresh" size={16} /> Reset Filter
                 </Button>
               )}
             </div>
@@ -2638,7 +2605,7 @@ function CatalogTabBody({
           {remaining > 0 && (
             <div className="py-4 text-center">
               <Button variant="outline" size="sm" onClick={() => setVisibleCount((c) => c + ITEMS_PER_PAGE)}>
-                <ChevronDown className="h-4 w-4" /> Tampilkan {remaining} lainnya
+                <Icon name="angle-small-down" size={16} /> Tampilkan {remaining} lainnya
               </Button>
             </div>
           )}

@@ -1,26 +1,7 @@
+import { Icon } from '../components/ui/icon';
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  Activity,
-  AlertTriangle,
-  Bell,
-  CalendarClock,
-  CheckCircle2,
-  Clock,
-  Home,
-  Key,
-  KeyRound,
-  LogOut,
-  MapPin,
-  Phone,
-  ShieldCheck,
-  Store,
-  Timer,
-  UserCircle2,
-  Warehouse,
-  XCircle,
-  Zap,
-} from 'lucide-react';
+
 import { orders as ordersApi } from '@/lib/api';
 import { CABANG, ROUTES, type Order } from '@/lib/config';
 import {
@@ -50,10 +31,10 @@ interface ActivityItem {
   STATUS?: string;
 }
 
-const STATUS_INFO: Record<string, { icon: typeof Clock; color: string; label: string }> = {
-  PENDING: { icon: Clock, color: 'text-warning', label: 'menunggu persetujuan' },
-  APPROVED: { icon: CheckCircle2, color: 'text-success', label: 'disetujui' },
-  REJECTED: { icon: XCircle, color: 'text-danger', label: 'ditolak' },
+const STATUS_INFO: Record<string, { icon: string; color: string; label: string }> = {
+  PENDING: { icon: 'clock', color: 'text-warning', label: 'menunggu persetujuan' },
+  APPROVED: { icon: 'check-circle', color: 'text-success', label: 'disetujui' },
+  REJECTED: { icon: 'circle-xmark', color: 'text-danger', label: 'ditolak' },
 };
 
 export default function Profil() {
@@ -138,7 +119,7 @@ export default function Profil() {
   return (
     <div className="mx-auto max-w-3xl space-y-4">
       <h1 className="font-display flex items-center gap-2 text-2xl font-bold">
-        <UserCircle2 className="h-6 w-6 text-primary" />
+        <Icon name="circle-user" size={24} className="text-primary" />
         Profil <span className="text-primary">Pengguna</span>
       </h1>
 
@@ -150,7 +131,7 @@ export default function Profil() {
         <h2 className="text-lg font-bold">{session.nama || session.username || '-'}</h2>
         <div className="text-sm text-muted-foreground">@{session.username || '-'}</div>
         <div className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs font-semibold">
-          {isAdmin ? <Warehouse className="h-3.5 w-3.5" /> : <Store className="h-3.5 w-3.5" />}
+          {isAdmin ? <Icon name="warehouse-alt" size={14} /> : <Icon name="shop" size={14} />}
           {roleLabel}
         </div>
       </Card>
@@ -159,7 +140,7 @@ export default function Profil() {
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="p-4">
           <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <Store className="h-5 w-5" />
+            <Icon name="shop" size={20} />
           </div>
           <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Cabang</div>
           <div className="mt-0.5 text-sm font-bold">
@@ -175,7 +156,7 @@ export default function Profil() {
         </Card>
         <Card className="p-4">
           <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <Phone className="h-5 w-5" />
+            <Icon name="phone-call" size={20} />
           </div>
           <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Kontak</div>
           <div className="mt-0.5 text-sm font-bold">
@@ -185,7 +166,7 @@ export default function Profil() {
         </Card>
         <Card className="p-4">
           <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <MapPin className="h-5 w-5" />
+            <Icon name="map-marker" size={20} />
           </div>
           <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Alamat</div>
           <div className="mt-0.5 text-[13px] font-bold">
@@ -194,7 +175,7 @@ export default function Profil() {
         </Card>
         <Card className="p-4">
           <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <CalendarClock className="h-5 w-5" />
+            <Icon name="calendar-clock" size={20} />
           </div>
           <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Login Sejak</div>
           <div className="mt-0.5 text-[13px] font-bold">{session.loginAt ? formatWita(session.loginAt) : '-'}</div>
@@ -205,7 +186,7 @@ export default function Profil() {
       {/* Aksi cepat */}
       <Card className="p-4">
         <h2 className="mb-3 flex items-center gap-2 text-[15px] font-bold">
-          <Zap className="h-4 w-4 text-primary" />
+          <Icon name="bolt" size={16} className="text-primary" />
           Aksi Cepat
         </h2>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
@@ -213,28 +194,28 @@ export default function Profil() {
             to={ROUTES.gantiPassword}
             className="flex items-center gap-2 rounded-xl border border-border bg-card p-3 text-sm font-medium transition-colors hover:border-primary/50 hover:text-primary"
           >
-            <Key className="h-5 w-5 text-primary" />
+            <Icon name="key" size={20} className="text-primary" />
             Ganti Password
           </Link>
           <Link
             to={ROUTES.notifikasi}
             className="flex items-center gap-2 rounded-xl border border-border bg-card p-3 text-sm font-medium transition-colors hover:border-primary/50 hover:text-primary"
           >
-            <Bell className="h-5 w-5 text-primary" />
+            <Icon name="bell" size={20} className="text-primary" />
             Notifikasi
           </Link>
           <Link
             to={ROUTES.laporan}
             className="flex items-center gap-2 rounded-xl border border-border bg-card p-3 text-sm font-medium transition-colors hover:border-primary/50 hover:text-primary"
           >
-            <Activity className="h-5 w-5 text-primary" />
+            <Icon name="pulse" size={20} className="text-primary" />
             Laporan
           </Link>
           <Link
             to={homeRoute}
             className="flex items-center gap-2 rounded-xl border border-border bg-card p-3 text-sm font-medium transition-colors hover:border-primary/50 hover:text-primary"
           >
-            <Home className="h-5 w-5 text-primary" />
+            <Icon name="home" size={20} className="text-primary" />
             Halaman Utama
           </Link>
           <Button
@@ -242,7 +223,7 @@ export default function Profil() {
             className="flex items-center gap-2 justify-start rounded-xl p-3 text-sm"
             onClick={() => void handleLogout()}
           >
-            <LogOut className="h-5 w-5" />
+            <Icon name="sign-out-alt" size={20} />
             Keluar
           </Button>
         </div>
@@ -251,27 +232,27 @@ export default function Profil() {
       {/* Session info */}
       <Card className="p-4">
         <h2 className="mb-3 flex items-center gap-2 text-[15px] font-bold">
-          <ShieldCheck className="h-4 w-4 text-primary" />
+          <Icon name="shield" size={16} className="text-primary" />
           Session Info
         </h2>
         <div className="divide-y divide-border">
           <div className="flex items-center justify-between gap-3 py-2.5">
             <span className="flex items-center gap-2 text-sm text-muted-foreground">
-              <KeyRound className="h-3.5 w-3.5" />
+              <Icon name="key" size={14} />
               Token
             </span>
             <span className="font-mono text-xs font-semibold">{token}</span>
           </div>
           <div className="flex items-center justify-between gap-3 py-2.5">
             <span className="flex items-center gap-2 text-sm text-muted-foreground">
-              <CalendarClock className="h-3.5 w-3.5" />
+              <Icon name="calendar-clock" size={14} />
               Expires
             </span>
             <span className="text-sm font-semibold">{session.expires ? formatWita(session.expires) : '-'}</span>
           </div>
           <div className="flex items-center justify-between gap-3 py-2.5">
             <span className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Timer className="h-3.5 w-3.5" />
+              <Icon name="stopwatch" size={14} />
               Sisa Waktu
             </span>
             <span className={cn('text-sm font-bold tabular-nums', remainingCls)}>{remainingText}</span>
@@ -283,7 +264,7 @@ export default function Profil() {
       <Card className="overflow-hidden">
         <div className="flex items-center justify-between border-b border-border px-4 py-3.5">
           <h2 className="flex items-center gap-2 text-[15px] font-bold">
-            <Activity className="h-4 w-4 text-primary" />
+            <Icon name="pulse" size={16} className="text-primary" />
             Aktivitas Terbaru
           </h2>
           <span className="text-xs text-muted-foreground">
@@ -293,7 +274,7 @@ export default function Profil() {
         <div>
           {activityError ? (
             <div className="py-10 text-center text-muted-foreground">
-              <AlertTriangle className="mx-auto mb-2 h-10 w-10 text-danger" />
+              <Icon name="triangle-warning" size={40} className="mx-auto mb-2 text-danger" />
               <p className="text-sm">Gagal memuat aktivitas.</p>
             </div>
           ) : activities === null ? (
@@ -303,7 +284,7 @@ export default function Profil() {
             </div>
           ) : activities.length === 0 ? (
             <div className="py-10 text-center text-muted-foreground">
-              <Activity className="mx-auto mb-2 h-10 w-10 opacity-50" />
+              <Icon name="pulse" size={40} className="mx-auto mb-2 opacity-50" />
               <p className="text-sm">Belum ada aktivitas.</p>
             </div>
           ) : (
@@ -311,13 +292,12 @@ export default function Profil() {
               {activities.map((order, i) => {
                 const status = String(order.STATUS || 'PENDING').toUpperCase();
                 const info = STATUS_INFO[status] || STATUS_INFO.PENDING;
-                const Icon = info.icon;
                 const branch = CABANG[String(order.ID_CABANG)];
                 const branchName = branch ? branch.pic : String(order.ID_CABANG || '-');
                 return (
                   <div key={i} className="flex items-start gap-3 px-4 py-3">
                     <span className={cn('mt-0.5', info.color)}>
-                      <Icon className="h-[18px] w-[18px]" />
+                      <Icon name={info.icon} size={18} />
                     </span>
                     <div className="min-w-0">
                       <div className="text-sm">
@@ -325,7 +305,7 @@ export default function Profil() {
                         {info.label}
                       </div>
                       <div className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
-                        <Clock className="h-3 w-3" />
+                        <Icon name="clock" size={12} />
                         {formatTimeAgo(order.TANGGAL_ORDER)}
                         <span className="mx-0.5">·</span>
                         {formatDateOnlyWita(order.TANGGAL_ORDER)}

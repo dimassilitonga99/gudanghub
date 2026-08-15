@@ -1,6 +1,7 @@
+import { Icon } from '../components/ui/icon';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Lock, LogIn, Send, Store, User as UserIcon } from 'lucide-react';
+
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { katalog, prewarmAppScript } from '@/lib/api';
@@ -152,7 +153,7 @@ export default function Login() {
       <div className="relative z-10 w-full max-w-md">
         <div className="mb-6 text-center">
           <span className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand text-white shadow-lg shadow-brand/30">
-            <Store className="h-7 w-7" />
+            <Icon name="shop" size={28} />
           </span>
           <GradientShimmer
             gradient="sunrise"
@@ -181,7 +182,7 @@ export default function Login() {
             <div className="space-y-1.5">
               <Label htmlFor="inputUser">Username</Label>
               <div className="relative">
-                <UserIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-900/40" />
+                <Icon name="user" size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-900/40" />
                 <Input
                   id="inputUser"
                   ref={usernameRef}
@@ -201,7 +202,7 @@ export default function Login() {
             <div className="space-y-1.5">
               <Label htmlFor="inputPass">Password</Label>
               <div className="relative">
-                <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-900/40" />
+                <Icon name="lock" size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-900/40" />
                 <Input
                   id="inputPass"
                   type={showPw ? 'text' : 'password'}
@@ -221,7 +222,7 @@ export default function Login() {
                   className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-ink-900/50 hover:text-ink-900"
                   aria-label={showPw ? 'Sembunyikan password' : 'Tampilkan password'}
                 >
-                  {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showPw ? <Icon name="eye-crossed" size={16} /> : <Icon name="eye" size={16} />}
                 </button>
               </div>
             </div>
@@ -256,7 +257,7 @@ export default function Login() {
                 </>
               ) : (
                 <>
-                  <LogIn className="h-4 w-4" />
+                  <Icon name="sign-in-alt" size={16} />
                   Masuk
                 </>
               )}
@@ -313,7 +314,7 @@ export default function Login() {
                 </>
               ) : (
                 <>
-                  <Send className="h-4 w-4" />
+                  <Icon name="paper-plane" size={16} />
                   Kirim ke Admin
                 </>
               )}

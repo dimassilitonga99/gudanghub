@@ -1,21 +1,8 @@
+import { Icon } from '../components/ui/icon';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import {
-  AlertTriangle,
-  Bell,
-  BellRing,
-  CheckCheck,
-  CheckCircle2,
-  Clock,
-  List,
-  Mail,
-  Package,
-  RefreshCw,
-  Store,
-  Wifi,
-  XCircle,
-} from 'lucide-react';
+
 import { orders as ordersApi } from '@/lib/api';
 import { CABANG, SETTINGS, type Order } from '@/lib/config';
 import { formatTimeAgo, formatWita, parseAnyDate, cn } from '@/lib/utils';
@@ -54,12 +41,12 @@ interface NotifOrder extends Order {
   TANGGAL_PROSES?: string;
 }
 
-const FILTERS: { key: string; label: string; icon: typeof List }[] = [
-  { key: 'all', label: 'Semua', icon: List },
-  { key: 'unread', label: 'Belum Dibaca', icon: Mail },
-  { key: 'PENDING', label: 'Menunggu', icon: Clock },
-  { key: 'APPROVED', label: 'Disetujui', icon: CheckCircle2 },
-  { key: 'REJECTED', label: 'Ditolak', icon: XCircle },
+const FILTERS: { key: string; label: string; icon: string }[] = [
+  { key: 'all', label: 'Semua', icon: 'list' },
+  { key: 'unread', label: 'Belum Dibaca', icon: 'envelope' },
+  { key: 'PENDING', label: 'Menunggu', icon: 'clock' },
+  { key: 'APPROVED', label: 'Disetujui', icon: 'check-circle' },
+  { key: 'REJECTED', label: 'Ditolak', icon: 'circle-xmark' },
 ];
 
 export default function Notifikasi() {
@@ -278,7 +265,7 @@ export default function Notifikasi() {
     toast.success('Semua notifikasi ditandai dibaca.');
   };
 
-  const EmptyIcon = filter === 'unread' ? CheckCheck : Bell;
+  const emptyIcon = filter === 'unread' ? 'check-double' : 'bell';
   const emptyMsg =
     filter === 'all'
       ? 'Belum ada notifikasi'
@@ -290,7 +277,7 @@ export default function Notifikasi() {
     <div className="mx-auto max-w-3xl space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="font-display flex items-center gap-2 text-2xl font-bold">
-          <BellRing className="h-6 w-6 text-primary" />
+          <Icon name="bell-ring" size={24} className="text-primary" />
           Notifikasi <span className="text-primary">Live</span>
           {counts.unread > 0 && (
             <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-bold text-white tabular-nums">
@@ -304,7 +291,7 @@ export default function Notifikasi() {
           onClick={() => void handleMarkAllRead()}
           disabled={!orders.length}
         >
-          <CheckCheck className="h-4 w-4" />
+          <Icon name="check-double" size={16} />
           Tandai Dibaca
         </Button>
       </div>
@@ -316,7 +303,7 @@ export default function Notifikasi() {
           <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
         </span>
         <span className="flex items-center gap-1.5 text-muted-foreground">
-          <Wifi className="h-3 w-3" />
+          <Icon name="wifi" size={12} />
           Notifikasi live · Auto-refresh setiap {Math.round(SETTINGS.notifPollingMs / 1000)} detik
         </span>
         <span className="ml-auto font-medium">
@@ -327,7 +314,6 @@ export default function Notifikasi() {
       {/* Filter chips */}
       <div className="flex flex-wrap gap-2">
         {FILTERS.map((f) => {
-          const Icon = f.icon;
           const count =
             f.key === 'all'
               ? counts.total
@@ -350,7 +336,7 @@ export default function Notifikasi() {
                   : 'border-border bg-card text-muted-foreground hover:border-primary/50 hover:text-foreground',
               )}
             >
-              <Icon className="h-3.5 w-3.5" />
+              <Icon name={f.icon} size={14} />
               {f.label}
               <span
                 className={cn(
@@ -374,16 +360,16 @@ export default function Notifikasi() {
           </div>
         ) : loadError ? (
           <div className="py-12 text-center text-muted-foreground">
-            <AlertTriangle className="mx-auto mb-3 h-12 w-12 text-danger" />
+            <Icon name="triangle-warning" size={48} className="mx-auto mb-3 text-danger" />
             <p className="mb-3 text-sm">Gagal memuat notifikasi.</p>
             <Button size="sm" variant="outline" onClick={() => void loadNotifications(false)}>
-              <RefreshCw className="h-4 w-4" />
+              <Icon name="refresh" size={16} />
               Coba Lagi
             </Button>
           </div>
         ) : filtered.length === 0 ? (
           <div className="py-12 text-center text-muted-foreground">
-            <EmptyIcon className="mx-auto mb-3 h-14 w-14 opacity-50" />
+            <Icon name={emptyIcon} size={56} className="mx-auto mb-3 opacity-50" />
             <p className="text-sm">{emptyMsg}</p>
           </div>
         ) : (
@@ -402,11 +388,11 @@ export default function Notifikasi() {
 
               const statusIcon =
                 status === 'APPROVED' ? (
-                  <CheckCircle2 className="h-[22px] w-[22px]" />
+                  <Icon name="check-circle" size={22} />
                 ) : status === 'REJECTED' ? (
-                  <XCircle className="h-[22px] w-[22px]" />
+                  <Icon name="circle-xmark" size={22} />
                 ) : (
-                  <Clock className="h-[22px] w-[22px]" />
+                  <Icon name="clock" size={22} />
                 );
 
               let title: string;
@@ -414,7 +400,7 @@ export default function Notifikasi() {
               let titleIcon: React.ReactNode;
               if (session?.role === 'admin') {
                 if (status === 'PENDING') {
-                  titleIcon = <Package className="h-4 w-4" />;
+                  titleIcon = <Icon name="package" size={16} />;
                   title = `Order Baru dari ${branch.pic}`;
                   desc = (
                     <>
@@ -424,7 +410,7 @@ export default function Notifikasi() {
                     </>
                   );
                 } else if (status === 'APPROVED') {
-                  titleIcon = <CheckCircle2 className="h-4 w-4" />;
+                  titleIcon = <Icon name="check-circle" size={16} />;
                   title = 'Order Disetujui';
                   desc = (
                     <>
@@ -432,7 +418,7 @@ export default function Notifikasi() {
                     </>
                   );
                 } else {
-                  titleIcon = <XCircle className="h-4 w-4" />;
+                  titleIcon = <Icon name="circle-xmark" size={16} />;
                   title = 'Order Ditolak';
                   desc = (
                     <>
@@ -442,7 +428,7 @@ export default function Notifikasi() {
                 }
               } else {
                 if (status === 'PENDING') {
-                  titleIcon = <Clock className="h-4 w-4" />;
+                  titleIcon = <Icon name="clock" size={16} />;
                   title = 'Order Menunggu Persetujuan';
                   desc = (
                     <>
@@ -451,7 +437,7 @@ export default function Notifikasi() {
                     </>
                   );
                 } else if (status === 'APPROVED') {
-                  titleIcon = <CheckCircle2 className="h-4 w-4" />;
+                  titleIcon = <Icon name="check-circle" size={16} />;
                   title = 'Order Anda Disetujui!';
                   desc = (
                     <>
@@ -460,7 +446,7 @@ export default function Notifikasi() {
                     </>
                   );
                 } else {
-                  titleIcon = <XCircle className="h-4 w-4" />;
+                  titleIcon = <Icon name="circle-xmark" size={16} />;
                   title = 'Order Anda Ditolak';
                   desc = (
                     <>
@@ -500,7 +486,7 @@ export default function Notifikasi() {
                     <span className="mt-0.5 block text-[13px] text-muted-foreground">{desc}</span>
                     <span className="mt-2 flex flex-wrap items-center gap-1.5">
                       <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold">
-                        <Store className="h-3 w-3" />
+                        <Icon name="shop" size={12} />
                         {order.ID_CABANG}
                       </span>
                       <span
@@ -518,7 +504,7 @@ export default function Notifikasi() {
                       </span>
                       {order.TANGGAL_PROSES && (
                         <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold opacity-60">
-                          <Clock className="h-3 w-3" />
+                          <Icon name="clock" size={12} />
                           {formatDateOnlyWita(order.TANGGAL_PROSES)}
                         </span>
                       )}

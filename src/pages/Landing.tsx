@@ -1,37 +1,7 @@
+import { Icon } from '../components/ui/icon';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import {
-  ArrowRight,
-  ArrowUpRight,
-  Armchair,
-  BarChart3,
-  Bed,
-  Boxes,
-  CheckCircle2,
-  CookingPot,
-  FileText,
-  Info,
-  LayoutDashboard,
-  LayoutGrid,
-  LogIn,
-  MapPin,
-  Menu,
-  Monitor,
-  Package,
-  Palette,
-  Phone,
-  ShoppingBag,
-  ShoppingCart,
-  Sofa,
-  Sparkles,
-  Store,
-  Timer,
-  Utensils,
-  Warehouse,
-  Wrench,
-  X,
-  Zap,
-} from 'lucide-react';
+
 import { CABANG_LIST, ROUTES } from '@/lib/config';
 import { useAuth } from '@/context/AuthContext';
 import { GradientShimmer } from '@/components/ui/gradient-shimmer';
@@ -39,12 +9,12 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 const FEATURES = [
-  { icon: ShoppingCart, title: 'Order Cepat', desc: 'Pesan barang dari katalog dalam hitungan detik, kapan saja.' },
-  { icon: Zap, title: 'Kinerja Tinggi', desc: 'Ditenagai cache proxy cloud untuk respons instan di jaringan 3G.' },
-  { icon: LayoutDashboard, title: 'Kontrol Pusat', desc: 'Kelola semua order cabang dari satu layar terpusat.' },
-  { icon: BarChart3, title: 'Laporan Lengkap', desc: 'Rekap per cabang, status, dan nilai otomatis.' },
-  { icon: Timer, title: 'Verifikasi Picker', desc: 'Cek stok barang sebelum order diproses.' },
-  { icon: Package, title: 'Katalog Terpusat', desc: 'Harga dan stok selalu sinkron dari satu sumber data.' },
+  { icon: 'shopping-cart', title: 'Order Cepat', desc: 'Pesan barang dari katalog dalam hitungan detik, kapan saja.' },
+  { icon: 'bolt', title: 'Kinerja Tinggi', desc: 'Ditenagai cache proxy cloud untuk respons instan di jaringan 3G.' },
+  { icon: 'dashboard', title: 'Kontrol Pusat', desc: 'Kelola semua order cabang dari satu layar terpusat.' },
+  { icon: 'chart-histogram', title: 'Laporan Lengkap', desc: 'Rekap per cabang, status, dan nilai otomatis.' },
+  { icon: 'stopwatch', title: 'Verifikasi Picker', desc: 'Cek stok barang sebelum order diproses.' },
+  { icon: 'package', title: 'Katalog Terpusat', desc: 'Harga dan stok selalu sinkron dari satu sumber data.' },
 ];
 
 const STATS = [
@@ -64,35 +34,35 @@ const GALLERY = [
 
 const ABOUT_ITEMS = [
   {
-    icon: FileText,
+    icon: 'file',
     title: 'Terdokumentasi Sempurna',
     desc: 'Setiap permintaan memiliki jejak audit — dari siapa, kapan, dan alasannya.',
   },
   {
-    icon: Zap,
+    icon: 'bolt',
     title: 'Keputusan dalam Sekejap',
     desc: 'Tinjauan pusat menyetujui, menyesuaikan, atau menolak dari mana saja. Perubahan tersinkron instan.',
   },
   {
-    icon: BarChart3,
+    icon: 'chart-histogram',
     title: 'Wawasan Berbasis Data',
     desc: 'Laporan cabang, rate persetujuan, dan pola order — semua dalam satu layar.',
   },
 ];
 
-const KATEGORI_MARQUEE: { name: string; icon: typeof Armchair }[] = [
-  { name: 'Kursi', icon: Armchair },
-  { name: 'Kasur', icon: Bed },
-  { name: 'Meja', icon: Utensils },
-  { name: 'Elektronik', icon: Monitor },
-  { name: 'Peralatan Dapur', icon: CookingPot },
-  { name: 'Peralatan Makan', icon: Utensils },
-  { name: 'Peralatan Mandi', icon: Sparkles },
-  { name: 'Lemari', icon: Boxes },
-  { name: 'Loker', icon: Boxes },
-  { name: 'Sofa', icon: Sofa },
-  { name: 'Rak Buku', icon: Boxes },
-  { name: 'Dekorasi', icon: Palette },
+const KATEGORI_MARQUEE: { name: string; icon: string }[] = [
+  { name: 'Kursi', icon: 'chair' },
+  { name: 'Kasur', icon: 'bed' },
+  { name: 'Meja', icon: 'utensils' },
+  { name: 'Elektronik', icon: 'dashboard-monitor' },
+  { name: 'Peralatan Dapur', icon: 'pot' },
+  { name: 'Peralatan Makan', icon: 'utensils' },
+  { name: 'Peralatan Mandi', icon: 'sparkles' },
+  { name: 'Lemari', icon: 'boxes' },
+  { name: 'Loker', icon: 'boxes' },
+  { name: 'Sofa', icon: 'sofa' },
+  { name: 'Rak Buku', icon: 'boxes' },
+  { name: 'Dekorasi', icon: 'palette' },
 ];
 
 const NAV_LINKS = [
@@ -305,7 +275,7 @@ function TeamSection() {
         <Reveal>
           <div className="tim-brand">
             <div className="tim-brand-mark">
-              <Warehouse className="h-6 w-6" />
+              <Icon name="warehouse-alt" size={24} />
             </div>
             <div className="tim-brand-name">
               GUDANG<span>HUB</span>
@@ -412,7 +382,7 @@ function DemoSection() {
   useEffect(() => {
     let timer;
     const tryPlay = () => {
-      Array.from(document.querySelectorAll('.demo-frame video')).forEach((v) => {
+      Array.from(document.querySelectorAll<HTMLVideoElement>('.demo-frame video')).forEach((v) => {
         v.muted = true;
         const p = v.play();
         if (p) p.catch(() => {});
@@ -510,9 +480,9 @@ function GallerySection() {
       <Reveal delay="1">
         <div className="gallery-cta">
           <Link to="/login" className="gallery-cta-btn">
-            <ShoppingBag className="h-[18px] w-[18px]" />
+            <Icon name="shopping-bag" size={18} />
             Lihat Katalog Lengkap
-            <ArrowRight className="h-4 w-4" />
+            <Icon name="arrow-right" size={16} />
           </Link>
         </div>
       </Reveal>
@@ -527,7 +497,7 @@ function AboutSection() {
         <Reveal className="about-media">
           <div className="about-media-main">
             <div className="about-media-icon">
-              <Warehouse className="h-16 w-16" />
+              <Icon name="warehouse-alt" size={64} />
             </div>
             <img src="./images/filosofi.jpg" alt="Filosofi GudangHub" className="about-image" loading="lazy" />
           </div>
@@ -555,7 +525,7 @@ function AboutSection() {
               <Reveal key={item.title} delay={String(i + 1)}>
                 <div className="about-item">
                   <span className="about-item-icon">
-                    <item.icon className="h-[22px] w-[22px]" />
+                    <Icon name={item.icon} size={22} />
                   </span>
                   <div>
                     <h4>{item.title}</h4>
@@ -569,7 +539,7 @@ function AboutSection() {
           <Reveal delay="1">
             <Link to="/login" className="btn-about">
               Masuk ke Aplikasi
-              <ArrowRight className="h-4 w-4" />
+              <Icon name="arrow-right" size={16} />
             </Link>
           </Reveal>
         </div>
@@ -613,7 +583,7 @@ function FooterSection() {
           <div className="footer-about">
             <Link to="/" className="inline-flex items-center gap-2 font-display text-lg font-bold">
               <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/60 text-white">
-                <Warehouse className="h-4 w-4" />
+                <Icon name="warehouse-alt" size={16} />
               </span>
               Gudang<em>Hub</em>
             </Link>
@@ -626,39 +596,39 @@ function FooterSection() {
           <div className="footer-col">
             <h5>Jelajahi</h5>
             <a href="#demo" onClick={smoothScroll('#demo')}>
-              <Wrench className="h-[14px] w-[14px]" /> Demo
+              <Icon name="wrench-alt" size={14} /> Demo
             </a>
             <a href="#katalog" onClick={smoothScroll('#katalog')}>
-              <LayoutGrid className="h-[14px] w-[14px]" /> Katalog
+              <Icon name="grid" size={14} /> Katalog
             </a>
             <a href="#tentang" onClick={smoothScroll('#tentang')}>
-              <Info className="h-[14px] w-[14px]" /> Tentang
+              <Icon name="info" size={14} /> Tentang
             </a>
             <a href="#cabang" onClick={smoothScroll('#cabang')}>
-              <Store className="h-[14px] w-[14px]" /> Cabang
+              <Icon name="shop" size={14} /> Cabang
             </a>
           </div>
 
           <div className="footer-col">
             <h5>Akses</h5>
             <Link to="/login">
-              <LogIn className="h-[14px] w-[14px]" /> Masuk Aplikasi
+              <Icon name="sign-in-alt" size={14} /> Masuk Aplikasi
             </Link>
             <Link to="/order">
-              <ShoppingCart className="h-[14px] w-[14px]" /> Lacak Order
+              <Icon name="shopping-cart" size={14} /> Lacak Order
             </Link>
             <a href="#katalog" onClick={smoothScroll('#katalog')}>
-              <LayoutGrid className="h-[14px] w-[14px]" /> Lihat Katalog
+              <Icon name="grid" size={14} /> Lihat Katalog
             </a>
           </div>
 
           <div className="footer-col">
             <h5>Terhubung</h5>
             <a href="#top" onClick={smoothScroll('#top')}>
-              <MapPin className="h-[14px] w-[14px]" /> PT Central Perabot Utama · NTT
+              <Icon name="map-marker" size={14} /> PT Central Perabot Utama · NTT
             </a>
             <a href="tel:+6281234567890">
-              <Phone className="h-[14px] w-[14px]" /> +62 812 3456 7890
+              <Icon name="phone-call" size={14} /> +62 812 3456 7890
             </a>
           </div>
         </div>
@@ -668,6 +638,12 @@ function FooterSection() {
             <b>GudangHub v3.0</b> · PT Central Perabot Utama · Waktu WITA
           </span>
           <span>© 2025 GudangHub. Dibangun dengan hati.</span>
+          <span>
+            Icons by{' '}
+            <a href="https://www.flaticon.com/uicons" target="_blank" rel="noreferrer">
+              Uicons by Flaticon
+            </a>
+          </span>
         </div>
       </div>
     </footer>
@@ -716,7 +692,7 @@ function BentoCard({ index }: { index: number }) {
           }}
         />
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-muted/40 text-muted-foreground">
-          <Store className="h-14 w-14" strokeWidth={1.2} />
+          <Icon name="shop" size={56} />
           <span className="font-mono text-xs font-medium">{cabang.id}</span>
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10" />
@@ -756,7 +732,7 @@ function BentoCard({ index }: { index: number }) {
           </div>
           <span className="inline-flex items-center gap-1 font-mono text-[10px] font-medium uppercase tracking-wider text-primary opacity-0 transition-opacity group-hover:opacity-100">
             Kelola
-            <ArrowUpRight className="h-3 w-3" />
+            <Icon name="arrow-up-right" size={12} />
           </span>
         </div>
       </div>
@@ -1034,19 +1010,15 @@ export default function Landing() {
         >
           <div className="relative z-10 text-center">
             <div className="splash-logo mx-auto mb-5 flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-cyan-500 to-teal-400 sm:h-28 sm:w-28">
-              <Warehouse className="h-12 w-12 text-white sm:h-14 sm:w-14" strokeWidth={1.5} />
+              <Icon name="warehouse-alt" size={48} className="text-white sm:h-14 sm:w-14" />
             </div>
             <div className="splash-brand">
               GUDANG<span className="text-cyan-400">HUB</span>
             </div>
             <div className="splash-tagline">Kolaborasi Cabang &amp; Gudang</div>
             <div className="relative mt-6 flex justify-center gap-3">
-              {['sp-1', 'sp-2', 'sp-3', 'sp-4', 'sp-5'].map((s, i) => (
-                <Sparkles
-                  key={s}
-                  className={cn('splash-spark h-3 w-3 text-cyan-300', s)}
-                  style={{ animation: `splashSparkle 1.5s ease ${3.5 + i * 0.2}s infinite` }}
-                />
+              {['sp-1', 'sp-2', 'sp-3', 'sp-4', 'sp-5'].map((s) => (
+                <Icon key={s} name="sparkles" size={12} className={cn('splash-spark text-cyan-300', s)} />
               ))}
             </div>
           </div>
@@ -1074,7 +1046,7 @@ export default function Landing() {
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
           <Link to="/" className="flex items-center gap-2 font-display text-lg font-bold">
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/60 text-white">
-              <Warehouse className="h-4 w-4" />
+              <Icon name="warehouse-alt" size={16} />
             </span>
             GudangHub
           </Link>
@@ -1097,7 +1069,7 @@ export default function Landing() {
               <Button asChild size="sm">
                 <Link to={homeRoute}>
                   Buka Aplikasi
-                  <ArrowRight className="h-4 w-4" />
+                  <Icon name="arrow-right" size={16} />
                 </Link>
               </Button>
             ) : (
@@ -1108,7 +1080,7 @@ export default function Landing() {
                 <Button asChild size="sm">
                   <Link to="/login">
                     Mulai
-                    <ArrowRight className="h-4 w-4" />
+                    <Icon name="arrow-right" size={16} />
                   </Link>
                 </Button>
               </>
@@ -1121,7 +1093,7 @@ export default function Landing() {
             aria-label="Menu"
             onClick={() => setDrawerOpen(true)}
           >
-            <Menu className="h-5 w-5" />
+            <Icon name="menu-burger" size={20} />
           </button>
         </div>
       </header>
@@ -1140,7 +1112,7 @@ export default function Landing() {
         <div className="mb-4 flex items-center justify-between">
           <span className="flex items-center gap-2 font-display text-base font-bold">
             <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/60 text-white">
-              <Warehouse className="h-3.5 w-3.5" />
+              <Icon name="warehouse-alt" size={14} />
             </span>
             GudangHub
           </span>
@@ -1150,7 +1122,7 @@ export default function Landing() {
             aria-label="Tutup"
             onClick={() => setDrawerOpen(false)}
           >
-            <X className="h-4 w-4" />
+            <Icon name="circle-xmark" size={16} />
           </button>
         </div>
         {NAV_LINKS.map((l) => (
@@ -1171,14 +1143,14 @@ export default function Landing() {
             <Button asChild className="w-full">
               <Link to={homeRoute} onClick={() => setDrawerOpen(false)}>
                 Buka Aplikasi
-                <ArrowRight className="h-4 w-4" />
+                <Icon name="arrow-right" size={16} />
               </Link>
             </Button>
           ) : (
             <Button asChild className="w-full">
               <Link to="/login" onClick={() => setDrawerOpen(false)}>
                 Masuk ke Aplikasi
-                <ArrowRight className="h-4 w-4" />
+                <Icon name="arrow-right" size={16} />
               </Link>
             </Button>
           )}
@@ -1213,7 +1185,7 @@ export default function Landing() {
             <Button asChild size="lg">
               <Link to="/login">
                 Masuk ke Aplikasi
-                <ArrowRight className="h-5 w-5" />
+                <Icon name="arrow-right" size={20} />
               </Link>
             </Button>
             <Button asChild variant="outline" size="lg">
@@ -1226,7 +1198,7 @@ export default function Landing() {
 
         <Reveal delay="3">
           <div className="mt-10 flex items-center justify-center gap-2 text-xs text-muted-foreground">
-            <CheckCircle2 className="h-4 w-4 text-success" />
+            <Icon name="check-circle" size={16} className="text-success" />
             Optimasi jaringan 3G · Mode offline · Notifikasi real-time
           </div>
         </Reveal>
@@ -1239,12 +1211,11 @@ export default function Landing() {
       <section className="mt-14 overflow-hidden border-y border-border/50 py-3">
         <div className="flex w-max animate-marquee gap-8">
           {[...KATEGORI_MARQUEE, ...KATEGORI_MARQUEE].map((k, i) => {
-            const Icon = k.icon;
             return (
               <span key={k.name + i} className="flex items-center gap-3 whitespace-nowrap">
                 <span className="flex items-center gap-2 text-sm text-muted-foreground">
                   <span className="text-primary">
-                    <Icon className="h-[22px] w-[22px]" strokeWidth={1.8} />
+                    <Icon name={k.icon} size={22} className="icon-fade" />
                   </span>
                   {k.name}
                 </span>
@@ -1282,7 +1253,7 @@ export default function Landing() {
             <Reveal key={f.title} delay={String((i % 3) + 1)}>
               <div className="group h-full rounded-xl border border-border p-5 transition-colors hover:border-primary/40">
                 <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/15 text-primary">
-                  <f.icon className="h-5 w-5" />
+                  <Icon name={f.icon} size={20} className="icon-beat" />
                 </span>
                 <h3 className="mt-3 font-semibold">{f.title}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">{f.desc}</p>
@@ -1355,17 +1326,17 @@ export default function Landing() {
             </p>
             <div className="mx-auto mt-6 grid max-w-lg grid-cols-1 gap-3 text-center text-sm sm:grid-cols-3">
               <div className="rounded-xl border border-border bg-muted/30 p-4">
-                <Store className="mx-auto mb-2 h-5 w-5 text-primary" />
+                <Icon name="shop" size={20} className="mx-auto mb-2 text-primary" />
                 <div className="font-semibold">4 Cabang</div>
                 <div className="text-xs text-muted-foreground">Tersebar di NTT</div>
               </div>
               <div className="rounded-xl border border-border bg-muted/30 p-4">
-                <Zap className="mx-auto mb-2 h-5 w-5 text-primary" />
+                <Icon name="bolt" size={20} className="mx-auto mb-2 text-primary" />
                 <div className="font-semibold">Cache Cloud</div>
                 <div className="text-xs text-muted-foreground">Respons instan</div>
               </div>
               <div className="rounded-xl border border-border bg-muted/30 p-4">
-                <Package className="mx-auto mb-2 h-5 w-5 text-primary" />
+                <Icon name="package" size={20} className="mx-auto mb-2 text-primary" />
                 <div className="font-semibold">4.700+ Barang</div>
                 <div className="text-xs text-muted-foreground">Katalog terpusat</div>
               </div>
@@ -1385,7 +1356,7 @@ export default function Landing() {
               <Button asChild size="lg" onClick={() => navigate(homeRoute)}>
                 <Link to={homeRoute}>
                   {session ? 'Buka Aplikasi' : 'Mulai Sekarang'}
-                  <ArrowRight className="h-5 w-5" />
+                  <Icon name="arrow-right" size={20} />
                 </Link>
               </Button>
             </div>

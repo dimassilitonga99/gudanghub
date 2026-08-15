@@ -1,30 +1,7 @@
+import { Icon } from '../components/ui/icon';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import {
-  AlertTriangle,
-  ArrowRight,
-  Ban,
-  Check,
-  CheckCircle2,
-  Clock,
-  Edit2,
-  FileText,
-  MessageSquare,
-  Package,
-  PackageCheck,
-  Phone,
-  Plus,
-  RefreshCw,
-  Save,
-  Search,
-  Send,
-  Sparkles,
-  Store,
-  Trash2,
-  Warehouse,
-  X,
-  XCircle,
-} from 'lucide-react';
+
 import { loadAll, orders } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { CABANG, SETTINGS, type Barang, type Order, type DetailItem } from '@/lib/config';
@@ -50,22 +27,22 @@ function StatusBadge({ status }: { status: string }) {
     PENDING: {
       cls: 'bg-warning/15 text-warning border-warning/30',
       label: 'Tertunda',
-      icon: <Clock className="h-3 w-3" />,
+      icon: <Icon name="clock" size={12} />,
     },
     PICKED: {
       cls: 'bg-info/15 text-info border-info/30',
       label: 'Diverifikasi Picker',
-      icon: <PackageCheck className="h-3 w-3" />,
+      icon: <Icon name="box-check" size={12} />,
     },
     APPROVED: {
       cls: 'bg-success/15 text-success border-success/30',
       label: 'Disetujui',
-      icon: <CheckCircle2 className="h-3 w-3" />,
+      icon: <Icon name="check-circle" size={12} />,
     },
     REJECTED: {
       cls: 'bg-danger/15 text-danger border-danger/30',
       label: 'Ditolak',
-      icon: <XCircle className="h-3 w-3" />,
+      icon: <Icon name="circle-xmark" size={12} />,
     },
   };
   const info = map[st] || map.PENDING;
@@ -462,7 +439,7 @@ function EditModal({
         <DialogContent className="max-h-[88vh] max-w-3xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-base">
-              <Package className="h-4 w-4 text-brand" />
+              <Icon name="package" size={16} className="text-brand" />
               {order.ORDER_ID}
             </DialogTitle>
           </DialogHeader>
@@ -489,7 +466,7 @@ function EditModal({
             </div>
             {order.CATATAN && (
               <div className="flex items-start gap-2 sm:col-span-2">
-                <MessageSquare className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                <Icon name="message-text" size={14} className="mt-0.5 shrink-0 text-muted-foreground" />
                 <span className="text-sm">{order.CATATAN}</span>
               </div>
             )}
@@ -558,22 +535,22 @@ function EditModal({
                         <div className="mt-1 flex flex-wrap gap-2 text-[11px] text-muted-foreground">
                           {it.stokSistem !== '' && (
                             <span className="flex items-center gap-1">
-                              <Package className="h-3 w-3" /> Sistem: {it.stokSistem}
+                              <Icon name="package" size={12} /> Sistem: {it.stokSistem}
                             </span>
                           )}
                           {it.stokGudang !== '' && (
                             <span className="flex items-center gap-1">
-                              <Warehouse className="h-3 w-3" /> Gudang: {it.stokGudang}
+                              <Icon name="warehouse-alt" size={12} /> Gudang: {it.stokGudang}
                             </span>
                           )}
                           {it.stokToko !== '' && (
                             <span className="flex items-center gap-1">
-                              <Store className="h-3 w-3" /> Toko: {it.stokToko}
+                              <Icon name="shop" size={12} /> Toko: {it.stokToko}
                             </span>
                           )}
                           {pickerVal !== '' && (
                             <span className="flex items-center gap-1 font-bold text-info">
-                              <PackageCheck className="h-3 w-3" /> Picker: {pickerVal}
+                              <Icon name="box-check" size={12} /> Picker: {pickerVal}
                             </span>
                           )}
                         </div>
@@ -618,20 +595,20 @@ function EditModal({
                       <div className="flex flex-col gap-1">
                         {disabled ? (
                           <Button size="sm" variant="outline" onClick={() => rejectItem(idx)}>
-                            <RefreshCw className="h-3.5 w-3.5" />
+                            <Icon name="refresh" size={14} />
                             Kembalikan
                           </Button>
                         ) : (
                           <>
                             <div className="flex gap-1">
                               <Button size="icon" variant="outline" className="h-7 w-7" title="Edit qty" onClick={() => void editQuantity(idx)}>
-                                <Edit2 className="h-3.5 w-3.5" />
+                                <Icon name="edit" size={14} />
                               </Button>
                               <Button size="icon" variant="outline" className="h-7 w-7 text-warning" title="Tolak" onClick={() => void rejectItem(idx)}>
-                                <Ban className="h-3.5 w-3.5" />
+                                <Icon name="ban" size={14} />
                               </Button>
                               <Button size="icon" variant="outline" className="h-7 w-7 text-danger" title="Hapus" onClick={() => void deleteItem(idx)}>
-                                <Trash2 className="h-3.5 w-3.5" />
+                                <Icon name="trash" size={14} />
                               </Button>
                             </div>
                           </>
@@ -692,7 +669,7 @@ function EditModal({
               />
             </div>
             <Button onClick={addNewItem}>
-              <Plus className="h-4 w-4" />
+              <Icon name="plus" size={16} />
               Tambah
             </Button>
           </div>
@@ -719,7 +696,7 @@ function EditModal({
               disabled={saving}
               className="bg-success text-white hover:bg-success/90"
             >
-              <Save className="h-4 w-4" />
+              <Icon name="floppy-disks" size={16} />
               {saving ? 'Menyimpan...' : 'Simpan Perubahan'}
             </Button>
             <Button
@@ -727,7 +704,7 @@ function EditModal({
               disabled={saving}
               className="bg-info text-white hover:bg-info/90"
             >
-              <Send className="h-4 w-4" />
+              <Icon name="paper-plane" size={16} />
               Kirim Email
             </Button>
             <Button
@@ -735,11 +712,11 @@ function EditModal({
               onClick={handlePrintForm}
               disabled={saving}
             >
-              <FileText className="h-4 w-4" />
+              <Icon name="file" size={16} />
               Print Form
             </Button>
             <Button variant="ghost" onClick={onClose} disabled={saving}>
-              <X className="h-4 w-4" />
+              <Icon name="circle-xmark" size={16} />
               Tutup
             </Button>
           </div>
@@ -1033,28 +1010,28 @@ export default function Dashboard() {
       label: 'Total Order',
       sub: 'Semua pesanan masuk',
       value: ordersList.length,
-      icon: <Package className="h-5 w-5 text-brand" />,
+      icon: <Icon name="package" size={20} className="text-brand" />,
       tone: 'bg-brand/15 text-brand',
     },
     {
       label: 'Menunggu',
       sub: 'Perlu persetujuan',
       value: donut.pending,
-      icon: <Clock className="h-5 w-5 text-warning" />,
+      icon: <Icon name="clock" size={20} className="text-warning" />,
       tone: 'bg-warning/15 text-warning',
     },
     {
       label: 'Disetujui',
       sub: 'Pesanan berhasil',
       value: donut.approved,
-      icon: <CheckCircle2 className="h-5 w-5 text-success" />,
+      icon: <Icon name="check-circle" size={20} className="text-success" />,
       tone: 'bg-success/15 text-success',
     },
     {
       label: 'Ditolak',
       sub: 'Pesanan ditolak',
       value: donut.rejected,
-      icon: <XCircle className="h-5 w-5 text-danger" />,
+      icon: <Icon name="circle-xmark" size={20} className="text-danger" />,
       tone: 'bg-danger/15 text-danger',
     },
   ];
@@ -1065,7 +1042,7 @@ export default function Dashboard() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="flex items-center gap-2 font-display text-2xl font-bold">
-            <Sparkles className="h-6 w-6 text-brand" />
+            <Icon name="sparkles" size={24} className="text-brand" />
             Selamat datang, {session?.nama || session?.username || 'Admin'}!
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -1075,11 +1052,11 @@ export default function Dashboard() {
         <div className="flex items-center gap-2">
           {pendingCount > 0 && (
             <Badge className="gap-1 bg-warning text-white">
-              <Clock className="h-3 w-3" /> {pendingCount} pending
+              <Icon name="clock" size={12} /> {pendingCount} pending
             </Badge>
           )}
           <Button variant="outline" size="sm" onClick={() => void loadData(true)} disabled={refreshing}>
-            <RefreshCw className={cn('h-4 w-4', refreshing && 'animate-spin')} />
+            <Icon name="refresh" size={16} className={refreshing ? 'animate-spin' : undefined} />
             Muat Ulang
           </Button>
         </div>
@@ -1087,7 +1064,7 @@ export default function Dashboard() {
 
       {pendingCount > 0 && (
         <div className="flex items-center gap-2 rounded-lg border border-warning/30 bg-warning/10 px-3 py-2.5 text-sm text-warning">
-          <AlertTriangle className="h-4 w-4 shrink-0" />
+          <Icon name="triangle-warning" size={16} className="shrink-0" />
           {pendingCount} pesanan menunggu verifikasi.
         </div>
       )}
@@ -1151,14 +1128,14 @@ export default function Dashboard() {
               <CardContent className="p-4">
                 <div className="mb-3 flex items-center justify-between">
                   <h2 className="flex items-center gap-2 text-sm font-semibold">
-                    <Clock className="h-4 w-4 text-warning" />
+                    <Icon name="clock" size={16} className="text-warning" />
                     Order Menunggu Persetujuan
                   </h2>
                   <button
                     onClick={() => goTab('orders')}
                     className="flex items-center gap-1 text-xs font-medium text-brand hover:underline"
                   >
-                    Lihat Semua <ArrowRight className="h-3.5 w-3.5" />
+                    Lihat Semua <Icon name="arrow-right" size={14} />
                   </button>
                 </div>
                 {loading ? (
@@ -1169,7 +1146,7 @@ export default function Dashboard() {
                   </div>
                 ) : pendingOrders.length === 0 ? (
                   <div className="flex flex-col items-center gap-2 py-8 text-sm text-muted-foreground">
-                    <CheckCircle2 className="h-10 w-10 text-success" />
+                    <Icon name="check-circle" size={40} className="text-success" />
                     Semua order sudah diproses!
                   </div>
                 ) : (
@@ -1189,7 +1166,7 @@ export default function Dashboard() {
                             <td className="py-2.5 font-mono text-xs font-bold">{o.ORDER_ID}</td>
                             <td className="py-2.5">
                               <span className="flex items-center gap-1.5">
-                                <Store className="h-3.5 w-3.5 text-brand" />
+                                <Icon name="shop" size={14} className="text-brand" />
                                 {CABANG[String(o.ID_CABANG)]?.pic || '-'}
                               </span>
                             </td>
@@ -1197,13 +1174,13 @@ export default function Dashboard() {
                             <td className="py-2.5">
                               <div className="flex justify-end gap-1">
                                 <Button size="icon" variant="outline" className="h-8 w-8 text-success" title="Setujui" onClick={() => void quickApprove(o)}>
-                                  <Check className="h-4 w-4" />
+                                  <Icon name="check" size={16} />
                                 </Button>
                                 <Button size="icon" variant="outline" className="h-8 w-8 text-danger" title="Tolak" onClick={() => void quickReject(o)}>
-                                  <X className="h-4 w-4" />
+                                  <Icon name="circle-xmark" size={16} />
                                 </Button>
                                 <Button size="sm" variant="outline" onClick={() => setEditOrder(o)}>
-                                  <Edit2 className="h-3.5 w-3.5" />
+                                  <Icon name="edit" size={14} />
                                   Kelola
                                 </Button>
                               </div>
@@ -1301,7 +1278,7 @@ export default function Dashboard() {
         <div className="space-y-4">
           <div className="flex flex-wrap items-center gap-2">
             <div className="relative min-w-52 flex-1">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Icon name="search" size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <Input
                 id="orderSearch"
                 value={orderSearch}
@@ -1359,7 +1336,7 @@ export default function Dashboard() {
                         <td className="p-3 font-mono text-xs font-bold">{o.ORDER_ID}</td>
                         <td className="p-3">
                           <span className="flex items-center gap-1.5">
-                            <Store className="h-3.5 w-3.5 text-brand" />
+                            <Icon name="shop" size={14} className="text-brand" />
                             {CABANG[String(o.ID_CABANG)]?.pic || '-'}
                           </span>
                         </td>
@@ -1372,15 +1349,15 @@ export default function Dashboard() {
                             {st === 'PENDING' && (
                               <>
                                 <Button size="icon" variant="outline" className="h-8 w-8 text-success" title="Setujui" onClick={() => void quickApprove(o)}>
-                                  <Check className="h-4 w-4" />
+                                  <Icon name="check" size={16} />
                                 </Button>
                                 <Button size="icon" variant="outline" className="h-8 w-8 text-danger" title="Tolak" onClick={() => void quickReject(o)}>
-                                  <X className="h-4 w-4" />
+                                  <Icon name="circle-xmark" size={16} />
                                 </Button>
                               </>
                             )}
                             <Button size="sm" variant="outline" onClick={() => setEditOrder(o)}>
-                              <Edit2 className="h-3.5 w-3.5" />
+                              <Icon name="edit" size={14} />
                               Kelola
                             </Button>
                           </div>
@@ -1399,7 +1376,7 @@ export default function Dashboard() {
       {tab === 'katalog' && (
         <div className="space-y-4">
           <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Icon name="search" size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={katalogSearch}
               onChange={(e) => setKatalogSearch(e.target.value)}
@@ -1434,10 +1411,10 @@ export default function Dashboard() {
 
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             {[
-              { label: 'Total Barang', value: katalogStats.total, icon: <Package className="h-4 w-4" />, cls: 'bg-brand/15 text-brand' },
-              { label: 'Stok Aman', value: katalogStats.ok, icon: <CheckCircle2 className="h-4 w-4" />, cls: 'bg-success/15 text-success' },
-              { label: 'Stok Menipis', value: katalogStats.low, icon: <AlertTriangle className="h-4 w-4" />, cls: 'bg-warning/15 text-warning' },
-              { label: 'Stok Habis', value: katalogStats.empty, icon: <XCircle className="h-4 w-4" />, cls: 'bg-danger/15 text-danger' },
+              { label: 'Total Barang', value: katalogStats.total, icon: <Icon name="package" size={16} />, cls: 'bg-brand/15 text-brand' },
+              { label: 'Stok Aman', value: katalogStats.ok, icon: <Icon name="check-circle" size={16} />, cls: 'bg-success/15 text-success' },
+              { label: 'Stok Menipis', value: katalogStats.low, icon: <Icon name="triangle-warning" size={16} />, cls: 'bg-warning/15 text-warning' },
+              { label: 'Stok Habis', value: katalogStats.empty, icon: <Icon name="circle-xmark" size={16} />, cls: 'bg-danger/15 text-danger' },
             ].map((s) => (
               <Card key={s.label}>
                 <CardContent className="flex items-center gap-2 p-3">
@@ -1516,7 +1493,7 @@ export default function Dashboard() {
                     style={{ background: `linear-gradient(135deg, ${cb.color}, ${cb.color}22)` }}
                   >
                     <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white">
-                      <Store className="h-5 w-5" />
+                      <Icon name="shop" size={20} />
                     </span>
                     <div className="min-w-0">
                       <div className="truncate text-sm font-bold text-white">{cb.nama}</div>
@@ -1541,10 +1518,10 @@ export default function Dashboard() {
                   </div>
                   <div className="flex items-center justify-between border-t border-border px-4 py-2 text-xs text-muted-foreground">
                     <span className="flex items-center gap-1">
-                      <Phone className="h-3 w-3" /> {cb.telepon || '-'}
+                      <Icon name="phone-call" size={12} /> {cb.telepon || '-'}
                     </span>
                     <span className="flex items-center gap-1 text-danger">
-                      <XCircle className="h-3 w-3" /> {rejected} ditolak
+                      <Icon name="circle-xmark" size={12} /> {rejected} ditolak
                     </span>
                   </div>
                 </CardContent>

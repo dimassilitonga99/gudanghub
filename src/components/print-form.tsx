@@ -1,6 +1,7 @@
+import { Icon } from './ui/icon';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { Download, Printer, X } from 'lucide-react';
+
 import { CABANG } from '@/lib/config';
 import { chunkArray, formatTanggalCetak, toInt } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -293,15 +294,15 @@ export default function PrintFormModal({
               disabled={busy}
               className="text-black"
             >
-              <Download className="h-4 w-4" />
+              <Icon name="download" size={16} />
               {busy ? 'Proses...' : pages.length > 1 ? `Download ${pages.length} JPG` : 'Download JPG'}
             </Button>
             <Button size="sm" onClick={() => window.print()}>
-              <Printer className="h-4 w-4" />
+              <Icon name="print" size={16} />
               Print / PDF
             </Button>
             <Button size="icon" variant="ghost" onClick={onClose} className="text-black">
-              <X className="h-4 w-4" />
+              <Icon name="circle-xmark" size={16} />
             </Button>
           </div>
         </DialogHeader>

@@ -3,6 +3,11 @@
 @tailwind utilities;
 
 @layer base {
+  .fi {
+    display: inline-block;
+    vertical-align: middle;
+    line-height: 1;
+  }
   :root {
     --background: 0 0% 100%;
     --foreground: 240 29% 8%;
@@ -1437,4 +1442,27 @@
 @media (max-width: 600px) {
   .footer-top { grid-template-columns: 1fr; gap: 24px; }
   .footer-bottom { flex-direction: column; text-align: center; }
+}
+
+
+/* ============================================================
+   FLATICON UICONS — animasi halus
+   ============================================================ */
+
+.icon-beat {
+  animation: icon-beat 2.4s ease-in-out infinite;
+}
+
+@keyframes icon-beat {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+}
+
+.icon-fade {
+  animation: icon-fade 3.2s ease-in-out infinite;
+}
+
+@keyframes icon-fade {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
 }

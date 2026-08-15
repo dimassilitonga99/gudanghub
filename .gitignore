@@ -38,3 +38,7 @@ pnpm-debug.log*
 
 # Deploy
 .gh-pages-cache/
+
+# Wrangler
+.wrangler/
+

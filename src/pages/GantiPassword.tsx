@@ -1,7 +1,8 @@
+import { Icon } from '../components/ui/icon';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { ArrowLeft, Eye, EyeOff, KeyRound, Save } from 'lucide-react';
+
 import { auth } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { clearSession } from '@/lib/session';
@@ -183,7 +184,7 @@ export default function GantiPassword() {
       aria-label={show ? labelHide : labelShow}
       onClick={() => setShow(!show)}
     >
-      {show ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
+      {show ? <Icon name="eye-crossed" size={18} /> : <Icon name="eye" size={18} />}
     </Button>
   );
 
@@ -194,7 +195,7 @@ export default function GantiPassword() {
         onClick={() => navigate(ROUTES.profil)}
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-primary"
       >
-        <ArrowLeft className="h-4 w-4" />
+        <Icon name="arrow-left" size={16} />
         Kembali ke Profil
       </button>
 
@@ -318,7 +319,7 @@ export default function GantiPassword() {
               </>
             ) : (
               <>
-                <Save className="h-[18px] w-[18px]" />
+                <Icon name="floppy-disks" size={18} />
                 Simpan Password Baru
               </>
             )}
@@ -327,7 +328,7 @@ export default function GantiPassword() {
       </Card>
 
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
-        <KeyRound className="h-3.5 w-3.5" />
+        <Icon name="key" size={14} />
         Gunakan minimal 8 karakter dengan kombinasi huruf, angka, dan simbol.
       </div>
     </div>

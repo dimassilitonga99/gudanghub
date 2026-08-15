@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import '@fontsource-variable/geist';
 import '@fontsource-variable/geist-mono';
+import '@flaticon/flaticon-uicons/css/solid/rounded.css';
 import App from './App';
 import { AuthProvider } from './context/AuthContext';
 import { prewarmAppScript, startKeepAlive } from './lib/api';

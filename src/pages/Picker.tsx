@@ -1,23 +1,7 @@
+import { Icon } from '../components/ui/icon';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import {
-  Calendar,
-  CalendarClock,
-  Check,
-  CheckCircle2,
-  CheckCheck,
-  Circle,
-  Clock,
-  Edit2,
-  List,
-  Lock,
-  MessageSquare,
-  Package,
-  RefreshCw,
-  Send,
-  Store,
-  XCircle,
-} from 'lucide-react';
+
 import { orders as ordersApi, callApi } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { CABANG, type Order, type DetailItem } from '@/lib/config';
@@ -394,7 +378,7 @@ export default function Picker() {
           </p>
         </div>
         <Button variant="outline" size="sm" onClick={() => void loadOrders()}>
-          <RefreshCw className="h-4 w-4" /> Muat Ulang
+          <Icon name="refresh" size={16} /> Muat Ulang
         </Button>
       </div>
 
@@ -402,16 +386,16 @@ export default function Picker() {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {(
           [
-            ['Menunggu', stats.pending, 'text-warning', Clock],
-            ['Sudah Dicek', stats.picked, 'text-info', CheckCheck],
-            ['Disetujui', stats.approved, 'text-success', CheckCircle2],
-            ['Total', stats.total, 'text-foreground', Package],
+            ['Menunggu', stats.pending, 'text-warning', 'clock'],
+            ['Sudah Dicek', stats.picked, 'text-info', 'check-double'],
+            ['Disetujui', stats.approved, 'text-success', 'check-circle'],
+            ['Total', stats.total, 'text-foreground', 'package'],
           ] as const
-        ).map(([label, value, color, Icon]) => (
+        ).map(([label, value, color, name]) => (
           <Card key={label}>
             <CardContent className="p-3">
               <div className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
-                <Icon className="h-3 w-3" /> {label}
+                <Icon name={name} size={12} /> {label}
               </div>
               <div className={cn('mt-1 text-2xl font-bold', color)}>{loading ? '-' : value}</div>
             </CardContent>
@@ -422,7 +406,7 @@ export default function Picker() {
       {/* FILTER TOKO */}
       <div className="flex flex-wrap items-center gap-2">
         <span className="flex items-center gap-1 text-xs font-semibold">
-          <Store className="h-3.5 w-3.5" /> Toko:
+          <Icon name="shop" size={14} /> Toko:
         </span>
         <select
           value={filterToko}
@@ -446,7 +430,7 @@ export default function Picker() {
       {/* FILTER TANGGAL */}
       <div className="flex flex-wrap items-center gap-2">
         <span className="flex items-center gap-1 text-xs font-semibold">
-          <Calendar className="h-3.5 w-3.5" /> Tanggal:
+          <Icon name="calendar" size={14} /> Tanggal:
         </span>
         <Input
           type="date"
@@ -487,7 +471,7 @@ export default function Picker() {
                 filterQuick === value ? 'border-brand bg-brand/10 text-brand' : 'border-border text-muted-foreground',
               )}
             >
-              <Calendar className="h-3 w-3" /> {label}
+              <Icon name="calendar" size={12} /> {label}
             </button>
           ))}
         </div>
@@ -497,12 +481,12 @@ export default function Picker() {
       <div className="flex flex-wrap gap-1.5">
         {(
           [
-            ['ALL', 'Semua', List],
-            ['PENDING', 'Menunggu', Clock],
-            ['PICKED', 'Sudah Dicek', CheckCheck],
-            ['APPROVED', 'Disetujui', CheckCircle2],
+            ['ALL', 'Semua', 'list'],
+            ['PENDING', 'Menunggu', 'clock'],
+            ['PICKED', 'Sudah Dicek', 'check-double'],
+            ['APPROVED', 'Disetujui', 'check-circle'],
           ] as const
-        ).map(([value, label, Icon]) => (
+        ).map(([value, label, name]) => (
           <button
             key={value}
             type="button"
@@ -512,7 +496,7 @@ export default function Picker() {
               filter === value ? 'border-brand bg-brand/10 text-brand' : 'border-border text-muted-foreground',
             )}
           >
-            <Icon className="h-3.5 w-3.5" /> {label}
+            <Icon name={name} size={14} /> {label}
           </button>
         ))}
       </div>
@@ -527,14 +511,14 @@ export default function Picker() {
       ) : filtered.length === 0 ? (
         <Card>
           <CardContent className="py-10 text-center">
-            <Package className="mx-auto mb-2 h-10 w-10 text-muted" />
+            <Icon name="package" size={40} className="mx-auto mb-2 text-muted" />
             <p className="text-sm text-muted-foreground">{emptyMsg}</p>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-3">
           <div className="flex items-center gap-1.5 px-1 text-[11px] text-muted-foreground">
-            <Package className="h-3 w-3" />
+            <Icon name="package" size={12} />
             {filtered.length} order{filterToko || filterDateFrom || filterDateTo || filter !== 'ALL' ? ' (difilter)' : ''}
           </div>
           {filtered.map((order) => {
@@ -578,11 +562,11 @@ export default function Picker() {
                       <div className="text-sm font-bold">{order.ORDER_ID}</div>
                       <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
                         <span className="flex items-center gap-1">
-                          <Store className="h-3 w-3" /> {branch.nama || order.ID_CABANG}
+                          <Icon name="shop" size={12} /> {branch.nama || order.ID_CABANG}
                         </span>
                         <span>· PIC: {branch.pic || '-'}</span>
                         <span className="flex items-center gap-1">
-                          <CalendarClock className="h-3 w-3" /> {formatWita(order.TANGGAL_ORDER)}
+                          <Icon name="calendar-clock" size={12} /> {formatWita(order.TANGGAL_ORDER)}
                         </span>
                         <span>· {details.length} item</span>
                       </div>
@@ -597,7 +581,7 @@ export default function Picker() {
                       </div>
                     </div>
                     <Badge variant="outline" className={cn('gap-1', statusColor)}>
-                      {status === 'PENDING' ? <Clock className="h-3 w-3" /> : status === 'PICKED' ? <CheckCheck className="h-3 w-3" /> : status === 'APPROVED' ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+                      {status === 'PENDING' ? <Icon name="clock" size={12} /> : status === 'PICKED' ? <Icon name="check-double" size={12} /> : status === 'APPROVED' ? <Icon name="check-circle" size={12} /> : <Icon name="circle-xmark" size={12} />}
                       {statusLabel}
                     </Badge>
                   </div>
@@ -627,15 +611,15 @@ export default function Picker() {
                           <div className="flex items-center">
                             {isFilled && isLocked ? (
                               <span title="Terkunci">
-                                <CheckCircle2 className="h-4 w-4 text-success" />
+                                <Icon name="check-circle" size={16} className="text-success" />
                               </span>
                             ) : isFilled && !isLocked ? (
                               <span title="Sedang diedit">
-                                <Edit2 className="h-4 w-4 text-warning" />
+                                <Icon name="edit" size={16} className="text-warning" />
                               </span>
                             ) : (
                               <span title="Belum diisi">
-                                <Circle className="h-4 w-4 text-muted-foreground/50" />
+                                <Icon name="circle" size={16} className="text-muted-foreground/50" />
                               </span>
                             )}
                           </div>
@@ -711,7 +695,7 @@ export default function Picker() {
                                   })();
                                 }}
                               >
-                                <Lock className="h-3.5 w-3.5 text-muted-foreground" />
+                                <Icon name="lock" size={14} className="text-muted-foreground" />
                               </Button>
                             )}
                             {!isLocked && canEdit && isFilled && (
@@ -729,7 +713,7 @@ export default function Picker() {
                                   }
                                 }}
                               >
-                                <Check className="h-3.5 w-3.5 text-success" />
+                                <Icon name="check" size={14} className="text-success" />
                               </Button>
                             )}
                           </div>
@@ -759,7 +743,7 @@ export default function Picker() {
                     <>
                       <div>
                         <div className="mb-1 flex items-center gap-1 text-xs font-medium text-muted-foreground">
-                          <MessageSquare className="h-3 w-3" /> Catatan Picker
+                          <Icon name="message-text" size={12} /> Catatan Picker
                         </div>
                         <Textarea
                           value={pickerNote[String(order.ORDER_ID)] ?? getPickerNote(order)}
@@ -775,7 +759,7 @@ export default function Picker() {
                         disabled={sendingId === String(order.ORDER_ID)}
                         onClick={() => void submitPicked(order)}
                       >
-                        {status === 'PICKED' ? <RefreshCw className="h-4 w-4" /> : <Send className="h-4 w-4" />}
+                        {status === 'PICKED' ? <Icon name="refresh" size={16} /> : <Icon name="paper-plane" size={16} />}
                         {sendingId === String(order.ORDER_ID)
                           ? 'Mengirim...'
                           : status === 'PICKED'

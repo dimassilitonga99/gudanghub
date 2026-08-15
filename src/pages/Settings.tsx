@@ -1,23 +1,7 @@
+import { Icon } from '../components/ui/icon';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import {
-  AlertTriangle,
-  Database,
-  FileSpreadsheet,
-  Globe,
-  Info,
-  MapPin,
-  Monitor,
-  Moon,
-  Phone,
-  RefreshCw,
-  Smartphone,
-  Store,
-  Tag,
-  Trash2,
-  Users,
-  Warehouse,
-} from 'lucide-react';
+
 import { useAuth } from '@/context/AuthContext';
 import { CABANG, SESSION, APP } from '@/lib/config';
 import { getInitials, isStandalone } from '@/lib/utils';
@@ -221,21 +205,21 @@ export default function Settings() {
         {prefRow(
           'Mode Gelap',
           'Gunakan tema gelap di seluruh aplikasi',
-          <Moon className="h-4 w-4" />,
+          <Icon name="moon" size={16} />,
           prefs.darkMode,
           (v) => setPref('darkMode', v, `Mode ${v ? 'gelap' : 'terang'} diaktifkan.`),
         )}
         {prefRow(
           'Notifikasi Browser',
           'Tampilkan notifikasi sistem saat ada order baru',
-          <Smartphone className="h-4 w-4" />,
+          <Icon name="smartphone" size={16} />,
           prefs.browserNotif,
           (v) => void handleBrowserNotif(v),
         )}
         {prefRow(
           'Suara Notifikasi',
           'Bunyi saat ada notifikasi baru',
-          <AlertTriangle className="h-4 w-4" />,
+          <Icon name="triangle-warning" size={16} />,
           prefs.soundNotif,
           (v) => {
             setPref('soundNotif', v);
@@ -248,7 +232,7 @@ export default function Settings() {
         {prefRow(
           'Auto Refresh Dashboard',
           'Refresh data otomatis setiap 1 menit',
-          <RefreshCw className="h-4 w-4" />,
+          <Icon name="refresh" size={16} />,
           prefs.autoRefresh,
           (v) => {
             setPref('autoRefresh', v);
@@ -262,7 +246,7 @@ export default function Settings() {
         <Card className="p-5">
           <div className="mb-4 flex items-center gap-3">
             <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <Users className="h-[22px] w-[22px]" />
+              <Icon name="users" size={22} />
             </span>
             <div>
               <h2 className="font-display text-base font-bold">Kelola User</h2>
@@ -280,12 +264,12 @@ export default function Settings() {
                   <div className="text-xs text-muted-foreground">@{user.username}</div>
                   <div className="mt-1 flex flex-wrap gap-1.5">
                     <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold uppercase">
-                      {user.role === 'admin' ? <Warehouse className="h-3 w-3" /> : <Store className="h-3 w-3" />}
+                      {user.role === 'admin' ? <Icon name="warehouse-alt" size={12} /> : <Icon name="shop" size={12} />}
                       {user.role === 'admin' ? 'Admin' : 'Cabang'}
                     </span>
                     {user.idCabang && (
                       <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold">
-                        <Tag className="h-3 w-3" />
+                        <Icon name="tags" size={12} />
                         {user.idCabang}
                       </span>
                     )}
@@ -295,7 +279,7 @@ export default function Settings() {
             ))}
           </div>
           <div className="mt-4 flex items-start gap-2.5 rounded-lg border border-info/20 bg-info/10 p-3.5 text-xs leading-relaxed text-info">
-            <Info className="mt-0.5 h-[18px] w-[18px] shrink-0" />
+            <Icon name="info" size={18} className="mt-0.5 shrink-0" />
             <div>
               <b>Info:</b> User dikelola melalui Google Sheet (sheet <code>USERS</code>). Buka
               Google Sheets untuk menambah/mengedit akun.
@@ -306,7 +290,7 @@ export default function Settings() {
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 rounded-lg border border-info/30 px-2.5 py-1.5 font-semibold transition-colors hover:bg-info/15"
                 >
-                  <FileSpreadsheet className="h-3.5 w-3.5" />
+                  <Icon name="file-spreadsheet" size={14} />
                   Buka Google Sheets
                 </a>
               </div>
@@ -319,7 +303,7 @@ export default function Settings() {
       <Card className="p-5">
         <div className="mb-4 flex items-center gap-3">
           <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <Store className="h-[22px] w-[22px]" />
+            <Icon name="shop" size={22} />
           </span>
           <div>
             <h2 className="font-display text-base font-bold">Daftar Cabang</h2>
@@ -331,7 +315,7 @@ export default function Settings() {
             <div key={id} className="rounded-lg border border-border bg-muted/20 p-3.5">
               <div className="flex items-center gap-2.5">
                 <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <Store className="h-5 w-5" />
+                  <Icon name="shop" size={20} />
                 </span>
                 <div className="min-w-0">
                   <div className="truncate text-sm font-semibold">{info.nama}</div>
@@ -342,11 +326,11 @@ export default function Settings() {
               </div>
               <div className="mt-2.5 space-y-1 text-xs text-muted-foreground">
                 <div className="flex items-center gap-1.5">
-                  <Phone className="h-3 w-3" />
+                  <Icon name="phone-call" size={12} />
                   <b className="font-medium">{info.telepon || '-'}</b>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <MapPin className="h-3 w-3" />
+                  <Icon name="map-marker" size={12} />
                   {info.alamat || '-'}
                 </div>
               </div>
@@ -359,7 +343,7 @@ export default function Settings() {
       <Card className="p-5">
         <div className="mb-4 flex items-center gap-3">
           <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <Info className="h-[22px] w-[22px]" />
+            <Icon name="info" size={22} />
           </span>
           <div>
             <h2 className="font-display text-base font-bold">Informasi Sistem</h2>
@@ -368,12 +352,12 @@ export default function Settings() {
         </div>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {[
-            { label: 'App Version', value: `v${APP.version}`, icon: <Tag className="h-3 w-3" />, accent: true },
-            { label: 'Backend', value: 'Google Apps Script', icon: <Database className="h-3 w-3" /> },
-            { label: 'Timezone', value: 'Asia/Makassar', icon: <Globe className="h-3 w-3" /> },
-            { label: 'Storage Used', value: storageUsed, icon: <Database className="h-3 w-3" /> },
-            { label: 'PWA Status', value: pwaStatus, icon: <Smartphone className="h-3 w-3" />, green: pwaStatus === 'Installed' },
-            { label: 'Browser', value: browserInfo, icon: <Monitor className="h-3 w-3" /> },
+            { label: 'App Version', value: `v${APP.version}`, icon: <Icon name="tags" size={12} />, accent: true },
+            { label: 'Backend', value: 'Google Apps Script', icon: <Icon name="database" size={12} /> },
+            { label: 'Timezone', value: 'Asia/Makassar', icon: <Icon name="globe" size={12} /> },
+            { label: 'Storage Used', value: storageUsed, icon: <Icon name="database" size={12} /> },
+            { label: 'PWA Status', value: pwaStatus, icon: <Icon name="smartphone" size={12} />, green: pwaStatus === 'Installed' },
+            { label: 'Browser', value: browserInfo, icon: <Icon name="dashboard-monitor" size={12} /> },
           ].map((tile) => (
             <div key={tile.label} className="rounded-lg border border-border bg-muted/20 p-3">
               <div className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
@@ -392,7 +376,7 @@ export default function Settings() {
       <Card className="border-danger/30 p-5">
         <div className="mb-4 flex items-center gap-3">
           <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-danger/10 text-danger">
-            <AlertTriangle className="h-[22px] w-[22px]" />
+            <Icon name="triangle-warning" size={22} />
           </span>
           <div>
             <h2 className="font-display text-base font-bold text-danger">Danger Zone</h2>
@@ -403,7 +387,7 @@ export default function Settings() {
           <div className="flex items-center justify-between gap-4 rounded-lg border border-border bg-muted/20 px-3.5 py-3">
             <div>
               <div className="flex items-center gap-1.5 text-sm font-medium">
-                <Trash2 className="h-4 w-4" />
+                <Icon name="trash" size={16} />
                 Hapus Cache Lokal
               </div>
               <div className="text-xs text-muted-foreground">
@@ -411,20 +395,20 @@ export default function Settings() {
               </div>
             </div>
             <Button variant="destructive" size="sm" onClick={() => void handleClearCache()}>
-              <Trash2 className="h-4 w-4" />
+              <Icon name="trash" size={16} />
               Hapus
             </Button>
           </div>
           <div className="flex items-center justify-between gap-4 rounded-lg border border-border bg-muted/20 px-3.5 py-3">
             <div>
               <div className="flex items-center gap-1.5 text-sm font-medium">
-                <RefreshCw className="h-4 w-4" />
+                <Icon name="refresh" size={16} />
                 Reset Preferensi
               </div>
               <div className="text-xs text-muted-foreground">Kembalikan semua setting ke default</div>
             </div>
             <Button variant="destructive" size="sm" onClick={() => void handleResetPrefs()}>
-              <RefreshCw className="h-4 w-4" />
+              <Icon name="refresh" size={16} />
               Reset
             </Button>
           </div>
