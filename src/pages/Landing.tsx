@@ -8,9 +8,6 @@ import {
   Bed,
   Boxes,
   CheckCircle2,
-  ChevronLeft,
-  ChevronRight,
-  ClipboardList,
   CookingPot,
   FileText,
   Info,
@@ -22,17 +19,13 @@ import {
   Monitor,
   Package,
   Palette,
-  Pause,
   Phone,
-  Play,
-  ShieldCheck,
   ShoppingBag,
   ShoppingCart,
   Sofa,
   Sparkles,
   Store,
   Timer,
-  Truck,
   Utensils,
   Warehouse,
   Wrench,
@@ -59,65 +52,6 @@ const STATS = [
   { value: 9, suffix: '', label: 'Kategori furnitur' },
   { value: 500, suffix: '+', label: 'Item dalam katalog' },
   { value: 24, suffix: '/7', label: 'Sistem selalu siap' },
-];
-
-const WORKFLOW_STEPS = [
-  {
-    icon: Store,
-    num: '/ 01',
-    title: 'Toko Mengorder',
-    status: 'DRAFT DIBUAT',
-    tags: ['KATALOG LIVE', 'FORM ORDER', 'DRAFT'],
-    desc: 'Cabang memilih barang dari katalog real-time, melengkapi jumlah, lalu menyimpan draft sebelum dikirim ke pusat.',
-    points: [
-      'Stok dan harga tampil real-time dari satu sumber terpusat',
-      'Tambah item satu per satu, atau massal dari Excel',
-      'Catatan untuk pusat dilampirkan di tiap order',
-      'Draft tersimpan otomatis — aman walau jaringan putus',
-    ],
-  },
-  {
-    icon: ClipboardList,
-    num: '/ 02',
-    title: 'Order Masuk Antrean',
-    status: 'DALAM ANTREAN',
-    tags: ['NOTIFIKASI', 'PRIORITAS', 'JEJAK LOG'],
-    desc: 'Order terkirim ke pusat dan masuk antrean verifikasi — terlihat oleh semua pihak, tidak ada order yang hilang.',
-    points: [
-      'Notifikasi instan ke pusat begitu order masuk',
-      'Antrean verifikasi terurut dari order terbaru',
-      'Status berubah otomatis: DRAFT → SUBMITTED',
-      'Riwayat lengkap: siapa mengubah, kapan, dan apa',
-    ],
-  },
-  {
-    icon: ShieldCheck,
-    num: '/ 03',
-    title: 'Verifikasi Stok',
-    status: 'DIVERIFIKASI',
-    tags: ['COCOK STOK', 'APPROVED / TOLAK', 'PICKER'],
-    desc: 'Stok dicocokkan di gudang. Order disetujui, jumlahnya disesuaikan, atau ditolak dengan alasan — semua berjejak.',
-    points: [
-      'Cek kesediaan stok per rak gudang',
-      'Approve, sesuaikan, atau tolak dengan alasan',
-      'Picker memverifikasi fisik sebelum dikirim',
-      'Setiap keputusan tercatat di jejak audit',
-    ],
-  },
-  {
-    icon: Truck,
-    num: '/ 04',
-    title: 'Barang Meluncur',
-    status: 'SIAP DIKIRIM',
-    tags: ['STATUS PICKED', 'NOTIF REAL-TIME', 'LAPORAN'],
-    desc: 'Order approved diverifikasi picker dan siap kirim. Cabang mendapat notifikasi real-time di semua perangkat.',
-    points: [
-      'Status bergerak otomatis: PICKED → SENT',
-      'Notifikasi real-time ke cabang dan pusat',
-      'Laporan rekap nilai otomatis per cabang',
-      'Sinkron di semua perangkat, online atau offline',
-    ],
-  },
 ];
 
 const GALLERY = [
@@ -162,7 +96,6 @@ const KATEGORI_MARQUEE: { name: string; icon: typeof Armchair }[] = [
 ];
 
 const NAV_LINKS = [
-  { label: 'Cara Kerja', href: '#cara' },
   { label: 'Demo', href: '#demo' },
   { label: 'Katalog', href: '#katalog' },
   { label: 'Tentang', href: '#tentang' },
@@ -467,125 +400,6 @@ function StatNum({ value, suffix }: { value: number; suffix: string }) {
   );
 }
 
-function StepsSection() {
-  const [active, setActive] = useState(0);
-  const [playing, setPlaying] = useState(true);
-
-  useEffect(() => {
-    if (!playing) return;
-    const t = setInterval(() => {
-      setActive((a) => (a + 1) % WORKFLOW_STEPS.length);
-    }, 5600);
-    return () => clearInterval(t);
-  }, [playing]);
-
-  const go = (i: number) => {
-    setActive(((i % WORKFLOW_STEPS.length) + WORKFLOW_STEPS.length) % WORKFLOW_STEPS.length);
-  };
-
-  const fill = (active / (WORKFLOW_STEPS.length - 1)) * 100;
-  const step = WORKFLOW_STEPS[active];
-
-  return (
-    <section className="wf mx-auto max-w-5xl px-4" id="cara" aria-labelledby="cara-title">
-      <Reveal>
-        <header className="section-head">
-          <span className="section-kicker">Sistem Animasi · Alur Operasional</span>
-          <h2 id="cara-title">
-            Satu alur, <em>empat gerakan</em>.
-          </h2>
-          <p>
-            Putar animasinya dan lihat bagaimana setiap order bergerak — dari toko cabang, diperiksa
-            di pusat, hingga siap dikirim. Detail tiap tahap ada di panel.
-          </p>
-        </header>
-      </Reveal>
-
-      <Reveal>
-        <div className="wf-system">
-          <div className="wf-rail" role="tablist" aria-label="Tahapan cara kerja">
-            <div className="wf-line" aria-hidden="true">
-              <span className="wf-line-fill" style={{ width: `${fill}%` }} />
-              <span className="wf-packet" key={`pkt-${active}`} style={{ left: `${fill}%` }}>
-                <span className="wf-packet-core" />
-              </span>
-            </div>
-            {WORKFLOW_STEPS.map((s, i) => (
-              <button
-                key={s.num}
-                type="button"
-                role="tab"
-                aria-selected={i === active}
-                className={cn(
-                  'wf-node',
-                  i === active ? 'is-active' : i < active ? 'is-done' : 'is-todo',
-                )}
-                onClick={() => go(i)}
-                aria-label={`Langkah ${i + 1}: ${s.title}`}
-              >
-                <span className="wf-node-icon">
-                  <s.icon className="h-5 w-5" />
-                </span>
-                <span className="wf-node-label">{s.title}</span>
-              </button>
-            ))}
-          </div>
-
-          <div className="wf-stage" key={`stage-${active}`}>
-            <div className="wf-stage-meta">
-              <span className="wf-num">{step.num}</span>
-              <span className="wf-status">
-                <span className="wf-status-dot" />
-                {step.status}
-              </span>
-            </div>
-            <div className="wf-tags">
-              {step.tags.map((t) => (
-                <span key={t} className="wf-tag">
-                  {t}
-                </span>
-              ))}
-            </div>
-            <h3 className="wf-title">{step.title}</h3>
-            <p className="wf-desc">{step.desc}</p>
-            <ul className="wf-points">
-              {step.points.map((p, i) => (
-                <li key={p} style={{ '--i': i } as React.CSSProperties}>
-                  <CheckCircle2 className="h-4 w-4" />
-                  {p}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="wf-controls">
-            <button type="button" className="wf-ctl" onClick={() => go(active - 1)} aria-label="Langkah sebelumnya">
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              className="wf-ctl wf-ctl-play"
-              onClick={() => setPlaying((p) => !p)}
-              aria-label={playing ? 'Jeda animasi' : 'Putar animasi'}
-            >
-              {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-            </button>
-            <button type="button" className="wf-ctl" onClick={() => go(active + 1)} aria-label="Langkah berikutnya">
-              <ChevronRight className="h-4 w-4" />
-            </button>
-            <span className="wf-counter">
-              {String(active + 1).padStart(2, '0')} <i>/</i> {String(WORKFLOW_STEPS.length).padStart(2, '0')}
-            </span>
-            <div className="wf-timer" aria-hidden="true">
-              <span key={`bar-${active}-${playing}`} className={playing ? 'is-running' : ''} />
-            </div>
-          </div>
-        </div>
-      </Reveal>
-    </section>
-  );
-}
-
 const DEMO_CLIPS = [
   { num: '01', file: '01-masuk.mp4', poster: 'poster-01.jpg', title: 'Masuk', desc: 'Cabang login dengan akun toko masing-masing.' },
   { num: '02', file: '02-pilih-barang.mp4', poster: 'poster-02.jpg', title: 'Pilih Barang', desc: 'Tambah barang yang stoknya mulai menipis dari katalog.' },
@@ -811,8 +625,8 @@ function FooterSection() {
 
           <div className="footer-col">
             <h5>Jelajahi</h5>
-            <a href="#cara" onClick={smoothScroll('#cara')}>
-              <Wrench className="h-[14px] w-[14px]" /> Cara Kerja
+            <a href="#demo" onClick={smoothScroll('#demo')}>
+              <Wrench className="h-[14px] w-[14px]" /> Demo
             </a>
             <a href="#katalog" onClick={smoothScroll('#katalog')}>
               <LayoutGrid className="h-[14px] w-[14px]" /> Katalog
@@ -1417,9 +1231,6 @@ export default function Landing() {
           </div>
         </Reveal>
       </section>
-
-      {/* STEPS — Cara Kerja */}
-      <StepsSection />
 
       {/* LIVE DEMO */}
       <DemoSection />
