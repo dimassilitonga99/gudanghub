@@ -3,7 +3,7 @@
    Offline support + smart caching + update notification
    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-const APP_VERSION = 'v5.0.2-react';
+const APP_VERSION = 'v5.1.0-react';
 const CACHE_PREFIX = 'gudanghub';
 const STATIC_CACHE = `${CACHE_PREFIX}-static-${APP_VERSION}`;
 const DYNAMIC_CACHE = `${CACHE_PREFIX}-dynamic-${APP_VERSION}`;
@@ -156,8 +156,8 @@ async function networkFirst(request, cacheName) {
   const cache = await caches.open(cacheName);
 
   try {
-// Try network with generous timeout (Apps Script bisa lambat saat cold start)
-  const networkResponse = await fetchWithTimeout(request, 60000);
+// Try network with reasonable timeout (Apps Script bisa lambat saat cold start)
+  const networkResponse = await fetchWithTimeout(request, 8000);
 
     // Cache the response (kalau valid)
     if (networkResponse && networkResponse.ok) {

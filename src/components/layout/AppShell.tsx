@@ -1,7 +1,7 @@
 import { Icon } from '../ui/icon';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import { ROUTES } from '@/lib/config';
@@ -41,6 +41,14 @@ export default function AppShell({ children }: { children: ReactNode }) {
   const { session, isAdmin, isPicker, logout } = useAuth();
   const navigate = useNavigate();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMobileNavOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   const role = isAdmin ? 'admin' : isPicker ? 'picker' : 'cabang';
   const items = NAV_ITEMS.filter((i) => i.roles.includes(role));

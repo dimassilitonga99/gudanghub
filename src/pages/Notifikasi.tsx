@@ -2,6 +2,7 @@ import { Icon } from '../components/ui/icon';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { toastError, toastSuccess } from '@/lib/toast';
 
 import { orders as ordersApi } from '@/lib/api';
 import { CABANG, SETTINGS, type Order } from '@/lib/config';
@@ -31,10 +32,7 @@ function saveReadIds(ids: Set<string>) {
 }
 
 function formatDateOnlyWita(value: string | undefined | null): string {
-  const d = parseAnyDate(value ?? '');
-  if (!d) return '-';
-  const pad = (x: number) => String(x).padStart(2, '0');
-  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+  return formatWita(value ?? '', false);
 }
 
 interface NotifOrder extends Order {
@@ -118,8 +116,8 @@ export default function Notifikasi() {
 
       if (message) {
         const full = message + (newlyAdded.length > 1 ? ` (+${newlyAdded.length - 1} lainnya)` : '');
-        if (status === 'APPROVED') toast.success(full, { duration: 5000 });
-        else if (status === 'REJECTED') toast.error(full, { duration: 5000 });
+        if (status === 'APPROVED') toastSuccess(full, { duration: 5000 });
+        else if (status === 'REJECTED') toastError(full, { duration: 5000 });
         else toast.info(full, { duration: 5000 });
         sendBrowserNotification(full);
       }
@@ -262,7 +260,7 @@ export default function Notifikasi() {
       saveReadIds(next);
       return next;
     });
-    toast.success('Semua notifikasi ditandai dibaca.');
+    toastSuccess('Semua notifikasi ditandai dibaca.');
   };
 
   const emptyIcon = filter === 'unread' ? 'check-double' : 'bell';

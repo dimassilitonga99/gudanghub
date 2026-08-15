@@ -1,6 +1,6 @@
 import { Icon } from '../components/ui/icon';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { toast } from 'sonner';
+import { toastError } from '@/lib/toast';
 
 import { orders as ordersApi } from '@/lib/api';
 import { CABANG, type Order } from '@/lib/config';
@@ -41,16 +41,14 @@ function calcTotal(order: Order): number {
 }
 
 function formatDateOnly(value: string | undefined | null): string {
-  const d = parseAnyDate(value ?? '');
-  if (!d) return '-';
-  const pad = (x: number) => String(x).padStart(2, '0');
-  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+  return formatWita(value ?? '', false);
 }
 
 export default function Laporan() {
   const { session } = useAuth();
   const [ordersList, setOrdersList] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [filterCabang, setFilterCabang] = useState('');
   const [filterPeriod, setFilterPeriod] = useState('all');
   const [filterStatus, setFilterStatus] = useState('');
@@ -60,8 +58,10 @@ export default function Laporan() {
     try {
       const o = await ordersApi.getAll({ cache: false });
       setOrdersList(o.status === 'ok' ? ((o.data as Order[]) || []) : []);
+      setLoadError(false);
     } catch (e) {
-      toast.error('Gagal memuat laporan: ' + (e as Error).message);
+      toastError('Gagal memuat laporan: ' + (e as Error).message);
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -266,6 +266,23 @@ export default function Laporan() {
             <div key={i} className="h-20 animate-pulse rounded-xl border border-border bg-card" />
           ))}
         </div>
+      ) : loadError ? (
+        <Card className="p-10 text-center">
+          <Icon name="triangle-warning" size={40} className="mx-auto mb-2 text-danger" />
+          <p className="text-sm text-muted-foreground">Gagal memuat laporan. Periksa koneksi Anda.</p>
+          <Button
+            size="sm"
+            className="mt-4"
+            onClick={() => {
+              setLoading(true);
+              setLoadError(false);
+              void loadData();
+            }}
+          >
+            <Icon name="refresh" size={14} />
+            Coba Lagi
+          </Button>
+        </Card>
       ) : (
         <>
           {/* Statistik */}

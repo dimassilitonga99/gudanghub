@@ -1,11 +1,11 @@
 import { Icon } from '../components/ui/icon';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
+import { toastSuccess } from '@/lib/toast';
 
 import { auth } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
-import { clearSession } from '@/lib/session';
+import { clearSession, homeRouteForSession } from '@/lib/session';
 import { ROUTES } from '@/lib/config';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -158,7 +158,7 @@ export default function GantiPassword() {
       setConfirmPassword('');
       setSaving(false);
 
-      toast.success('Password berhasil diubah!');
+      toastSuccess('Password berhasil diubah!');
 
       await new Promise((r) => setTimeout(r, 2000));
       clearSession();
@@ -192,11 +192,11 @@ export default function GantiPassword() {
     <div className="mx-auto max-w-md space-y-4">
       <button
         type="button"
-        onClick={() => navigate(ROUTES.profil)}
+        onClick={() => navigate(homeRouteForSession(session))}
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-primary"
       >
         <Icon name="arrow-left" size={16} />
-        Kembali ke Profil
+        {session?.role === 'admin' ? 'Kembali ke Dashboard' : 'Kembali ke Order'}
       </button>
 
       <h1 className="font-display text-2xl font-bold">Ganti Password</h1>

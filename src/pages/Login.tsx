@@ -4,9 +4,16 @@ import { Link, useNavigate } from 'react-router-dom';
 
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
-import { katalog, prewarmAppScript } from '@/lib/api';
+import { auth, katalog, prewarmAppScript } from '@/lib/api';
 import { API_URL, ROUTES } from '@/lib/config';
-import { getLastUsername } from '@/lib/session';
+import {
+  getLastUsername,
+  getSession,
+  homeRouteForSession,
+  isSessionValid,
+  setLastUsername,
+} from '@/lib/session';
+import { simpleHash, sleep } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,8 +25,62 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { auth } from '@/lib/api';
 import { GradientShimmer } from '@/components/ui/gradient-shimmer';
+
+const CRED_CACHE_KEY = 'gudanghub_login_cache';
+
+interface CachedUser {
+  username?: string;
+  nama?: string;
+  role?: string;
+  idCabang?: string | null;
+}
+
+function getCachedLogin(username: string, password: string): CachedUser | null {
+  try {
+    const raw = localStorage.getItem(CRED_CACHE_KEY);
+    if (!raw) return null;
+    const cache = JSON.parse(raw) as {
+      hash?: string;
+      user?: CachedUser;
+      time?: number;
+    };
+    if (!cache || !cache.hash || !cache.user || !cache.time) return null;
+    if (Date.now() - cache.time > 7 * 24 * 60 * 60 * 1000) {
+      localStorage.removeItem(CRED_CACHE_KEY);
+      return null;
+    }
+    if (simpleHash(username.toLowerCase() + ':' + password) !== cache.hash) return null;
+    return cache.user;
+  } catch {
+    return null;
+  }
+}
+
+function setCachedLogin(username: string, password: string, user: CachedUser): void {
+  try {
+    const hash = simpleHash(username.toLowerCase() + ':' + password);
+    localStorage.setItem(
+      CRED_CACHE_KEY,
+      JSON.stringify({ hash, user, time: Date.now() }),
+    );
+  } catch {
+    /* storage penuh */
+  }
+}
+
+async function verifyInBackground(username: string, password: string): Promise<void> {
+  try {
+    const result = await auth.login({ username, password });
+    if (result.status === 'ok' && result.user) {
+      setCachedLogin(username, password, result.user as CachedUser);
+    } else if (result.status === 'error') {
+      localStorage.removeItem(CRED_CACHE_KEY);
+    }
+  } catch {
+    /* offline — cache tetap dipakai */
+  }
+}
 
 function prewarm() {
   prewarmAppScript();
@@ -29,7 +90,7 @@ function prewarm() {
 }
 
 export default function Login() {
-  const { login, session } = useAuth();
+  const { login, restoreSession } = useAuth();
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -37,14 +98,30 @@ export default function Login() {
   const [remember, setRemember] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingText, setLoadingText] = useState('Memverifikasi...');
+  const [shaking, setShaking] = useState(false);
   const [forgotOpen, setForgotOpen] = useState(false);
   const [forgotUser, setForgotUser] = useState('');
   const [forgotLoading, setForgotLoading] = useState(false);
   const [forgotMsg, setForgotMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const usernameRef = useRef<HTMLInputElement>(null);
   const lastPrewarm = useRef(0);
+  const errorTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showError = (msg: string) => {
+    setError(msg);
+    setShaking(true);
+    setTimeout(() => setShaking(false), 500);
+    if (errorTimer.current) clearTimeout(errorTimer.current);
+    errorTimer.current = setTimeout(() => setError(''), 5000);
+  };
 
   useEffect(() => {
+    const s = getSession();
+    if (isSessionValid(s)) {
+      navigate(homeRouteForSession(s), { replace: true });
+      return;
+    }
     prewarm();
     const lastUser = getLastUsername();
     if (lastUser) {
@@ -52,7 +129,10 @@ export default function Login() {
       setRemember(true);
     }
     setTimeout(() => usernameRef.current?.focus(), 300);
-  }, []);
+    return () => {
+      if (errorTimer.current) clearTimeout(errorTimer.current);
+    };
+  }, [navigate]);
 
   const prewarmOnTyping = () => {
     const now = Date.now();
@@ -70,54 +150,97 @@ export default function Login() {
 
     const u = username.trim();
     if (!u || !password) {
-      setError('Username dan password wajib diisi.');
+      showError('Username dan password wajib diisi.');
       return;
     }
     if (u.length < 3) {
-      setError('Username minimal 3 karakter.');
+      showError('Username minimal 3 karakter.');
       return;
     }
 
     setLoading(true);
+
+    // ═══ STRATEGI 1: Cache kredensial (login instan) ═══
+    const cachedUser = getCachedLogin(u, password);
+    if (cachedUser) {
+      setLoadingText('Masuk...');
+      try {
+        const s = await restoreSession(cachedUser, 'cached-' + Date.now());
+        setLastUsername(remember ? s.username : '');
+        toast.success('Selamat datang, ' + (s.nama || s.username) + '!', { duration: 2000 });
+        await sleep(200);
+        navigate(homeRouteForSession(s), { replace: true });
+        void verifyInBackground(u, password);
+        return;
+      } catch (err) {
+        setLoading(false);
+        showError((err as Error).message || 'Login gagal. Coba lagi.');
+        return;
+      }
+    }
+
+    // ═══ STRATEGI 2: Server (retry agresif 3x) ═══
     let result: Awaited<ReturnType<typeof login>> | null = null;
     let lastErr: Error | null = null;
+    const maxAttempts = 3;
 
-    for (let attempt = 1; attempt <= 2; attempt++) {
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      setLoadingText(`Memverifikasi... (${attempt}/${maxAttempts})`);
       try {
-        result = await login(u, password);
+        result = await login(u, password, remember);
         break;
       } catch (err) {
         lastErr = err as Error;
-        if (attempt < 2) await new Promise((r) => setTimeout(r, 1500));
+        console.warn('[Login] Attempt ' + attempt + '/' + maxAttempts + ' failed:', (err as Error).message);
+        if (attempt < maxAttempts) {
+          setLoadingText('Mencoba lagi...');
+          await sleep(500);
+        }
       }
     }
 
     if (!result) {
-      setError(lastErr?.message || 'Login gagal. Coba lagi.');
+      showError(lastErr?.message || 'Login gagal. Coba lagi.');
       setLoading(false);
       return;
     }
 
-    const role = result?.role;
-    const idCabang = result?.idCabang;
-
-    if (role === 'cabang' && !idCabang) {
-      setError('Akun cabang tidak punya ID cabang. Hubungi admin.');
+    if (result.role === 'cabang' && !result.idCabang) {
+      showError('Akun cabang tidak punya ID cabang. Hubungi admin.');
       setLoading(false);
       return;
     }
 
-    toast.success('Selamat datang, ' + (session?.nama || session?.username) + '!', { duration: 2000 });
+    setCachedLogin(u, password, {
+      username: result.username,
+      nama: result.nama,
+      role: result.role,
+      idCabang: result.idCabang,
+    });
+
+    toast.success('Selamat datang, ' + (result.nama || result.username) + '!', { duration: 2000 });
 
     try {
       prewarmAppScript();
-      if (role !== 'admin') {
+      if (result.role !== 'admin') {
         katalog.getAll({ cache: false, timeout: 45000, maxRetries: 0 }).catch(() => {});
       }
     } catch {}
 
-    const home = role === 'admin' ? ROUTES.dashboard : role === 'picker' ? ROUTES.picker : ROUTES.order;
-    navigate(home + (role === 'cabang' && idCabang ? `?cabang=${encodeURIComponent(idCabang)}` : ''), { replace: true });
+    await sleep(200);
+    const home =
+      result.role === 'admin'
+        ? ROUTES.dashboard
+        : result.role === 'picker'
+          ? ROUTES.picker
+          : ROUTES.order;
+    navigate(
+      home +
+        (result.role === 'cabang' && result.idCabang
+          ? `?cabang=${encodeURIComponent(result.idCabang)}`
+          : ''),
+      { replace: true },
+    );
   };
 
   const submitForgot = async () => {
@@ -166,7 +289,12 @@ export default function Login() {
           </p>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-white p-6 text-ink-900 shadow-2xl sm:p-8">
+        <div
+          className={
+            'rounded-2xl border border-white/10 bg-white p-6 text-ink-900 shadow-2xl sm:p-8' +
+            (shaking ? ' animate-shake' : '')
+          }
+        >
           <h1 className="mb-1 text-xl font-bold text-ink-900">Masuk</h1>
           <p className="mb-5 text-sm text-ink-900/60">
             Masukkan username dan password untuk mulai mengelola order.
@@ -253,7 +381,7 @@ export default function Login() {
               {loading ? (
                 <>
                   <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
-                  Memverifikasi...
+                  {loadingText}
                 </>
               ) : (
                 <>

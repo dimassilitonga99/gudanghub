@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { APP } from './config';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -10,12 +11,21 @@ export function formatRupiah(n: number | string | undefined | null): string {
   return 'Rp ' + num.toLocaleString('id-ID');
 }
 
-export function formatWita(dateLike: string | number | Date | undefined | null): string {
+// Port persis dari utils.js vanilla: string DD-MM-YYYY diinterpretasikan sebagai waktu WITA (+08:00)
+export function formatWita(
+  dateLike: string | number | Date | undefined | null,
+  includeSeconds = true,
+): string {
   if (!dateLike) return '-';
-  const d = new Date(dateLike);
-  if (isNaN(d.getTime())) return '-';
+  const d = parseAnyDate(dateLike);
+  if (!d) return '-';
+  const wita = new Date(d.getTime() + APP.timezoneOffset * 60 * 60 * 1000);
   const pad = (x: number) => String(x).padStart(2, '0');
-  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())} WITA`;
+  const dateStr = `${pad(wita.getUTCDate())}-${pad(wita.getUTCMonth() + 1)}-${wita.getUTCFullYear()}`;
+  const timeStr = includeSeconds
+    ? `${pad(wita.getUTCHours())}:${pad(wita.getUTCMinutes())}:${pad(wita.getUTCSeconds())}`
+    : `${pad(wita.getUTCHours())}:${pad(wita.getUTCMinutes())}`;
+  return `${dateStr} ${timeStr}`;
 }
 
 export function escapeHtml(s: string): string {
@@ -27,24 +37,38 @@ export function escapeHtml(s: string): string {
     .replace(/'/g, '&#039;');
 }
 
-export function parseAnyDate(value: string | number | Date): Date | null {
+// Port persis dari utils.js vanilla: DD-MM-YYYY dianggap waktu WITA (+08:00); invalid/null → null
+export function parseAnyDate(value: string | number | Date | undefined | null): Date | null {
+  if (!value) return null;
   if (value instanceof Date) return isNaN(value.getTime()) ? null : value;
-  const n = Number(value);
-  if (!isNaN(n) && typeof value === 'number') {
-    const d = new Date(n);
+  if (typeof value === 'number') {
+    const d = new Date(value);
     return isNaN(d.getTime()) ? null : d;
   }
-  const s = String(value).trim();
-  if (!s) return null;
-  let d = new Date(s);
+
+  const text = String(value).trim();
+  if (!text) return null;
+
+  if (/^\d{2}-\d{2}-\d{4}/.test(text)) {
+    const [datePart, timePart = '00:00:00'] = text.split(' ');
+    const [day, month, year] = datePart.split('-');
+    const d = new Date(`${year}-${month}-${day}T${timePart}+08:00`);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  const d = new Date(text);
   if (!isNaN(d.getTime())) return d;
-  const parts = s.split(/[\/\-\.]/).map((x) => parseInt(x, 10));
+
+  // Fallback DD/MM/YYYY atau DD.MM.YYYY (juga waktu WITA)
+  const parts = text.split(/[\/\.]/).map((x) => parseInt(x, 10));
   if (parts.length === 3) {
     const [a, b, c] = parts;
-    if (a > 31) d = new Date(a, b - 1, c);
-    else if (c > 99) d = new Date(c, b - 1, a);
-    else d = new Date(2000 + c, b - 1, a);
-    return isNaN(d.getTime()) ? null : d;
+    let iso: string;
+    if (a > 31) iso = `${a}-${String(b).padStart(2, '0')}-${String(c).padStart(2, '0')}`;
+    else if (c > 99) iso = `${c}-${String(b).padStart(2, '0')}-${String(a).padStart(2, '0')}`;
+    else iso = `${2000 + c}-${String(b).padStart(2, '0')}-${String(a).padStart(2, '0')}`;
+    const dd = new Date(`${iso}T00:00:00+08:00`);
+    return isNaN(dd.getTime()) ? null : dd;
   }
   return null;
 }
@@ -55,6 +79,41 @@ export function debounce<T extends (...args: never[]) => void>(fn: T, ms: number
     clearTimeout(timer);
     timer = setTimeout(() => fn(...args), ms);
   };
+}
+
+export function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export function throttle<T extends (...args: never[]) => void>(fn: T, wait = 300) {
+  let lastCall = 0;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  return (...args: Parameters<T>) => {
+    const now = Date.now();
+    const remaining = wait - (now - lastCall);
+    if (remaining <= 0) {
+      clearTimeout(timer);
+      lastCall = now;
+      fn(...args);
+    } else {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        lastCall = Date.now();
+        fn(...args);
+      }, remaining);
+    }
+  };
+}
+
+// Port djb2 dari login.js vanilla (key cache kredensial)
+export function simpleHash(str: string): string {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash;
+  }
+  return 'h' + Math.abs(hash).toString(36);
 }
 
 export function hashCode(s: string): number {
@@ -96,7 +155,8 @@ const HARI_ID = ['MINGGU', 'SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT', 'SABTU']
 
 export function formatTanggalCetak(d: Date): string {
   const pad = (x: number) => String(x).padStart(2, '0');
-  return `${HARI_ID[d.getDay()]}, ${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+  const wita = new Date(d.getTime() + APP.timezoneOffset * 60 * 60 * 1000);
+  return `${HARI_ID[wita.getUTCDay()]}, ${pad(wita.getUTCDate())}/${pad(wita.getUTCMonth() + 1)}/${wita.getUTCFullYear()}`;
 }
 
 export function formatDateId(d: Date): string {
@@ -104,17 +164,47 @@ export function formatDateId(d: Date): string {
 }
 
 export function formatTimeAgo(dateLike: string | number | Date | null | undefined): string {
-  const d = dateLike ? new Date(dateLike) : null;
-  if (!d || isNaN(d.getTime())) return '-';
-  const diffMs = Date.now() - d.getTime();
-  const mins = Math.floor(diffMs / 60000);
-  if (mins < 1) return 'baru saja';
-  if (mins < 60) return `${mins} menit lalu`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours} jam lalu`;
-  const days = Math.floor(hours / 24);
-  if (days < 30) return `${days} hari lalu`;
-  return formatDateId(d);
+  const d = parseAnyDate(dateLike);
+  if (!d) return '-';
+  const diff = Math.floor((Date.now() - d.getTime()) / 1000);
+  if (diff < 60) return 'baru saja';
+  if (diff < 3600) return `${Math.floor(diff / 60)} menit lalu`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)} jam lalu`;
+  if (diff < 604800) return `${Math.floor(diff / 86400)} hari lalu`;
+  if (diff < 2592000) return `${Math.floor(diff / 604800)} minggu lalu`;
+  if (diff < 31536000) return `${Math.floor(diff / 2592000)} bulan lalu`;
+  return `${Math.floor(diff / 31536000)} tahun lalu`;
+}
+
+// Port getSequentialNumber dari print-form.js vanilla (nomor urut per bulan, dimulai 01)
+export function getSequentialNumber(
+  order: { TANGGAL_ORDER?: string | null; ORDER_ID: string | number } | undefined | null,
+  allOrders: { TANGGAL_ORDER?: string | null; ORDER_ID: string | number }[] | undefined | null,
+): string {
+  try {
+    if (!order || !allOrders) return '01';
+    const orderDate = parseAnyDate(order.TANGGAL_ORDER ?? '');
+    if (!orderDate) return '01';
+    const targetMonth = orderDate.getMonth();
+    const targetYear = orderDate.getFullYear();
+
+    const sameMonth = allOrders
+      .filter((o) => {
+        const d = parseAnyDate(o.TANGGAL_ORDER ?? '');
+        return d !== null && d.getMonth() === targetMonth && d.getFullYear() === targetYear;
+      })
+      .sort(
+        (a, b) =>
+          (parseAnyDate(a.TANGGAL_ORDER ?? '')?.getTime() ?? 0) -
+          (parseAnyDate(b.TANGGAL_ORDER ?? '')?.getTime() ?? 0),
+      );
+
+    const idx = sameMonth.findIndex((o) => o.ORDER_ID === order.ORDER_ID);
+    const nomor = idx >= 0 ? idx + 1 : sameMonth.length + 1;
+    return nomor < 10 ? '0' + nomor : String(nomor);
+  } catch {
+    return '01';
+  }
 }
 
 export function cleanCatatan(catatan: string | undefined | null): string {

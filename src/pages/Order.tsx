@@ -1,6 +1,7 @@
 import { Icon } from '../components/ui/icon';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { toastError, toastSuccess } from '@/lib/toast';
 
 import { katalog as katalogApi, orders as ordersApi, cart as cartApi, callApi } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
@@ -19,6 +20,7 @@ import {
   formatRupiah,
   formatWita,
   parseAnyDate,
+  getSequentialNumber,
   toInt,
   cleanCatatan,
   chunkArray,
@@ -311,11 +313,11 @@ function ManualForm({
   const submit = () => {
     const n = nama.trim();
     if (!n) {
-      toast.error('Nama barang wajib diisi.');
+      toastError('Nama barang wajib diisi.');
       return;
     }
     if (stokGudang.trim() === '' || stokToko.trim() === '') {
-      toast.error('Stok gudang dan stok toko wajib diisi.');
+      toastError('Stok gudang dan stok toko wajib diisi.');
       return;
     }
     const sg = Math.max(0, toInt(stokGudang));
@@ -532,12 +534,16 @@ function CartSheet({
   onSetNote: (key: string, note: string) => void;
   onSetStock: (key: string, type: 'gudang' | 'toko', value: number | '') => void;
   onDelete: (key: string) => void;
-  onSubmit: () => void;
+  onSubmit: (note: string) => void;
   submitting: boolean;
 }) {
   const items = useMemo(() => Object.values(cart), [cart]);
   const [cartNote, setCartNote] = useState('');
   const [noteOpen, setNoteOpen] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    if (items.length === 0) setCartNote('');
+  }, [items.length]);
 
   const gudangMissing = items.filter((i) => isEmpty(i.stokGudang)).length;
   const tokoMissing = items.filter((i) => isEmpty(i.stokToko)).length;
@@ -757,7 +763,7 @@ function CartSheet({
             rows={2}
             placeholder="Catatan untuk admin (opsional)..."
           />
-          <Button className="w-full" onClick={onSubmit} disabled={!valid || submitting}>
+          <Button className="w-full" onClick={() => onSubmit(cartNote)} disabled={!valid || submitting}>
             <Icon name="paper-plane" size={16} />
             {submitting ? 'Mengirim...' : 'Kirim Order ke Gudang'}
           </Button>
@@ -857,9 +863,9 @@ function PreOrderDialog({
       await downloadJpgPages(pageEls, `Form-Order-${cabangId}-No${nomorOrder}`, (done, total) => {
         setJpgProgress(`Proses ${done}/${total}...`);
       });
-      toast.success('JPG berhasil diunduh.');
+      toastSuccess('JPG berhasil diunduh.');
     } catch (err) {
-      toast.error('Gagal download JPG: ' + (err as Error).message);
+      toastError('Gagal download JPG: ' + (err as Error).message);
     } finally {
       setJpgBusy(false);
       setJpgProgress('');
@@ -868,7 +874,7 @@ function PreOrderDialog({
 
   const send = async () => {
     if (nomorMode === 'manual' && !nomorManual) {
-      toast.error('Nomor order manual wajib diisi.');
+      toastError('Nomor order manual wajib diisi.');
       return;
     }
     setSending(true);
@@ -876,7 +882,7 @@ function PreOrderDialog({
       await onConfirm({ nomorOrder: getNomorOrder(), tanggalOrder: getTanggalOrder() });
       onClose();
     } catch (err) {
-      toast.error('Gagal mengirim: ' + (err as Error).message);
+      toastError('Gagal mengirim: ' + (err as Error).message);
     } finally {
       setSending(false);
     }
@@ -1165,8 +1171,10 @@ function HistoryTab({
   onReset: () => void;
 }) {
   const [filter, setFilter] = useState('ALL');
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
+  const [dateFrom, setDateFrom] = useState(() =>
+    formatDateInput(new Date(new Date().getFullYear(), new Date().getMonth(), 1)),
+  );
+  const [dateTo, setDateTo] = useState(() => formatDateInput(new Date()));
   const [quickDate, setQuickDate] = useState('');
 
   const nextOrderNumber = useMemo(() => {
@@ -1490,14 +1498,24 @@ interface MassItem {
 function MassOrderTab({
   productByCode,
   onOpenPreOrder,
+  resetKey,
 }: {
   productByCode: Record<string, Barang>;
   onOpenPreOrder: (items: CartItem[], catatan: string) => void;
+  resetKey: number;
 }) {
   const [text, setText] = useState('');
   const [items, setItems] = useState<MassItem[]>([]);
   const [note, setNote] = useState('');
   const [previewing, setPreviewing] = useState(false);
+
+  useEffect(() => {
+    if (resetKey <= 0) return;
+    setText('');
+    setItems([]);
+    setNote('');
+    setPreviewing(false);
+  }, [resetKey]);
 
   const parseMassInput = useCallback(
     (value: string): MassItem[] => {
@@ -1556,7 +1574,7 @@ function MassOrderTab({
         return;
       }
       handleInput(t);
-      toast.success('Berhasil paste.');
+      toastSuccess('Berhasil paste.');
     } catch {
       toast.info('Paste manual dengan Ctrl+V.');
     }
@@ -1572,7 +1590,7 @@ function MassOrderTab({
 
   const submit = () => {
     if (!validItems.length) {
-      toast.error('Tidak ada barang valid.');
+      toastError('Tidak ada barang valid.');
       return;
     }
     if (gudangMissing > 0 || tokoMissing > 0) {
@@ -1846,6 +1864,7 @@ export default function Order() {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [printOrder, setPrintOrder] = useState<Order | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [massResetKey, setMassResetKey] = useState(0);
   const cartRef = useRef(cart);
   cartRef.current = cart;
   const syncTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -1878,7 +1897,7 @@ export default function Order() {
       const k = await katalogApi.getAll();
       setKatalogList(k.status === 'ok' ? ((k.data as Barang[]) || []) : []);
     } catch (e) {
-      toast.error('Gagal memuat katalog: ' + (e as Error).message);
+      toastError('Gagal memuat katalog: ' + (e as Error).message);
     } finally {
       setLoading(false);
     }
@@ -1898,7 +1917,7 @@ export default function Order() {
         });
       setHistory(branchOrders);
     } catch (e) {
-      toast.error('Gagal memuat riwayat: ' + (e as Error).message);
+      toastError('Gagal memuat riwayat: ' + (e as Error).message);
     } finally {
       setHistoryLoading(false);
     }
@@ -1971,7 +1990,7 @@ export default function Order() {
         catatanItem: existing?.catatanItem || '',
       },
     });
-    if (!existing) toast.success('Ditambah ke keranjang.', { duration: 1500 });
+    if (!existing) toastSuccess('Ditambah ke keranjang.', { duration: 1500 });
   };
 
   const setCartQty = (key: string, qty: number) => {
@@ -1985,9 +2004,7 @@ export default function Order() {
     const next = { ...cartRef.current };
     const item = next[key];
     if (!item) return;
-    const q = item.qty + delta;
-    if (q <= 0) delete next[key];
-    else next[key] = { ...item, qty: q };
+    next[key] = { ...item, qty: Math.max(1, item.qty + delta) };
     persistCart(next);
   };
 
@@ -2053,7 +2070,7 @@ export default function Order() {
         catatanItem: '',
       },
     });
-    toast.success(`"${data.nama}" ditambahkan ke keranjang.`, { duration: 2000 });
+    toastSuccess(`"${data.nama}" ditambahkan ke keranjang.`, { duration: 2000 });
   };
 
   const updateManualItem = (
@@ -2064,7 +2081,7 @@ export default function Order() {
     if (!next[key]) return;
     next[key] = { ...next[key], ...data };
     persistCart(next);
-    toast.success(`"${data.nama}" berhasil diperbarui.`, { duration: 2000 });
+    toastSuccess(`"${data.nama}" berhasil diperbarui.`, { duration: 2000 });
   };
 
   /* ── SUBMIT (dari pre-order dialog) ──────────────────────────────── */
@@ -2099,7 +2116,7 @@ export default function Order() {
         throw new Error(String(result.message || 'Gagal mengirim order.'));
       }
       persistCart({});
-      toast.success('Order berhasil dikirim!', { duration: 4000 });
+      toastSuccess('Order berhasil dikirim!', { duration: 4000 });
       setPreOrder(null);
       setTimeout(() => {
         setTab('history');
@@ -2139,8 +2156,9 @@ export default function Order() {
       if (result.status !== 'ok') {
         throw new Error(String(result.message || 'Gagal mengirim order.'));
       }
-      toast.success('Order massal berhasil dikirim!', { duration: 4000 });
+      toastSuccess('Order massal berhasil dikirim!', { duration: 4000 });
       setPreOrder(null);
+      setMassResetKey((k) => k + 1);
       setTimeout(() => {
         setTab('history');
         void loadHistory();
@@ -2181,14 +2199,14 @@ export default function Order() {
         idCabang: branchId,
       }, { dedupe: false, timeout: 60000 });
       if (result.status !== 'ok') {
-        toast.error(String(result.message || 'Reset gagal. Password salah?'));
+        toastError(String(result.message || 'Reset gagal. Password salah?'));
         return;
       }
-      toast.success(String(result.message || 'Semua order berhasil direset! Nomor order kembali ke 01.'), { duration: 5000 });
+      toastSuccess(String(result.message || 'Semua order berhasil direset! Nomor order kembali ke 01.'), { duration: 5000 });
       setHistory([]);
       await loadHistory();
     } catch (error) {
-      toast.error('Gagal reset: ' + (error as Error).message);
+      toastError('Gagal reset: ' + (error as Error).message);
     }
   };
 
@@ -2269,11 +2287,7 @@ export default function Order() {
             }}
             onDecrease={(b) => {
               const kode = String(b.KODE_BARANG);
-              if (cartRef.current[kode]) {
-                const item = cartRef.current[kode];
-                if (item.qty - 1 <= 0) removeFromCart(kode);
-                else setCartQty(kode, item.qty - 1);
-              }
+              if (cartRef.current[kode]) setCartQty(kode, cartRef.current[kode].qty - 1);
             }}
             onSetQty={(b, qty) => {
               const kode = String(b.KODE_BARANG);
@@ -2292,6 +2306,7 @@ export default function Order() {
         <TabsContent value="mass" className="space-y-4">
           <MassOrderTab
             productByCode={productByCode}
+            resetKey={massResetKey}
             onOpenPreOrder={(items, catatan) => setPreOrder({ items, catatan })}
           />
         </TabsContent>
@@ -2333,14 +2348,14 @@ export default function Order() {
         onSetNote={setCartNote}
         onSetStock={setCartStock}
         onDelete={removeFromCart}
-        onSubmit={() => {
+        onSubmit={(note) => {
           const missing = cartItems.filter((i) => isEmpty(i.stokGudang) || isEmpty(i.stokToko)).length;
           if (missing > 0) {
             toast.warning('Isi stok gudang dan stok toko untuk semua barang.', { duration: 4000 });
             return;
           }
           setCartOpen(false);
-          setPreOrder({ items: cartItems, catatan: '' });
+          setPreOrder({ items: cartItems, catatan: note });
         }}
         submitting={submitting}
       />
@@ -2366,8 +2381,8 @@ export default function Order() {
         title={`Preview Form Order — ${printOrder?.ORDER_ID || ''}`}
         orderId={printOrder?.ORDER_ID || ''}
         idCabang={String(printOrder?.ID_CABANG || '')}
-        tanggalCetak={printOrder?.TANGGAL_ORDER ? new Date(String(printOrder.TANGGAL_ORDER)) : new Date()}
-        nomorOrder={printOrder?.NOMOR_ORDER || '01'}
+        tanggalCetak={parseAnyDate(printOrder?.TANGGAL_ORDER ?? '') ?? new Date()}
+        nomorOrder={String(printOrder?.NOMOR_ORDER || '') || getSequentialNumber(printOrder, history)}
         statusOrder={String(printOrder?.STATUS || 'PENDING')}
         items={printItems}
         stokLookup={(kode) => {

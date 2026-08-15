@@ -26,7 +26,13 @@ interface AuthContextValue {
   isAdmin: boolean;
   isCabang: boolean;
   isPicker: boolean;
-  login: (username: string, password: string) => Promise<SessionData>;
+  login: (username: string, password: string, remember?: boolean) => Promise<SessionData>;
+  restoreSession: (user: {
+    username?: string;
+    nama?: string;
+    role?: string;
+    idCabang?: string | null;
+  }, token: string | null) => Promise<SessionData>;
   logout: () => void;
   homeRoute: string;
 }
@@ -41,18 +47,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isCabang = session?.role === 'cabang';
   const isPicker = session?.role === 'picker';
 
-  const login = useCallback(async (username: string, password: string): Promise<SessionData> => {
-    const result = await auth.login({ username, password });
-    if (result.status !== 'ok' || !result.token) {
-      throw new Error(String(result.message || 'Login gagal.'));
-    }
-    const user = (result.user as { username?: string; nama?: string; role?: string; idCabang?: string | null }) || {};
-    const s = saveSession(user, String(result.token));
-    if (!s) throw new Error('Gagal menyimpan sesi.');
-    setLastUsername(s.username);
-    setSessionState(s);
-    return s;
-  }, []);
+  const login = useCallback(
+    async (username: string, password: string, remember = false): Promise<SessionData> => {
+      const result = await auth.login({ username, password });
+      if (result.status !== 'ok') {
+        throw new Error(String(result.message || 'Login gagal.'));
+      }
+      const user = (result.user as { username?: string; nama?: string; role?: string; idCabang?: string | null }) || {};
+      const token = typeof result.token === 'string' ? result.token : null;
+      const s = saveSession(user, token);
+      if (!s) throw new Error('Gagal menyimpan sesi.');
+      setLastUsername(remember ? s.username : '');
+      setSessionState(s);
+      return s;
+    },
+    [],
+  );
+
+  // Login instan dari cache kredensial (vanilla: token 'cached-'+Date.now())
+  const restoreSession = useCallback(
+    async (user: { username?: string; nama?: string; role?: string; idCabang?: string | null }, token: string | null): Promise<SessionData> => {
+      const s = saveSession(user, token);
+      if (!s) throw new Error('Gagal menyimpan sesi.');
+      setSessionState(s);
+      return s;
+    },
+    [],
+  );
 
   const logout = useCallback(() => {
     clearSession();
@@ -79,10 +100,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isCabang,
       isPicker,
       login,
+      restoreSession,
       logout,
       homeRoute: homeRouteForSession(valid ? session : null),
     }),
-    [session, valid, isAdmin, isCabang, isPicker, login, logout],
+    [session, valid, isAdmin, isCabang, isPicker, login, restoreSession, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

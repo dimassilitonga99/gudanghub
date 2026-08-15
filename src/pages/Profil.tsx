@@ -18,10 +18,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
 function formatDateOnlyWita(value: string | undefined | null): string {
-  const d = parseAnyDate(value ?? '');
-  if (!d) return '-';
-  const pad = (x: number) => String(x).padStart(2, '0');
-  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+  return formatWita(value ?? '', false);
 }
 
 interface ActivityItem {

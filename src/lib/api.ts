@@ -454,7 +454,7 @@ export function clearPending(): void {
 export const auth = {
   login(data: Record<string, unknown>): Promise<ApiResult> {
     clearPending();
-    return callApi('login', data, { dedupe: false, cache: false, timeout: 30000, maxRetries: 1 });
+    return callApi('login', data, { dedupe: false, cache: false, timeout: 15000, maxRetries: 1 });
   },
   changePassword(data: Record<string, unknown>): Promise<ApiResult> {
     return callApi('changePassword', data, { dedupe: false, timeout: 20000 });

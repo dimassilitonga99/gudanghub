@@ -8,18 +8,25 @@ import '@flaticon/flaticon-uicons/css/solid/rounded.css';
 import App from './App';
 import { AuthProvider } from './context/AuthContext';
 import { prewarmAppScript, startKeepAlive } from './lib/api';
+import { registerServiceWorker, initInstallPrompt, initConnectionStatus } from './lib/pwa';
+import { SETTINGS } from './lib/config';
 import './index.css';
 
 prewarmAppScript();
 startKeepAlive();
 
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(() => {
-      /* SW gagal register — aplikasi tetap berjalan */
-    });
-  });
+// Boot tema: default gelap (vanilla), baca preferensi tersimpan dari Settings
+try {
+  const prefs = JSON.parse(localStorage.getItem('gudanghub_prefs') || '{}');
+  const darkMode = typeof prefs.darkMode === 'boolean' ? prefs.darkMode : true;
+  document.documentElement.classList.toggle('dark', darkMode);
+} catch {
+  document.documentElement.classList.add('dark');
 }
+
+registerServiceWorker();
+initInstallPrompt();
+initConnectionStatus();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -29,6 +36,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <Toaster
           position="top-center"
           richColors
+          duration={SETTINGS.toastDuration}
           toastOptions={{
             style: { fontFamily: 'Geist Variable, Manrope, sans-serif' },
           }}

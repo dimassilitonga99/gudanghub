@@ -13,10 +13,13 @@ import Notifikasi from './pages/Notifikasi';
 import SettingsPage from './pages/Settings';
 import GantiPassword from './pages/GantiPassword';
 
-function Protected({ children }: { children: React.ReactNode }) {
-  const { valid, session } = useAuth();
+function Protected({ children, roles }: { children: React.ReactNode; roles?: string[] }) {
+  const { valid, session, homeRoute } = useAuth();
   if (!valid || !session) {
     return <Navigate to={ROUTES.login} replace />;
+  }
+  if (roles && !roles.includes(session.role)) {
+    return <Navigate to={homeRoute} replace />;
   }
   return <>{children}</>;
 }
@@ -29,7 +32,7 @@ export default function App() {
       <Route
         path={ROUTES.dashboard}
         element={
-          <Protected>
+          <Protected roles={['admin']}>
             <AppShell>
               <Dashboard />
             </AppShell>
@@ -39,7 +42,7 @@ export default function App() {
       <Route
         path={ROUTES.order}
         element={
-          <Protected>
+          <Protected roles={['admin', 'cabang']}>
             <AppShell>
               <Order />
             </AppShell>
@@ -49,7 +52,7 @@ export default function App() {
       <Route
         path={ROUTES.picker}
         element={
-          <Protected>
+          <Protected roles={['picker']}>
             <AppShell>
               <Picker />
             </AppShell>
@@ -59,7 +62,7 @@ export default function App() {
       <Route
         path={ROUTES.laporan}
         element={
-          <Protected>
+          <Protected roles={['admin', 'cabang', 'picker']}>
             <AppShell>
               <Laporan />
             </AppShell>
@@ -69,7 +72,7 @@ export default function App() {
       <Route
         path={ROUTES.profil}
         element={
-          <Protected>
+          <Protected roles={['admin', 'cabang', 'picker']}>
             <AppShell>
               <Profil />
             </AppShell>
@@ -79,7 +82,7 @@ export default function App() {
       <Route
         path={ROUTES.notifikasi}
         element={
-          <Protected>
+          <Protected roles={['admin', 'cabang', 'picker']}>
             <AppShell>
               <Notifikasi />
             </AppShell>
@@ -89,7 +92,7 @@ export default function App() {
       <Route
         path={ROUTES.settings}
         element={
-          <Protected>
+          <Protected roles={['admin', 'cabang', 'picker']}>
             <AppShell>
               <SettingsPage />
             </AppShell>
@@ -99,7 +102,7 @@ export default function App() {
       <Route
         path={ROUTES.gantiPassword}
         element={
-          <Protected>
+          <Protected roles={['admin', 'cabang', 'picker']}>
             <AppShell>
               <GantiPassword />
             </AppShell>

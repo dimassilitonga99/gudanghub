@@ -1,11 +1,19 @@
 import { Icon } from '../components/ui/icon';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { toastError, toastSuccess } from '@/lib/toast';
 
 import { loadAll, orders } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { CABANG, SETTINGS, type Barang, type Order, type DetailItem } from '@/lib/config';
-import { cn, formatRupiah, formatWita, toInt } from '@/lib/utils';
+import {
+  cn,
+  formatRupiah,
+  formatWita,
+  getSequentialNumber,
+  parseAnyDate,
+  toInt,
+} from '@/lib/utils';
 import { useDialog } from '@/lib/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -155,12 +163,14 @@ interface EditItemState {
 function EditModal({
   order,
   katalog,
+  allOrders,
   sessionName,
   onClose,
   onSaved,
 }: {
   order: Order | null;
   katalog: Barang[];
+  allOrders: Order[];
   sessionName: string;
   onClose: () => void;
   onSaved: () => void;
@@ -279,7 +289,7 @@ function EditModal({
     }
     const barang = katalog.find((b) => String(b.KODE_BARANG).toUpperCase() === addKode.toUpperCase());
     if (!barang) {
-      toast.error('Barang tidak ditemukan di katalog.');
+      toastError('Barang tidak ditemukan di katalog.');
       return;
     }
     const existingIdx = items.findIndex(
@@ -307,7 +317,7 @@ function EditModal({
         catatanItem: '',
       };
       setItems((prev) => [...prev, newItem]);
-      toast.success(`${newItem.nama} ditambahkan`);
+      toastSuccess(`${newItem.nama} ditambahkan`);
     }
     setAddKode('');
     setAddQty(1);
@@ -330,7 +340,7 @@ function EditModal({
     }
     const errors = validateItems();
     if (errors.length > 0) {
-      toast.error(`${errors.length} item wajib punya alasan.`, { duration: 5000 });
+      toastError(`${errors.length} item wajib punya alasan.`, { duration: 5000 });
       return;
     }
     const approved = items.filter((i) => i.itemStatus === 'APPROVED').length;
@@ -386,14 +396,14 @@ function EditModal({
         })),
       });
       if (result.status === 'ok') {
-        toast.success(sendEmail ? 'Tersimpan & email terkirim!' : 'Perubahan tersimpan!');
+        toastSuccess(sendEmail ? 'Tersimpan & email terkirim!' : 'Perubahan tersimpan!');
         onSaved();
         onClose();
       } else {
-        toast.error(String(result.message || 'Gagal menyimpan.'));
+        toastError(String(result.message || 'Gagal menyimpan.'));
       }
     } catch (e) {
-      toast.error((e as Error).message);
+      toastError((e as Error).message);
     } finally {
       setSaving(false);
     }
@@ -728,9 +738,15 @@ function EditModal({
         title={`Preview Form Order — ${order.ORDER_ID}`}
         orderId={order.ORDER_ID}
         idCabang={String(order.ID_CABANG || '')}
-        tanggalCetak={order.TANGGAL_ORDER ? new Date(order.TANGGAL_ORDER) : new Date()}
-        nomorOrder={order.NOMOR_ORDER || '01'}
+        tanggalCetak={parseAnyDate(order.TANGGAL_ORDER ?? '') ?? new Date()}
+        nomorOrder={String(order.NOMOR_ORDER || '') || getSequentialNumber(order, allOrders)}
         items={printItems}
+        stokLookup={(kode) => {
+          const b = katalog.find(
+            (x) => String(x.KODE_BARANG).trim().toUpperCase() === String(kode).trim().toUpperCase(),
+          );
+          return b ? toInt(b.STOK) : undefined;
+        }}
         onClose={() => setPrintOpen(false)}
       />
 
@@ -759,17 +775,20 @@ export default function Dashboard() {
   const [katalogCategory, setKatalogCategory] = useState('');
   const [editOrder, setEditOrder] = useState<Order | null>(null);
   const [now, setNow] = useState(new Date());
+  const lastLoadRef = useRef(0);
 
   const loadData = useCallback(
     async (force = false) => {
+      if (!force && Date.now() - lastLoadRef.current < SETTINGS.throttleMs) return;
+      lastLoadRef.current = Date.now();
       if (force) setRefreshing(true);
       try {
         const { orders: o, katalog: k } = await loadAll({ cache: !force });
         setOrdersList((o as Order[]) || []);
         setKatalogList((k as Barang[]) || []);
-        if (force) toast.success('Data berhasil dimuat ulang.');
+        if (force) toastSuccess('Data berhasil dimuat ulang.');
       } catch (e) {
-        toast.error('Gagal memuat data: ' + (e as Error).message);
+        toastError('Gagal memuat data: ' + (e as Error).message);
       } finally {
         setLoading(false);
         setRefreshing(false);
@@ -892,7 +911,7 @@ export default function Dashboard() {
       [...ordersList]
         .map((o) => ({
           order: o,
-          sortKey: new Date(String(o.TANGGAL_ORDER || '').replace(' ', 'T')).getTime() || 0,
+          sortKey: parseAnyDate(o.TANGGAL_ORDER ?? '')?.getTime() ?? 0,
         }))
         .sort((a, b) => b.sortKey - a.sortKey)
         .slice(0, 6)
@@ -949,19 +968,19 @@ export default function Dashboard() {
       try {
         const result = await orders.updateStatus({ orderId, status, alasan });
         if (result.status === 'ok') {
-          toast.success(status === 'APPROVED' ? 'Order disetujui!' : 'Order ditolak.');
+          toastSuccess(status === 'APPROVED' ? 'Order disetujui!' : 'Order ditolak.');
           void loadData(true);
         } else {
           setOrdersList((list) =>
             list.map((o) => (String(o.ORDER_ID) === orderId ? { ...o, STATUS: prev } : o)),
           );
-          toast.error(String(result.message || 'Gagal.'));
+          toastError(String(result.message || 'Gagal.'));
         }
       } catch (e) {
         setOrdersList((list) =>
           list.map((o) => (String(o.ORDER_ID) === orderId ? { ...o, STATUS: prev } : o)),
         );
-        toast.error((e as Error).message);
+        toastError((e as Error).message);
       }
     },
     [loadData],
@@ -1534,6 +1553,7 @@ export default function Dashboard() {
       <EditModal
         order={editOrder}
         katalog={katalogList}
+        allOrders={ordersList}
         sessionName={session?.nama || session?.username || ''}
         onClose={() => setEditOrder(null)}
         onSaved={() => void loadData(true)}

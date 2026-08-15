@@ -1,6 +1,7 @@
 import { Icon } from './ui/icon';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { toastError, toastSuccess } from '@/lib/toast';
 
 import { CABANG } from '@/lib/config';
 import { chunkArray, formatTanggalCetak, toInt } from '@/lib/utils';
@@ -59,7 +60,7 @@ function buildPage(
   const statusBadge = (() => {
     if (!info.statusOrder) return null;
     const st = info.statusOrder.toUpperCase();
-    if (st === 'PENDING')
+    if (st === 'PENDING' || st === 'PICKED')
       return <span style={{ background: '#f59e0b', color: '#fff', padding: '2px 10px', borderRadius: 4, fontSize: 13, fontWeight: 700 }}>MENUNGGU</span>;
     if (st === 'APPROVED')
       return <span style={{ background: '#16a34a', color: '#fff', padding: '2px 10px', borderRadius: 4, fontSize: 13, fontWeight: 700 }}>DISETUJUI</span>;
@@ -270,9 +271,9 @@ export default function PrintFormModal({
       await downloadJpgPages(pageEls, `Form-Order-${orderId}`, (done, total) => {
         toast.info(`Memproses halaman ${done}/${total}...`);
       });
-      toast.success('Gambar berhasil diunduh.');
+      toastSuccess('Gambar berhasil diunduh.');
     } catch (e) {
-      toast.error((e as Error).message || 'Gagal memproses gambar. Gunakan Print / PDF saja.');
+      toastError((e as Error).message || 'Gagal memproses gambar. Gunakan Print / PDF saja.');
     } finally {
       setBusy(false);
     }
@@ -280,7 +281,7 @@ export default function PrintFormModal({
 
   return (
     <Dialog open onOpenChange={(v) => !v && !busy && onClose()}>
-      <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto bg-white">
+      <DialogContent className="print-modal-root max-h-[90vh] max-w-4xl overflow-y-auto bg-white">
         <DialogHeader className="flex flex-row items-center justify-between">
           <DialogTitle className="text-base text-black">
             {title}
@@ -307,7 +308,7 @@ export default function PrintFormModal({
           </div>
         </DialogHeader>
 
-        <div ref={pagesRef} className="space-y-4">
+        <div ref={pagesRef} id="printPagesContainer" className="space-y-4">
           {pages.map((pageItems, i) =>
             buildPage(pageItems, {
               pic,
@@ -324,13 +325,24 @@ export default function PrintFormModal({
           @media print {
             body * { visibility: hidden; }
             .print-page-admin, .print-page-admin * { visibility: visible; }
+            .print-modal-root {
+              position: static !important;
+              max-width: 100% !important;
+              max-height: none !important;
+              overflow: visible !important;
+              padding: 0 !important;
+              margin: 0 !important;
+              box-shadow: none !important;
+              background: #fff !important;
+            }
             .print-page-admin {
-              position: absolute;
-              left: 0;
-              top: 0;
+              position: static !important;
               max-width: 100% !important;
               box-shadow: none !important;
+              margin: 0 auto !important;
+              page-break-after: always !important;
             }
+            .print-page-admin:last-child { page-break-after: auto !important; }
             @page { size: A4; margin: 10mm; }
             * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           }

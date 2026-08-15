@@ -1,6 +1,7 @@
 import { Icon } from '../components/ui/icon';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { toastError, toastSuccess } from '@/lib/toast';
 
 import { orders as ordersApi, callApi } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
@@ -48,6 +49,7 @@ export default function Picker() {
 
   const [allOrders, setAllOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [filter, setFilter] = useState('ALL');
   const [filterToko, setFilterToko] = useState('');
   const [filterDateFrom, setFilterDateFrom] = useState('');
@@ -131,9 +133,11 @@ export default function Picker() {
           return (db ? db.getTime() : 0) - (da ? da.getTime() : 0);
         });
       setAllOrders(branchOrders);
+      setLoadError(false);
       setLoading(false);
     } catch (error) {
-      toast.error('Gagal: ' + (error as Error).message);
+      toastError('Gagal: ' + (error as Error).message);
+      setLoadError(true);
       setLoading(false);
     }
   }, [assignedCabang]);
@@ -240,9 +244,8 @@ export default function Picker() {
   }, [allOrders]);
 
   const itemsOf = useCallback((order: Order): DetailItem[] => {
-    return ((order.DETAIL as DetailItem[] | undefined) || []).filter(
-      (d) => String(d.ITEM_STATUS || 'APPROVED').toUpperCase() !== 'DELETED',
-    );
+    // Jangan filter DELETED — indeks item harus sejajar dengan DETAIL server (key `${orderId}_${idx}`)
+    return (order.DETAIL as DetailItem[] | undefined) || [];
   }, []);
 
   const getItemRow = useCallback(
@@ -345,13 +348,13 @@ export default function Picker() {
         { dedupe: false, timeout: 30000 },
       );
       if (result.status !== 'ok') {
-        toast.error(String(result.message || 'Gagal.'));
+        toastError(String(result.message || 'Gagal.'));
         return;
       }
-      toast.success(isResubmit ? 'Verifikasi diupdate!' : 'Verifikasi dikirim!', { duration: 4000 });
+      toastSuccess(isResubmit ? 'Verifikasi diupdate!' : 'Verifikasi dikirim!', { duration: 4000 });
       await loadOrders();
     } catch (error) {
-      toast.error('Gagal: ' + (error as Error).message);
+      toastError('Gagal: ' + (error as Error).message);
     } finally {
       setSendingId(null);
     }
@@ -508,6 +511,25 @@ export default function Picker() {
             <Skeleton key={i} className="h-32 w-full" />
           ))}
         </div>
+      ) : loadError ? (
+        <Card>
+          <CardContent className="py-10 text-center">
+            <Icon name="triangle-warning" size={40} className="mx-auto mb-2 text-danger" />
+            <p className="text-sm text-muted-foreground">Gagal memuat order. Periksa koneksi Anda.</p>
+            <Button
+              size="sm"
+              className="mt-4"
+              onClick={() => {
+                setLoading(true);
+                setLoadError(false);
+                void loadOrders();
+              }}
+            >
+              <Icon name="refresh" size={14} />
+              Coba Lagi
+            </Button>
+          </CardContent>
+        </Card>
       ) : filtered.length === 0 ? (
         <Card>
           <CardContent className="py-10 text-center">
@@ -661,7 +683,7 @@ export default function Picker() {
                                 const v = e.target.value.trim();
                                 if (v !== '') {
                                   setItemValue(String(order.ORDER_ID), idx, v);
-                                  toast.success('Item dikunci ✓', { duration: 1000 });
+                                  toastSuccess('Item dikunci ✓', { duration: 1000 });
                                 }
                               }}
                               onKeyDown={(e) => {
@@ -707,9 +729,10 @@ export default function Picker() {
                                 onClick={() => {
                                   const key = `${order.ORDER_ID}_${idx}`;
                                   const data = pickerDataRef.current[key];
+                                  if (data?.locked) return;
                                   if (data && data.value.trim() !== '') {
                                     setItemValue(String(order.ORDER_ID), idx, data.value.trim());
-                                    toast.success('Item dikunci ✓', { duration: 1000 });
+                                    toastSuccess('Item dikunci ✓', { duration: 1000 });
                                   }
                                 }}
                               >

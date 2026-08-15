@@ -29,7 +29,7 @@ export function setSession(
   const sessionData: SessionData = {
     username: String(user.username || '').toLowerCase(),
     nama: String(user.nama || ''),
-    role: (String(user.role || '').toLowerCase() || 'cabang') as Role,
+    role: String(user.role || '').toLowerCase() as Role,
     idCabang: user.idCabang ? String(user.idCabang).toUpperCase() : null,
     token: token || null,
     loginAt: now.toISOString(),
@@ -56,6 +56,7 @@ export function clearSession(): boolean {
 export function isSessionValid(currentSession: SessionData | null = null): boolean {
   const s = currentSession || getSession();
   if (!s || !s.expires) return false;
+  if (!['admin', 'cabang', 'picker'].includes(s.role)) return false;
   try {
     return new Date(s.expires) > new Date();
   } catch {

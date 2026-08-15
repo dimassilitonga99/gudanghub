@@ -1,6 +1,7 @@
 import { Icon } from '../components/ui/icon';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { toastError, toastSuccess } from '@/lib/toast';
 
 import { useAuth } from '@/context/AuthContext';
 import { CABANG, SESSION, APP } from '@/lib/config';
@@ -111,7 +112,7 @@ export default function Settings() {
     const next = { ...prefs, [key]: value };
     setPrefs(next);
     savePrefs(next);
-    if (toastMsg) toast.success(toastMsg);
+    if (toastMsg) toastSuccess(toastMsg);
   };
 
   const handleBrowserNotif = async (checked: boolean) => {
@@ -120,7 +121,7 @@ export default function Settings() {
       return;
     }
     if (!('Notification' in window)) {
-      toast.error('Browser tidak mendukung notifikasi.');
+      toastError('Browser tidak mendukung notifikasi.');
       return;
     }
     try {
@@ -134,14 +135,14 @@ export default function Settings() {
       try {
         new Notification('GudangHub', {
           body: 'Notifikasi berhasil diaktifkan!',
-          icon: './public/icons/icon-192.png',
+          icon: 'icons/icon-192.png',
         });
       } catch {
         /* notifikasi tidak didukung */
       }
     } catch {
       setPref('browserNotif', false);
-      toast.error('Gagal mengaktifkan notifikasi.');
+      toastError('Gagal mengaktifkan notifikasi.');
     }
   };
 
@@ -161,10 +162,10 @@ export default function Settings() {
       localStorage.clear();
       sessionStorage.clear();
       if (session) sessionStorage.setItem(SESSION.key, session);
-      toast.success('Cache lokal berhasil dihapus.');
+      toastSuccess('Cache lokal berhasil dihapus.');
       setTimeout(() => window.location.reload(), 1000);
     } catch {
-      toast.error('Gagal menghapus cache.');
+      toastError('Gagal menghapus cache.');
     }
   };
 
@@ -178,7 +179,7 @@ export default function Settings() {
     if (!ok) return;
     setPrefs({ ...DEFAULT_PREFS });
     savePrefs({ ...DEFAULT_PREFS });
-    toast.success('Preferensi direset ke default.');
+    toastSuccess('Preferensi direset ke default.');
   };
 
   const isAdmin = session?.role === 'admin';
@@ -225,7 +226,7 @@ export default function Settings() {
             setPref('soundNotif', v);
             if (v) {
               playTestSound();
-              toast.success('Suara notifikasi aktif.');
+              toastSuccess('Suara notifikasi aktif.');
             }
           },
         )}
