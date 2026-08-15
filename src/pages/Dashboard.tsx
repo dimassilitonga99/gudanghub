@@ -5,7 +5,7 @@ import { toastError, toastSuccess } from '@/lib/toast';
 
 import { loadAll, orders } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
-import { CABANG, SETTINGS, type Barang, type Order, type DetailItem } from '@/lib/config';
+import { APP, CABANG, SETTINGS, type Barang, type Order, type DetailItem } from '@/lib/config';
 import {
   cn,
   formatRupiah,
@@ -66,6 +66,11 @@ function StatusBadge({ status }: { status: string }) {
    ───────────────────────────────────────────────────────────────────── */
 
 const PALETTE = ['#ff6b00', '#8b5cf6', '#22c55e', '#f59e0b', '#0ea5e9', '#ef4444', '#14b8a6', '#ec4899'];
+
+function witaDayUTC(d: Date): number {
+  const s = new Date(d.getTime() + APP.timezoneOffset * 3600 * 1000);
+  return Date.UTC(s.getUTCFullYear(), s.getUTCMonth(), s.getUTCDate());
+}
 
 function DonutChart({
   segments,
@@ -1118,16 +1123,16 @@ export default function Dashboard() {
 
   const trend14 = useMemo(() => {
     const days: { label: string; total: number; approved: number }[] = [];
-    const now = new Date();
+    const nowDay = witaDayUTC(new Date());
     for (let i = 13; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
-      days.push({ label: `${d.getDate()}/${d.getMonth() + 1}`, total: 0, approved: 0 });
+      const d = new Date(nowDay - i * 86400000);
+      days.push({ label: `${d.getUTCDate()}/${d.getUTCMonth() + 1}`, total: 0, approved: 0 });
     }
     for (const o of ordersList) {
-      const [dd, mm, yyyy] = String(o.TANGGAL_ORDER || '').split('-').map(Number);
-      if (!dd || !mm || !yyyy) continue;
-      const diffDays = Math.round((now.getTime() - new Date(yyyy, mm - 1, dd).getTime()) / 86400000);
-      const bucket = days[13 - diffDays];
+      const d = parseAnyDate(o.TANGGAL_ORDER ?? '');
+      if (!d) continue;
+      const diff = Math.round((nowDay - witaDayUTC(d)) / 86400000);
+      const bucket = days[13 - diff];
       if (!bucket) continue;
       bucket.total++;
       if (String(o.STATUS || '').toUpperCase() === 'APPROVED') bucket.approved++;
@@ -1137,15 +1142,15 @@ export default function Dashboard() {
 
   const daily30 = useMemo(() => {
     const days: { label: string; total: number }[] = [];
-    const now = new Date();
+    const nowDay = witaDayUTC(new Date());
     for (let i = 29; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
-      days.push({ label: `${d.getDate()}/${d.getMonth() + 1}`, total: 0 });
+      const d = new Date(nowDay - i * 86400000);
+      days.push({ label: `${d.getUTCDate()}/${d.getUTCMonth() + 1}`, total: 0 });
     }
     for (const o of ordersList) {
-      const [dd, mm, yyyy] = String(o.TANGGAL_ORDER || '').split('-').map(Number);
-      if (!dd || !mm || !yyyy) continue;
-      const diff = Math.round((now.getTime() - new Date(yyyy, mm - 1, dd).getTime()) / 86400000);
+      const d = parseAnyDate(o.TANGGAL_ORDER ?? '');
+      if (!d) continue;
+      const diff = Math.round((nowDay - witaDayUTC(d)) / 86400000);
       const bucket = days[29 - diff];
       if (bucket) bucket.total++;
     }
