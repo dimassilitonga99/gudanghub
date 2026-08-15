@@ -65,29 +65,23 @@ function StatusBadge({ status }: { status: string }) {
    DONUT CHART
    ───────────────────────────────────────────────────────────────────── */
 
+const PALETTE = ['#ff6b00', '#8b5cf6', '#22c55e', '#f59e0b', '#0ea5e9', '#ef4444', '#14b8a6', '#ec4899'];
+
 function DonutChart({
-  approved,
-  pending,
-  rejected,
+  segments,
   total,
+  centerLabel = 'Total',
 }: {
-  approved: number;
-  pending: number;
-  rejected: number;
+  segments: { label: string; value: number; color: string }[];
   total: number;
+  centerLabel?: string;
 }) {
   const R = 42;
   const C = 2 * Math.PI * R;
   const t = Math.max(1, total);
-  const seg = [
-    { value: approved, color: '#22c55e' },
-    { value: pending, color: '#f59e0b' },
-    { value: rejected, color: '#ef4444' },
-  ];
   let offset = 0;
-  const segments = seg.map((s) => {
-    const frac = s.value / t;
-    const dash = frac * C;
+  const segs = segments.map((s) => {
+    const dash = (s.value / t) * C;
     const seg = { ...s, dash, offset };
     offset += dash;
     return seg;
@@ -97,7 +91,7 @@ function DonutChart({
     <div className="flex items-center gap-5">
       <svg width="120" height="120" viewBox="0 0 120 120">
         <circle cx="60" cy="60" r={R} fill="none" stroke="#1e1e3a" strokeWidth="18" />
-        {segments.map((s, i) =>
+        {segs.map((s, i) =>
           s.dash > 0 ? (
             <circle
               key={i}
@@ -119,15 +113,11 @@ function DonutChart({
           {total}
         </text>
         <text x="60" y="72" textAnchor="middle" fill="#94a3b8" fontSize="10">
-          Total
+          {centerLabel}
         </text>
       </svg>
       <div className="space-y-1.5 text-sm">
-        {[
-          { label: 'Disetujui', value: approved, color: '#22c55e' },
-          { label: 'Tertunda', value: pending, color: '#f59e0b' },
-          { label: 'Ditolak', value: rejected, color: '#ef4444' },
-        ].map((l) => (
+        {segments.map((l) => (
           <div key={l.label} className="flex items-center gap-2">
             <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: l.color }} />
             <span className="text-muted-foreground">{l.label}</span>
@@ -135,6 +125,173 @@ function DonutChart({
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+function TrendAreaChart({ data }: { data: { label: string; total: number; approved: number }[] }) {
+  const W = 720;
+  const H = 200;
+  const P = { top: 16, right: 12, bottom: 28, left: 34 };
+  const max = Math.max(1, ...data.map((d) => d.total));
+  const iw = W - P.left - P.right;
+  const ih = H - P.top - P.bottom;
+  const x = (i: number) => P.left + (data.length <= 1 ? iw / 2 : (i / (data.length - 1)) * iw);
+  const y = (v: number) => P.top + ih - (v / max) * ih;
+  const totalPts = data.map((d, i) => `${x(i)},${y(d.total)}`).join(' ');
+  const areaPts = `${P.left},${P.top + ih} ${totalPts} ${P.left + iw},${P.top + ih}`;
+  const apprPts = data.map((d, i) => `${x(i)},${y(d.approved)}`).join(' ');
+
+  return (
+    <div>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full">
+        <defs>
+          <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#ff6b00" stopOpacity="0.35" />
+            <stop offset="100%" stopColor="#ff6b00" stopOpacity="0.02" />
+          </linearGradient>
+        </defs>
+        {[0.25, 0.5, 0.75, 1].map((f) => (
+          <line
+            key={f}
+            x1={P.left}
+            x2={W - P.right}
+            y1={y(max * f)}
+            y2={y(max * f)}
+            stroke="currentColor"
+            strokeOpacity="0.08"
+          />
+        ))}
+        <polygon points={areaPts} fill="url(#trendFill)" />
+        <polyline
+          points={totalPts}
+          fill="none"
+          stroke="#ff6b00"
+          strokeWidth="2.5"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        />
+        <polyline
+          points={apprPts}
+          fill="none"
+          stroke="#22c55e"
+          strokeWidth="2"
+          strokeDasharray="5 4"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        />
+        {data.map((d, i) =>
+          d.total > 0 ? (
+            <circle key={i} cx={x(i)} cy={y(d.total)} r="3" fill="#ff6b00" stroke="#fff" strokeWidth="1" />
+          ) : null,
+        )}
+        {data.map((d, i) =>
+          i % 2 === 0 ? (
+            <text key={i} x={x(i)} y={H - 8} textAnchor="middle" fontSize="10" fill="currentColor" fillOpacity="0.55">
+              {d.label}
+            </text>
+          ) : null,
+        )}
+      </svg>
+      <div className="mt-1 flex items-center justify-center gap-4 text-xs text-muted-foreground">
+        <span className="flex items-center gap-1.5">
+          <span className="h-2 w-3 rounded-sm bg-brand" /> Total
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="h-2 w-3 rounded-sm bg-success" /> Disetujui
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function StackedBarChart({
+  data,
+  max,
+}: {
+  data: { pic: string; pending: number; approved: number; rejected: number }[];
+  max: number;
+}) {
+  return (
+    <div className="flex h-40 items-end justify-around gap-3">
+      {data.map((c) => {
+        const total = c.pending + c.approved + c.rejected;
+        const h = (v: number) => `${Math.round((v / max) * 100)}%`;
+        return (
+          <div key={c.pic} className="flex flex-1 flex-col items-center gap-1">
+            <span className="text-xs font-bold">{total}</span>
+            <div className="flex h-full w-full flex-col-reverse overflow-hidden rounded-t-md" title={`${c.pic}: ${total} order`}>
+              {total > 0 && (
+                <>
+                  <div style={{ height: h(c.approved) }} className="w-full bg-success" />
+                  <div style={{ height: h(c.pending) }} className="w-full bg-warning" />
+                  <div style={{ height: h(c.rejected) }} className="w-full bg-danger" />
+                </>
+              )}
+            </div>
+            <span className="text-[11px] text-muted-foreground">{c.pic}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function TopProdukChart({ data, max }: { data: { kode: string; nama: string; qty: number }[]; max: number }) {
+  if (data.length === 0) {
+    return <div className="py-8 text-center text-sm text-muted-foreground">Belum ada data order.</div>;
+  }
+  return (
+    <div className="space-y-3">
+      {data.map((p, i) => (
+        <div key={p.kode}>
+          <div className="mb-1 flex items-baseline justify-between gap-2 text-xs">
+            <span className="truncate font-medium">
+              <span className="mr-1.5 inline-block w-4 text-brand">#{i + 1}</span>
+              {p.nama}
+            </span>
+            <span className="shrink-0 font-bold tabular-nums">{p.qty} pcs</span>
+          </div>
+          <div className="h-2.5 overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-brand to-brand-light"
+              style={{ width: `${Math.max((p.qty / max) * 100, 4)}%` }}
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function RadialGauge({ value, label, sub }: { value: number; label: string; sub?: string }) {
+  const R = 42;
+  const C = 2 * Math.PI * R;
+  const pct = Math.max(0, Math.min(100, value));
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <svg width="150" height="150" viewBox="0 0 120 120">
+        <circle cx="60" cy="60" r={R} fill="none" stroke="currentColor" strokeOpacity="0.12" strokeWidth="12" />
+        <circle
+          cx="60"
+          cy="60"
+          r={R}
+          fill="none"
+          stroke="#22c55e"
+          strokeWidth="12"
+          strokeLinecap="round"
+          strokeDasharray={`${(pct / 100) * C} ${C}`}
+          transform="rotate(-90 60 60)"
+          style={{ transition: 'stroke-dasharray 0.6s ease' }}
+        />
+        <text x="60" y="57" textAnchor="middle" fill="currentColor" fontSize="22" fontWeight="bold">
+          {pct}%
+        </text>
+        <text x="60" y="72" textAnchor="middle" fill="currentColor" fillOpacity="0.5" fontSize="9">
+          {label}
+        </text>
+      </svg>
+      {sub && <p className="text-center text-xs text-muted-foreground">{sub}</p>}
     </div>
   );
 }
@@ -895,16 +1052,75 @@ export default function Dashboard() {
     };
   }, [ordersList]);
 
-  const perCabang = useMemo(
+  const perCabangStacked = useMemo(
     () =>
-      Object.keys(CABANG).map((id) => ({
-        id,
-        pic: CABANG[id].pic,
-        count: ordersList.filter((o) => String(o.ID_CABANG || '').toUpperCase() === id).length,
-      })),
+      Object.keys(CABANG).map((id) => {
+        const o = ordersList.filter((x) => String(x.ID_CABANG || '').toUpperCase() === id);
+        return {
+          id,
+          pic: CABANG[id].pic,
+          pending: o.filter((x) => String(x.STATUS || '').toUpperCase() === 'PENDING').length,
+          approved: o.filter((x) => String(x.STATUS || '').toUpperCase() === 'APPROVED').length,
+          rejected: o.filter((x) => String(x.STATUS || '').toUpperCase() === 'REJECTED').length,
+        };
+      }),
     [ordersList],
   );
-  const maxCabang = Math.max(1, ...perCabang.map((c) => c.count));
+  const maxCabangStacked = Math.max(
+    1,
+    ...perCabangStacked.map((c) => c.pending + c.approved + c.rejected),
+  );
+
+  const trend14 = useMemo(() => {
+    const days: { label: string; total: number; approved: number }[] = [];
+    const now = new Date();
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+      days.push({ label: `${d.getDate()}/${d.getMonth() + 1}`, total: 0, approved: 0 });
+    }
+    for (const o of ordersList) {
+      const [dd, mm, yyyy] = String(o.TANGGAL_ORDER || '').split('-').map(Number);
+      if (!dd || !mm || !yyyy) continue;
+      const diffDays = Math.round((now.getTime() - new Date(yyyy, mm - 1, dd).getTime()) / 86400000);
+      const bucket = days[13 - diffDays];
+      if (!bucket) continue;
+      bucket.total++;
+      if (String(o.STATUS || '').toUpperCase() === 'APPROVED') bucket.approved++;
+    }
+    return days;
+  }, [ordersList]);
+
+  const topProduk = useMemo(() => {
+    const map = new Map<string, { nama: string; qty: number }>();
+    for (const o of ordersList) {
+      for (const d of (o.DETAIL as DetailItem[] | undefined) || []) {
+        if (String(d.ITEM_STATUS || 'APPROVED').toUpperCase() === 'DELETED') continue;
+        const kode = String(d.KODE_BARANG || '-');
+        const qty = toInt(d.QTY);
+        const cur = map.get(kode);
+        if (cur) cur.qty += qty;
+        else map.set(kode, { nama: String(d.NAMA_BARANG || kode), qty });
+      }
+    }
+    return [...map.entries()]
+      .map(([kode, v]) => ({ kode, ...v }))
+      .sort((a, b) => b.qty - a.qty)
+      .slice(0, 5);
+  }, [ordersList]);
+  const maxTopProduk = Math.max(1, ...topProduk.map((p) => p.qty));
+
+  const kategoriCount = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const b of katalogList) {
+      const k = String(b.KATEGORI || '').trim() || 'Lainnya';
+      map.set(k, (map.get(k) || 0) + 1);
+    }
+    return [...map.entries()]
+      .map(([label, value]) => ({ label, value }))
+      .sort((a, b) => b.value - a.value);
+  }, [katalogList]);
+
+  const approvalPct = donut.total ? Math.round((donut.approved / donut.total) * 100) : 0;
 
   const activityFeed = useMemo(
     () =>
@@ -1220,32 +1436,34 @@ export default function Dashboard() {
                   <span className="text-brand">◔</span> Status Order
                 </h2>
                 <DonutChart
-                  approved={donut.approved}
-                  pending={donut.pending}
-                  rejected={donut.rejected}
+                  segments={[
+                    { label: 'Disetujui', value: donut.approved, color: '#22c55e' },
+                    { label: 'Tertunda', value: donut.pending, color: '#f59e0b' },
+                    { label: 'Ditolak', value: donut.rejected, color: '#ef4444' },
+                  ]}
                   total={donut.total}
                 />
               </CardContent>
             </Card>
 
-            {/* Bar chart per cabang */}
+            {/* Stacked bar chart per cabang */}
             <Card>
               <CardContent className="p-4">
                 <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold">
+                  <Icon name="chart-histogram" size={16} className="text-brand" />
                   Pesanan per Cabang
                 </h2>
-                <div className="flex h-36 items-end justify-around gap-3">
-                  {perCabang.map((c) => (
-                    <div key={c.id} className="flex flex-1 flex-col items-center gap-1">
-                      <span className="text-xs font-bold">{c.count}</span>
-                      <div
-                        className="w-full rounded-t-md bg-gradient-to-t from-brand to-brand-light"
-                        title={`${c.pic}: ${c.count} order`}
-                        style={{ height: `${Math.max((c.count / maxCabang) * 90 + 4, 4)}%` }}
-                      />
-                      <span className="text-[11px] text-muted-foreground">{c.pic}</span>
-                    </div>
-                  ))}
+                <StackedBarChart data={perCabangStacked} max={maxCabangStacked} />
+                <div className="mt-3 flex flex-wrap items-center justify-center gap-4 text-[11px] text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <span className="h-2 w-3 rounded-sm bg-success" /> Disetujui
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="h-2 w-3 rounded-sm bg-warning" /> Tertunda
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="h-2 w-3 rounded-sm bg-danger" /> Ditolak
+                  </span>
                 </div>
               </CardContent>
             </Card>
@@ -1288,6 +1506,91 @@ export default function Dashboard() {
                 )}
               </CardContent>
             </Card>
+          </div>
+
+          {/* Laporan & Grafik */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Icon name="chart-line-up" size={18} className="text-brand" />
+              <h2 className="font-display text-lg font-bold">Laporan & Grafik</h2>
+            </div>
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+              {/* Tren order 14 hari (area/line) */}
+              <Card className="lg:col-span-2">
+                <CardContent className="p-4">
+                  <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold">
+                    <Icon name="chart-area" size={16} className="text-brand" />
+                    Tren Order 14 Hari
+                  </h3>
+                  {loading ? (
+                    <Skeleton className="h-52 w-full" />
+                  ) : (
+                    <TrendAreaChart data={trend14} />
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Gauge konversi */}
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center p-4">
+                  <h3 className="mb-3 flex items-center gap-2 self-start text-sm font-semibold">
+                    <Icon name="gauge-circle-plus" size={16} className="text-success" />
+                    Tingkat Persetujuan
+                  </h3>
+                  {loading ? (
+                    <Skeleton className="h-40 w-40 rounded-full" />
+                  ) : (
+                    <RadialGauge
+                      value={approvalPct}
+                      label="Disetujui"
+                      sub={`${donut.approved} dari ${donut.total} order disetujui`}
+                    />
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Top produk (horizontal bar) */}
+              <Card className="lg:col-span-2">
+                <CardContent className="p-4">
+                  <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold">
+                    <Icon name="chart-simple-horizontal" size={16} className="text-brand" />
+                    Produk Paling Banyak Dipesan
+                  </h3>
+                  {loading ? (
+                    <div className="space-y-3">
+                      {[...Array(5)].map((_, i) => (
+                        <Skeleton key={i} className="h-6 w-full" />
+                      ))}
+                    </div>
+                  ) : (
+                    <TopProdukChart data={topProduk} max={maxTopProduk} />
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Donut kategori katalog */}
+              <Card>
+                <CardContent className="p-4">
+                  <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold">
+                    <Icon name="chart-pie" size={16} className="text-brand" />
+                    Kategori Katalog
+                  </h3>
+                  {loading ? (
+                    <Skeleton className="h-40 w-full" />
+                  ) : (
+                    <DonutChart
+                      segments={kategoriCount.map((k, i) => ({
+                        label: k.label,
+                        value: k.value,
+                        color: PALETTE[i % PALETTE.length],
+                      }))}
+                      total={katalogList.length}
+                      centerLabel="Barang"
+                    />
+                  )}
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
       )}
