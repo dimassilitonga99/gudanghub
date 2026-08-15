@@ -264,6 +264,51 @@ function TopProdukChart({ data, max }: { data: { kode: string; nama: string; qty
   );
 }
 
+function BarChartDays({ data }: { data: { label: string; total: number }[] }) {
+  const max = Math.max(1, ...data.map((d) => d.total));
+  return (
+    <div>
+      <div className="flex h-44 items-end gap-[3px]">
+        {data.map((d, i) => {
+          const today = i === data.length - 1;
+          const h = d.total === 0 ? 2 : Math.max((d.total / max) * 100, 4);
+          return (
+            <div
+              key={i}
+              title={`${d.label}: ${d.total} order`}
+              className="group relative flex flex-1 flex-col items-center justify-end"
+            >
+              <span className="mb-1 hidden text-[10px] font-bold tabular-nums text-foreground group-hover:block">
+                {d.total}
+              </span>
+              <div
+                className={cn(
+                  'w-full rounded-t-sm transition-all',
+                  today ? 'bg-brand' : d.total > 0 ? 'bg-brand/70 hover:bg-brand' : 'bg-muted',
+                )}
+                style={{ height: `${h}%` }}
+              />
+            </div>
+          );
+        })}
+      </div>
+      <div className="mt-2 flex justify-between text-[10px] text-muted-foreground">
+        {[0, 7, 14, 21, 29].map((i) => (
+          <span key={i}>{data[i]?.label ?? ''}</span>
+        ))}
+      </div>
+      <div className="mt-2 flex items-center justify-center gap-4 text-xs text-muted-foreground">
+        <span className="flex items-center gap-1.5">
+          <span className="h-2.5 w-3 rounded-sm bg-brand" /> Order
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="h-2.5 w-3 rounded-sm bg-brand" /> Hari ini
+        </span>
+      </div>
+    </div>
+  );
+}
+
 function RadialGauge({ value, label, sub }: { value: number; label: string; sub?: string }) {
   const R = 42;
   const C = 2 * Math.PI * R;
@@ -1090,6 +1135,23 @@ export default function Dashboard() {
     return days;
   }, [ordersList]);
 
+  const daily30 = useMemo(() => {
+    const days: { label: string; total: number }[] = [];
+    const now = new Date();
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+      days.push({ label: `${d.getDate()}/${d.getMonth() + 1}`, total: 0 });
+    }
+    for (const o of ordersList) {
+      const [dd, mm, yyyy] = String(o.TANGGAL_ORDER || '').split('-').map(Number);
+      if (!dd || !mm || !yyyy) continue;
+      const diff = Math.round((now.getTime() - new Date(yyyy, mm - 1, dd).getTime()) / 86400000);
+      const bucket = days[29 - diff];
+      if (bucket) bucket.total++;
+    }
+    return days;
+  }, [ordersList]);
+
   const topProduk = useMemo(() => {
     const map = new Map<string, { nama: string; qty: number }>();
     for (const o of ordersList) {
@@ -1587,6 +1649,21 @@ export default function Dashboard() {
                       total={katalogList.length}
                       centerLabel="Barang"
                     />
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Diagram batang order per hari (30 hari) */}
+              <Card className="lg:col-span-3">
+                <CardContent className="p-4">
+                  <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold">
+                    <Icon name="chart-histogram" size={16} className="text-brand" />
+                    Order per Hari (30 Hari Terakhir)
+                  </h3>
+                  {loading ? (
+                    <Skeleton className="h-52 w-full" />
+                  ) : (
+                    <BarChartDays data={daily30} />
                   )}
                 </CardContent>
               </Card>
