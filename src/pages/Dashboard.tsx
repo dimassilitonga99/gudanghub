@@ -134,84 +134,302 @@ function DonutChart({
   );
 }
 
-function TrendAreaChart({ data }: { data: { label: string; total: number; approved: number }[] }) {
+function niceMax(v: number): number {
+  if (v <= 1) return 1;
+  const base = Math.pow(10, Math.floor(Math.log10(v)));
+  const f = v / base;
+  return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * base;
+}
+
+function fmtDateInputWita(d: Date): string {
+  const s = new Date(d.getTime() + APP.timezoneOffset * 3600 * 1000);
+  return `${s.getUTCFullYear()}-${String(s.getUTCMonth() + 1).padStart(2, '0')}-${String(s.getUTCDate()).padStart(2, '0')}`;
+}
+
+function fmtRpCompact(v: number): string {
+  if (v >= 1e6) return `Rp ${(v / 1e6).toFixed(1)}jt`;
+  if (v >= 1e3) return `Rp ${Math.round(v / 1e3)}rb`;
+  return `Rp ${Math.round(v)}`;
+}
+
+const MAX_DAYS = 180;
+
+function buildDayBuckets(
+  orders: Order[],
+  from: string,
+  to: string,
+  classify: (o: Order) => { key: string; value: number }[],
+): { day: number; label: string; values: Record<string, number> }[] {
+  const nowDay = witaDayUTC(new Date());
+  const endDay = to ? witaDayUTC(new Date(to + 'T00:00:00Z')) : nowDay;
+  let minDay = from ? witaDayUTC(new Date(from + 'T00:00:00Z')) : null;
+  if (!minDay) {
+    const ds = orders
+      .map((o) => {
+        const d = parseAnyDate(o.TANGGAL_ORDER ?? '');
+        return d ? witaDayUTC(d) : NaN;
+      })
+      .filter(Number.isFinite);
+    minDay = ds.length ? Math.min(...ds) : endDay;
+  }
+  if (minDay > endDay) minDay = endDay;
+  const spanDays = Math.round((endDay - minDay) / 86400000);
+  if (spanDays > MAX_DAYS) minDay = endDay - MAX_DAYS * 86400000;
+  const n = Math.round((endDay - minDay) / 86400000) + 1;
+  const buckets: { day: number; label: string; values: Record<string, number> }[] = [];
+  for (let i = 0; i < n; i++) {
+    const day = minDay + i * 86400000;
+    const d = new Date(day);
+    buckets.push({ day, label: `${d.getUTCDate()}/${d.getUTCMonth() + 1}`, values: {} });
+  }
+  const byDay = new Map(buckets.map((b) => [b.day, b]));
+  for (const o of orders) {
+    const d = parseAnyDate(o.TANGGAL_ORDER ?? '');
+    if (!d) continue;
+    const b = byDay.get(witaDayUTC(d));
+    if (!b) continue;
+    for (const c of classify(o)) b.values[c.key] = (b.values[c.key] ?? 0) + c.value;
+  }
+  return buckets;
+}
+
+const classifyByStatus = (o: Order) => {
+  const st = String(o.STATUS || 'PENDING').toUpperCase();
+  const key = st === 'APPROVED' ? 'approved' : st === 'PENDING' ? 'pending' : st === 'REJECTED' ? 'rejected' : 'other';
+  return [
+    { key, value: 1 },
+    { key: 'total', value: 1 },
+  ];
+};
+
+const classifyByCabang = (o: Order) => [{ key: String(o.ID_CABANG || '').toUpperCase(), value: 1 }];
+
+const classifyNilai = (o: Order) => {
+  const dets = (o.DETAIL as DetailItem[] | undefined) || [];
+  const val = dets
+    .filter((d) => String(d.ITEM_STATUS || 'APPROVED').toUpperCase() === 'APPROVED')
+    .reduce((s, d) => s + (Number(d.QTY) || 0) * (Number(d.HARGA_SATUAN) || 0), 0);
+  return val > 0 ? [{ key: 'nilai', value: val }] : [];
+};
+
+const classifyQty = (o: Order) => {
+  const dets = (o.DETAIL as DetailItem[] | undefined) || [];
+  const qty = dets
+    .filter((d) => String(d.ITEM_STATUS || 'APPROVED').toUpperCase() !== 'DELETED')
+    .reduce((s, d) => s + toInt(d.QTY), 0);
+  return qty > 0 ? [{ key: 'qty', value: qty }] : [];
+};
+
+const ORDER_SERIES = [
+  { key: 'total', label: 'Total', color: '#ff6b00' },
+  { key: 'approved', label: 'Disetujui', color: '#22c55e' },
+  { key: 'pending', label: 'Tertunda', color: '#f59e0b' },
+  { key: 'rejected', label: 'Ditolak', color: '#ef4444' },
+];
+
+const CABANG_SERIES = Object.keys(CABANG).map((id, i) => ({
+  key: id,
+  label: CABANG[id].pic,
+  color: CABANG[id].color || PALETTE[i % PALETTE.length],
+}));
+
+function ChartPeriod({
+  from,
+  to,
+  quick,
+  onFrom,
+  onTo,
+  onQuick,
+}: {
+  from: string;
+  to: string;
+  quick: string;
+  onFrom: (v: string) => void;
+  onTo: (v: string) => void;
+  onQuick: (v: string) => void;
+}) {
+  const chips: [string, string][] = [
+    ['7', '7 Hari'],
+    ['30', '30 Hari'],
+    ['90', '90 Hari'],
+    ['month', 'Bulan Ini'],
+    ['all', 'Semua'],
+  ];
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap gap-1">
+        {chips.map(([val, label]) => (
+          <button
+            key={val}
+            type="button"
+            onClick={() => onQuick(val)}
+            className={cn(
+              'rounded-full border px-2.5 py-1 text-[11px] font-semibold',
+              quick === val ? 'border-brand bg-brand/10 text-brand' : 'border-border text-muted-foreground hover:bg-accent',
+            )}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      <div className="flex items-center gap-1.5 text-xs">
+        <input
+          type="date"
+          value={from}
+          onChange={(e) => onFrom(e.target.value)}
+          title="Dari tanggal"
+          className="h-8 rounded-md border border-input bg-background px-2 text-xs dark:[color-scheme:dark]"
+        />
+        <span className="text-muted-foreground">s/d</span>
+        <input
+          type="date"
+          value={to}
+          onChange={(e) => onTo(e.target.value)}
+          title="Sampai tanggal"
+          className="h-8 rounded-md border border-input bg-background px-2 text-xs dark:[color-scheme:dark]"
+        />
+      </div>
+    </div>
+  );
+}
+
+function LineChart({
+  data,
+  series,
+  format = (v) => String(v),
+  height = 230,
+}: {
+  data: { day: number; label: string; values: Record<string, number> }[];
+  series: { key: string; label: string; color: string }[];
+  format?: (v: number) => string;
+  height?: number;
+}) {
   const W = 720;
-  const H = 200;
-  const P = { top: 16, right: 12, bottom: 28, left: 34 };
-  const max = Math.max(1, ...data.map((d) => d.total));
+  const H = height;
+  const P = { top: 18, right: 14, bottom: 26, left: 52 };
   const iw = W - P.left - P.right;
   const ih = H - P.top - P.bottom;
+  const maxV = Math.max(1, ...data.flatMap((d) => series.map((s) => d.values[s.key] ?? 0)));
+  const nice = niceMax(maxV);
   const x = (i: number) => P.left + (data.length <= 1 ? iw / 2 : (i / (data.length - 1)) * iw);
-  const y = (v: number) => P.top + ih - (v / max) * ih;
-  const totalPts = data.map((d, i) => `${x(i)},${y(d.total)}`).join(' ');
-  const areaPts = `${P.left},${P.top + ih} ${totalPts} ${P.left + iw},${P.top + ih}`;
-  const apprPts = data.map((d, i) => `${x(i)},${y(d.approved)}`).join(' ');
+  const y = (v: number) => P.top + ih - (v / nice) * ih;
+
+  if (data.length === 0) {
+    return <div className="py-10 text-center text-sm text-muted-foreground">Tidak ada data pada periode ini.</div>;
+  }
+  const step = Math.max(1, Math.ceil(data.length / 8));
 
   return (
     <div>
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full">
-        <defs>
-          <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#ff6b00" stopOpacity="0.35" />
-            <stop offset="100%" stopColor="#ff6b00" stopOpacity="0.02" />
-          </linearGradient>
-        </defs>
-        {[0.25, 0.5, 0.75, 1].map((f) => (
-          <line
-            key={f}
-            x1={P.left}
-            x2={W - P.right}
-            y1={y(max * f)}
-            y2={y(max * f)}
-            stroke="currentColor"
-            strokeOpacity="0.08"
+        {[0, 0.25, 0.5, 0.75, 1].map((f) => (
+          <g key={f}>
+            <line
+              x1={P.left}
+              x2={W - P.right}
+              y1={y(nice * f)}
+              y2={y(nice * f)}
+              stroke="currentColor"
+              strokeOpacity="0.08"
+            />
+            <text x={P.left - 6} y={y(nice * f) + 3} textAnchor="end" fontSize="9" fill="currentColor" fillOpacity="0.5">
+              {format(nice * f)}
+            </text>
+          </g>
+        ))}
+        {series.map((s) => (
+          <polyline
+            key={s.key}
+            points={data.map((d, i) => `${x(i)},${y(d.values[s.key] ?? 0)}`).join(' ')}
+            fill="none"
+            stroke={s.color}
+            strokeWidth="2"
+            strokeLinejoin="round"
+            strokeLinecap="round"
           />
         ))}
-        <polygon points={areaPts} fill="url(#trendFill)" />
-        <polyline
-          points={totalPts}
-          fill="none"
-          stroke="#ff6b00"
-          strokeWidth="2.5"
-          strokeLinejoin="round"
-          strokeLinecap="round"
-        />
-        <polyline
-          points={apprPts}
-          fill="none"
-          stroke="#22c55e"
-          strokeWidth="2"
-          strokeDasharray="5 4"
-          strokeLinejoin="round"
-          strokeLinecap="round"
-        />
         {data.map((d, i) =>
-          d.total > 0 ? (
-            <g key={i}>
-              <circle cx={x(i)} cy={y(d.total)} r="3" fill="#ff6b00" stroke="#fff" strokeWidth="1" />
-              <text x={x(i)} y={y(d.total) - 7} textAnchor="middle" fontSize="9" fill="currentColor" fillOpacity="0.7">
-                {d.total}
-              </text>
-            </g>
-          ) : null,
-        )}
-        {data.map((d, i) =>
-          i % 2 === 0 ? (
-            <text key={i} x={x(i)} y={H - 8} textAnchor="middle" fontSize="10" fill="currentColor" fillOpacity="0.55">
+          i % step === 0 ? (
+            <text key={i} x={x(i)} y={H - 8} textAnchor="middle" fontSize="9" fill="currentColor" fillOpacity="0.55">
               {d.label}
             </text>
           ) : null,
         )}
+        {series.map((s) => {
+          const i = data.length - 1;
+          const v = data[i].values[s.key] ?? 0;
+          return v > 0 ? (
+            <g key={s.key + '-end'}>
+              <circle cx={x(i)} cy={y(v)} r="3.5" fill={s.color} stroke="#fff" strokeWidth="1" />
+              <text x={x(i) - 4} y={y(v) - 7} textAnchor="end" fontSize="9" fontWeight="bold" fill={s.color}>
+                {format(v)}
+              </text>
+            </g>
+          ) : null;
+        })}
       </svg>
-      <div className="mt-1 flex items-center justify-center gap-4 text-xs text-muted-foreground">
-        <span className="flex items-center gap-1.5">
-          <span className="h-2 w-3 rounded-sm bg-brand" /> Total
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="h-2 w-3 rounded-sm bg-success" /> Disetujui
-        </span>
+      <div className="mt-1 flex flex-wrap items-center justify-center gap-3 text-xs text-muted-foreground">
+        {series.map((s) => (
+          <span key={s.key} className="flex items-center gap-1.5">
+            <span className="h-0.5 w-4 rounded-full" style={{ backgroundColor: s.color }} /> {s.label}
+          </span>
+        ))}
       </div>
     </div>
+  );
+}
+
+function LineChartCard({
+  title,
+  icon,
+  series,
+  classify,
+  format,
+  orders,
+  loading,
+}: {
+  title: string;
+  icon: string;
+  series: { key: string; label: string; color: string }[];
+  classify: (o: Order) => { key: string; value: number }[];
+  format?: (v: number) => string;
+  orders: Order[];
+  loading: boolean;
+}) {
+  const [from, setFrom] = useState('');
+  const [to, setTo] = useState('');
+  const [quick, setQuick] = useState('30');
+  const applyQuick = (type: string) => {
+    const today = new Date();
+    let f = '';
+    let t = fmtDateInputWita(today);
+    if (type === '7') f = fmtDateInputWita(new Date(today.getTime() - 6 * 86400000));
+    else if (type === '30') f = fmtDateInputWita(new Date(today.getTime() - 29 * 86400000));
+    else if (type === '90') f = fmtDateInputWita(new Date(today.getTime() - 89 * 86400000));
+    else if (type === 'month') f = fmtDateInputWita(new Date(today.getFullYear(), today.getMonth(), 1));
+    else if (type === 'all') {
+      f = '';
+      t = '';
+    }
+    setQuick(type);
+    setFrom(f);
+    setTo(t);
+  };
+  const buckets = useMemo(() => buildDayBuckets(orders, from, to, classify), [orders, from, to, classify]);
+
+  return (
+    <Card>
+      <CardContent className="p-4">
+        <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold">
+          <Icon name={icon} size={16} className="text-brand" />
+          {title}
+        </h3>
+        <ChartPeriod from={from} to={to} quick={quick} onFrom={setFrom} onTo={setTo} onQuick={applyQuick} />
+        <div className="mt-3">
+          {loading ? <Skeleton className="h-56 w-full" /> : <LineChart data={buckets} series={series} format={format} />}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -253,109 +471,6 @@ function StackedBarChart({
           </div>
         );
       })}
-    </div>
-  );
-}
-
-function TopProdukChart({ data, max }: { data: { kode: string; nama: string; qty: number }[]; max: number }) {
-  if (data.length === 0) {
-    return <div className="py-8 text-center text-sm text-muted-foreground">Belum ada data order.</div>;
-  }
-  return (
-    <div className="space-y-3">
-      {data.map((p, i) => (
-        <div key={p.kode}>
-          <div className="mb-1 flex items-baseline justify-between gap-2 text-xs">
-            <span className="truncate font-medium">
-              <span className="mr-1.5 inline-block w-4 text-brand">#{i + 1}</span>
-              {p.nama}
-            </span>
-            <span className="shrink-0 font-bold tabular-nums">{p.qty} pcs</span>
-          </div>
-          <div className="h-2.5 overflow-hidden rounded-full bg-muted">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-brand to-brand-light"
-              style={{ width: `${Math.max((p.qty / max) * 100, 4)}%` }}
-            />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function BarChartDays({ data }: { data: { label: string; total: number }[] }) {
-  const max = Math.max(1, ...data.map((d) => d.total));
-  return (
-    <div>
-      <div className="flex h-44 items-end gap-[3px]">
-        {data.map((d, i) => {
-          const today = i === data.length - 1;
-          const h = d.total === 0 ? 2 : Math.max((d.total / max) * 100, 4);
-          return (
-            <div key={i} title={`${d.label}: ${d.total} order`} className="group relative flex h-full flex-1 flex-col items-center justify-end">
-              <div
-                className={cn(
-                  'relative w-full rounded-t-sm transition-all',
-                  today ? 'bg-brand' : d.total > 0 ? 'bg-brand/70 hover:bg-brand' : 'bg-muted',
-                )}
-                style={{ height: `${h}%` }}
-              >
-                {d.total > 0 && (
-                  <span className="pointer-events-none absolute -top-3 left-1/2 -translate-x-1/2 text-[8px] font-bold leading-none tabular-nums text-muted-foreground">
-                    {d.total}
-                  </span>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-      <div className="mt-2 flex justify-between text-[10px] text-muted-foreground">
-        {[0, 7, 14, 21, 29].map((i) => (
-          <span key={i}>{data[i]?.label ?? ''}</span>
-        ))}
-      </div>
-      <div className="mt-2 flex items-center justify-center gap-4 text-xs text-muted-foreground">
-        <span className="flex items-center gap-1.5">
-          <span className="h-2.5 w-3 rounded-sm bg-brand" /> Order
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="h-2.5 w-3 rounded-sm bg-brand" /> Hari ini
-        </span>
-      </div>
-    </div>
-  );
-}
-
-function RadialGauge({ value, label, sub }: { value: number; label: string; sub?: string }) {
-  const R = 42;
-  const C = 2 * Math.PI * R;
-  const pct = Math.max(0, Math.min(100, value));
-  return (
-    <div className="flex flex-col items-center gap-3">
-      <svg width="150" height="150" viewBox="0 0 120 120">
-        <circle cx="60" cy="60" r={R} fill="none" stroke="currentColor" strokeOpacity="0.12" strokeWidth="12" />
-        <circle
-          cx="60"
-          cy="60"
-          r={R}
-          fill="none"
-          stroke="#22c55e"
-          strokeWidth="12"
-          strokeLinecap="round"
-          strokeDasharray={`${(pct / 100) * C} ${C}`}
-          transform="rotate(-90 60 60)"
-          style={{ transition: 'stroke-dasharray 0.6s ease' }}
-        />
-        <text x="60" y="57" textAnchor="middle" fill="currentColor" fontSize="22" fontWeight="bold">
-          {pct}%
-        </text>
-        <text x="60" y="72" textAnchor="middle" fill="currentColor" fillOpacity="0.5" fontSize="9">
-          {label}
-        </text>
-      </svg>
-      {sub && <p className="text-center text-xs text-muted-foreground">{sub}</p>}
     </div>
   );
 }
@@ -1135,74 +1250,6 @@ export default function Dashboard() {
     ...perCabangStacked.map((c) => c.pending + c.approved + c.rejected),
   );
 
-  const trend14 = useMemo(() => {
-    const days: { label: string; total: number; approved: number }[] = [];
-    const nowDay = witaDayUTC(new Date());
-    for (let i = 13; i >= 0; i--) {
-      const d = new Date(nowDay - i * 86400000);
-      days.push({ label: `${d.getUTCDate()}/${d.getUTCMonth() + 1}`, total: 0, approved: 0 });
-    }
-    for (const o of ordersList) {
-      const d = parseAnyDate(o.TANGGAL_ORDER ?? '');
-      if (!d) continue;
-      const diff = Math.round((nowDay - witaDayUTC(d)) / 86400000);
-      const bucket = days[13 - diff];
-      if (!bucket) continue;
-      bucket.total++;
-      if (String(o.STATUS || '').toUpperCase() === 'APPROVED') bucket.approved++;
-    }
-    return days;
-  }, [ordersList]);
-
-  const daily30 = useMemo(() => {
-    const days: { label: string; total: number }[] = [];
-    const nowDay = witaDayUTC(new Date());
-    for (let i = 29; i >= 0; i--) {
-      const d = new Date(nowDay - i * 86400000);
-      days.push({ label: `${d.getUTCDate()}/${d.getUTCMonth() + 1}`, total: 0 });
-    }
-    for (const o of ordersList) {
-      const d = parseAnyDate(o.TANGGAL_ORDER ?? '');
-      if (!d) continue;
-      const diff = Math.round((nowDay - witaDayUTC(d)) / 86400000);
-      const bucket = days[29 - diff];
-      if (bucket) bucket.total++;
-    }
-    return days;
-  }, [ordersList]);
-
-  const topProduk = useMemo(() => {
-    const map = new Map<string, { nama: string; qty: number }>();
-    for (const o of ordersList) {
-      for (const d of (o.DETAIL as DetailItem[] | undefined) || []) {
-        if (String(d.ITEM_STATUS || 'APPROVED').toUpperCase() === 'DELETED') continue;
-        const kode = String(d.KODE_BARANG || '-');
-        const qty = toInt(d.QTY);
-        const cur = map.get(kode);
-        if (cur) cur.qty += qty;
-        else map.set(kode, { nama: String(d.NAMA_BARANG || kode), qty });
-      }
-    }
-    return [...map.entries()]
-      .map(([kode, v]) => ({ kode, ...v }))
-      .sort((a, b) => b.qty - a.qty)
-      .slice(0, 5);
-  }, [ordersList]);
-  const maxTopProduk = Math.max(1, ...topProduk.map((p) => p.qty));
-
-  const kategoriCount = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const b of katalogList) {
-      const k = String(b.KATEGORI || '').trim() || 'Lainnya';
-      map.set(k, (map.get(k) || 0) + 1);
-    }
-    return [...map.entries()]
-      .map(([label, value]) => ({ label, value }))
-      .sort((a, b) => b.value - a.value);
-  }, [katalogList]);
-
-  const approvalPct = donut.total ? Math.round((donut.approved / donut.total) * 100) : 0;
-
   const activityFeed = useMemo(
     () =>
       [...ordersList]
@@ -1589,103 +1636,46 @@ export default function Dashboard() {
             </Card>
           </div>
 
-          {/* Laporan & Grafik */}
+          {/* Laporan & Grafik (line chart + periode atur per chart) */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <Icon name="chart-line-up" size={18} className="text-brand" />
               <h2 className="font-display text-lg font-bold">Laporan & Grafik</h2>
             </div>
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-              {/* Tren order 14 hari (area/line) */}
-              <Card className="lg:col-span-2">
-                <CardContent className="p-4">
-                  <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold">
-                    <Icon name="chart-area" size={16} className="text-brand" />
-                    Tren Order 14 Hari
-                  </h3>
-                  {loading ? (
-                    <Skeleton className="h-52 w-full" />
-                  ) : (
-                    <TrendAreaChart data={trend14} />
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Gauge konversi */}
-              <Card>
-                <CardContent className="flex flex-col items-center justify-center p-4">
-                  <h3 className="mb-3 flex items-center gap-2 self-start text-sm font-semibold">
-                    <Icon name="gauge-circle-plus" size={16} className="text-success" />
-                    Tingkat Persetujuan
-                  </h3>
-                  {loading ? (
-                    <Skeleton className="h-40 w-40 rounded-full" />
-                  ) : (
-                    <RadialGauge
-                      value={approvalPct}
-                      label="Disetujui"
-                      sub={`${donut.approved} dari ${donut.total} order disetujui`}
-                    />
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Top produk (horizontal bar) */}
-              <Card className="lg:col-span-2">
-                <CardContent className="p-4">
-                  <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold">
-                    <Icon name="chart-simple-horizontal" size={16} className="text-brand" />
-                    Produk Paling Banyak Dipesan
-                  </h3>
-                  {loading ? (
-                    <div className="space-y-3">
-                      {[...Array(5)].map((_, i) => (
-                        <Skeleton key={i} className="h-6 w-full" />
-                      ))}
-                    </div>
-                  ) : (
-                    <TopProdukChart data={topProduk} max={maxTopProduk} />
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Donut kategori katalog */}
-              <Card>
-                <CardContent className="p-4">
-                  <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold">
-                    <Icon name="chart-pie" size={16} className="text-brand" />
-                    Kategori Katalog
-                  </h3>
-                  {loading ? (
-                    <Skeleton className="h-40 w-full" />
-                  ) : (
-                    <DonutChart
-                      segments={kategoriCount.map((k, i) => ({
-                        label: k.label,
-                        value: k.value,
-                        color: PALETTE[i % PALETTE.length],
-                      }))}
-                      total={katalogList.length}
-                      centerLabel="Barang"
-                    />
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Diagram batang order per hari (30 hari) */}
-              <Card className="lg:col-span-3">
-                <CardContent className="p-4">
-                  <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold">
-                    <Icon name="chart-histogram" size={16} className="text-brand" />
-                    Order per Hari (30 Hari Terakhir)
-                  </h3>
-                  {loading ? (
-                    <Skeleton className="h-52 w-full" />
-                  ) : (
-                    <BarChartDays data={daily30} />
-                  )}
-                </CardContent>
-              </Card>
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              <LineChartCard
+                title="Tren Order"
+                icon="chart-line-up"
+                series={ORDER_SERIES}
+                classify={classifyByStatus}
+                orders={ordersList}
+                loading={loading}
+              />
+              <LineChartCard
+                title="Tren per Cabang"
+                icon="chart-connected"
+                series={CABANG_SERIES}
+                classify={classifyByCabang}
+                orders={ordersList}
+                loading={loading}
+              />
+              <LineChartCard
+                title="Tren Nilai Order"
+                icon="chart-mixed"
+                series={[{ key: 'nilai', label: 'Nilai (Rp)', color: '#22c55e' }]}
+                classify={classifyNilai}
+                format={fmtRpCompact}
+                orders={ordersList}
+                loading={loading}
+              />
+              <LineChartCard
+                title="Tren Produk"
+                icon="chart-scatter"
+                series={[{ key: 'qty', label: 'Jumlah Barang', color: '#8b5cf6' }]}
+                classify={classifyQty}
+                orders={ordersList}
+                loading={loading}
+              />
             </div>
           </div>
         </div>
