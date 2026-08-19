@@ -1120,11 +1120,17 @@ export default function Dashboard() {
   const [katalogSearch, setKatalogSearch] = useState('');
   const [katalogCategory, setKatalogCategory] = useState('');
   const [editOrder, setEditOrder] = useState<Order | null>(null);
+  const [dataNotice, setDataNotice] = useState('');
   const lastLoadRef = useRef(0);
 
   type ApiResultType = Awaited<ReturnType<typeof orders.getAll>>;
   const applyOrders = useCallback((r: ApiResultType) => {
-    if (r.status === 'ok' && Array.isArray(r.data)) setOrdersList(r.data as Order[]);
+    if (r.status === 'ok' && Array.isArray(r.data)) {
+      setOrdersList(r.data as Order[]);
+      setDataNotice('');
+    } else if (r.status !== 'ok') {
+      setDataNotice(String(r.message || 'Gagal memuat order.'));
+    }
   }, []);
   const applyKatalog = useCallback((r: ApiResultType) => {
     if (r.status === 'ok' && Array.isArray(r.data)) setKatalogList(r.data as Barang[]);
@@ -1143,6 +1149,12 @@ export default function Dashboard() {
       applyKatalog(k);
     } catch (e) {
       setLoading(false);
+      // Simpan data lama tetap tampil; beri tahu user kalau refresh gagal
+      setOrdersList((prev) => {
+        if (prev.length === 0) setDataNotice('Gagal memuat data. Periksa koneksi, lalu tekan Muat Ulang.');
+        return prev;
+      });
+      setDataNotice((cur) => (cur ? cur : 'Gagal memperbarui data. Menampilkan data tersimpan.'));
       console.warn('[Dashboard] loadFast error:', (e as Error).message);
     }
   }, [applyOrders, applyKatalog]);
@@ -1158,6 +1170,7 @@ export default function Dashboard() {
         applyKatalog(k);
         if (showToast) toastSuccess('Data berhasil dimuat ulang.');
       } catch (e) {
+        setDataNotice((cur) => cur || 'Gagal memperbarui data. Menampilkan data tersimpan.');
         toastError('Gagal memuat data: ' + (e as Error).message);
       } finally {
         setLoading(false);
@@ -1458,6 +1471,13 @@ export default function Dashboard() {
         <div className="flex items-center gap-2 rounded-lg border border-warning/30 bg-warning/10 px-3 py-2.5 text-sm text-warning">
           <Icon name="triangle-warning" size={16} className="shrink-0" />
           {pendingCount} pesanan menunggu verifikasi.
+        </div>
+      )}
+
+      {dataNotice && (
+        <div className="flex items-center gap-2 rounded-lg border border-danger/30 bg-danger/10 px-3 py-2.5 text-sm text-danger">
+          <Icon name="triangle-warning" size={16} className="shrink-0" />
+          {dataNotice}
         </div>
       )}
 

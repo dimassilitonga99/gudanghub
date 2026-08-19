@@ -139,7 +139,7 @@ export default function Login() {
     if (now - lastPrewarm.current < 30000) return;
     lastPrewarm.current = now;
     try {
-      fetch(API_URL + '?action=ping&t=' + Date.now(), { method: 'GET', cache: 'no-store' }).catch(() => {});
+fetch(API_URL + '?action=ping&t=' + Date.now(), { method: 'GET', mode: 'no-cors', cache: 'no-store' }).catch(() => {});
     } catch {}
   };
 
