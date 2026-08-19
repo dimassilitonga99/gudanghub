@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { toastError, toastSuccess } from '@/lib/toast';
 
-import { loadAll, orders } from '@/lib/api';
+import { katalog, orders } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { APP, CABANG, SETTINGS, type Barang, type Order, type DetailItem } from '@/lib/config';
 import {
@@ -70,6 +70,16 @@ const PALETTE = ['#ff6b00', '#8b5cf6', '#22c55e', '#f59e0b', '#0ea5e9', '#ef4444
 function witaDayUTC(d: Date): number {
   const s = new Date(d.getTime() + APP.timezoneOffset * 3600 * 1000);
   return Date.UTC(s.getUTCFullYear(), s.getUTCMonth(), s.getUTCDate());
+}
+
+// Jam header tick per detik di komponen kecil — hindari re-render seluruh dashboard tiap detik
+function LiveClock({ className }: { className?: string }) {
+  const [now, setNow] = useState(new Date());
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  return <span className={className}>{formatWita(now)}</span>;
 }
 
 function DonutChart({
@@ -1110,19 +1120,43 @@ export default function Dashboard() {
   const [katalogSearch, setKatalogSearch] = useState('');
   const [katalogCategory, setKatalogCategory] = useState('');
   const [editOrder, setEditOrder] = useState<Order | null>(null);
-  const [now, setNow] = useState(new Date());
   const lastLoadRef = useRef(0);
 
-  const loadData = useCallback(
-    async (force = false) => {
-      if (!force && Date.now() - lastLoadRef.current < SETTINGS.throttleMs) return;
-      lastLoadRef.current = Date.now();
-      if (force) setRefreshing(true);
+  type ApiResultType = Awaited<ReturnType<typeof orders.getAll>>;
+  const applyOrders = useCallback((r: ApiResultType) => {
+    if (r.status === 'ok' && Array.isArray(r.data)) setOrdersList(r.data as Order[]);
+  }, []);
+  const applyKatalog = useCallback((r: ApiResultType) => {
+    if (r.status === 'ok' && Array.isArray(r.data)) setKatalogList(r.data as Barang[]);
+  }, []);
+
+  // Muat instan: pakai cache localStorage/mem dulu (stale-while-revalidate),
+  // refresh background otomatis via getAllFast. Order render dulu, katalog menyusul.
+  const loadFast = useCallback(async () => {
+    if (Date.now() - lastLoadRef.current < SETTINGS.throttleMs) return;
+    lastLoadRef.current = Date.now();
+    try {
+      const o = await orders.getAllFast(applyOrders);
+      applyOrders(o);
+      setLoading(false);
+      const k = await katalog.getAllFast(applyKatalog);
+      applyKatalog(k);
+    } catch (e) {
+      setLoading(false);
+      console.warn('[Dashboard] loadFast error:', (e as Error).message);
+    }
+  }, [applyOrders, applyKatalog]);
+
+  // Muat paksa dari server (tombol Muat Ulang / setelah aksi tulis)
+  const loadFresh = useCallback(
+    async (showToast = false) => {
+      setRefreshing(true);
       try {
-        const { orders: o, katalog: k } = await loadAll({ cache: !force });
-        setOrdersList((o as Order[]) || []);
-        setKatalogList((k as Barang[]) || []);
-        if (force) toastSuccess('Data berhasil dimuat ulang.');
+        const o = await orders.getAll({ cache: false });
+        applyOrders(o);
+        const k = await katalog.getAll({ cache: false });
+        applyKatalog(k);
+        if (showToast) toastSuccess('Data berhasil dimuat ulang.');
       } catch (e) {
         toastError('Gagal memuat data: ' + (e as Error).message);
       } finally {
@@ -1130,17 +1164,12 @@ export default function Dashboard() {
         setRefreshing(false);
       }
     },
-    [],
+    [applyOrders, applyKatalog],
   );
 
   useEffect(() => {
-    void loadData(true);
-  }, [loadData]);
-
-  useEffect(() => {
-    const t = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(t);
-  }, []);
+    void loadFast();
+  }, [loadFast]);
 
   // Auto refresh dengan visibility change
   useEffect(() => {
@@ -1148,7 +1177,7 @@ export default function Dashboard() {
     const start = () => {
       if (timer) return;
       timer = setInterval(() => {
-        if (!document.hidden) void loadData(false);
+        if (!document.hidden) void loadFast();
       }, SETTINGS.autoRefreshMs);
     };
     const onVisibility = () => {
@@ -1158,7 +1187,7 @@ export default function Dashboard() {
           timer = null;
         }
       } else {
-        void loadData(false);
+        void loadFast();
         start();
       }
     };
@@ -1168,7 +1197,7 @@ export default function Dashboard() {
       document.removeEventListener('visibilitychange', onVisibility);
       if (timer) clearInterval(timer);
     };
-  }, [loadData]);
+  }, [loadFast]);
 
   // Hash routing antar tab + back/forward
   useEffect(() => {
@@ -1196,7 +1225,7 @@ export default function Dashboard() {
     const onKey = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'r' && !e.shiftKey) {
         e.preventDefault();
-        void loadData(true);
+        void loadFresh(true);
       }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
@@ -1205,7 +1234,7 @@ export default function Dashboard() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [loadData]);
+  }, [loadFresh]);
 
   const pendingCount = useMemo(
     () => ordersList.filter((o) => String(o.STATUS || '').toUpperCase() === 'PENDING').length,
@@ -1313,7 +1342,7 @@ export default function Dashboard() {
         const result = await orders.updateStatus({ orderId, status, alasan });
         if (result.status === 'ok') {
           toastSuccess(status === 'APPROVED' ? 'Order disetujui!' : 'Order ditolak.');
-          void loadData(true);
+          void loadFresh();
         } else {
           setOrdersList((list) =>
             list.map((o) => (String(o.ORDER_ID) === orderId ? { ...o, STATUS: prev } : o)),
@@ -1327,7 +1356,7 @@ export default function Dashboard() {
         toastError((e as Error).message);
       }
     },
-    [loadData],
+    [loadFresh],
   );
 
   const quickApprove = async (order: Order) => {
@@ -1409,7 +1438,7 @@ export default function Dashboard() {
             Selamat datang, {session?.nama || session?.username || 'Admin'}!
           </h1>
           <p className="text-sm text-muted-foreground">
-            Ringkasan operasional PT Central Perabot Utama hari ini · {formatWita(now)}
+            Ringkasan operasional PT Central Perabot Utama hari ini · <LiveClock />
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -1418,7 +1447,7 @@ export default function Dashboard() {
               <Icon name="clock" size={12} /> {pendingCount} pending
             </Badge>
           )}
-          <Button variant="outline" size="sm" onClick={() => void loadData(true)} disabled={refreshing}>
+          <Button variant="outline" size="sm" onClick={() => void loadFresh(true)} disabled={refreshing}>
             <Icon name="refresh" size={16} className={refreshing ? 'animate-spin' : undefined} />
             Muat Ulang
           </Button>
@@ -1945,7 +1974,7 @@ export default function Dashboard() {
         allOrders={ordersList}
         sessionName={session?.nama || session?.username || ''}
         onClose={() => setEditOrder(null)}
-        onSaved={() => void loadData(true)}
+        onSaved={() => void loadFresh()}
       />
 
       {dialog}

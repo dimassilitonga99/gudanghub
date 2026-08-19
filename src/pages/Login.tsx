@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
-import { auth, katalog, prewarmAppScript } from '@/lib/api';
+import { auth, katalog, orders, prewarmAppScript } from '@/lib/api';
 import { API_URL, ROUTES } from '@/lib/config';
 import {
   getLastUsername,
@@ -222,7 +222,10 @@ export default function Login() {
 
     try {
       prewarmAppScript();
-      if (result.role !== 'admin') {
+      if (result.role === 'admin') {
+        // Hangatkan cache getOrders saat login → dashboard langsung render instan
+        orders.getAll({ cache: true, timeout: 45000, maxRetries: 0 }).catch(() => {});
+      } else {
         katalog.getAll({ cache: false, timeout: 45000, maxRetries: 0 }).catch(() => {});
       }
     } catch {}
