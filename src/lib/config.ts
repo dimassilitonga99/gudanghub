@@ -227,7 +227,7 @@ export const SETTINGS = {
   itemsPerPage: 40,
   maxOrderItems: 100,
   apiTimeout: 30000,
-  autoRefreshMs: 60000,
+  autoRefreshMs: 30000,
   throttleMs: 3000,
   toastDuration: 3000,
   toastDurationError: 5000,

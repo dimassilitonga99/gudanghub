@@ -1160,14 +1160,24 @@ export default function Dashboard() {
   }, [applyOrders, applyKatalog]);
 
   // Muat paksa dari server (tombol Muat Ulang / setelah aksi tulis)
+  // Order diterapkan langsung saat tiba; katalog menyusul — UI tidak menunggu payload katalog.
   const loadFresh = useCallback(
     async (showToast = false) => {
       setRefreshing(true);
       try {
-        const o = await orders.getAll({ cache: false });
-        applyOrders(o);
-        const k = await katalog.getAll({ cache: false });
-        applyKatalog(k);
+        try {
+          const o = await orders.getAll({ cache: false });
+          applyOrders(o);
+        } catch (e) {
+          throw e;
+        }
+        try {
+          const k = await katalog.getAll({ cache: false });
+          applyKatalog(k);
+        } catch {
+          /* katalog gagal — order tetap tampil fresh */
+        }
+        setDataNotice('');
         if (showToast) toastSuccess('Data berhasil dimuat ulang.');
       } catch (e) {
         setDataNotice((cur) => cur || 'Gagal memperbarui data. Menampilkan data tersimpan.');
