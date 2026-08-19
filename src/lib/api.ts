@@ -295,7 +295,11 @@ export async function callApi(
       if (result && result.code === 'AUTH_REQUIRED' && PUBLIC_ACTIONS.indexOf(action) === -1) {
         handleAuthRequired();
       }
-      if (useCache && result.status === 'ok' && Array.isArray(result.data) && result.data.length > 0) {
+      // Write-through: data bersama (getOrders/getBarang/getCabang) selalu
+      // disegarkan di cache lokal walau dipanggil dengan cache:false,
+      // supaya refresh pasca-write tidak meninggalkan cache basi.
+      const sharedReads = action === 'getOrders' || action === 'getBarang' || action === 'getCabang';
+      if ((useCache || sharedReads) && result.status === 'ok' && Array.isArray(result.data) && result.data.length > 0) {
         memCache.set(cacheKey, { data: result, time: Date.now() });
         setLSCache(action, result);
       }

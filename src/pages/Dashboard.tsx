@@ -1122,14 +1122,20 @@ export default function Dashboard() {
   const [editOrder, setEditOrder] = useState<Order | null>(null);
   const [dataNotice, setDataNotice] = useState('');
   const lastLoadRef = useRef(0);
+  // Versi data: naik tiap operasi tulis. Hasil fetch yang mulai SEBELUM
+  // tulis terbaru diabaikan (hindari refresh latar menimpa data baru = revert).
+  const dataSeqRef = useRef(0);
 
   type ApiResultType = Awaited<ReturnType<typeof orders.getAll>>;
-  const applyOrders = useCallback((r: ApiResultType) => {
-    if (r.status === 'ok' && Array.isArray(r.data)) {
+  const applyOrders = useCallback((r: ApiResultType, startedSeq = dataSeqRef.current) => {
+    if (r.status !== 'ok') {
+      setDataNotice(String(r.message || 'Gagal memuat order.'));
+      return;
+    }
+    if (!Array.isArray(r.data)) return;
+    if (startedSeq >= dataSeqRef.current) {
       setOrdersList(r.data as Order[]);
       setDataNotice('');
-    } else if (r.status !== 'ok') {
-      setDataNotice(String(r.message || 'Gagal memuat order.'));
     }
   }, []);
   const applyKatalog = useCallback((r: ApiResultType) => {
@@ -1141,9 +1147,10 @@ export default function Dashboard() {
   const loadFast = useCallback(async () => {
     if (Date.now() - lastLoadRef.current < SETTINGS.throttleMs) return;
     lastLoadRef.current = Date.now();
+    const startedSeq = dataSeqRef.current;
     try {
-      const o = await orders.getAllFast(applyOrders);
-      applyOrders(o);
+      const o = await orders.getAllFast((fresh) => applyOrders(fresh, startedSeq));
+      applyOrders(o, startedSeq);
       setLoading(false);
       const k = await katalog.getAllFast(applyKatalog);
       applyKatalog(k);
@@ -1164,10 +1171,11 @@ export default function Dashboard() {
   const loadFresh = useCallback(
     async (showToast = false) => {
       setRefreshing(true);
+      const startedSeq = dataSeqRef.current;
       try {
         try {
           const o = await orders.getAll({ cache: false });
-          applyOrders(o);
+          applyOrders(o, startedSeq);
         } catch (e) {
           throw e;
         }
@@ -1357,6 +1365,7 @@ export default function Dashboard() {
     async (order: Order, status: 'APPROVED' | 'REJECTED', alasan: string) => {
       const orderId = String(order.ORDER_ID);
       const prev = String(order.STATUS || 'PENDING');
+      dataSeqRef.current++;
       setOrdersList((list) =>
         list.map((o) => (String(o.ORDER_ID) === orderId ? { ...o, STATUS: status } : o)),
       );
@@ -2004,7 +2013,10 @@ export default function Dashboard() {
         allOrders={ordersList}
         sessionName={session?.nama || session?.username || ''}
         onClose={() => setEditOrder(null)}
-        onSaved={() => void loadFresh()}
+        onSaved={() => {
+          dataSeqRef.current++;
+          void loadFresh();
+        }}
       />
 
       {dialog}
