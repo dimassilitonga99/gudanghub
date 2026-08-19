@@ -187,7 +187,12 @@ function TrendAreaChart({ data }: { data: { label: string; total: number; approv
         />
         {data.map((d, i) =>
           d.total > 0 ? (
-            <circle key={i} cx={x(i)} cy={y(d.total)} r="3" fill="#ff6b00" stroke="#fff" strokeWidth="1" />
+            <g key={i}>
+              <circle cx={x(i)} cy={y(d.total)} r="3" fill="#ff6b00" stroke="#fff" strokeWidth="1" />
+              <text x={x(i)} y={y(d.total) - 7} textAnchor="middle" fontSize="9" fill="currentColor" fillOpacity="0.7">
+                {d.total}
+              </text>
+            </g>
           ) : null,
         )}
         {data.map((d, i) =>
@@ -218,20 +223,30 @@ function StackedBarChart({
   max: number;
 }) {
   return (
-    <div className="flex h-40 items-end justify-around gap-3">
+    <div className="flex h-44 items-end justify-around gap-3">
       {data.map((c) => {
         const total = c.pending + c.approved + c.rejected;
-        const h = (v: number) => `${Math.round((v / max) * 100)}%`;
+        const pct = (v: number) => (v / max) * 100;
+        const layers = [
+          { key: 'approved' as const, value: c.approved, cls: 'bg-success' },
+          { key: 'pending' as const, value: c.pending, cls: 'bg-warning' },
+          { key: 'rejected' as const, value: c.rejected, cls: 'bg-danger' },
+        ];
         return (
-          <div key={c.pic} className="flex flex-1 flex-col items-center gap-1">
+          <div key={c.pic} className="flex h-full flex-1 flex-col items-center gap-1">
             <span className="text-xs font-bold">{total}</span>
-            <div className="flex h-full w-full flex-col-reverse overflow-hidden rounded-t-md" title={`${c.pic}: ${total} order`}>
-              {total > 0 && (
-                <>
-                  <div style={{ height: h(c.approved) }} className="w-full bg-success" />
-                  <div style={{ height: h(c.pending) }} className="w-full bg-warning" />
-                  <div style={{ height: h(c.rejected) }} className="w-full bg-danger" />
-                </>
+            <div
+              className="flex h-full w-full flex-col-reverse overflow-hidden rounded-t-md bg-muted/20"
+              title={`${c.pic}: ${total} order`}
+            >
+              {layers.map((l) =>
+                l.value > 0 ? (
+                  <div key={l.key} style={{ height: `${pct(l.value)}%` }} className={cn('flex w-full items-center justify-center', l.cls)}>
+                    {pct(l.value) >= 9 && (
+                      <span className="text-[9px] font-bold leading-none text-white">{l.value}</span>
+                    )}
+                  </div>
+                ) : null,
               )}
             </div>
             <span className="text-[11px] text-muted-foreground">{c.pic}</span>
@@ -278,21 +293,20 @@ function BarChartDays({ data }: { data: { label: string; total: number }[] }) {
           const today = i === data.length - 1;
           const h = d.total === 0 ? 2 : Math.max((d.total / max) * 100, 4);
           return (
-            <div
-              key={i}
-              title={`${d.label}: ${d.total} order`}
-              className="group relative flex flex-1 flex-col items-center justify-end"
-            >
-              <span className="mb-1 hidden text-[10px] font-bold tabular-nums text-foreground group-hover:block">
-                {d.total}
-              </span>
+            <div key={i} title={`${d.label}: ${d.total} order`} className="group relative flex h-full flex-1 flex-col items-center justify-end">
               <div
                 className={cn(
-                  'w-full rounded-t-sm transition-all',
+                  'relative w-full rounded-t-sm transition-all',
                   today ? 'bg-brand' : d.total > 0 ? 'bg-brand/70 hover:bg-brand' : 'bg-muted',
                 )}
                 style={{ height: `${h}%` }}
-              />
+              >
+                {d.total > 0 && (
+                  <span className="pointer-events-none absolute -top-3 left-1/2 -translate-x-1/2 text-[8px] font-bold leading-none tabular-nums text-muted-foreground">
+                    {d.total}
+                  </span>
+                )}
+              </div>
             </div>
           );
         })}
