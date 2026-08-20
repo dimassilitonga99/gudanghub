@@ -826,17 +826,7 @@ function PreOrderDialog({
 
   const getNomorOrder = useCallback((): string => {
     if (nomorMode === 'manual') return nomorManual || '01';
-    try {
-      const now = new Date();
-      const sameMonth = ordersCache.filter((o) => {
-        const d = parseAnyDate(String(o.TANGGAL_ORDER || ''));
-        return d && d.getTime() !== 0 && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-      });
-      const nomor = sameMonth.length + 1;
-      return nomor < 10 ? '0' + nomor : String(nomor);
-    } catch {
-      return '01';
-    }
+    return getNextNomor(ordersCache);
   }, [nomorMode, nomorManual, ordersCache]);
 
   const getTanggalOrder = useCallback((): Date => {
@@ -1157,6 +1147,26 @@ function formatDateInput(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
+// Nomor order berikutnya — patokan nomor TERAKHIR di form order (bulan berjalan).
+// Contoh: form terakhir bernomor 2 → berikutnya 3. Fallback hitung bila data kosong.
+function getNextNomor(orders: Order[]): string {
+  try {
+    const now = new Date();
+    const sameMonth = orders.filter((o) => {
+      const d = parseAnyDate(String(o.TANGGAL_ORDER || ''));
+      return d && d.getTime() !== 0 && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    });
+    const used = sameMonth
+      .map((o) => parseInt(String((o as unknown as Record<string, unknown>).NOMOR_ORDER), 10))
+      .filter((n) => !isNaN(n));
+    const last = used.length ? Math.max(...used) : 0;
+    const nomor = last > 0 ? last + 1 : sameMonth.length + 1;
+    return nomor < 10 ? '0' + nomor : String(nomor);
+  } catch {
+    return '01';
+  }
+}
+
 function HistoryTab({
   orders,
   loading,
@@ -1177,19 +1187,7 @@ function HistoryTab({
   const [dateTo, setDateTo] = useState(() => formatDateInput(new Date()));
   const [quickDate, setQuickDate] = useState('');
 
-  const nextOrderNumber = useMemo(() => {
-    try {
-      const now = new Date();
-      const sameMonth = orders.filter((o) => {
-        const d = parseAnyDate(String(o.TANGGAL_ORDER || ''));
-        return d && d.getTime() !== 0 && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-      });
-      const nomor = sameMonth.length + 1;
-      return nomor < 10 ? '0' + nomor : String(nomor);
-    } catch {
-      return '01';
-    }
-  }, [orders]);
+  const nextOrderNumber = useMemo(() => getNextNomor(orders), [orders]);
 
   const applyQuickDate = (type: string) => {
     const today = new Date();
