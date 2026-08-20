@@ -1086,6 +1086,7 @@ function EditModal({
         idCabang={String(order.ID_CABANG || '')}
         tanggalCetak={parseAnyDate(order.TANGGAL_ORDER ?? '') ?? new Date()}
         nomorOrder={String(order.NOMOR_ORDER || '') || getSequentialNumber(order, allOrders)}
+        statusOrder={String(order.STATUS || 'PENDING')}
         items={printItems}
         stokLookup={(kode) => {
           const b = katalog.find(
@@ -1093,6 +1094,7 @@ function EditModal({
           );
           return b ? toInt(b.STOK) : undefined;
         }}
+        showStatus
         onClose={() => setPrintOpen(false)}
       />
 

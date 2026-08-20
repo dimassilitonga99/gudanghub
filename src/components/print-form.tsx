@@ -57,8 +57,6 @@ function buildPage(
     stokLookup?: (kode: string) => number | string | undefined;
   },
 ): React.ReactNode {
-  const isCabang = !!info.statusOrder;
-
   const statusBadge = (() => {
     if (!info.statusOrder) return null;
     const st = info.statusOrder.toUpperCase();
@@ -167,7 +165,7 @@ function buildPage(
               <span style={{ fontWeight: 700 }}>Hari/Tgl</span> : {info.tanggal}
             </td>
           </tr>
-          {isCabang && (
+          {info.statusOrder && (
             <tr>
               <td style={{ padding: '2px 0', fontWeight: 700, verticalAlign: 'top' }}>STATUS ORDER</td>
               <td colSpan={2} style={{ padding: '2px 0', verticalAlign: 'top' }}>
@@ -221,54 +219,29 @@ function buildPage(
         </tbody>
       </table>
 
-      {/* TANDA TANGAN */}
-      {isCabang ? (
-        <table width="100%" cellPadding={0} cellSpacing={0} style={{ border: '1px solid #000', borderCollapse: 'collapse' }}>
-          <tbody>
-            <tr>
-              <td style={{ ...signBase, padding: '12px 20px 3px', width: '33%', textAlign: 'left', fontSize: 13 }}>pengantar,</td>
-              <td style={{ ...signBase, padding: '12px 10px 3px', width: '34%', textAlign: 'center', fontSize: 13 }}>Persetujuan,</td>
-              <td style={{ ...signBase, padding: '12px 20px 3px', width: '33%', textAlign: 'right', fontSize: 13 }}>Penerima,</td>
-            </tr>
-            <tr>
-              <td colSpan={3} style={{ padding: '25px 0' }}>&nbsp;</td>
-            </tr>
-            <tr>
-              <td style={{ ...signBase, padding: '0 20px 3px', textAlign: 'left', fontSize: 13, fontWeight: 600 }}>(_______________)</td>
-              <td style={{ ...signBase, padding: '0 10px 3px', textAlign: 'center', fontSize: 13, fontWeight: 600 }}>(_______________)</td>
-              <td style={{ ...signBase, padding: '0 20px 3px', textAlign: 'right', fontSize: 13, fontWeight: 600 }}>(_______________)</td>
-            </tr>
-            <tr>
-              <td style={{ ...signBase, padding: '0 20px 12px 30px', textAlign: 'left', fontSize: 14, fontWeight: 900 }}>Driver</td>
-              <td style={{ ...signBase, padding: '0 10px 12px', textAlign: 'center', fontSize: 14, fontWeight: 900 }}>SPV Gudang</td>
-              <td style={{ ...signBase, padding: '0 30px 12px 20px', textAlign: 'right', fontSize: 14, fontWeight: 900 }}>SPV Cabang</td>
-            </tr>
-          </tbody>
-        </table>
-      ) : (
-        <table width="100%" cellPadding={0} cellSpacing={0} style={{ border: '1px solid #000', borderCollapse: 'collapse' }}>
-          <tbody>
-            <tr>
-              <td style={{ ...signBase, textAlign: 'center', padding: '12px 20px 3px', width: '33%', fontSize: 13 }}>pengantar,</td>
-              <td style={{ ...signBase, textAlign: 'center', padding: '12px 20px 3px', width: '34%', fontSize: 13 }}>Persetujuan,</td>
-              <td style={{ ...signBase, textAlign: 'center', padding: '12px 20px 3px', width: '33%', fontSize: 13 }}>Penerima,</td>
-            </tr>
-            <tr>
-              <td colSpan={3} style={{ padding: '25px 0' }}>&nbsp;</td>
-            </tr>
-            <tr>
-              <td style={{ ...signBase, textAlign: 'center', padding: '0 20px 3px', fontSize: 13, fontWeight: 600 }}>(_______________)</td>
-              <td style={{ ...signBase, textAlign: 'center', padding: '0 20px 3px', fontSize: 13, fontWeight: 600 }}>(_______________)</td>
-              <td style={{ ...signBase, textAlign: 'center', padding: '0 20px 3px', fontSize: 13, fontWeight: 600 }}>(_______________)</td>
-            </tr>
-            <tr>
-              <td style={{ ...signBase, textAlign: 'center', padding: '0 20px 12px', fontSize: 14, fontWeight: 900 }}>Driver</td>
-              <td style={{ ...signBase, textAlign: 'center', padding: '0 20px 12px', fontSize: 14, fontWeight: 900 }}>SPV Gudang</td>
-              <td style={{ ...signBase, textAlign: 'center', padding: '0 20px 12px', fontSize: 14, fontWeight: 900 }}>SPV Cabang</td>
-            </tr>
-          </tbody>
-        </table>
-      )}
+      {/* TANDA TANGAN — merged tengah, garis atas-bawah */}
+      <table width="100%" cellPadding={0} cellSpacing={0} style={{ border: '1px solid #000', borderCollapse: 'collapse' }}>
+        <tbody>
+          <tr>
+            <td style={{ ...signBase, textAlign: 'center', padding: '12px 20px 3px', width: '33%', fontSize: 13 }}>pengantar,</td>
+            <td style={{ ...signBase, textAlign: 'center', padding: '12px 20px 3px', width: '34%', fontSize: 13 }}>Persetujuan,</td>
+            <td style={{ ...signBase, textAlign: 'center', padding: '12px 20px 3px', width: '33%', fontSize: 13 }}>Penerima,</td>
+          </tr>
+          <tr>
+            <td colSpan={3} style={{ padding: '25px 0' }}>&nbsp;</td>
+          </tr>
+          <tr>
+            <td style={{ ...signBase, textAlign: 'center', padding: '0 20px 3px', fontSize: 13, fontWeight: 600 }}>(_______________)</td>
+            <td style={{ ...signBase, textAlign: 'center', padding: '0 20px 3px', fontSize: 13, fontWeight: 600 }}>(_______________)</td>
+            <td style={{ ...signBase, textAlign: 'center', padding: '0 20px 3px', fontSize: 13, fontWeight: 600 }}>(_______________)</td>
+          </tr>
+          <tr>
+            <td style={{ ...signBase, textAlign: 'center', padding: '0 20px 12px', fontSize: 14, fontWeight: 900 }}>Driver</td>
+            <td style={{ ...signBase, textAlign: 'center', padding: '0 20px 12px', fontSize: 14, fontWeight: 900 }}>SPV Gudang</td>
+            <td style={{ ...signBase, textAlign: 'center', padding: '0 20px 12px', fontSize: 14, fontWeight: 900 }}>SPV Cabang</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   );
 }
