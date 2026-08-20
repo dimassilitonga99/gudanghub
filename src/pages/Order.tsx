@@ -1154,6 +1154,45 @@ function fmtWITADateInput(d: Date): string {
   return `${String(s.getUTCDate()).padStart(2, '0')}-${String(s.getUTCMonth() + 1).padStart(2, '0')}-${s.getUTCFullYear()}`;
 }
 
+// WITA datetime utk tampilan riwayat optimistik: DD-MM-YYYY HH:MM:SS
+function fmtWITADateTime(d: Date): string {
+  const pad = (x: number) => String(x).padStart(2, '0');
+  const s = new Date(d.getTime() + APP.timezoneOffset * 3600 * 1000);
+  const t = new Date(Date.now() + APP.timezoneOffset * 3600 * 1000);
+  return `${pad(s.getUTCDate())}-${pad(s.getUTCMonth() + 1)}-${s.getUTCFullYear()} ${pad(t.getUTCHours())}:${pad(t.getUTCMinutes())}:${pad(t.getUTCSeconds())}`;
+}
+
+// Bangun order lokal utk tampil INSTAN di riwayat sebelum sinkron server
+function buildOptimisticOrder(
+  items: CartItem[],
+  config: { nomorOrder: string; tanggalOrder: Date },
+  branchId: string,
+  catatan: string,
+  orderId: string,
+): Order {
+  return {
+    ORDER_ID: orderId,
+    NOMOR_ORDER: config.nomorOrder,
+    TANGGAL_ORDER: fmtWITADateTime(config.tanggalOrder),
+    ID_CABANG: branchId,
+    STATUS: 'PENDING',
+    CATATAN: catatan,
+    DETAIL: items.map((i) => ({
+      KODE_BARANG: i.kode,
+      NAMA_BARANG: i.nama,
+      KATEGORI: i.kategori,
+      QTY: i.qty,
+      SATUAN: i.satuan,
+      HARGA_SATUAN: i.harga,
+      ITEM_STATUS: 'APPROVED',
+      ORIGINAL_QTY: i.qty,
+      STOK_GUDANG: i.stokGudang,
+      STOK_TOKO: i.stokToko,
+      STOK_SISTEM: i.stokSistem,
+    })),
+  };
+}
+
 // Nomor order berikutnya — patokan nomor TERAKHIR di form order (bulan berjalan).
 // Contoh: form terakhir bernomor 2 → berikutnya 3. Fallback hitung bila data kosong.
 function getNextNomor(orders: Order[]): string {
@@ -2122,6 +2161,9 @@ export default function Order() {
       if (result.status !== 'ok') {
         throw new Error(String(result.message || 'Gagal mengirim order.'));
       }
+      // Tampilkan INSTAN di riwayat (optimistik), lalu reconcile dengan server
+      const oid = String((result as unknown as { orderId?: string }).orderId || `ORD-LOCAL-${Date.now()}`);
+      setHistory((prev) => [buildOptimisticOrder(items, config, branchId, fullCatatan, oid), ...prev]);
       persistCart({});
       toastSuccess('Order berhasil dikirim!', { duration: 4000 });
       setPreOrder(null);
@@ -2165,6 +2207,8 @@ export default function Order() {
       if (result.status !== 'ok') {
         throw new Error(String(result.message || 'Gagal mengirim order.'));
       }
+      const oidMass = String((result as unknown as { orderId?: string }).orderId || `ORD-LOCAL-${Date.now()}`);
+      setHistory((prev) => [buildOptimisticOrder(items, config, branchId, fullCatatan, oidMass), ...prev]);
       toastSuccess('Order massal berhasil dikirim!', { duration: 4000 });
       setPreOrder(null);
       setMassResetKey((k) => k + 1);
