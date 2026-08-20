@@ -1906,6 +1906,8 @@ export default function Order() {
   const [preOrder, setPreOrder] = useState<{ items: CartItem[]; catatan: string } | null>(null);
   const [history, setHistory] = useState<Order[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const historyRef = useRef<Order[]>([]);
+  historyRef.current = history;
   const [printOrder, setPrintOrder] = useState<Order | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [massResetKey, setMassResetKey] = useState(0);
@@ -1948,7 +1950,9 @@ export default function Order() {
   }, []);
 
   const loadHistory = useCallback(async () => {
-    setHistoryLoading(true);
+    // Skeleton hanya saat load PERTAMA; refresh berikutnya biarkan list tampil
+    // agar order optimistik tetap terlihat selama menunggu server (4-12s).
+    if (historyRef.current.length === 0) setHistoryLoading(true);
     try {
       const h = await ordersApi.getAll({ cache: false });
       const all = h.status === 'ok' ? ((h.data as Order[]) || []) : [];
