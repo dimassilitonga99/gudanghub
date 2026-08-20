@@ -806,6 +806,8 @@ function PreOrderDialog({
   const [jpgBusy, setJpgBusy] = useState(false);
   const [jpgProgress, setJpgProgress] = useState('');
   const previewRef = useRef<HTMLDivElement | null>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   const pages = useMemo(() => {
     const chunks = chunkArray(items, PRINT_ITEMS_PER_PAGE);
@@ -819,11 +821,14 @@ function PreOrderDialog({
     setTanggalMode('today');
     setTanggalCustom('');
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') onCloseRef.current();
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
+    // Hanya reset saat dialog DIBUKA. JANGAN ikutkan onClose: parent melempar
+    // arrow baru tiap render (saat submitting/optimistic), yang akan me-reset
+    // nomor/tanggal manual yang sedang diisi saat klik "Kirim ke Gudang".
+  }, [open]);
 
   const getNomorOrder = useCallback((): string => {
     if (nomorMode === 'manual') return nomorManual || '01';
