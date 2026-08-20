@@ -177,9 +177,10 @@ export function formatTimeAgo(dateLike: string | number | Date | null | undefine
 }
 
 // Port getSequentialNumber dari print-form.js vanilla (nomor urut per bulan, dimulai 01)
+// Skala PER-CABANG: urutan mengikuti nomor yang tampil di form tiap cabang, bukan semua cabang.
 export function getSequentialNumber(
-  order: { TANGGAL_ORDER?: string | null; ORDER_ID: string | number } | undefined | null,
-  allOrders: { TANGGAL_ORDER?: string | null; ORDER_ID: string | number }[] | undefined | null,
+  order: { TANGGAL_ORDER?: string | null; ORDER_ID: string | number; ID_CABANG?: string | null } | undefined | null,
+  allOrders: { TANGGAL_ORDER?: string | null; ORDER_ID: string | number; ID_CABANG?: string | null }[] | undefined | null,
 ): string {
   try {
     if (!order || !allOrders) return '01';
@@ -187,11 +188,17 @@ export function getSequentialNumber(
     if (!orderDate) return '01';
     const targetMonth = orderDate.getMonth();
     const targetYear = orderDate.getFullYear();
+    const cabang = String(order.ID_CABANG || '').toUpperCase();
 
     const sameMonth = allOrders
       .filter((o) => {
         const d = parseAnyDate(o.TANGGAL_ORDER ?? '');
-        return d !== null && d.getMonth() === targetMonth && d.getFullYear() === targetYear;
+        return (
+          d !== null &&
+          cabang === String(o.ID_CABANG || '').toUpperCase() &&
+          d.getMonth() === targetMonth &&
+          d.getFullYear() === targetYear
+        );
       })
       .sort(
         (a, b) =>
