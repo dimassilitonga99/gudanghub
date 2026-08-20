@@ -299,7 +299,9 @@ export async function callApi(
       // disegarkan di cache lokal walau dipanggil dengan cache:false,
       // supaya refresh pasca-write tidak meninggalkan cache basi.
       const sharedReads = action === 'getOrders' || action === 'getBarang' || action === 'getCabang';
-      if ((useCache || sharedReads) && result.status === 'ok' && Array.isArray(result.data) && result.data.length > 0) {
+      // Hasil KOSONG pun ditulis (array sah): reset semua order membuat getOrders
+      // mengembalikan [], dan cache lokal harus ikut bersih — bukan data lama.
+      if ((useCache || sharedReads) && result.status === 'ok' && Array.isArray(result.data)) {
         memCache.set(cacheKey, { data: result, time: Date.now() });
         setLSCache(action, result);
       }
@@ -329,7 +331,6 @@ export async function callApiStale(
   payload: Record<string, unknown> = {},
   options: StaleOptions = {},
 ): Promise<ApiResult> {
-  const ttl = options.ttl || 5 * 60 * 1000;
   const maxAge = options.maxAge || 24 * 60 * 60 * 1000;
   const onFresh = options.onFresh || null;
   const timeout = options.timeout || 45000;
@@ -337,10 +338,10 @@ export async function callApiStale(
   const cached = getLSCache(action);
 
   if (cached && cached.age < maxAge) {
-    if (cached.age < ttl) {
-      return { ...cached.data, _fromCache: true, _cacheAge: cached.age };
-    }
-
+    // SELALU revalidate di background (bukan hanya saat umur > ttl):
+    // data bisa basi karena write dari browser lain (reset order, approve,
+    // reject, order baru). Tanpa ini, F5 dalam ttl menampilkan data lama
+    // yang tidak pernah terkoreksi.
     setTimeout(() => {
       executeWithRetry(action, payload, timeout, 2)
         .then((freshResult) => {
@@ -352,7 +353,9 @@ export async function callApiStale(
             handleAuthRequired();
             return;
           }
-          if (freshResult && freshResult.status === 'ok' && Array.isArray(freshResult.data) && freshResult.data.length > 0) {
+          // Hasil KOSONG pun sah (mis. semua order direset): tetap tulis cache
+          // dan kabari UI, supaya data lama tidak hidup terus.
+          if (freshResult && freshResult.status === 'ok' && Array.isArray(freshResult.data)) {
             setLSCache(action, freshResult);
             memCache.set(action + '::' + JSON.stringify(payload), {
               data: freshResult,
@@ -378,7 +381,7 @@ export async function callApiStale(
     return result;
   }
 
-  if (result && result.status === 'ok' && Array.isArray(result.data) && result.data.length > 0) {
+  if (result && result.status === 'ok' && Array.isArray(result.data)) {
     setLSCache(action, result);
     memCache.set(action + '::' + JSON.stringify(payload), { data: result, time: Date.now() });
   }
