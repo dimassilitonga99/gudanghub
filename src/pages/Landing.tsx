@@ -1164,6 +1164,26 @@ export default function Landing() {
         className="relative mx-auto max-w-5xl px-4 pt-16 text-center sm:pt-24"
         style={{ transform: `translateY(-${heroY}px)` }}
       >
+        {/* Video hero (Seedance) — parallax scroll; fallback poster kalau video belum ada */}
+        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-3xl">
+          <video
+            className="h-full w-full object-cover opacity-25"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            poster="/videos/hero-poster.jpg"
+            style={{ transform: `translateY(${heroY * -0.12}px) scale(1.12)` }}
+            onError={(e) => {
+              (e.currentTarget as HTMLVideoElement).style.display = 'none';
+            }}
+          >
+            <source src="/videos/hero.mp4" type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/35 to-background" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(6,182,212,0.12),transparent_60%)]" />
+        </div>
         <Reveal>
           <h1 className="text-4xl font-black tracking-tight sm:text-6xl">
             <GradientShimmer gradient="sunrise" className="block">
