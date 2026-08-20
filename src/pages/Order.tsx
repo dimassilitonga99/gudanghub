@@ -6,6 +6,7 @@ import { toastError, toastSuccess } from '@/lib/toast';
 import { katalog as katalogApi, orders as ordersApi, cart as cartApi, callApi } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import {
+  APP,
   CABANG,
   KATEGORI_MANUAL,
   SATUAN_OPTIONS,
@@ -1147,6 +1148,12 @@ function formatDateInput(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
+// Format tanggal (WITA) utk payload backend: DD-MM-YYYY
+function fmtWITADateInput(d: Date): string {
+  const s = new Date(d.getTime() + APP.timezoneOffset * 3600 * 1000);
+  return `${String(s.getUTCDate()).padStart(2, '0')}-${String(s.getUTCMonth() + 1).padStart(2, '0')}-${s.getUTCFullYear()}`;
+}
+
 // Nomor order berikutnya — patokan nomor TERAKHIR di form order (bulan berjalan).
 // Contoh: form terakhir bernomor 2 → berikutnya 3. Fallback hitung bila data kosong.
 function getNextNomor(orders: Order[]): string {
@@ -2095,6 +2102,8 @@ export default function Order() {
         : `${formInfo}\n\n[STOK AKTUAL] ${stockNote}`;
       const result = await ordersApi.submit({
         idCabang: branchId,
+        nomorOrder: config.nomorOrder,
+        tanggalOrder: fmtWITADateInput(config.tanggalOrder),
         catatan: fullCatatan,
         items: items.map((i) => ({
           kode: i.kode,
@@ -2136,6 +2145,8 @@ export default function Order() {
       const fullCatatan = `[MASSAL] ${catatan}${catatan ? '\n\n' : ''}${formInfo}\n\n[STOK AKTUAL] ${stockNote}`;
       const result = await ordersApi.submit({
         idCabang: branchId,
+        nomorOrder: config.nomorOrder,
+        tanggalOrder: fmtWITADateInput(config.tanggalOrder),
         catatan: fullCatatan,
         items: items.map((i) => ({
           kode: i.kode,
