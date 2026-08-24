@@ -12,6 +12,7 @@ import Profil from './pages/Profil';
 import Notifikasi from './pages/Notifikasi';
 import SettingsPage from './pages/Settings';
 import GantiPassword from './pages/GantiPassword';
+import ItemManagement from './pages/ItemManagement';
 
 function Protected({ children, roles }: { children: React.ReactNode; roles?: string[] }) {
   const { valid, session, homeRoute } = useAuth();
@@ -105,6 +106,16 @@ export default function App() {
           <Protected roles={['admin', 'cabang', 'picker']}>
             <AppShell>
               <GantiPassword />
+            </AppShell>
+          </Protected>
+        }
+      />
+      <Route
+        path={ROUTES.itemManagement}
+        element={
+          <Protected roles={['admin']}>
+            <AppShell>
+              <ItemManagement />
             </AppShell>
           </Protected>
         }

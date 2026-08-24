@@ -179,6 +179,7 @@ export const ROUTES = {
   profil: 'profil.html',
   notifikasi: 'notifikasi.html',
   settings: 'settings.html',
+  itemManagement: 'item-management.html',
 };
 
 export function getHomeRoute(role) {

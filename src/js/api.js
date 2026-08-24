@@ -497,6 +497,27 @@ export var katalog = {
     clearLSCache('getBarang');
     return this.getAll({ cache: false });
   },
+
+  create: function (data) {
+    return callApi('createBarang', data, {
+      dedupe: false,
+      timeout: 30000,
+    });
+  },
+
+  update: function (data) {
+    return callApi('updateBarang', data, {
+      dedupe: false,
+      timeout: 30000,
+    });
+  },
+
+  delete: function (data) {
+    return callApi('deleteBarang', data, {
+      dedupe: false,
+      timeout: 30000,
+    });
+  },
 };
 
 export var cabang = {

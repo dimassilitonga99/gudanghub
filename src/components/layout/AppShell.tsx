@@ -15,6 +15,7 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { to: ROUTES.dashboard, label: 'Dashboard', icon: <Icon name="dashboard" size={16} />, roles: ['admin'] },
+  { to: ROUTES.itemManagement, label: 'Item Management', icon: <Icon name="boxes" size={16} />, roles: ['admin'] },
   { to: ROUTES.order, label: 'Order', icon: <Icon name="shopping-cart" size={16} />, roles: ['cabang', 'admin'] },
   { to: ROUTES.picker, label: 'Picker', icon: <Icon name="clipboard-check" size={16} />, roles: ['picker'] },
   { to: ROUTES.laporan, label: 'Laporan', icon: <Icon name="file" size={16} />, roles: ['admin', 'cabang'] },
