@@ -254,29 +254,16 @@ function initCabangList() {
 
   container.innerHTML = `
     <div class="bento-wrap">
-
-      <!-- SVG Connection Lines -->
-      <svg class="bento-connect" viewBox="0 0 1200 700" preserveAspectRatio="none" aria-hidden="true">
-        <defs>
-          <linearGradient id="bentoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#ff6b00" stop-opacity="0"/>
-            <stop offset="50%" stop-color="#ff8c38" stop-opacity="0.5"/>
-            <stop offset="100%" stop-color="#ff6b00" stop-opacity="0"/>
-          </linearGradient>
-        </defs>
-        <path class="bento-line bl-1" d="M 250 180 Q 600 80 950 180" stroke="url(#bentoGrad)" stroke-width="1.5" fill="none"/>
-        <path class="bento-line bl-2" d="M 950 180 Q 1050 350 950 520" stroke="url(#bentoGrad)" stroke-width="1.5" fill="none"/>
-        <path class="bento-line bl-3" d="M 950 520 Q 600 620 250 520" stroke="url(#bentoGrad)" stroke-width="1.5" fill="none"/>
-        <path class="bento-line bl-4" d="M 250 520 Q 150 350 250 180" stroke="url(#bentoGrad)" stroke-width="1.5" fill="none"/>
-        <path class="bento-line bl-5" d="M 250 180 Q 600 350 950 520" stroke="url(#bentoGrad)" stroke-width="1" fill="none" opacity="0.5"/>
-        <path class="bento-line bl-6" d="M 950 180 Q 600 350 250 520" stroke="url(#bentoGrad)" stroke-width="1" fill="none" opacity="0.5"/>
-      </svg>
+      <div class="char-select-header">
+        <h2 class="char-select-title">CHOOSE YOUR STORE</h2>
+        <div class="char-select-subtitle">Select a branch to manage orders</div>
+      </div>
 
       <div class="bento-grid">
         ${CABANG_LIST.map((cabang, i) => `
-          <a href="./login.html"
-             class="bento-card bento-pos-${i + 1}"
-             style="--card-color: ${cabang.color || '#ff6b00'}; --anim-delay: ${i * 0.15}s;">
+          <div class="bento-card bento-pos-${i + 1} branch-selectable"
+               data-branch-id="${cabang.id}"
+               style="--card-color: ${cabang.color || '#ff6b00'}; --anim-delay: ${i * 0.15}s;">
 
             <div class="bento-image">
               <img
@@ -294,10 +281,7 @@ function initCabangList() {
             <div class="bento-overlay"></div>
             <div class="bento-grain"></div>
 
-            <div class="bento-signal">
-              <span class="bento-signal-dot"></span>
-              <span class="bento-signal-pulse"></span>
-            </div>
+            <div class="bento-highlight"></div>
 
             <div class="bento-badge">
               ${icon('map-pin', { size: 10 })}
@@ -320,23 +304,39 @@ function initCabangList() {
                   <span class="bento-status-dot"></span>
                   Aktif
                 </span>
-                <span class="bento-arrow">
-                  Kelola
+                <span class="bento-select-text">
+                  Select Store
                   ${icon('arrow-up-right', { size: 12 })}
                 </span>
               </div>
             </div>
 
             <div class="bento-glow"></div>
-          </a>
+          </div>
         `).join('')}
       </div>
     </div>
   `;
 
-  // 3D Tilt effect
-  container.querySelectorAll('.bento-card').forEach((card) => {
+  const cards = container.querySelectorAll('.bento-card');
+
+  cards.forEach((card, index) => {
+    card.addEventListener('click', () => {
+      cards.forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      
+      const branchId = card.dataset.branchId;
+      const branchInfo = CABANG_LIST.find(b => b.id === branchId);
+      
+      if (branchInfo) {
+        console.log('Branch selected:', branchInfo);
+        window.location.href = './login.html?branch=' + encodeURIComponent(branchId);
+      }
+    });
+
     card.addEventListener('mousemove', (e) => {
+      if (card.classList.contains('selected')) return;
+      
       const rect = card.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
@@ -349,9 +349,20 @@ function initCabangList() {
     });
 
     card.addEventListener('mouseleave', () => {
-      card.style.transform = '';
+      if (!card.classList.contains('selected')) {
+        card.style.transform = '';
+      }
     });
   });
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const selectedBranch = urlParams.get('branch');
+  if (selectedBranch) {
+    const selectedCard = container.querySelector(`.bento-card[data-branch-id="${selectedBranch}"]`);
+    if (selectedCard) {
+      selectedCard.classList.add('selected');
+    }
+  }
 }
 // ─────────────────────────────────────────────────────────────────────────
 // BACKGROUND PARTICLES CANVAS
