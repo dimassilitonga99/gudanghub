@@ -650,11 +650,12 @@ function FooterSection() {
   );
 }
 
-function BentoCard({ index }: { index: number }) {
+function BentoCard({ index, isSelected, onClick }: { index: number; isSelected?: boolean; onClick?: () => void }) {
   const cabang = CABANG_LIST[index];
   const cardRef = useRef<HTMLAnchorElement>(null);
 
   const onMouseMove = useCallback((e: React.MouseEvent) => {
+    if (isSelected) return;
     const card = cardRef.current;
     if (!card) return;
     const rect = card.getBoundingClientRect();
@@ -665,20 +666,21 @@ function BentoCard({ index }: { index: number }) {
     card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
     card.style.setProperty('--mx', `${x}px`);
     card.style.setProperty('--my', `${y}px`);
-  }, []);
+  }, [isSelected]);
 
   const onMouseLeave = useCallback(() => {
     const card = cardRef.current;
-    if (card) card.style.transform = '';
-  }, []);
+    if (card && !isSelected) card.style.transform = '';
+  }, [isSelected]);
 
   return (
     <Link
       ref={cardRef}
-      to="/login"
+      to={`/login?branch=${cabang.id}`}
       onMouseMove={onMouseMove}
       onMouseLeave={onMouseLeave}
-      className="bento-card group"
+      onClick={onClick}
+      className={cn('bento-card group', isSelected && 'selected')}
       style={{ '--card-color': cabang.color || '#ff6b00' } as React.CSSProperties}
     >
       <div className="relative aspect-[16/10] overflow-hidden">
@@ -712,29 +714,29 @@ function BentoCard({ index }: { index: number }) {
           />
           Cabang {cabang.id}
         </div>
-        <h3 className="mt-2 truncate text-lg font-semibold tracking-tight text-foreground">
-          {cabang.nama}
-        </h3>
-        <div className="mt-4 flex items-center justify-between border-t border-border/60 pt-3">
-          <div className="flex min-w-0 items-center gap-2">
-            <span
-              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold text-white"
-              style={{ backgroundColor: cabang.color }}
-            >
-              {cabang.pic.charAt(0)}
-            </span>
-            <div className="min-w-0">
-              <div className="font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground">
-                PIC
-              </div>
-              <div className="truncate text-xs font-medium text-foreground/90">{cabang.pic}</div>
-            </div>
-          </div>
-          <span className="inline-flex items-center gap-1 font-mono text-[10px] font-medium uppercase tracking-wider text-primary opacity-0 transition-opacity group-hover:opacity-100">
-            Kelola
-            <Icon name="arrow-up-right" size={12} />
-          </span>
-        </div>
+           <h3 className="mt-2 truncate text-lg font-semibold tracking-tight text-foreground">
+             {cabang.nama}
+           </h3>
+           <div className="mt-4 flex items-center justify-between border-t border-border/60 pt-3">
+             <div className="flex min-w-0 items-center gap-2">
+               <span
+                 className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold text-white"
+                 style={{ backgroundColor: cabang.color }}
+               >
+                 {cabang.pic.charAt(0)}
+               </span>
+               <div className="min-w-0">
+                 <div className="font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground">
+                   PIC
+                 </div>
+                 <div className="truncate text-xs font-medium text-foreground/90">{cabang.pic}</div>
+               </div>
+             </div>
+             <span className="inline-flex items-center gap-1 font-mono text-[10px] font-medium uppercase tracking-wider text-primary opacity-0 transition-opacity group-hover:opacity-100">
+               Select Store
+               <Icon name="arrow-up-right" size={12} />
+             </span>
+           </div>
       </div>
 
       <div className="bento-glow" />
@@ -885,8 +887,17 @@ export default function Landing() {
   const [scrolled, setScrolled] = useState(false);
   const [progress, setProgress] = useState(0);
   const [heroY, setHeroY] = useState(0);
+  const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
   const glowRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const branchParam = urlParams.get('branch');
+    if (branchParam && CABANG_LIST.find(c => c.id === branchParam)) {
+      setSelectedBranch(branchParam);
+    }
+  }, []);
 
   const reduceMotion = useMemo(
     () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
@@ -1286,12 +1297,14 @@ export default function Landing() {
       {/* CABANG — bento */}
       <section id="cabang" className="mx-auto max-w-5xl scroll-mt-16 px-4 pb-16">
         <Reveal>
-          <h2 className="text-center text-2xl font-semibold tracking-tight sm:text-3xl">
-            Jaringan Cabang
-          </h2>
-          <p className="mt-2 text-center text-sm text-muted-foreground">
-            Terhubung ke semua cabang melalui satu aplikasi.
-          </p>
+          <div className="char-select-header mb-10">
+            <h2 className="char-select-title text-center font-serif text-4xl font-bold sm:text-6xl">
+              CHOOSE YOUR STORE
+            </h2>
+            <p className="char-select-subtitle text-center text-sm sm:text-base">
+              Select a branch to manage orders
+            </p>
+          </div>
         </Reveal>
 
         <Reveal scale className="mt-10">
@@ -1319,18 +1332,11 @@ export default function Landing() {
             </svg>
 
             <div className="relative grid grid-cols-1 gap-4 sm:grid-cols-12">
-              <div className="sm:col-span-7" style={{ animationDelay: '0s' }}>
-                <BentoCard index={0} />
-              </div>
-              <div className="sm:col-span-5" style={{ animationDelay: '0.15s' }}>
-                <BentoCard index={1} />
-              </div>
-              <div className="sm:col-span-5" style={{ animationDelay: '0.3s' }}>
-                <BentoCard index={2} />
-              </div>
-              <div className="sm:col-span-7" style={{ animationDelay: '0.45s' }}>
-                <BentoCard index={3} />
-              </div>
+              {CABANG_LIST.map((cabang, i) => (
+                <div key={cabang.id} className={cn('sm:col-span-7', i === 1 || i === 2 ? 'sm:col-span-5' : '')} style={{ animationDelay: `${i * 0.15}s` }}>
+                  <BentoCard index={i} isSelected={selectedBranch === cabang.id} onClick={() => setSelectedBranch(cabang.id)} />
+                </div>
+              ))}
             </div>
           </div>
         </Reveal>
