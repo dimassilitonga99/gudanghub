@@ -1,0 +1,65 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [
+      "src/index.css",
+      "public/icons/generator.html"
+    ],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "fraunces",
+        "files": [
+          "src/styles/base.css"
+        ],
+        "createdAt": "2026-08-24T08:27:50.047Z",
+        "reason": "Brand font requirement"
+      },
+      {
+        "rule": "overused-font",
+        "value": "arial",
+        "files": [
+          "src/js/pages/order-pages/print-form-cabang.js"
+        ],
+        "createdAt": "2026-08-24T08:27:50.149Z",
+        "reason": "Print-friendly font"
+      },
+      {
+        "rule": "bounce-easing",
+        "value": "cubic-bezier(0.68, -0.55, 0.265, 1.55)",
+        "files": [
+          "src/styles/tokens.css"
+        ],
+        "createdAt": "2026-08-24T08:27:50.189Z",
+        "reason": "Brand animation style"
+      },
+      {
+        "rule": "overused-font",
+        "value": "arial",
+        "files": [
+          "src/js/pages/order-pages/pre-order-dialog.js"
+        ],
+        "createdAt": "2026-08-24T08:27:50.214Z",
+        "reason": "Print-friendly font"
+      },
+      {
+        "rule": "overused-font",
+        "value": "arial",
+        "files": [
+          "src/js/pages/dashboard-pages/print-form.js"
+        ],
+        "createdAt": "2026-08-24T08:27:50.247Z",
+        "reason": "Print-friendly font"
+      },
+      {
+        "rule": "layout-transition",
+        "value": "width",
+        "files": [
+          "src/index.css"
+        ],
+        "createdAt": "2026-08-24T08:27:50.309Z",
+        "reason": "Legacy layout animation"
+      }
+    ]
+  }
+}
