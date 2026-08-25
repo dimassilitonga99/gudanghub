@@ -29,7 +29,7 @@ interface FeedbackLogoutProps {
  * (rating bintang + komentar) sesuai PRD feedback.md, teks bahasa Indonesia.
  */
 export function FeedbackLogout({ children }: FeedbackLogoutProps) {
-  const { logout, session } = useAuth();
+  const { logout } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = React.useState(false);
   const [rating, setRating] = React.useState(0);
@@ -42,23 +42,26 @@ export function FeedbackLogout({ children }: FeedbackLogoutProps) {
     navigate(ROUTES.login);
   }, [logout, navigate]);
 
-  const submitAndLogout = () => {
+  const submitAndLogout = async () => {
     if (rating < 1 || sent) return;
     setSent(true);
-    // Kirim fire-and-forget — logout tetap jalan walau gagal/offline
-    void callApi(
-      'submitFeedback',
-      {
-        rating,
-        pesan: feedback.trim(),
-        username: session?.username || '',
-        nama: session?.nama || '',
-        idCabang: session?.idCabang || '',
-      },
-      { dedupe: false, cache: false, timeout: 15000, maxRetries: 1 },
-    ).catch(() => {});
-    toast.success('Terima kasih atas masukan Anda!', { duration: 2500 });
-    setTimeout(performLogout, 500);
+    try {
+      const res = await callApi(
+        'submitFeedback',
+        { rating, pesan: feedback.trim() },
+        { dedupe: false, cache: false, timeout: 25000, maxRetries: 1 },
+      );
+      if (res?.status === 'ok') {
+        toast.success('Terima kasih atas masukan Anda!', { duration: 2500 });
+      } else {
+        toast.error(res?.message || 'Gagal mengirim feedback.', { duration: 5000 });
+      }
+    } catch {
+      toast.error('Gagal mengirim feedback. Periksa koneksi lalu coba lagi.', { duration: 5000 });
+      setSent(false);
+      return;
+    }
+    performLogout();
   };
 
   const resetState = () => {
