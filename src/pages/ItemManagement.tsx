@@ -12,7 +12,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface ItemForm {
   KODE_BARANG: string;
@@ -24,7 +25,11 @@ interface ItemForm {
   STOK_GUDANG: number | '';
   STOK_TOKO: number | '';
   CATATAN?: string;
+  GAMBAR?: string;
 }
+
+const driveThumb = (fileId?: string | null) =>
+  fileId ? `https://drive.google.com/thumbnail?id=${encodeURIComponent(String(fileId))}&sz=w400` : '';
 
 const DEFAULT_CATEGORIES = [
   'Kursi', 'Meja', 'Lemari', 'Sofa', 'Kasur', 'Rak', 'Bufet', 'Dapur',
@@ -93,7 +98,7 @@ export default function ItemManagement() {
       STOK: item.STOK ? Number(item.STOK) : '',
       STOK_GUDANG: item.STOK_GUDANG ? Number(item.STOK_GUDANG) : '',
       STOK_TOKO: item.STOK_TOKO ? Number(item.STOK_TOKO) : '',
-      CATATAN: item.CATATAN ? String(item.CATATAN) : '',
+      CATATAN: item.DESKRIPSI ? String(item.DESKRIPSI) : '',
     });
     setShowModal(true);
   };
@@ -101,9 +106,10 @@ export default function ItemManagement() {
   const handleDelete = async (kodeBarang: string) => {
     if (!confirm('Apakah Anda yakin ingin menghapus item ini?')) return;
     try {
-      const res = await katalog.delete?.({ KODE_BARANG: kodeBarang });
+      const res = await katalog.remove(kodeBarang);
       if (res?.status === 'ok') {
         toastSuccess('Item berhasil dihapus');
+        await katalog.refresh().catch(() => undefined);
         loadItems();
       } else {
         toast.error(res?.message || 'Gagal menghapus item');
@@ -121,26 +127,38 @@ export default function ItemManagement() {
     }
     setIsSaving(true);
     try {
-      const payload = {
-        ...form,
-        HARGA: form.HARGA || 0,
-        STOK: form.STOK || 0,
-        STOK_GUDANG: form.STOK_GUDANG || 0,
-        STOK_TOKO: form.STOK_TOKO || 0,
+      const payload: Record<string, unknown> = {
+        kode: form.KODE_BARANG,
+        nama: form.NAMA_BARANG,
+        kategori: form.KATEGORI,
+        satuan: form.SATUAN,
+        harga: form.HARGA || 0,
+        stok: form.STOK || 0,
+        stokGudang: form.STOK_GUDANG === '' ? undefined : form.STOK_GUDANG,
+        stokToko: form.STOK_TOKO === '' ? undefined : form.STOK_TOKO,
+        deskripsi: form.CATATAN || '',
       };
+      if (typeof form.GAMBAR === 'string') {
+        payload.gambar = form.GAMBAR;
+      }
+      let res;
       if (selectedItem?.KODE_BARANG) {
-        payload.KODE_BARANG = selectedItem.KODE_BARANG;
-        const res = await katalog.update?.(payload);
+        res = await katalog.update(payload);
         if (res?.status === 'ok') {
           toastSuccess('Item berhasil diupdate');
         }
       } else {
-        const res = await katalog.create?.(payload);
+        res = await katalog.create(payload);
         if (res?.status === 'ok') {
           toastSuccess('Item baru berhasil ditambahkan');
         }
       }
+      if (res?.status !== 'ok') {
+        toast.error(res?.message || 'Gagal menyimpan item');
+        return;
+      }
       setShowModal(false);
+      await katalog.refresh().catch(() => undefined);
       loadItems();
     } catch (e) {
       toast.error('Error menyimpan item');
@@ -235,7 +253,7 @@ export default function ItemManagement() {
                 <div className="relative h-48 bg-muted overflow-hidden">
                   {item.GAMBAR ? (
                     <img
-                      src={item.GAMBAR}
+                      src={driveThumb(item.GAMBAR as string)}
                       alt={item.NAMA_BARANG}
                       className="h-full w-full object-cover transition-transform group-hover:scale-105"
                       onError={(e) => {
@@ -415,29 +433,34 @@ export default function ItemManagement() {
             <div className="space-y-2">
               <Label htmlFor="gambar">Gambar Item</Label>
               <div className="flex flex-col gap-3">
-                {form.GAMBAR ? (
-                  <div className="relative w-32 h-32 rounded-lg overflow-hidden border-2 border-border">
-                    <img
-                      src={form.GAMBAR}
-                      alt="Preview"
-                      className="w-full h-full object-cover"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setForm({ ...form, GAMBAR: '' })}
-                      className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center hover:bg-destructive/90"
-                    >
-                      <Icon name="x" size={12} />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="w-32 h-32 rounded-lg border-2 border-dashed border-border flex items-center justify-center bg-muted/50">
-                    <div className="text-center">
-                      <Icon name="image" size={32} className="mx-auto text-muted-foreground mb-2" />
-                      <p className="text-xs text-muted-foreground">No image selected</p>
+                {(() => {
+                  const previewSrc = form.GAMBAR === undefined
+                    ? driveThumb(selectedItem?.GAMBAR as string | undefined)
+                    : form.GAMBAR;
+                  return previewSrc ? (
+                    <div className="relative w-32 h-32 rounded-lg overflow-hidden border-2 border-border">
+                      <img
+                        src={previewSrc}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setForm({ ...form, GAMBAR: '' })}
+                        className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center hover:bg-destructive/90"
+                      >
+                        <Icon name="x" size={12} />
+                      </button>
                     </div>
-                  </div>
-                )}
+                  ) : (
+                    <div className="w-32 h-32 rounded-lg border-2 border-dashed border-border flex items-center justify-center bg-muted/50">
+                      <div className="text-center">
+                        <Icon name="image" size={32} className="mx-auto text-muted-foreground mb-2" />
+                        <p className="text-xs text-muted-foreground">No image selected</p>
+                      </div>
+                    </div>
+                  );
+                })()}
                 <div className="flex gap-3">
                   <label className="cursor-pointer bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
                     <Icon name="upload" size={16} />
@@ -447,18 +470,8 @@ export default function ItemManagement() {
                       accept="image/*"
                       onChange={handleImageUpload}
                       className="hidden"
-                      disabled={!!form.GAMBAR}
                     />
                   </label>
-                  {selectedItem?.GAMBAR && (
-                    <button
-                      type="button"
-                      onClick={() => setForm({ ...form, GAMBAR: '' })}
-                      className="px-4 py-2 rounded-lg text-sm font-medium border border-border hover:bg-muted text-muted-foreground transition-colors"
-                    >
-                      Hapus Gambar
-                    </button>
-                  )}
                 </div>
                 <p className="text-xs text-muted-foreground">Rekomendasi: JPG/PNG, maksimal 2MB</p>
               </div>

@@ -1,10 +1,11 @@
 import { Icon } from '../ui/icon';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 
 import { useEffect, useState, type ReactNode } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import { ROUTES } from '@/lib/config';
+import { FeedbackLogout } from '@/components/feedback-logout';
 
 interface NavItem {
   to: string;
@@ -39,8 +40,7 @@ function RoleBadge({ role }: { role: string }) {
 }
 
 export default function AppShell({ children }: { children: ReactNode }) {
-  const { session, isAdmin, isPicker, logout } = useAuth();
-  const navigate = useNavigate();
+  const { session, isAdmin, isPicker } = useAuth();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   useEffect(() => {
@@ -53,11 +53,6 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
   const role = isAdmin ? 'admin' : isPicker ? 'picker' : 'cabang';
   const items = NAV_ITEMS.filter((i) => i.roles.includes(role));
-
-  const handleLogout = () => {
-    logout();
-    navigate(ROUTES.login);
-  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -103,13 +98,14 @@ export default function AppShell({ children }: { children: ReactNode }) {
               <RoleBadge role={role} />
             </div>
           </div>
-          <button
-            onClick={handleLogout}
-            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-danger hover:bg-danger/10"
-          >
-            <Icon name="sign-out-alt" size={16} />
-            Keluar
-          </button>
+          <FeedbackLogout>
+            <button
+              className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-danger hover:bg-danger/10"
+            >
+              <Icon name="sign-out-alt" size={16} />
+              Keluar
+            </button>
+          </FeedbackLogout>
         </div>
       </aside>
 
@@ -155,13 +151,14 @@ export default function AppShell({ children }: { children: ReactNode }) {
                 {item.label}
               </NavLink>
             ))}
-            <button
-              onClick={handleLogout}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-danger hover:bg-danger/10"
-            >
-              <Icon name="sign-out-alt" size={16} />
-              Keluar
-            </button>
+            <FeedbackLogout>
+              <button
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-danger hover:bg-danger/10"
+              >
+                <Icon name="sign-out-alt" size={16} />
+                Keluar
+              </button>
+            </FeedbackLogout>
           </div>
         )}
 

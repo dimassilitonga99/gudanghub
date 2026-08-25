@@ -493,6 +493,15 @@ export const katalog = {
     clearLSCache('getBarang');
     return katalog.getAll({ cache: false });
   },
+  create(data: Record<string, unknown>): Promise<ApiResult> {
+    return callApi('createBarang', data, { dedupe: false, timeout: 45000 });
+  },
+  update(data: Record<string, unknown>): Promise<ApiResult> {
+    return callApi('updateBarang', data, { dedupe: false, timeout: 45000 });
+  },
+  remove(kode: string): Promise<ApiResult> {
+    return callApi('deleteBarang', { kode }, { dedupe: false, timeout: 45000 });
+  },
 };
 
 export const cabang = {
