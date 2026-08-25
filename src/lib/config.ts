@@ -1,4 +1,6 @@
 export const API_URL = 'https://gudanghub-api-proxy.silitongadimas.workers.dev';
+export const APPS_SCRIPT_URL =
+  'https://script.google.com/macros/s/AKfycbwePvHJy-ZNp0_5_tB4Pb88zBksn3Rn4pMBzdVitLTbY96S7FGVPTGgmyIzy1JrgBo6/exec';
 
 export const APP = {
   name: 'GudangHub',
