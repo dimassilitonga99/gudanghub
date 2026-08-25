@@ -23,6 +23,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import PrintFormModal, { type PrintItem } from '@/components/print-form';
+import { LeaderboardCard } from '@/components/ui/leaderboard-card';
 
 function toNum(v: unknown): number {
   const n = Number(v);
@@ -1312,6 +1313,45 @@ export default function Dashboard() {
     ...perCabangStacked.map((c) => c.pending + c.approved + c.rejected),
   );
 
+  // Leaderboard "Pesanan per Cabang" — data sama dengan perCabangStacked, gaya podium + ranking
+  const cabangLeaderboard = useMemo(() => {
+    const ranked = [...perCabangStacked]
+      .map((c) => ({ ...c, total: c.pending + c.approved + c.rejected }))
+      .sort((a, b) => b.total - a.total || a.id.localeCompare(b.id))
+      .map((c, i) => ({ ...c, rank: i + 1 }));
+    return {
+      podium: ranked.slice(0, 3).map((c) => ({
+        userId: c.id,
+        userName: c.pic || c.id,
+        rank: c.rank,
+        value: c.total,
+      })),
+      list: ranked.map((c) => ({
+        userId: c.id,
+        rank: c.rank,
+        userName: c.pic || c.id,
+        byline: `${c.id} · Disetujui ${c.approved} · Tertunda ${c.pending} · Ditolak ${c.rejected}`,
+        value: c.total,
+        displayed: true as const,
+      })),
+    };
+  }, [perCabangStacked]);
+
+  const cabangPeriod = useMemo(() => {
+    let min: number | null = null;
+    let max: number | null = null;
+    ordersList.forEach((o) => {
+      const t = parseAnyDate(o.TANGGAL_ORDER ?? '')?.getTime();
+      if (!t) return;
+      if (min === null || t < min) min = t;
+      if (max === null || t > max) max = t;
+    });
+    return {
+      from: new Date(min ?? Date.now()),
+      to: new Date(max ?? Date.now()),
+    };
+  }, [ordersList]);
+
   const activityFeed = useMemo(
     () =>
       [...ordersList]
@@ -1644,27 +1684,15 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            {/* Stacked bar chart per cabang */}
-            <Card>
-              <CardContent className="p-4">
-                <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold">
-                  <Icon name="chart-histogram" size={16} className="text-brand" />
-                  Pesanan per Cabang
-                </h2>
-                <StackedBarChart data={perCabangStacked} max={maxCabangStacked} />
-                <div className="mt-3 flex flex-wrap items-center justify-center gap-4 text-[11px] text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <span className="h-2 w-3 rounded-sm bg-success" /> Disetujui
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <span className="h-2 w-3 rounded-sm bg-warning" /> Tertunda
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <span className="h-2 w-3 rounded-sm bg-danger" /> Ditolak
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Leaderboard pesanan per cabang (podium + ranking) */}
+            <LeaderboardCard
+              className="lg:col-span-2"
+              title="Pesanan per Cabang"
+              fromDate={cabangPeriod.from}
+              toDate={cabangPeriod.to}
+              podiumRankings={cabangLeaderboard.podium}
+              rankings={cabangLeaderboard.list}
+            />
 
             {/* Activity feed */}
             <Card className="lg:col-span-2">
