@@ -27,6 +27,7 @@ const PERIODS: Record<string, string> = {
   month: '30 Hari Terakhir',
   quarter: '3 Bulan Terakhir',
   year: '1 Tahun Terakhir',
+  custom: 'Rentang Kustom',
 };
 
 function countByStatus(orders: Order[], status: string): number {
@@ -52,6 +53,8 @@ export default function Laporan() {
   const [filterCabang, setFilterCabang] = useState('');
   const [filterPeriod, setFilterPeriod] = useState('all');
   const [filterStatus, setFilterStatus] = useState('');
+  const [filterFrom, setFilterFrom] = useState('');
+  const [filterTo, setFilterTo] = useState('');
   const [printedAt, setPrintedAt] = useState(() => new Date());
 
   const loadData = useCallback(async () => {
@@ -104,8 +107,42 @@ export default function Laporan() {
         return orderDate !== null && orderDate >= cutoff;
       });
     }
+    if (filterFrom || filterTo) {
+      const fromRaw = filterFrom ? new Date(filterFrom + 'T00:00:00').getTime() : Number.NEGATIVE_INFINITY;
+      const toRaw = filterTo ? new Date(filterTo + 'T23:59:59.999').getTime() : Number.POSITIVE_INFINITY;
+      const fromMs = Number.isNaN(fromRaw) ? Number.NEGATIVE_INFINITY : fromRaw;
+      const toMs = Number.isNaN(toRaw) ? Number.POSITIVE_INFINITY : toRaw;
+      list = list.filter((o) => {
+        const orderDate = parseAnyDate(o.TANGGAL_ORDER ?? '');
+        if (!orderDate) return false;
+        const t = orderDate.getTime();
+        return t >= fromMs && t <= toMs;
+      });
+    }
     return list;
-  }, [ordersList, filterCabang, filterStatus, filterPeriod]);
+  }, [ordersList, filterCabang, filterStatus, filterPeriod, filterFrom, filterTo]);
+
+  const setRange = (from: string, to: string) => {
+    setFilterFrom(from);
+    setFilterTo(to);
+    setFilterPeriod(from || to ? 'custom' : 'all');
+  };
+
+  function fmtInputDate(value: string): string {
+    if (!value) return '';
+    const d = new Date(value + 'T00:00:00');
+    if (Number.isNaN(d.getTime())) return '';
+    return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  const periodLabel = useMemo(() => {
+    if (filterPeriod === 'custom') {
+      const f = filterFrom ? fmtInputDate(filterFrom) : 'awal';
+      const t = filterTo ? fmtInputDate(filterTo) : 'sekarang';
+      return `${f} — ${t}`;
+    }
+    return PERIODS[filterPeriod] || 'Semua Periode';
+  }, [filterPeriod, filterFrom, filterTo]);
 
   const stats = useMemo(() => {
     const approved = countByStatus(filtered, 'APPROVED');
@@ -164,7 +201,7 @@ export default function Laporan() {
       <Card className="p-5 sm:p-6 print:border print:border-gray-300 print:bg-white">
         <h1 className="font-display flex items-center gap-2 text-xl font-bold sm:text-2xl print:text-black">
           <Icon name="chart-histogram" size={24} className="text-primary print:hidden" />
-          Laporan Order — <span>{PERIODS[filterPeriod] || 'Semua Periode'}</span>
+          Laporan Order — <span>{periodLabel}</span>
         </h1>
         <p className="mt-1 text-sm text-muted-foreground print:text-gray-600">
           PT Central Perabot Utama · Waktu WITA
@@ -203,7 +240,8 @@ export default function Laporan() {
       </Card>
 
       {/* Filter */}
-      <div className="grid grid-cols-1 gap-3 rounded-xl border border-border bg-card p-4 print:hidden sm:grid-cols-3">
+      <div className="space-y-3 rounded-xl border border-border bg-card p-4 print:hidden">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div>
           <label className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
             <Icon name="shop" size={12} />
@@ -257,6 +295,48 @@ export default function Laporan() {
               <SelectItem value="REJECTED">Ditolak</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+        </div>
+
+        {/* Rentang tanggal kustom */}
+        <div className="flex flex-wrap items-end gap-3 border-t border-border pt-3">
+          <div>
+            <label className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              <Icon name="clock" size={12} />
+              Dari Tanggal
+            </label>
+            <input
+              type="date"
+              value={filterFrom}
+              onChange={(e) => setRange(e.target.value, filterTo)}
+              title="Mulai rentang"
+              className="h-9 rounded-md border border-input bg-background px-2 text-sm dark:[color-scheme:dark]"
+            />
+          </div>
+          <div>
+            <label className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              <Icon name="clock" size={12} />
+              Sampai Tanggal
+            </label>
+            <input
+              type="date"
+              value={filterTo}
+              onChange={(e) => setRange(filterFrom, e.target.value)}
+              title="Akhir rentang"
+              className="h-9 rounded-md border border-input bg-background px-2 text-sm dark:[color-scheme:dark]"
+            />
+          </div>
+          {(filterFrom || filterTo) && (
+            <>
+              <span className="rounded-full bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary">
+                {filterFrom ? fmtInputDate(filterFrom) || '…' : 'Awal'} — {filterTo ? fmtInputDate(filterTo) || '…' : 'Sekarang'}
+              </span>
+              <Button variant="outline" size="sm" onClick={() => setRange('', '')}>
+                <Icon name="circle-xmark" size={14} />
+                Reset Rentang
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
