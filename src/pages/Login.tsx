@@ -1,6 +1,8 @@
 import { Icon } from '../components/ui/icon';
+import { SmokeyBackground } from '@/components/ui/login-form';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { User, Lock, ArrowRight } from 'lucide-react';
 
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
@@ -15,8 +17,6 @@ import {
 } from '@/lib/session';
 import { simpleHash, sleep } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
@@ -139,7 +139,7 @@ export default function Login() {
     if (now - lastPrewarm.current < 30000) return;
     lastPrewarm.current = now;
     try {
-fetch(API_URL + '?action=ping&t=' + Date.now(), { method: 'GET', mode: 'no-cors', cache: 'no-store' }).catch(() => {});
+      fetch(API_URL + '?action=ping&t=' + Date.now(), { method: 'GET', mode: 'no-cors', cache: 'no-store' }).catch(() => {});
     } catch {}
   };
 
@@ -267,54 +267,53 @@ fetch(API_URL + '?action=ping&t=' + Date.now(), { method: 'GET', mode: 'no-cors'
     setForgotLoading(false);
   };
 
+  const inputBase =
+    'peer block w-full appearance-none border-0 border-b-2 border-white/30 bg-transparent px-0 py-2.5 text-sm text-white placeholder:text-transparent focus:border-orange-400 focus:outline-none focus:ring-0 [&:-webkit-autofill]:[-webkit-text-fill-color:white] [&:-webkit-autofill]:[box-shadow:0_0_0px_1000px_rgba(8,21,28,0.85)_inset]';
+
+  const labelBase =
+    'pointer-events-none absolute left-0 top-3 z-0 origin-[0] -translate-y-6 scale-75 transform text-sm duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75';
+
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-ink-950 px-4">
-      <div
-        className="pointer-events-none absolute inset-0 opacity-60"
-        style={{
-          background:
-            'radial-gradient(ellipse 60% 60% at 50% 50%, #1B4B5A 0%, #123B4A 40%, #0A1F2E 70%, #08151C 100%)',
-        }}
-      />
-      <div className="relative z-10 w-full max-w-md">
-        <div className="mb-6 text-center">
-          <span className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand text-white shadow-lg shadow-brand/30">
-            <Icon name="shop" size={28} />
-          </span>
-          <GradientShimmer
-            gradient="sunrise"
-            className="font-display text-3xl font-bold text-white"
+    <div className="relative min-h-screen overflow-hidden bg-gray-950">
+      {/* WebGL smokey background (PRD) */}
+      <SmokeyBackground backdropBlurAmount="md" color="#155E75" />
+
+      <div className="relative z-10 flex min-h-screen items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          {/* Brand header */}
+          <div className="mb-8 text-center">
+            <span className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-xl shadow-orange-500/40">
+              <Icon name="shop" size={30} />
+            </span>
+            <GradientShimmer gradient="sunrise" className="font-display text-4xl font-bold text-white">
+              GudangHub
+            </GradientShimmer>
+            <p className="mt-1.5 text-sm text-white/50">PT Central Perabot Utama — NTT</p>
+          </div>
+
+          {/* Glassmorphism card (PRD) */}
+          <div
+            className={
+              'rounded-2xl border border-white/20 bg-white/10 p-6 shadow-2xl backdrop-blur-xl sm:p-8' +
+              (shaking ? ' animate-shake' : '')
+            }
           >
-            GudangHub
-          </GradientShimmer>
-          <p className="mt-1 text-sm text-white/60">
-            PT Central Perabot Utama — NTT
-          </p>
-        </div>
-
-        <div
-          className={
-            'rounded-2xl border border-white/10 bg-white p-6 text-ink-900 shadow-2xl sm:p-8' +
-            (shaking ? ' animate-shake' : '')
-          }
-        >
-          <h1 className="mb-1 text-xl font-bold text-ink-900">Masuk</h1>
-          <p className="mb-5 text-sm text-ink-900/60">
-            Masukkan username dan password untuk mulai mengelola order.
-          </p>
-
-          {error && (
-            <div className="mb-4 rounded-lg border border-danger/30 bg-danger/10 px-3 py-2.5 text-sm font-medium text-danger">
-              {error}
+            <div className="mb-6 text-center">
+              <h1 className="text-3xl font-bold text-white">Selamat Datang</h1>
+              <p className="mt-2 text-sm text-gray-300">Masuk untuk melanjutkan</p>
             </div>
-          )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="inputUser">Username</Label>
-              <div className="relative">
-                <Icon name="user" size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-900/40" />
-                <Input
+            {error && (
+              <div className="mb-5 rounded-lg border border-red-400/30 bg-red-500/15 px-3 py-2.5 text-sm font-medium text-red-200">
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-7">
+              {/* Username dengan floating label */}
+              <div className="relative z-0">
+                <input
+                  type="text"
                   id="inputUser"
                   ref={usernameRef}
                   value={username}
@@ -323,84 +322,92 @@ fetch(API_URL + '?action=ping&t=' + Date.now(), { method: 'GET', mode: 'no-cors'
                     setError('');
                     prewarmOnTyping();
                   }}
-                  placeholder="Masukkan username Anda"
-                  className="border-ink-900/15 bg-ink-900/5 pl-9 text-ink-900 placeholder:text-ink-900/40 focus-visible:ring-brand"
+                  className={inputBase}
+                  placeholder=" "
                   autoComplete="username"
+                  required
                 />
+                <label htmlFor="inputUser" className={`${labelBase} text-white/60 peer-focus:text-orange-400`}>
+                  <User className="-mt-0.5 mr-2 inline-block" size={16} />
+                  Username
+                </label>
               </div>
-            </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="inputPass">Password</Label>
-              <div className="relative">
-                <Icon name="lock" size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-900/40" />
-                <Input
-                  id="inputPass"
+              {/* Password dengan floating label */}
+              <div className="relative z-0">
+                <input
                   type={showPw ? 'text' : 'password'}
+                  id="inputPass"
                   value={password}
                   onChange={(e) => {
                     setPassword(e.target.value);
                     setError('');
                     prewarmOnTyping();
                   }}
-                  placeholder="Masukkan password"
-                  className="border-ink-900/15 bg-ink-900/5 pl-9 pr-10 text-ink-900 placeholder:text-ink-900/40 focus-visible:ring-brand"
+                  className={`${inputBase} pr-9`}
+                  placeholder=" "
                   autoComplete="current-password"
+                  required
                 />
+                <label htmlFor="inputPass" className={`${labelBase} text-white/60 peer-focus:text-orange-400`}>
+                  <Lock className="-mt-0.5 mr-2 inline-block" size={16} />
+                  Password
+                </label>
                 <button
                   type="button"
                   onClick={() => setShowPw((v) => !v)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-ink-900/50 hover:text-ink-900"
+                  className="absolute inset-y-0 right-0 flex items-center px-1 text-white/50 transition-colors hover:text-white"
                   aria-label={showPw ? 'Sembunyikan password' : 'Tampilkan password'}
                 >
-                  {showPw ? <Icon name="eye-crossed" size={16} /> : <Icon name="eye" size={16} />}
+                  <Icon name={showPw ? 'eye-crossed' : 'eye'} size={16} />
                 </button>
               </div>
-            </div>
 
-            <div className="flex items-center justify-between">
-              <label className="flex cursor-pointer items-center gap-2 text-sm text-ink-900/70">
-                <Checkbox
-                  checked={remember}
-                  onCheckedChange={(v) => setRemember(v === true)}
-                  id="remember"
-                />
-                Ingat saya
-              </label>
-              <button
-                type="button"
-                onClick={() => {
-                  setForgotUser(username);
-                  setForgotMsg(null);
-                  setForgotOpen(true);
-                }}
-                className="text-sm font-semibold text-brand hover:underline"
-              >
-                Lupa password?
-              </button>
-            </div>
+              <div className="flex items-center justify-between">
+                <label className="flex cursor-pointer items-center gap-2 text-sm text-white/70">
+                  <Checkbox
+                    checked={remember}
+                    onCheckedChange={(v) => setRemember(v === true)}
+                    id="remember"
+                  />
+                  Ingat saya
+                </label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setForgotUser(username);
+                    setForgotMsg(null);
+                    setForgotOpen(true);
+                  }}
+                  className="text-xs text-white/70 transition hover:text-white"
+                >
+                  Lupa password?
+                </button>
+              </div>
 
-            <Button type="submit" disabled={loading} className="w-full">
-              {loading ? (
-                <>
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
-                  {loadingText}
-                </>
-              ) : (
-                <>
-                  <Icon name="sign-in-alt" size={16} />
-                  Masuk
-                </>
-              )}
-            </Button>
-          </form>
+              {/* Submit dengan arrow animation (PRD) */}
+              <Button type="submit" disabled={loading} className="group w-full gap-2 py-3">
+                {loading ? (
+                  <>
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                    {loadingText}
+                  </>
+                ) : (
+                  <>
+                    Masuk
+                    <ArrowRight className="h-5 w-5 transform transition-transform group-hover:translate-x-1" />
+                  </>
+                )}
+              </Button>
+            </form>
+          </div>
+
+          <p className="mt-5 text-center text-xs text-white/50">
+            <Link to="/" className="transition hover:text-white/80">
+              ← Kembali ke beranda
+            </Link>
+          </p>
         </div>
-
-        <p className="mt-4 text-center text-xs text-white/50">
-          <Link to="/" className="hover:text-white/80">
-            Kembali ke beranda
-          </Link>
-        </p>
       </div>
 
       <Dialog open={forgotOpen} onOpenChange={setForgotOpen}>
@@ -412,13 +419,14 @@ fetch(API_URL + '?action=ping&t=' + Date.now(), { method: 'GET', mode: 'no-cors'
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
-            <Input
+            <input
               value={forgotUser}
               onChange={(e) => {
                 setForgotUser(e.target.value);
                 setForgotMsg(null);
               }}
               placeholder="Username"
+              className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   e.preventDefault();
