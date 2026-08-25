@@ -1,6 +1,6 @@
 export const API_URL = 'https://gudanghub-api-proxy.silitongadimas.workers.dev';
 export const APPS_SCRIPT_URL =
-  'https://script.google.com/macros/s/AKfycbwePvHJy-ZNp0_5_tB4Pb88zBksn3Rn4pMBzdVitLTbY96S7FGVPTGgmyIzy1JrgBo6/exec';
+  'https://script.google.com/macros/s/AKfycbx-IG_C2KMFbAlXBlP5NVtfzO1FsZOCdFzoQiqTkUIl8Lh9ZhBDdsmuPY8hlqDfHhRerQ/exec';
 
 export const APP = {
   name: 'GudangHub',
@@ -103,22 +103,22 @@ export const KATEGORI_MARQUEE: { name: string; iconName: string }[] = [
 ];
 
 export const KATEGORI_ICONS: Record<string, string> = {
-  Kursi: '🪑',
-  Meja: '🍽️',
-  Lemari: '🗄️',
-  Sofa: '🛋️',
-  Kasur: '🛏️',
-  Rak: '📚',
-  Bufet: '🪟',
-  Dapur: '🍳',
-  Elektronik: '📺',
-  Dekorasi: '🎨',
-  'Peralatan Dapur': '🍳',
-  'Peralatan Makan': '🍴',
-  'Peralatan Mandi': '🚿',
-  Loker: '🗃️',
-  'Rak Buku': '📚',
-  default: '📦',
+  Kursi: 'ðŸª‘',
+  Meja: 'ðŸ½ï¸',
+  Lemari: 'ðŸ—„ï¸',
+  Sofa: 'ðŸ›‹ï¸',
+  Kasur: 'ðŸ›ï¸',
+  Rak: 'ðŸ“š',
+  Bufet: 'ðŸªŸ',
+  Dapur: 'ðŸ³',
+  Elektronik: 'ðŸ“º',
+  Dekorasi: 'ðŸŽ¨',
+  'Peralatan Dapur': 'ðŸ³',
+  'Peralatan Makan': 'ðŸ´',
+  'Peralatan Mandi': 'ðŸš¿',
+  Loker: 'ðŸ—ƒï¸',
+  'Rak Buku': 'ðŸ“š',
+  default: 'ðŸ“¦',
 };
 
 export const KATEGORI_ICON_NAMES: Record<string, string> = {
@@ -161,28 +161,28 @@ export interface StatusInfo {
 export const STATUS: Record<OrderStatus, StatusInfo> = {
   PENDING: {
     label: 'Tertunda',
-    icon: '⏳',
+    icon: 'â³',
     iconName: 'clock',
     color: 'warning',
     badge: 'badge-warning',
   },
   PICKED: {
     label: 'Diverifikasi Picker',
-    icon: '📋',
+    icon: 'ðŸ“‹',
     iconName: 'check-check',
     color: 'info',
     badge: 'badge-info',
   },
   APPROVED: {
     label: 'Disetujui',
-    icon: '✅',
+    icon: 'âœ…',
     iconName: 'check-circle',
     color: 'success',
     badge: 'badge-success',
   },
   REJECTED: {
     label: 'Ditolak',
-    icon: '❌',
+    icon: 'âŒ',
     iconName: 'x-circle',
     color: 'danger',
     badge: 'badge-danger',
@@ -195,10 +195,10 @@ export function getStatusInfo(status: string): StatusInfo {
 }
 
 export const ITEM_STATUS: Record<string, { label: string; icon: string; iconName: string; color: string }> = {
-  APPROVED: { label: 'Disetujui', icon: '✅', iconName: 'check-circle', color: 'success' },
-  REJECTED: { label: 'Ditolak', icon: '🚫', iconName: 'ban', color: 'warning' },
-  DELETED: { label: 'Dihapus', icon: '🗑️', iconName: 'trash', color: 'danger' },
-  EDITED: { label: 'Diedit', icon: '✏️', iconName: 'edit-2', color: 'info' },
+  APPROVED: { label: 'Disetujui', icon: 'âœ…', iconName: 'check-circle', color: 'success' },
+  REJECTED: { label: 'Ditolak', icon: 'ðŸš«', iconName: 'ban', color: 'warning' },
+  DELETED: { label: 'Dihapus', icon: 'ðŸ—‘ï¸', iconName: 'trash', color: 'danger' },
+  EDITED: { label: 'Diedit', icon: 'âœï¸', iconName: 'edit-2', color: 'info' },
 };
 
 export const ROUTES = {
