@@ -42,3 +42,5 @@ pnpm-debug.log*
 # Wrangler
 .wrangler/
 
+# screenshot hasil uji otomatis
+test/shots/
