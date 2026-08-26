@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { toastSuccess } from '@/lib/toast';
 import { katalog } from '@/lib/api';
-import { BarangImage, setGambarCache } from '@/components/ItemPhoto';
+import { BarangImage, gambarCache, setGambarCache } from '@/components/ItemPhoto';
 import { useAuth } from '@/context/AuthContext';
 import { APP, type Barang } from '@/lib/config';
 import { cn, formatRupiah, formatWita } from '@/lib/utils';
@@ -346,9 +346,9 @@ export default function ItemManagement() {
                   <div className="absolute top-3 right-3 flex gap-2">
                     <Button
                       size="sm"
-                      variant="secondary"
                       onClick={() => handleEdit(item)}
-                      className="h-8 w-8 rounded-full bg-white/90 shadow-sm hover:bg-white"
+                      className="h-8 w-8 rounded-full border border-border bg-background text-foreground shadow-md hover:bg-accent"
+                      title="Edit item"
                     >
                       <Icon name="pencil" size={14} />
                     </Button>
@@ -356,7 +356,8 @@ export default function ItemManagement() {
                       size="sm"
                       variant="destructive"
                       onClick={() => handleDelete(item.KODE_BARANG)}
-                      className="h-8 w-8 rounded-full shadow-sm hover:opacity-90"
+                      className="h-8 w-8 rounded-full shadow-md hover:opacity-90"
+                      title="Hapus item"
                     >
                       <Icon name="trash" size={14} />
                     </Button>
