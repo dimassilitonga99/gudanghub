@@ -3,7 +3,7 @@
    Offline support + smart caching + update notification
    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-const APP_VERSION = 'v5.5.0-react';
+const APP_VERSION = 'v5.6.0-react';
 const CACHE_PREFIX = 'gudanghub';
 const STATIC_CACHE = `${CACHE_PREFIX}-static-${APP_VERSION}`;
 const DYNAMIC_CACHE = `${CACHE_PREFIX}-dynamic-${APP_VERSION}`;
@@ -23,6 +23,7 @@ const API_DOMAINS = [
   'script.google.com',
   'script.googleusercontent.com',
   'workers.dev',
+  'vercel.app',
 ];
 
 // Domain fonts (cache-first, jarang berubah)
