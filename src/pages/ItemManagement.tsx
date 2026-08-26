@@ -66,6 +66,7 @@ async function fileToCompressedDataUrl(file: File): Promise<string> {
 const gambarCache = new Map<string, string>();
 
 function BarangImage({ kode }: { kode: string }) {
+  const holderRef = useRef<HTMLDivElement | null>(null);
   const [src, setSrc] = useState(() => gambarCache.get(kode) || '');
 
   useEffect(() => {
@@ -73,34 +74,51 @@ function BarangImage({ kode }: { kode: string }) {
       setSrc(gambarCache.get(kode)!);
       return;
     }
+    const el = holderRef.current;
+    if (!el) return;
+
     let alive = true;
-    katalog
-      .getGambar(kode)
-      .then((res) => {
-        if (res.status === 'ok' && res.data) {
-          const gambar = String((res.data as { gambar?: string }).gambar || '');
-          if (gambar) {
-            gambarCache.set(kode, gambar);
-            if (alive) setSrc(gambar);
-          }
-        }
-      })
-      .catch(() => undefined);
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        io.disconnect();
+        katalog
+          .getGambar(kode)
+          .then((res) => {
+            if (res.status === 'ok' && res.data) {
+              const gambar = String((res.data as { gambar?: string }).gambar || '');
+              if (gambar) {
+                gambarCache.set(kode, gambar);
+                if (alive) setSrc(gambar);
+              }
+            }
+          })
+          .catch(() => undefined);
+      },
+      { rootMargin: '400px' },
+    );
+
+    io.observe(el);
     return () => {
       alive = false;
+      io.disconnect();
     };
   }, [kode]);
 
-  if (!src) return null;
   return (
-    <img
-      src={src}
-      alt={kode}
-      className="absolute inset-0 h-full w-full object-cover transition-transform group-hover:scale-105"
-      onError={(e) => {
-        (e.currentTarget as HTMLImageElement).style.display = 'none';
-      }}
-    />
+    <div ref={holderRef} className="absolute inset-0">
+      {src ? (
+        <img
+          src={src}
+          alt={kode}
+          className="h-full w-full object-cover transition-transform group-hover:scale-105"
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).style.display = 'none';
+          }}
+        />
+      ) : null}
+    </div>
   );
 }
 
@@ -188,6 +206,21 @@ export default function ItemManagement() {
         (item.KATEGORI && item.KATEGORI.toLowerCase().includes(searchLower))
     );
   }, [items, search]);
+
+  // Render bertahap — 4.764 kartu sekaligus membuat browser macet
+  const PAGE_SIZE = 24;
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [search]);
+
+  const visibleItems = useMemo(
+    () => filteredItems.slice(0, visibleCount),
+    [filteredItems, visibleCount],
+  );
+
+  const remainingCount = filteredItems.length - visibleItems.length;
 
   const handleEdit = (item: Barang) => {
     setSelectedItem(item);
@@ -351,7 +384,7 @@ export default function ItemManagement() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredItems.map((item) => (
+            {visibleItems.map((item) => (
               <Card key={item.KODE_BARANG} className="overflow-hidden group transition-all hover:shadow-lg">
                 <div className="relative h-48 bg-muted overflow-hidden">
                   <div className="flex h-full items-center justify-center text-muted-foreground">
@@ -399,6 +432,17 @@ export default function ItemManagement() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        )}
+
+        {remainingCount > 0 && !loading && (
+          <div className="mt-8 text-center">
+            <Button
+              variant="outline"
+              onClick={() => setVisibleCount((c) => c + 48)}
+            >
+              Tampilkan lebih banyak — sisa {remainingCount} item
+            </Button>
           </div>
         )}
 
