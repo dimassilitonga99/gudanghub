@@ -44,20 +44,31 @@ async function fileToCompressedDataUrl(file: File): Promise<string> {
     image.onerror = () => reject(new Error('File bukan gambar valid'));
     image.src = dataUrl;
   });
+  // Pertahankan transparansi: PNG/WebP tetap PNG (alpha aman).
+  // Hanya JPG sumber yang dikompres sebagai JPEG.
+  const keepAlpha = /image\/(png|webp)/i.test(file.type);
+  const mime = keepAlpha ? 'image/png' : 'image/jpeg';
+  const maxDim = keepAlpha ? 380 : 480;
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
   if (!ctx) return dataUrl;
-  let scale = Math.min(1, 480 / Math.max(img.naturalWidth, img.naturalHeight));
+  let scale = Math.min(1, maxDim / Math.max(img.naturalWidth, img.naturalHeight));
   let quality = 0.72;
   const draw = () => {
     canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
     canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
+    if (keepAlpha) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    } else {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    return canvas.toDataURL('image/jpeg', quality);
+    return canvas.toDataURL(mime, quality);
   };
   let out = draw();
-  while (out.length > MAX_CELL && (quality > 0.4 || scale > 0.12)) {
-    if (quality > 0.45) quality -= 0.1;
+  while (out.length > MAX_CELL && scale > 0.1) {
+    if (!keepAlpha && quality > 0.45) quality -= 0.1;
     else scale *= 0.8;
     out = draw();
   }
@@ -561,7 +572,7 @@ export default function ItemManagement() {
                     />
                   </label>
                 </div>
-                <p className="text-xs text-muted-foreground">JPG/PNG/WebP — dikompres otomatis agar ringan</p>
+                <p className="text-xs text-muted-foreground">JPG/PNG/WebP — PNG transparan (tanpa background) didukung</p>
               </div>
             </div>
 
