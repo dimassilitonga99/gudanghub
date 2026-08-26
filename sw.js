@@ -3,7 +3,7 @@
    Offline support + smart caching + update notification
    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-const APP_VERSION = 'v5.3.0-react';
+const APP_VERSION = 'v5.4.0-react';
 const CACHE_PREFIX = 'gudanghub';
 const STATIC_CACHE = `${CACHE_PREFIX}-static-${APP_VERSION}`;
 const DYNAMIC_CACHE = `${CACHE_PREFIX}-dynamic-${APP_VERSION}`;

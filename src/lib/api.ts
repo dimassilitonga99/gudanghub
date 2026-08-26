@@ -5,7 +5,7 @@ export { API_URL };
 
 // Action baru yang belum dikenal worker proxy → panggil Apps Script langsung
 // (CORS Apps Script terbuka penuh; FormData POST = simple request tanpa preflight).
-const DIRECT_ACTIONS = ['submitFeedback', 'createBarang', 'updateBarang', 'deleteBarang'];
+const DIRECT_ACTIONS: string[] = []; // semua kini lewat worker adapter v5
 
 function apiBaseUrl(action: string): string {
   return DIRECT_ACTIONS.indexOf(action) !== -1 ? APPS_SCRIPT_URL : API_URL;
