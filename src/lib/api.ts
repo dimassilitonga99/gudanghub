@@ -510,6 +510,9 @@ export const katalog = {
   remove(kode: string): Promise<ApiResult> {
     return callApi('deleteBarang', { kode }, { dedupe: false, timeout: 45000 });
   },
+  getGambar(kode: string): Promise<ApiResult> {
+    return callApi('getGambar', { kode }, { dedupe: false, cache: false, timeout: 30000 });
+  },
 };
 
 export const cabang = {

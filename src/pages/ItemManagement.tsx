@@ -28,8 +28,81 @@ interface ItemForm {
   GAMBAR?: string;
 }
 
-const driveThumb = (fileId?: string | null) =>
-  fileId ? `https://drive.google.com/thumbnail?id=${encodeURIComponent(String(fileId))}&sz=w400` : '';
+const MAX_CELL = 42000;
+
+async function fileToCompressedDataUrl(file: File): Promise<string> {
+  const dataUrl = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error('Gagal membaca file'));
+    reader.readAsDataURL(file);
+  });
+  const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error('File bukan gambar valid'));
+    image.src = dataUrl;
+  });
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return dataUrl;
+  let scale = Math.min(1, 480 / Math.max(img.naturalWidth, img.naturalHeight));
+  let quality = 0.72;
+  const draw = () => {
+    canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
+    canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    return canvas.toDataURL('image/jpeg', quality);
+  };
+  let out = draw();
+  while (out.length > MAX_CELL && (quality > 0.4 || scale > 0.12)) {
+    if (quality > 0.45) quality -= 0.1;
+    else scale *= 0.8;
+    out = draw();
+  }
+  return out;
+}
+
+const gambarCache = new Map<string, string>();
+
+function BarangImage({ kode }: { kode: string }) {
+  const [src, setSrc] = useState(() => gambarCache.get(kode) || '');
+
+  useEffect(() => {
+    if (gambarCache.has(kode)) {
+      setSrc(gambarCache.get(kode)!);
+      return;
+    }
+    let alive = true;
+    katalog
+      .getGambar(kode)
+      .then((res) => {
+        if (res.status === 'ok' && res.data) {
+          const gambar = String((res.data as { gambar?: string }).gambar || '');
+          if (gambar) {
+            gambarCache.set(kode, gambar);
+            if (alive) setSrc(gambar);
+          }
+        }
+      })
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, [kode]);
+
+  if (!src) return null;
+  return (
+    <img
+      src={src}
+      alt={kode}
+      className="absolute inset-0 h-full w-full object-cover transition-transform group-hover:scale-105"
+      onError={(e) => {
+        (e.currentTarget as HTMLImageElement).style.display = 'none';
+      }}
+    />
+  );
+}
 
 const DEFAULT_CATEGORIES = [
   'Kursi', 'Meja', 'Lemari', 'Sofa', 'Kasur', 'Rak', 'Bufet', 'Dapur',
@@ -47,6 +120,7 @@ export default function ItemManagement() {
   const [selectedItem, setSelectedItem] = useState<Barang | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [existingGambar, setExistingGambar] = useState('');
 
   const [form, setForm] = useState<ItemForm>({
     KODE_BARANG: '',
@@ -63,6 +137,34 @@ export default function ItemManagement() {
   useEffect(() => {
     loadItems();
   }, []);
+
+  useEffect(() => {
+    if (!showModal || !selectedItem) {
+      setExistingGambar('');
+      return;
+    }
+    const kode = selectedItem.KODE_BARANG;
+    if (gambarCache.has(kode)) {
+      setExistingGambar(gambarCache.get(kode)!);
+      return;
+    }
+    let alive = true;
+    katalog
+      .getGambar(kode)
+      .then((res) => {
+        if (res.status === 'ok' && res.data) {
+          const gambar = String((res.data as { gambar?: string }).gambar || '');
+          if (gambar) {
+            gambarCache.set(kode, gambar);
+            if (alive) setExistingGambar(gambar);
+          }
+        }
+      })
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, [showModal, selectedItem]);
 
   async function loadItems() {
     try {
@@ -182,23 +284,24 @@ export default function ItemManagement() {
     setSelectedItem(null);
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = '';
     if (!file) return;
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error('Ukuran gambar maksimal 2MB');
+    if (file.size > 8 * 1024 * 1024) {
+      toast.error('Ukuran file maksimal 8MB (akan dikompres otomatis)');
       return;
     }
     if (!file.type.startsWith('image/')) {
       toast.error('File harus berupa gambar');
       return;
     }
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const dataUrl = ev.target?.result as string;
+    try {
+      const dataUrl = await fileToCompressedDataUrl(file);
       setForm((prev) => ({ ...prev, GAMBAR: dataUrl }));
-    };
-    reader.readAsDataURL(file);
+    } catch {
+      toast.error('Gagal memproses gambar');
+    }
   };
 
   if (!session || session.role !== 'admin') {
@@ -251,20 +354,10 @@ export default function ItemManagement() {
             {filteredItems.map((item) => (
               <Card key={item.KODE_BARANG} className="overflow-hidden group transition-all hover:shadow-lg">
                 <div className="relative h-48 bg-muted overflow-hidden">
-                  {item.GAMBAR ? (
-                    <img
-                      src={driveThumb(item.GAMBAR as string)}
-                      alt={item.NAMA_BARANG}
-                      className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                      onError={(e) => {
-                        (e.currentTarget as HTMLImageElement).style.display = 'none';
-                      }}
-                    />
-                  ) : (
-                    <div className="flex h-full items-center justify-center text-muted-foreground">
-                      <Icon name="image" size={48} />
-                    </div>
-                  )}
+                  <div className="flex h-full items-center justify-center text-muted-foreground">
+                    <Icon name="image" size={48} />
+                  </div>
+                  <BarangImage kode={item.KODE_BARANG} />
                   <div className="absolute top-3 right-3 flex gap-2">
                     <Button
                       size="sm"
@@ -434,9 +527,7 @@ export default function ItemManagement() {
               <Label htmlFor="gambar">Gambar Item</Label>
               <div className="flex flex-col gap-3">
                 {(() => {
-                  const previewSrc = form.GAMBAR === undefined
-                    ? driveThumb(selectedItem?.GAMBAR as string | undefined)
-                    : form.GAMBAR;
+                  const previewSrc = form.GAMBAR === undefined ? existingGambar : form.GAMBAR;
                   return previewSrc ? (
                     <div className="relative w-32 h-32 rounded-lg overflow-hidden border-2 border-border">
                       <img
@@ -473,7 +564,7 @@ export default function ItemManagement() {
                     />
                   </label>
                 </div>
-                <p className="text-xs text-muted-foreground">Rekomendasi: JPG/PNG, maksimal 2MB</p>
+                <p className="text-xs text-muted-foreground">JPG/PNG/WebP — dikompres otomatis agar ringan</p>
               </div>
             </div>
 

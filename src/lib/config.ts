@@ -206,6 +206,7 @@ export const ROUTES = {
   login: '/login',
   dashboard: '/dashboard',
   order: '/order',
+  itemManagement: '/item-management',
   gantiPassword: '/ganti-password',
   laporan: '/laporan',
   profil: '/profil',
