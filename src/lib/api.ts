@@ -235,8 +235,11 @@ async function executeWithRetry(
   maxRetries: number,
 ): Promise<ApiResult> {
   let lastError: Error | null = null;
+  // Payload besar (mis. gambar base64) HANYA lewat POST FormData —
+  // fallback GET dibuang karena URL tak muat & errornya menyesatkan.
+  const isBig = JSON.stringify(payload).length > 6000;
   const strategies: Array<(a: string, p: Record<string, unknown>, t: number) => Promise<ApiResult>> =
-    action === 'login' ? [apiPostForm] : [apiPostForm, apiGetQuery];
+    action === 'login' || isBig ? [apiPostForm] : [apiPostForm, apiGetQuery];
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     for (const strategy of strategies) {
@@ -502,13 +505,13 @@ export const katalog = {
     return katalog.getAll({ cache: false });
   },
   create(data: Record<string, unknown>): Promise<ApiResult> {
-    return callApi('createBarang', data, { dedupe: false, timeout: 45000 });
+    return callApi('createBarang', data, { dedupe: false, timeout: 90000, maxRetries: 3 });
   },
   update(data: Record<string, unknown>): Promise<ApiResult> {
-    return callApi('updateBarang', data, { dedupe: false, timeout: 45000 });
+    return callApi('updateBarang', data, { dedupe: false, timeout: 90000, maxRetries: 3 });
   },
   remove(kode: string): Promise<ApiResult> {
-    return callApi('deleteBarang', { kode }, { dedupe: false, timeout: 45000 });
+    return callApi('deleteBarang', { kode }, { dedupe: false, timeout: 60000, maxRetries: 3 });
   },
   getGambar(kode: string): Promise<ApiResult> {
     return callApi('getGambar', { kode }, { dedupe: false, cache: false, timeout: 30000 });

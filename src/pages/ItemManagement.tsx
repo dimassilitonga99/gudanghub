@@ -186,6 +186,7 @@ export default function ItemManagement() {
       const res = await katalog.remove(kodeBarang);
       if (res?.status === 'ok') {
         toastSuccess('Item berhasil dihapus');
+        gambarCache.delete(kodeBarang);
         await katalog.refresh().catch(() => undefined);
         loadItems();
       } else {
@@ -233,6 +234,15 @@ export default function ItemManagement() {
       if (res?.status !== 'ok') {
         toast.error(res?.message || 'Gagal menyimpan item');
         return;
+      }
+      // Tampilkan gambar baru INSTAN — tanpa nunggu fetch ulang / refresh
+      const finalKode = String(payload.kode || '').toUpperCase();
+      if (typeof form.GAMBAR === 'string' && form.GAMBAR) {
+        gambarCache.set(finalKode, form.GAMBAR);
+        setExistingGambar(form.GAMBAR);
+      } else if (form.GAMBAR === '') {
+        gambarCache.delete(finalKode);
+        setExistingGambar('');
       }
       setShowModal(false);
       await katalog.refresh().catch(() => undefined);
