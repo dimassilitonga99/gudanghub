@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { toastSuccess } from '@/lib/toast';
 import { katalog } from '@/lib/api';
-import { BarangImage, gambarCache } from '@/components/ItemPhoto';
+import { BarangImage, setGambarCache } from '@/components/ItemPhoto';
 import { useAuth } from '@/context/AuthContext';
 import { APP, type Barang } from '@/lib/config';
 import { cn, formatRupiah, formatWita } from '@/lib/utils';
@@ -186,7 +186,7 @@ export default function ItemManagement() {
       const res = await katalog.remove(kodeBarang);
       if (res?.status === 'ok') {
         toastSuccess('Item berhasil dihapus');
-        gambarCache.delete(kodeBarang);
+        setGambarCache(kodeBarang);
         await katalog.refresh().catch(() => undefined);
         loadItems();
       } else {
@@ -238,10 +238,10 @@ export default function ItemManagement() {
       // Tampilkan gambar baru INSTAN — tanpa nunggu fetch ulang / refresh
       const finalKode = String(payload.kode || '').toUpperCase();
       if (typeof form.GAMBAR === 'string' && form.GAMBAR) {
-        gambarCache.set(finalKode, form.GAMBAR);
+        setGambarCache(finalKode, form.GAMBAR);
         setExistingGambar(form.GAMBAR);
       } else if (form.GAMBAR === '') {
-        gambarCache.delete(finalKode);
+        setGambarCache(finalKode);
         setExistingGambar('');
       }
       setShowModal(false);
