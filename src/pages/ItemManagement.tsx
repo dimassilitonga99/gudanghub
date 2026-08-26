@@ -31,6 +31,18 @@ interface ItemForm {
 
 const MAX_CELL = 42000;
 
+// Browser modern semua bisa encode WebP — cek sekali saja
+const WEBP_OK = (() => {
+  try {
+    const c = document.createElement('canvas');
+    c.width = 1;
+    c.height = 1;
+    return c.toDataURL('image/webp').startsWith('data:image/webp');
+  } catch {
+    return false;
+  }
+})();
+
 async function fileToCompressedDataUrl(file: File): Promise<string> {
   const dataUrl = await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
@@ -44,34 +56,45 @@ async function fileToCompressedDataUrl(file: File): Promise<string> {
     image.onerror = () => reject(new Error('File bukan gambar valid'));
     image.src = dataUrl;
   });
-  // Pertahankan transparansi: PNG/WebP tetap PNG (alpha aman).
-  // Hanya JPG sumber yang dikompres sebagai JPEG.
-  const keepAlpha = /image\/(png|webp)/i.test(file.type);
-  const mime = keepAlpha ? 'image/png' : 'image/jpeg';
-  const maxDim = keepAlpha ? 380 : 480;
+
+  // Sumber PNG/WebP (ber-alpha) → simpan WebP transparan (jauh lebih ringan
+  // dari PNG, tanpa latar hitam). JPG sumber → JPEG latar putih.
+  const alpha = /image\/(png|webp)/i.test(file.type);
+  const mime = alpha ? (WEBP_OK ? 'image/webp' : 'image/png') : 'image/jpeg';
+
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
   if (!ctx) return dataUrl;
-  let scale = Math.min(1, maxDim / Math.max(img.naturalWidth, img.naturalHeight));
-  let quality = 0.72;
+
+  let scale = Math.min(1, 520 / Math.max(img.naturalWidth, img.naturalHeight));
+  let quality = 0.85;
+
   const draw = () => {
     canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
     canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
-    if (keepAlpha) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-    } else {
+    if (mime === 'image/jpeg') {
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+    } else {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
     return canvas.toDataURL(mime, quality);
   };
+
   let out = draw();
-  while (out.length > MAX_CELL && scale > 0.1) {
-    if (!keepAlpha && quality > 0.45) quality -= 0.1;
-    else scale *= 0.8;
+
+  // WebP mengecil drastis tiap -12% skala → konvergen 1–2 iterasi saja
+  while (out.length > MAX_CELL && scale > 0.14) {
+    if (!alpha || !WEBP_OK) {
+      if (quality > 0.5) quality -= 0.12;
+      else scale *= 0.8;
+    } else {
+      scale *= 0.88;
+    }
     out = draw();
   }
+
   return out;
 }
 
@@ -537,20 +560,22 @@ export default function ItemManagement() {
                 {(() => {
                   const previewSrc = form.GAMBAR === undefined ? existingGambar : form.GAMBAR;
                   return previewSrc ? (
-                    <div className="relative w-32 h-32 rounded-lg overflow-hidden border-2 border-border">
+                  <div className="relative w-32 h-32 mr-3">
+                    <div className="w-32 h-32 rounded-lg overflow-hidden border-2 border-border">
                       <img
                         src={previewSrc}
                         alt="Preview"
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-contain"
                       />
-                      <button
-                        type="button"
-                        onClick={() => setForm({ ...form, GAMBAR: '' })}
-                        className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center hover:bg-destructive/90"
-                      >
-                        <Icon name="x" size={12} />
-                      </button>
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, GAMBAR: '' })}
+                      className="absolute -top-2 -right-2 z-10 h-6 w-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center shadow-md hover:bg-destructive/90"
+                    >
+                      <Icon name="x" size={12} />
+                    </button>
+                  </div>
                   ) : (
                     <div className="w-32 h-32 rounded-lg border-2 border-dashed border-border flex items-center justify-center bg-muted/50">
                       <div className="text-center">
