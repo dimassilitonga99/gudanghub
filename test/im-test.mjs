@@ -1,7 +1,7 @@
 import { chromium } from 'playwright-core';
 import { mkdirSync } from 'fs';
 
-const BASE = 'https://gudanghub.pages.dev';
+const BASE = process.env.TEST_BASE || 'https://gudanghub.pages.dev';
 mkdirSync('test/shots', { recursive: true });
 
 const consoleErrors = [];

@@ -1,15 +1,8 @@
-import { API_URL, APPS_SCRIPT_URL, SETTINGS } from './config';
-import { getSession } from './session';
+import { API_URL, SETTINGS } from './config';
 
 export { API_URL };
 
-// Action baru yang belum dikenal worker proxy → panggil Apps Script langsung
-// (CORS Apps Script terbuka penuh; FormData POST = simple request tanpa preflight).
-const DIRECT_ACTIONS: string[] = []; // semua kini lewat worker adapter v5
-
-function apiBaseUrl(action: string): string {
-  return DIRECT_ACTIONS.indexOf(action) !== -1 ? APPS_SCRIPT_URL : API_URL;
-}
+const V5_BASE = 'https://gudanghub-api.vercel.app/api';
 
 export interface ApiResult<T = unknown> {
   status: 'ok' | 'error';
@@ -58,15 +51,6 @@ function handleAuthRequired(): void {
   } catch {
     /* ignore */
   }
-}
-
-function attachToken(action: string, payload: Record<string, unknown>): Record<string, unknown> {
-  if (PUBLIC_ACTIONS.indexOf(action) !== -1) return payload;
-  const s = getSession();
-  if (s && s.token) {
-    return { ...payload, token: s.token };
-  }
-  return payload;
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -118,58 +102,6 @@ export function clearLSCache(action?: string): void {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// RESPONSE PARSER (mendukung GZIP 'GZ1:')
-// ─────────────────────────────────────────────────────────────────────────
-
-async function decompressGz(text: string): Promise<string> {
-  const b64 = text.slice(4);
-  const bin = atob(b64);
-  const bytes = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-  if (typeof DecompressionStream === 'undefined') {
-    throw new Error('Browser tidak mendukung dekompresi.');
-  }
-  const ds = new DecompressionStream('gzip');
-  const stream = new Blob([bytes]).stream().pipeThrough(ds);
-  return await new Response(stream).text();
-}
-
-export async function parseResponse(text: string): Promise<ApiResult> {
-  if (!text || !text.trim()) {
-    return { status: 'error', message: 'Respons kosong dari server.' };
-  }
-
-  try {
-    if (text.indexOf('GZ1:') === 0) {
-      const plain = await decompressGz(text);
-      return JSON.parse(plain) as ApiResult;
-    }
-    return JSON.parse(text) as ApiResult;
-  } catch {
-    /* continue */
-  }
-
-  try {
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      return JSON.parse(jsonMatch[0]) as ApiResult;
-    }
-  } catch {
-    /* continue */
-  }
-
-  const lower = text.toLowerCase();
-  if (lower.includes('sign in') || lower.includes('accounts.google')) {
-    return {
-      status: 'error',
-      message: 'Server AppScript butuh login. Cek deployment access ke "Anyone".',
-    };
-  }
-
-  return { status: 'error', message: 'Format respons server tidak valid.' };
-}
-
-// ─────────────────────────────────────────────────────────────────────────
 // FETCH WITH TIMEOUT
 // ─────────────────────────────────────────────────────────────────────────
 
@@ -194,75 +126,258 @@ async function fetchWithTimeout(
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// LOW-LEVEL CALLS
+// V5 REST API — Token & Request
 // ─────────────────────────────────────────────────────────────────────────
 
-async function apiPostForm(action: string, payload: Record<string, unknown>, timeout: number): Promise<ApiResult> {
-  const body = JSON.stringify({ ...attachToken(action, payload), action });
-  const formData = new FormData();
-  formData.append('payload', body);
-  const response = await fetchWithTimeout(apiBaseUrl(action), { method: 'POST', body: formData }, timeout);
-  const text = await response.text();
-  return await parseResponse(text);
+const LS_ACCESS = 'v5_access';
+const LS_REFRESH = 'v5_refresh';
+
+function getAccess(): string {
+  try { return localStorage.getItem(LS_ACCESS) || ''; } catch { return ''; }
+}
+export function setV5Tokens(a: string, r: string) {
+  try { localStorage.setItem(LS_ACCESS, a); localStorage.setItem(LS_REFRESH, r); } catch {}
+}
+export function clearV5Tokens() {
+  try { localStorage.removeItem(LS_ACCESS); localStorage.removeItem(LS_REFRESH); } catch {}
 }
 
-async function apiGetQuery(action: string, payload: Record<string, unknown>, timeout: number): Promise<ApiResult> {
-  const body = JSON.stringify({ ...attachToken(action, payload), action });
-  const url =
-    apiBaseUrl(action) +
-    '?action=' +
-    encodeURIComponent(action) +
-    '&payload=' +
-    encodeURIComponent(body) +
-    '&t=' +
-    Date.now();
-  if (url.length > 7000) {
-    throw new Error('Payload terlalu besar.');
+async function refreshAccess(): Promise<string> {
+  let rt = '';
+  try { rt = localStorage.getItem(LS_REFRESH) || ''; } catch {}
+  if (!rt) throw new Error('AUTH_REQUIRED');
+  const r = await fetch(V5_BASE + '/auth/refresh', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + rt },
+  });
+  if (!r.ok) { clearV5Tokens(); throw new Error('AUTH_REQUIRED'); }
+  const j = await r.json();
+  setV5Tokens(j.access_token, rt);
+  return j.access_token;
+}
+
+async function v5Fetch(path: string, opts?: { method?: string; body?: string; token?: string }): Promise<any> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  const tok = opts?.token || getAccess();
+  if (tok) headers['Authorization'] = 'Bearer ' + tok;
+  const r = await fetchWithTimeout(V5_BASE + path, {
+    method: opts?.method || 'GET',
+    headers,
+    body: opts?.body,
+  }, 45000);
+  const j = await r.json();
+  if (r.status === 401) {
+    const newTok = await refreshAccess().catch(() => '');
+    if (!newTok) { clearV5Tokens(); return { error: 'AUTH_REQUIRED' }; }
+    headers['Authorization'] = 'Bearer ' + newTok;
+    const retry = await fetchWithTimeout(V5_BASE + path, {
+      method: opts?.method || 'GET', headers, body: opts?.body,
+    }, 45000);
+    return retry.json();
   }
-  const response = await fetchWithTimeout(url, { cache: 'no-store' }, timeout);
-  const text = await response.text();
-  return await parseResponse(text);
+  return j;
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-// EXECUTE WITH RETRY
-// ─────────────────────────────────────────────────────────────────────────
+function mapBarang(r: any): Record<string, unknown> {
+  return {
+    KODE_BARANG: r.kode, NAMA_BARANG: r.nama, KATEGORI: r.kategori || '',
+    SATUAN: r.satuan || 'PCS', HARGA: Number(r.harga), STOK: r.stok ?? 0,
+    STOK_GUDANG: r.stok_gudang ?? '', STOK_TOKO: r.stok_toko ?? '',
+    DESKRIPSI: r.deskripsi || '', GAMBAR_KEY: r.gambar_key || '',
+    UPDATED_AT: r.updated_at,
+  };
+}
 
-async function executeWithRetry(
+const pad2 = (n: number) => String(n).padStart(2, '0');
+
+function mapOrder(o: any): Record<string, unknown> {
+  const fmt = (iso: string) => {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return `${pad2(d.getUTCDate())}-${pad2(d.getUTCMonth()+1)}-${d.getUTCFullYear()} ${pad2(d.getUTCHours())}:${pad2(d.getUTCMinutes())}:${pad2(d.getUTCSeconds())}`;
+  };
+  return {
+    ORDER_ID: o.id, NOMOR_ORDER: o.nomor || '', ID_CABANG: o.cabang_id,
+    NAMA_CABANG: o.nama_cabang || '', PIC: o.pic || '',
+    TANGGAL_ORDER: fmt(o.tanggal), CATATAN: o.catatan || '',
+    STATUS: o.status || 'PENDING', TANGGAL_PROSES: fmt(o.tanggal_proses),
+    DIPROSES_OLEH: o.diproses_oleh || '',
+    DETAIL: (o.items || []).map((i: any) => ({
+      ORDER_ID: i.order_id, KODE_BARANG: i.kode_barang, NAMA_BARANG: i.nama_snapshot,
+      KATEGORI: i.kategori || '', QTY: Number(i.qty), SATUAN: i.satuan || 'PCS',
+      HARGA_SATUAN: Number(i.harga), SUBTOTAL: Number(i.subtotal),
+      ITEM_STATUS: i.item_status, ORIGINAL_QTY: i.original_qty ?? '',
+      REASON: i.reason || '', STOK_SISTEM: i.stok_sistem ?? '',
+      STOK_GUDANG: i.stok_gudang ?? '', STOK_TOKO: i.stok_toko ?? '',
+      STOK_PICKER: i.stok_picker ?? '', CATATAN_ITEM: i.catatan_item || '',
+    })),
+  };
+}
+
+// ── Action Router: GAS action name → REST endpoint ─────────────────────
+async function executeAction(
   action: string,
   payload: Record<string, unknown>,
-  timeout: number,
-  maxRetries: number,
 ): Promise<ApiResult> {
-  let lastError: Error | null = null;
-  // Payload besar (mis. gambar base64) HANYA lewat POST FormData —
-  // fallback GET dibuang karena URL tak muat & errornya menyesatkan.
-  const isBig = JSON.stringify(payload).length > 6000;
-  const strategies: Array<(a: string, p: Record<string, unknown>, t: number) => Promise<ApiResult>> =
-    action === 'login' || isBig ? [apiPostForm] : [apiPostForm, apiGetQuery];
+  const P = payload;
 
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    for (const strategy of strategies) {
-      try {
-        const result = await strategy(action, payload, timeout);
-        if (result && result.status) {
-          return result;
-        }
-      } catch (error) {
-        lastError = error as Error;
-        console.warn('[API]', strategy.name, 'attempt', attempt, 'failed:', (error as Error).message);
+  switch (action) {
+
+    case 'ping':
+      return { status: 'ok', message: 'pong' };
+
+    case 'login': {
+      const r = await fetch(V5_BASE + '/auth/login', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: P.username, password: P.password }),
+      });
+      const j = await r.json();
+      if (r.status !== 200) return { status: 'error', message: j.error || 'Login gagal.' };
+      setV5Tokens(j.access_token, j.refresh_token);
+      return { status: 'ok', token: j.access_token, user: j.user };
+    }
+
+    case 'forgotPassword':
+      return { status: 'ok', message: 'Hubungi Admin Gudang untuk reset password.' };
+
+    case 'getBarang': {
+      const first = await v5Fetch('/barang?limit=2000');
+      if (first.error) return { status: 'error', message: first.error };
+      let all = [...(first.data || [])];
+      let cursor = first.next_cursor;
+      while (cursor && all.length < 6000) {
+        const next = await v5Fetch('/barang?limit=2000&cursor=' + encodeURIComponent(cursor));
+        if (next.error || !next.data?.length) break;
+        all = all.concat(next.data);
+        cursor = next.next_cursor;
       }
+      return { status: 'ok', data: all.map(mapBarang) };
     }
-    if (attempt < maxRetries) {
-      const delayMs = Math.min(1000 * Math.pow(2, attempt - 1), 3000);
-      await new Promise((r) => setTimeout(r, delayMs));
-    }
-  }
 
-  return {
-    status: 'error',
-    message: lastError ? lastError.message : 'Gagal terhubung ke server.',
-  };
+    case 'getCabang':
+      return { status: 'ok', data: [
+        { ID_CABANG: 'CB001', NAMA_CABANG: 'Toko Nasional Eltari – Arfa', PIC: 'Arfa' },
+        { ID_CABANG: 'CB002', NAMA_CABANG: 'Toko Perabot Mama Oesapa – Akmal', PIC: 'Akmal' },
+        { ID_CABANG: 'CB003', NAMA_CABANG: 'Toko Perabot Mama TDM – Shally', PIC: 'Shally' },
+        { ID_CABANG: 'CB004', NAMA_CABANG: 'Toko Perabot Mama Kefamenanu – Fajar', PIC: 'Fajar' },
+      ]};
+
+    case 'createBarang': {
+      const j = await v5Fetch('/barang', { method: 'POST', body: JSON.stringify({
+        kode: P.kode, nama: P.nama, kategori: P.kategori, satuan: P.satuan,
+        harga: P.harga, stok: P.stok,
+        stok_gudang: P.stokGudang === '' ? null : P.stokGudang,
+        stok_toko: P.stokToko === '' ? null : P.stokToko,
+        deskripsi: P.deskripsi || '',
+      })});
+      if (j.error) return { status: 'error', message: j.error };
+      return { status: 'ok', message: 'Barang berhasil ditambahkan.', data: mapBarang(j.data) };
+    }
+
+    case 'updateBarang': {
+      const kode = String(P.kode || '').toUpperCase();
+      const body: Record<string, unknown> = {};
+      if (P.nama !== undefined) body.nama = P.nama;
+      if (P.kategori !== undefined) body.kategori = P.kategori;
+      if (P.satuan !== undefined) body.satuan = P.satuan;
+      if (P.harga !== undefined) body.harga = P.harga;
+      if (P.stok !== undefined) body.stok = P.stok;
+      if (P.stokGudang !== undefined) body.stok_gudang = P.stokGudang === '' ? null : P.stokGudang;
+      if (P.stokToko !== undefined) body.stok_toko = P.stokToko === '' ? null : P.stokToko;
+      if (P.deskripsi !== undefined) body.deskripsi = P.deskripsi;
+      const j = await v5Fetch('/barang/' + encodeURIComponent(kode), { method: 'PATCH', body: JSON.stringify(body) });
+      if (j.error) return { status: 'error', message: j.error };
+      return { status: 'ok', message: 'Barang berhasil diperbarui.' };
+    }
+
+    case 'deleteBarang': {
+      const kode = String(P.kode || '').toUpperCase();
+      const j = await v5Fetch('/barang/' + encodeURIComponent(kode), { method: 'DELETE' });
+      if (j.error) return { status: 'error', message: j.error };
+      return { status: 'ok', message: 'Barang berhasil dihapus.' };
+    }
+
+    case 'getOrders': {
+      const j = await v5Fetch('/orders');
+      if (j.error) return { status: 'error', message: j.error };
+      return { status: 'ok', data: (j.data || []).map(mapOrder) };
+    }
+
+    case 'getOrderDetail': {
+      const orderId = String(P.orderId || '');
+      const j = await v5Fetch('/orders/' + encodeURIComponent(orderId) + '/detail');
+      if (j.error) return { status: 'error', message: j.error };
+      return { status: 'ok', data: mapOrder(j.data).DETAIL };
+    }
+
+    case 'submitOrder': {
+      const items = Array.isArray(P.items) ? P.items : [];
+      const j = await v5Fetch('/orders', { method: 'POST', body: JSON.stringify({
+        idCabang: P.idCabang, catatan: P.catatan, nomorOrder: P.nomorOrder,
+        items: items.map((it: any) => ({ kode: it.kode, qty: it.qty, satuan: it.satuan, harga: it.harga })),
+      })});
+      if (j.error) return { status: 'error', message: j.error };
+      return { status: 'ok', message: 'Order berhasil dikirim!', orderId: j.orderId };
+    }
+
+    case 'updateStatus': {
+      const j = await v5Fetch('/orders/' + encodeURIComponent(String(P.orderId)) + '/status', {
+        method: 'PATCH', body: JSON.stringify({ status: P.status, alasan: P.alasan || '' }),
+      });
+      if (j.error) return { status: 'error', message: j.error };
+      return { status: 'ok', message: 'Status berhasil diupdate ke ' + P.status };
+    }
+
+    case 'editOrder': {
+      const items = Array.isArray(P.items) ? P.items : [];
+      const j = await v5Fetch('/orders/' + encodeURIComponent(String(P.orderId)) + '/edit', {
+        method: 'POST',
+        body: JSON.stringify({
+          items: items.map((it: any) => ({
+            kode: it.kode, qty: it.qty, satuan: it.satuan, harga: it.harga,
+            itemStatus: it.itemStatus || it.status || 'APPROVED',
+            originalQty: it.originalQty, reason: it.reason,
+            nama: it.nama, kategori: it.kategori, catatanItem: it.catatanItem,
+          })),
+          kirimEmail: !!P.kirimEmail,
+        }),
+      });
+      if (j.error) return { status: 'error', message: j.error };
+      return { status: 'ok', message: 'Perubahan disimpan.' };
+    }
+
+    case 'pickerVerify': {
+      const j = await v5Fetch('/orders/' + encodeURIComponent(String(P.orderId)) + '/pick', { method: 'POST' });
+      if (j.error) return { status: 'error', message: j.error };
+      return { status: 'ok', message: 'Order diverifikasi oleh Picker.' };
+    }
+
+    case 'syncCart':
+      await v5Fetch('/cart/sync', { method: 'POST', body: JSON.stringify({ cart: P.cart }) });
+      return { status: 'ok', message: 'Cart disimpan.' };
+
+    case 'getCart': {
+      const j = await v5Fetch('/cart');
+      return { status: 'ok', cart: typeof j.cart === 'string' ? j.cart : JSON.stringify(j.cart || '{}') };
+    }
+
+    case 'changePassword': {
+      const j = await v5Fetch('/auth/change-password', {
+        method: 'POST',
+        body: JSON.stringify({ passwordLama: P.passwordLama, passwordBaru: P.passwordBaru }),
+      });
+      if (j.error) return { status: 'error', message: j.error };
+      return { status: 'ok', message: 'Password berhasil diubah.' };
+    }
+
+    case 'submitFeedback': {
+      await v5Fetch('/feedback', { method: 'POST', body: JSON.stringify({ rating: P.rating, pesan: P.pesan || '' }) });
+      return { status: 'ok', message: 'Terima kasih atas masukan Anda.' };
+    }
+
+    default:
+      return { status: 'error', message: 'Action tidak dikenal: ' + action };
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -275,6 +390,32 @@ export interface CallOptions {
   cacheTtl?: number;
   timeout?: number;
   maxRetries?: number;
+}
+
+// Retry wrapper di atas executeAction (REST v5)
+async function executeWithRetry(
+  action: string,
+  payload: Record<string, unknown>,
+  _timeout: number,
+  maxRetries: number,
+): Promise<ApiResult> {
+  let lastError: Error | null = null;
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const result = await executeAction(action, payload);
+      if (result && result.status) return result;
+    } catch (error) {
+      lastError = error as Error;
+      const msg = lastError.message || '';
+      // AUTH_REQUIRED jangan di-retry — langsuk lempar agar handler logout jalan
+      if (msg === 'AUTH_REQUIRED') break;
+      console.warn('[API]', action, 'attempt', attempt, 'failed:', msg);
+    }
+    if (attempt < maxRetries) {
+      await new Promise((r) => setTimeout(r, Math.min(1000 * Math.pow(2, attempt - 1), 3000)));
+    }
+  }
+  return { status: 'error', message: lastError ? lastError.message : 'Gagal terhubung ke server.' };
 }
 
 export async function callApi(
