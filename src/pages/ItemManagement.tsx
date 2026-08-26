@@ -1,8 +1,9 @@
 import { Icon } from '../components/ui/icon';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { toastSuccess } from '@/lib/toast';
 import { katalog } from '@/lib/api';
+import { BarangImage, gambarCache } from '@/components/ItemPhoto';
 import { useAuth } from '@/context/AuthContext';
 import { APP, type Barang } from '@/lib/config';
 import { cn, formatRupiah, formatWita } from '@/lib/utils';
@@ -61,65 +62,6 @@ async function fileToCompressedDataUrl(file: File): Promise<string> {
     out = draw();
   }
   return out;
-}
-
-const gambarCache = new Map<string, string>();
-
-function BarangImage({ kode }: { kode: string }) {
-  const holderRef = useRef<HTMLDivElement | null>(null);
-  const [src, setSrc] = useState(() => gambarCache.get(kode) || '');
-
-  useEffect(() => {
-    if (gambarCache.has(kode)) {
-      setSrc(gambarCache.get(kode)!);
-      return;
-    }
-    const el = holderRef.current;
-    if (!el) return;
-
-    let alive = true;
-
-    const io = new IntersectionObserver(
-      (entries) => {
-        if (!entries.some((entry) => entry.isIntersecting)) return;
-        io.disconnect();
-        katalog
-          .getGambar(kode)
-          .then((res) => {
-            if (res.status === 'ok' && res.data) {
-              const gambar = String((res.data as { gambar?: string }).gambar || '');
-              if (gambar) {
-                gambarCache.set(kode, gambar);
-                if (alive) setSrc(gambar);
-              }
-            }
-          })
-          .catch(() => undefined);
-      },
-      { rootMargin: '400px' },
-    );
-
-    io.observe(el);
-    return () => {
-      alive = false;
-      io.disconnect();
-    };
-  }, [kode]);
-
-  return (
-    <div ref={holderRef} className="absolute inset-0">
-      {src ? (
-        <img
-          src={src}
-          alt={kode}
-          className="h-full w-full object-cover transition-transform group-hover:scale-105"
-          onError={(e) => {
-            (e.currentTarget as HTMLImageElement).style.display = 'none';
-          }}
-        />
-      ) : null}
-    </div>
-  );
 }
 
 const DEFAULT_CATEGORIES = [

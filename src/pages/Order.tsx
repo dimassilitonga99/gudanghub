@@ -1,4 +1,5 @@
 import { Icon } from '../components/ui/icon';
+import { useGambar } from '@/components/ItemPhoto';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { toastError, toastSuccess } from '@/lib/toast';
@@ -114,8 +115,24 @@ function fmtStock(v: number | ''): string {
 function ProductImage({ kode, nama, kategori }: { kode: string; nama: string; kategori: string }) {
   const [failed, setFailed] = useState(false);
   const [hoverFailed, setHoverFailed] = useState(false);
+  // Prioritas: gambar upload admin (Sheet) → fallback gambar statis images/produk
+  const { src: sheetSrc, ref } = useGambar(String(kode).toUpperCase());
+
+  if (sheetSrc) {
+    return (
+      <div ref={ref} className="relative h-full w-full overflow-hidden bg-muted/30">
+        <img
+          src={sheetSrc}
+          alt={nama}
+          className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
+        />
+      </div>
+    );
+  }
+
   const src = `./images/produk/${String(kode).toUpperCase()}.webp`;
   const hoverSrc = src.replace('.webp', '_2.webp');
+
   if (failed) {
     return (
       <div className="flex h-full w-full items-center justify-center bg-muted/40 text-4xl">
@@ -124,7 +141,7 @@ function ProductImage({ kode, nama, kategori }: { kode: string; nama: string; ka
     );
   }
   return (
-    <div className="relative h-full w-full overflow-hidden bg-muted/30">
+    <div ref={ref} className="relative h-full w-full overflow-hidden bg-muted/30">
       <img
         src={src}
         alt={nama}
