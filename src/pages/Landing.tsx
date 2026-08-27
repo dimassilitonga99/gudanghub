@@ -153,6 +153,45 @@ function Reveal({
   );
 }
 
+const TIM_QUOTES = [
+  { quote: 'Memimpin adalah menjadi contoh — bahkan saat tak ada yang melihat.', author: 'IBU HRD', color: '#D4AF37' },
+  { quote: 'Kerja keras tidak pernah mengkhianati hasil.', author: 'BAPAK ANAK SATU', color: '#5EED8C' },
+  { quote: 'Melayani dengan tulus, bekerja dengan jujur.', author: 'GARDA TERDEPAN', color: '#60C5F7' },
+  { quote: 'Setiap barang membawa harapan keluarga.', author: 'HATI YANG TERLUKA', color: '#F59E42' },
+  { quote: 'Senyum pelanggan adalah gaji terbaik.', author: 'JIWA PELAYAN', color: '#E879F9' },
+  { quote: 'Mengirim janji — tepat waktu, tepat hati.', author: 'SALES BOKEP', color: '#FB7185' },
+];
+
+function useTypewriter(items: { quote: string; author: string; color: string }[], typeSpeed = 40, deleteSpeed = 20, pause = 2000) {
+  const [index, setIndex] = useState(0);
+  const [text, setText] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    const current = items[index];
+    const fullText = `"${current.quote}"`;
+
+    const timeout = setTimeout(() => {
+      if (!isDeleting) {
+        setText(fullText.slice(0, text.length + 1));
+        if (text.length + 1 === fullText.length) {
+          setTimeout(() => setIsDeleting(true), pause);
+        }
+      } else {
+        setText(fullText.slice(0, text.length - 1));
+        if (text.length - 1 === 0) {
+          setIsDeleting(false);
+          setIndex((i) => (i + 1) % items.length);
+        }
+      }
+    }, isDeleting ? deleteSpeed : typeSpeed);
+
+    return () => clearTimeout(timeout);
+  }, [text, isDeleting, index, items, typeSpeed, deleteSpeed, pause]);
+
+  return { text, author: items[index].author, color: items[index].color, isDeleting };
+}
+
 const TIM_IMAGES = [
   { src: './images/tim/ceo.png', alt: 'CEO' },
   { src: './images/tim/manager-1.png', alt: 'Manager' },
@@ -163,18 +202,20 @@ const TIM_IMAGES = [
 ];
 
 function TeamSection() {
+  const { text, author, color } = useTypewriter(TIM_QUOTES);
+
   return (
     <section id="tim" aria-labelledby="tim-title" className="relative">
       <ImageStreamHero
         images={TIM_IMAGES}
         cards={7}
         speed={20}
-        axis={55}
-        className="min-h-[520px] md:min-h-[600px]"
+        axis={60}
+        className="min-h-[560px] md:min-h-[640px]"
       >
-        <div className="relative z-10 flex min-h-[520px] md:min-h-[600px] flex-col items-center justify-center px-4 text-center">
+        <div className="relative z-10 flex min-h-[560px] md:min-h-[640px] flex-col items-center px-4 pt-14 text-center md:pt-20">
           <Reveal>
-            <div className="mb-4 flex items-center gap-2">
+            <div className="mb-3 flex items-center gap-2">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 backdrop-blur">
                 <Icon name="warehouse-alt" size={18} />
               </div>
@@ -196,14 +237,33 @@ function TeamSection() {
           </Reveal>
 
           <Reveal delay="2">
-            <p className="mx-auto mt-5 max-w-lg text-sm leading-relaxed text-white/70 sm:text-base">
-              Di balik setiap order yang lancar, ada manusia-manusia luar biasa
-              yang bekerja tanpa henti — memastikan setiap detail sempurna.
-            </p>
+            <div className="mt-6 h-[80px] max-w-xl md:h-[70px]">
+              <p
+                className="mx-auto text-sm leading-relaxed sm:text-base md:text-lg"
+                style={{ color }}
+              >
+                {text}
+                <span
+                  className="ml-0.5 inline-block w-[2px] align-middle"
+                  style={{
+                    height: '1.1em',
+                    backgroundColor: color,
+                    opacity: 1,
+                    animation: 'blink 0.7s step-end infinite',
+                  }}
+                />
+              </p>
+              <p
+                className="mt-2 text-xs font-semibold tracking-widest uppercase"
+                style={{ color, opacity: 0.7 }}
+              >
+                — {author}
+              </p>
+            </div>
           </Reveal>
 
           <Reveal delay="3">
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-xs text-white/50">
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-6 text-xs text-white/50">
               <div className="flex flex-col items-center">
                 <span className="font-semibold text-white/80">Visi</span>
                 <span>Satu Gudang, Empat Cabang, Satu Tujuan</span>
