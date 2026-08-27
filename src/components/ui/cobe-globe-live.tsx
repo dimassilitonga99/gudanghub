@@ -94,14 +94,17 @@ export function GlobeLive({
     let animationId: number
     let phi = 0
 
+    const safeMarkers = Array.isArray(markers) ? markers : []
+    if (safeMarkers.length === 0) return
+
     /* ── markers: pusat + 4 toko ── */
     const allMarkers = [
       { location: HUB, size: 0.04, id: "hub" },
-      ...markers.map((m) => ({ location: m.location, size: 0.06, id: m.id })),
+      ...safeMarkers.map((m) => ({ location: m.location, size: 0.06, id: m.id })),
     ]
 
     /* ── arcs: hub → tiap toko ── */
-    const arcs = markers.map((m) => ({
+    const arcs = safeMarkers.map((m) => ({
       startLat: HUB[0],
       startLng: HUB[1],
       endLat: m.location[0],
@@ -113,36 +116,45 @@ export function GlobeLive({
       const width = canvas.offsetWidth
       if (width === 0 || globe) return
 
-      globe = createGlobe(canvas, {
-        devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
-        width,
-        height: width,
-        phi: 0,
-        theta: 0.15,
-        dark: 1,
-        diffuse: 1.2,
-        mapSamples: 16000,
-        mapBrightness: 6,
-        baseColor: [0.1, 0.1, 0.13],
-        markerColor: [1, 0.42, 0],
-        glowColor: [0.15, 0.12, 0.08],
-        markers: allMarkers,
-        arcs,
-        arcColor: [1, 0.42, 0],
-        arcWidth: 0.4,
-        arcHeight: 0.2,
-        arcDashLength: 0.4,
-        arcDashGap: 0.2,
-        arcDashAnimateGap: 15,
-        opacity: 0.85,
-      })
+      try {
+        globe = createGlobe(canvas, {
+          devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
+          width,
+          height: width,
+          phi: 0,
+          theta: 0.15,
+          dark: 1,
+          diffuse: 1.2,
+          mapSamples: 16000,
+          mapBrightness: 6,
+          baseColor: [0.1, 0.1, 0.13],
+          markerColor: [1, 0.42, 0],
+          glowColor: [0.15, 0.12, 0.08],
+          markers: allMarkers,
+          arcs,
+          arcColor: [1, 0.42, 0],
+          arcWidth: 0.4,
+          arcHeight: 0.2,
+          arcDashLength: 0.4,
+          arcDashGap: 0.2,
+          arcDashAnimateGap: 15,
+          opacity: 0.85,
+        })
+      } catch (e) {
+        console.error('[GlobeLive] createGlobe failed:', e)
+        return
+      }
 
       function animate() {
         if (!isPausedRef.current) phi += speed
-        globe!.update({
-          phi: phi + phiOffsetRef.current + dragOffset.current.phi,
-          theta: 0.15 + thetaOffsetRef.current + dragOffset.current.theta,
-        })
+        if (globe) {
+          try {
+            globe.update({
+              phi: phi + phiOffsetRef.current + dragOffset.current.phi,
+              theta: 0.15 + thetaOffsetRef.current + dragOffset.current.theta,
+            })
+          } catch {}
+        }
         animationId = requestAnimationFrame(animate)
       }
       animate()
@@ -185,7 +197,7 @@ export function GlobeLive({
       />
 
       {/* ── Floating labels di sekitar globe ── */}
-      {markers.map((m, i) => {
+      {(Array.isArray(markers) ? markers : []).map((m, i) => {
         const anchor = LABEL_ANCHORS[m.id] || { top: "50%", left: "50%", align: "center" }
         const dist = haversine(HUB, m.location)
         return (
