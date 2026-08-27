@@ -2,10 +2,11 @@ import { Icon } from '../components/ui/icon';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { CABANG_LIST, ROUTES } from '@/lib/config';
+import { CABANG, CABANG_LIST, ROUTES } from '@/lib/config';
 import { useAuth } from '@/context/AuthContext';
 import { GradientShimmer } from '@/components/ui/gradient-shimmer';
 import { ImageStreamHero } from '@/components/ui/image-stream-hero';
+import { GlobeLive } from '@/components/ui/cobe-globe-live';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -25,12 +26,11 @@ const STATS = [
   { value: 24, suffix: '/7', label: 'Sistem selalu siap' },
 ];
 
-const GALLERY = [
-  { src: './images/display-1.jpg', tag: 'Showroom Utama', caption: 'Display Furniture Premium', big: true },
-  { src: './images/display-2.jpg', tag: 'Rak Display', caption: 'Peralatan Rumah Tangga', big: false },
-  { src: './images/display-3.jpg', tag: 'Koleksi Baru', caption: 'Elektronik & Kitchen', big: false },
-  { src: './images/display-4.jpg', tag: 'Area Dapur', caption: 'Peralatan Masak Lengkap', big: false },
-  { src: './images/display-5.jpg', tag: 'Cabang Terbaru', caption: 'Toko Siap Melayani', big: true },
+const STORE_MARKERS = [
+  { id: 'CB001', nama: CABANG.CB001.nama, alamat: CABANG.CB001.alamat, pic: CABANG.CB001.pic, color: CABANG.CB001.color, location: [-10.1771, 123.5967] as [number, number] },
+  { id: 'CB002', nama: CABANG.CB002.nama, alamat: CABANG.CB002.alamat, pic: CABANG.CB002.pic, color: CABANG.CB002.color, location: [-10.168, 123.607] as [number, number] },
+  { id: 'CB003', nama: CABANG.CB003.nama, alamat: CABANG.CB003.alamat, pic: CABANG.CB003.pic, color: CABANG.CB003.color, location: [-10.185, 123.589] as [number, number] },
+  { id: 'CB004', nama: CABANG.CB004.nama, alamat: CABANG.CB004.alamat, pic: CABANG.CB004.pic, color: CABANG.CB004.color, location: [-9.4433, 124.4733] as [number, number] },
 ];
 
 const ABOUT_ITEMS = [
@@ -385,50 +385,86 @@ function DemoSection() {
   );
 }
 
-function GallerySection() {
+function StoreSection() {
   return (
-    <section className="gallery-section mx-auto max-w-5xl px-4" id="katalog" aria-labelledby="gallery-title">
-      <Reveal>
-        <header className="section-head">
-          <span className="section-kicker">Showroom Kami</span>
-          <h2 id="gallery-title">
-            Display toko yang <em>menginspirasi</em>.
-          </h2>
-          <p>
-            Lihat langsung bagaimana produk furniture kami tertata rapi di setiap cabang — siap
-            menyambut pelanggan setiap hari.
-          </p>
-        </header>
-      </Reveal>
+    <section className="py-20 md:py-28" id="katalog" aria-labelledby="store-title">
+      <div className="mx-auto max-w-6xl px-4">
+        <Reveal>
+          <header className="mb-12 text-center md:mb-16">
+            <span className="section-kicker">Jaringan Kami</span>
+            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl md:text-5xl" id="store-title">
+              Empat toko, <em className="text-orange-500">satu visi</em>.
+            </h2>
+            <p className="mx-auto mt-4 max-w-lg text-sm text-muted-foreground sm:text-base">
+              Jejaring toko furniture kami menyebar di NTT — siap melayani Anda
+              di mana pun berada.
+            </p>
+          </header>
+        </Reveal>
 
-      <div className="gallery-grid">
-        {GALLERY.map((g, i) => (
-          <Reveal
-            key={g.src}
-            scale
-            delay={i === 0 ? undefined : String(i === 4 ? 2 : (i % 3) + 1)}
-            className={cn('gallery-item', g.big && 'gallery-big')}
-          >
-            <img src={g.src} alt={g.tag} loading="lazy" />
-            <div className="gallery-overlay">
-              <div className="gallery-label">
-                <span className="gallery-tag">{g.tag}</span>
-                <span className="gallery-caption">{g.caption}</span>
-              </div>
+        <div className="grid items-center gap-8 md:grid-cols-[1fr_1.1fr] md:gap-12">
+          {/* Globe */}
+          <Reveal>
+            <div className="mx-auto w-full max-w-md md:mx-0 md:max-w-none">
+              <GlobeLive
+                markers={STORE_MARKERS.map((m) => ({
+                  id: m.id,
+                  location: m.location,
+                  nama: m.nama,
+                  alamat: m.alamat,
+                  color: m.color,
+                }))}
+                className="aspect-square w-full"
+                speed={0.004}
+              />
             </div>
           </Reveal>
-        ))}
-      </div>
 
-      <Reveal delay="1">
-        <div className="gallery-cta">
-          <Link to="/login" className="gallery-cta-btn">
-            <Icon name="shopping-bag" size={18} />
-            Lihat Katalog Lengkap
-            <Icon name="arrow-right" size={16} />
-          </Link>
+          {/* Toko cards */}
+          <div className="flex flex-col gap-3">
+            {STORE_MARKERS.map((toko, i) => (
+              <Reveal key={toko.id} delay={String(i)}>
+                <div
+                  className="group flex items-center gap-4 rounded-xl border border-border/60 bg-card/50 px-5 py-4 backdrop-blur-sm transition-all duration-300 hover:border-orange-500/40 hover:bg-orange-500/5 hover:shadow-lg hover:shadow-orange-500/5"
+                >
+                  <div
+                    className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg text-sm font-bold text-white"
+                    style={{ backgroundColor: toko.color }}
+                  >
+                    {toko.id.slice(-2)}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="truncate text-sm font-semibold text-foreground">
+                        {toko.nama}
+                      </span>
+                      <span
+                        className="h-1.5 w-1.5 flex-shrink-0 rounded-full"
+                        style={{ backgroundColor: toko.color }}
+                      />
+                    </div>
+                    <div className="mt-0.5 flex items-center gap-3 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Icon name="pin" size={11} />
+                        {toko.alamat}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Icon name="user" size={11} />
+                        {toko.pic}
+                      </span>
+                    </div>
+                  </div>
+                  <Icon
+                    name="arrow-right"
+                    size={14}
+                    className="flex-shrink-0 text-muted-foreground/40 transition-all duration-300 group-hover:translate-x-1 group-hover:text-orange-500"
+                  />
+                </div>
+              </Reveal>
+            ))}
+          </div>
         </div>
-      </Reveal>
+      </div>
     </section>
   );
 }
@@ -1201,7 +1237,7 @@ export default function Landing() {
       </section>
 
       {/* GALERI — Katalog */}
-      <GallerySection />
+      <StoreSection />
 
       {/* TIM */}
       <TeamSection />
