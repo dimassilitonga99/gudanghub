@@ -2327,7 +2327,7 @@ export default function Order() {
   );
 
   return (
-    <div className="relative min-h-screen">
+    <div className="relative">
       <ParticlesBg />
       <div className="relative z-10 space-y-6 pb-24">
         <div className="flex flex-wrap items-center justify-between gap-3">
