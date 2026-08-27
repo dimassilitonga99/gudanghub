@@ -152,7 +152,7 @@ export function ParticlesBg({ className = "" }: ParticlesBgProps) {
         ${className}
         min-w-full min-h-full
       `}
-      style={{ zIndex: -1 }}
+      style={{ zIndex: 0 }}
     />
   );
 }
