@@ -159,7 +159,7 @@ const TIM_QUOTES = [
   { quote: 'Melayani dengan tulus, bekerja dengan jujur.', author: 'GARDA TERDEPAN', color: '#60C5F7' },
   { quote: 'Setiap barang membawa harapan keluarga.', author: 'HATI YANG TERLUKA', color: '#F59E42' },
   { quote: 'Senyum pelanggan adalah gaji terbaik.', author: 'JIWA PELAYAN', color: '#E879F9' },
-  { quote: 'Mengirim janji — tepat waktu, tepat hati.', author: 'SALES BOKEP', color: '#FB7185' },
+  { quote: 'Mengirim janji — tepat waktu, tepat hati.', author: 'SALES SANTUY', color: '#FB7185' },
 ];
 
 function useTypewriter(items: { quote: string; author: string; color: string }[], typeSpeed = 40, deleteSpeed = 20, pause = 2000) {
@@ -210,16 +210,16 @@ function TeamSection() {
         images={TIM_IMAGES}
         cards={7}
         speed={20}
-        axis={60}
-        className="min-h-[560px] md:min-h-[640px]"
+        axis={62}
+        className="min-h-[520px] md:min-h-[600px]"
       >
-        <div className="relative z-10 flex min-h-[560px] md:min-h-[640px] flex-col items-center px-4 pt-14 text-center md:pt-20">
+        <div className="relative z-10 flex min-h-[520px] md:min-h-[600px] flex-col items-center px-4 pt-10 text-center md:pt-14">
           <Reveal>
-            <div className="mb-3 flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 backdrop-blur">
-                <Icon name="warehouse-alt" size={18} />
+            <div className="mb-2 flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 backdrop-blur">
+                <Icon name="warehouse-alt" size={16} />
               </div>
-              <span className="text-sm font-semibold tracking-[0.25em] text-white/80">
+              <span className="text-xs font-semibold tracking-[0.25em] text-white/80">
                 GUDANG<span className="text-white">HUB</span>
               </span>
             </div>
@@ -227,7 +227,7 @@ function TeamSection() {
 
           <Reveal delay="1">
             <h2
-              className="text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl"
+              className="text-3xl font-bold tracking-tight text-white sm:text-4xl md:text-5xl"
               id="tim-title"
             >
               TIM
@@ -237,7 +237,21 @@ function TeamSection() {
           </Reveal>
 
           <Reveal delay="2">
-            <div className="mt-6 h-[80px] max-w-xl md:h-[70px]">
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-4 text-[11px] text-white/50 sm:text-xs">
+              <div className="flex flex-col items-center gap-0.5">
+                <span className="font-semibold text-amber-400/80">Visi</span>
+                <span>Satu Gudang, Empat Cabang, Satu Tujuan</span>
+              </div>
+              <div className="h-5 w-px bg-white/20" />
+              <div className="flex flex-col items-center gap-0.5">
+                <span className="font-semibold text-amber-400/80">Misi</span>
+                <span>Melayani NTT dengan Sepenuh Hati</span>
+              </div>
+            </div>
+          </Reveal>
+
+          <Reveal delay="3">
+            <div className="mt-4 h-[72px] max-w-xl md:h-[64px]">
               <p
                 className="mx-auto text-sm leading-relaxed sm:text-base md:text-lg"
                 style={{ color }}
@@ -254,25 +268,11 @@ function TeamSection() {
                 />
               </p>
               <p
-                className="mt-2 text-xs font-semibold tracking-widest uppercase"
+                className="mt-1.5 text-[11px] font-semibold tracking-widest uppercase sm:text-xs"
                 style={{ color, opacity: 0.7 }}
               >
                 — {author}
               </p>
-            </div>
-          </Reveal>
-
-          <Reveal delay="3">
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-6 text-xs text-white/50">
-              <div className="flex flex-col items-center">
-                <span className="font-semibold text-white/80">Visi</span>
-                <span>Satu Gudang, Empat Cabang, Satu Tujuan</span>
-              </div>
-              <div className="h-6 w-px bg-white/20" />
-              <div className="flex flex-col items-center">
-                <span className="font-semibold text-white/80">Misi</span>
-                <span>Melayani NTT dengan Sepenuh Hati</span>
-              </div>
             </div>
           </Reveal>
         </div>
