@@ -2329,153 +2329,154 @@ export default function Order() {
   return (
     <div className="relative min-h-screen">
       <ParticlesBg />
-      <div className="space-y-6 pb-24 relative z-10">
+      <div className="relative z-10 space-y-6 pb-24">
         <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="font-display text-2xl font-bold">Order</h1>
-          <p className="text-sm text-muted-foreground">
-            {branchId} · {branchPic}
-          </p>
-        </div>
-        <Button variant="outline" size="sm" onClick={() => void loadData()}>
-          <Icon name="refresh" size={16} /> Muat Ulang
-        </Button>
-      </div>
-
-      <Tabs value={tab} onValueChange={(v) => {
-        setTab(v as OrderTab);
-        window.location.hash = v;
-      }}>
-        <TabsList className="w-full justify-start overflow-x-auto sm:w-auto">
-          <TabsTrigger value="katalog">Katalog</TabsTrigger>
-          <TabsTrigger value="mass">Order Massal</TabsTrigger>
-          <TabsTrigger value="history">Riwayat</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="katalog" className="space-y-4">
-          <CatalogTabBody
-            katalogList={katalogList}
-            kategoriList={kategoriList}
-            loading={loading}
-            cart={cart}
-            productByCode={productByCode}
-            onAdd={(b, qty, satuan) => addToCart(b, qty, satuan)}
-            onIncrease={(b) => {
-              const kode = String(b.KODE_BARANG);
-              if (cartRef.current[kode]) {
-                const item = cartRef.current[kode];
-                setCartQty(kode, item.qty + 1);
-              }
-            }}
-            onDecrease={(b) => {
-              const kode = String(b.KODE_BARANG);
-              if (cartRef.current[kode]) setCartQty(kode, cartRef.current[kode].qty - 1);
-            }}
-            onSetQty={(b, qty) => {
-              const kode = String(b.KODE_BARANG);
-              if (cartRef.current[kode]) setCartQty(kode, qty);
-            }}
-            onSetSatuan={(b, satuan) => {
-              const kode = String(b.KODE_BARANG);
-              if (cartRef.current[kode]) setCartSatuan(kode, satuan);
-            }}
-            onManualAdd={addManualToCart}
-            onManualUpdate={updateManualItem}
-            onManualDelete={removeFromCart}
-          />
-        </TabsContent>
-
-        <TabsContent value="mass" className="space-y-4">
-          <MassOrderTab
-            productByCode={productByCode}
-            resetKey={massResetKey}
-            onOpenPreOrder={(items, catatan) => setPreOrder({ items, catatan })}
-          />
-        </TabsContent>
-
-        <TabsContent value="history" className="space-y-4">
-          <HistoryTab
-            orders={history}
-            loading={historyLoading}
-            branchId={branchId}
-            onDownload={downloadForm}
-            onReset={() => void handleResetOrders()}
-          />
-        </TabsContent>
-      </Tabs>
-
-      {/* CART BAR */}
-      {cartItems.length > 0 && (
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 p-3 backdrop-blur">
-          <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2">
-            <Button onClick={() => setCartOpen(true)} className="flex-1 justify-between sm:flex-none">
-              <span className="flex items-center gap-2">
-                <Icon name="shopping-cart" size={16} /> Lihat Keranjang
-              </span>
-              <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs font-bold">
-                {cartCount} item · {formatRupiah(cartTotal)}
-              </span>
-            </Button>
+          <div>
+            <h1 className="font-display text-2xl font-bold">Order</h1>
+            <p className="text-sm text-muted-foreground">
+              {branchId} · {branchPic}
+            </p>
           </div>
+          <Button variant="outline" size="sm" onClick={() => void loadData()}>
+            <Icon name="refresh" size={16} /> Muat Ulang
+          </Button>
         </div>
-      )}
 
-      <CartSheet
-        open={cartOpen}
-        cart={cart}
-        onClose={() => setCartOpen(false)}
-        onQty={changeCartQty}
-        onSetQty={setCartQty}
-        onSetSatuan={setCartSatuan}
-        onSetNote={setCartNote}
-        onSetStock={setCartStock}
-        onDelete={removeFromCart}
-        onSubmit={(note) => {
-          const missing = cartItems.filter((i) => isEmpty(i.stokGudang) || isEmpty(i.stokToko)).length;
-          if (missing > 0) {
-            toast.warning('Isi stok gudang dan stok toko untuk semua barang.', { duration: 4000 });
-            return;
-          }
-          setCartOpen(false);
-          setPreOrder({ items: cartItems, catatan: note });
-        }}
-        submitting={submitting}
-      />
+        <Tabs value={tab} onValueChange={(v) => {
+          setTab(v as OrderTab);
+          window.location.hash = v;
+        }}>
+          <TabsList className="w-full justify-start overflow-x-auto sm:w-auto">
+            <TabsTrigger value="katalog">Katalog</TabsTrigger>
+            <TabsTrigger value="mass">Order Massal</TabsTrigger>
+            <TabsTrigger value="history">Riwayat</TabsTrigger>
+          </TabsList>
 
-      <PreOrderDialog
-        open={preOrder !== null}
-        items={preOrder?.items || []}
-        branchId={branchId}
-        ordersCache={history}
-        onClose={() => setPreOrder(null)}
-        onConfirm={async (config) => {
-          if (!preOrder) return;
-          if (tab === 'mass') {
-            await submitMass(preOrder.items, preOrder.catatan, config);
-          } else {
-            await submitOrder(preOrder.items, preOrder.catatan, config);
-          }
-        }}
-      />
+          <TabsContent value="katalog" className="space-y-4">
+            <CatalogTabBody
+              katalogList={katalogList}
+              kategoriList={kategoriList}
+              loading={loading}
+              cart={cart}
+              productByCode={productByCode}
+              onAdd={(b, qty, satuan) => addToCart(b, qty, satuan)}
+              onIncrease={(b) => {
+                const kode = String(b.KODE_BARANG);
+                if (cartRef.current[kode]) {
+                  const item = cartRef.current[kode];
+                  setCartQty(kode, item.qty + 1);
+                }
+              }}
+              onDecrease={(b) => {
+                const kode = String(b.KODE_BARANG);
+                if (cartRef.current[kode]) setCartQty(kode, cartRef.current[kode].qty - 1);
+              }}
+              onSetQty={(b, qty) => {
+                const kode = String(b.KODE_BARANG);
+                if (cartRef.current[kode]) setCartQty(kode, qty);
+              }}
+              onSetSatuan={(b, satuan) => {
+                const kode = String(b.KODE_BARANG);
+                if (cartRef.current[kode]) setCartSatuan(kode, satuan);
+              }}
+              onManualAdd={addManualToCart}
+              onManualUpdate={updateManualItem}
+              onManualDelete={removeFromCart}
+            />
+          </TabsContent>
 
-      <PrintFormModal
-        open={printOrder !== null}
-        title={`Preview Form Order — ${printOrder?.ORDER_ID || ''}`}
-        orderId={printOrder?.ORDER_ID || ''}
-        idCabang={String(printOrder?.ID_CABANG || '')}
-        tanggalCetak={parseAnyDate(printOrder?.TANGGAL_ORDER ?? '') ?? new Date()}
-        nomorOrder={String(printOrder?.NOMOR_ORDER || '') || getSequentialNumber(printOrder, history)}
-        statusOrder={String(printOrder?.STATUS || 'PENDING')}
-        items={printItems}
-        stokLookup={(kode) => {
-          const p = productByCode[String(kode).trim().toUpperCase()];
-          return p ? toInt(p.STOK) : undefined;
-        }}
-        showStatus
-        onClose={() => setPrintOrder(null)}
-      />
+          <TabsContent value="mass" className="space-y-4">
+            <MassOrderTab
+              productByCode={productByCode}
+              resetKey={massResetKey}
+              onOpenPreOrder={(items, catatan) => setPreOrder({ items, catatan })}
+            />
+          </TabsContent>
 
-      {dialog}
+          <TabsContent value="history" className="space-y-4">
+            <HistoryTab
+              orders={history}
+              loading={historyLoading}
+              branchId={branchId}
+              onDownload={downloadForm}
+              onReset={() => void handleResetOrders()}
+            />
+          </TabsContent>
+        </Tabs>
+
+        {/* CART BAR */}
+        {cartItems.length > 0 && (
+          <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 p-3 backdrop-blur">
+            <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2">
+              <Button onClick={() => setCartOpen(true)} className="flex-1 justify-between sm:flex-none">
+                <span className="flex items-center gap-2">
+                  <Icon name="shopping-cart" size={16} /> Lihat Keranjang
+                </span>
+                <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs font-bold">
+                  {cartCount} item · {formatRupiah(cartTotal)}
+                </span>
+              </Button>
+            </div>
+          </div>
+        )}
+
+        <CartSheet
+          open={cartOpen}
+          cart={cart}
+          onClose={() => setCartOpen(false)}
+          onQty={changeCartQty}
+          onSetQty={setCartQty}
+          onSetSatuan={setCartSatuan}
+          onSetNote={setCartNote}
+          onSetStock={setCartStock}
+          onDelete={removeFromCart}
+          onSubmit={(note) => {
+            const missing = cartItems.filter((i) => isEmpty(i.stokGudang) || isEmpty(i.stokToko)).length;
+            if (missing > 0) {
+              toast.warning('Isi stok gudang dan stok toko untuk semua barang.', { duration: 4000 });
+              return;
+            }
+            setCartOpen(false);
+            setPreOrder({ items: cartItems, catatan: note });
+          }}
+          submitting={submitting}
+        />
+
+        <PreOrderDialog
+          open={preOrder !== null}
+          items={preOrder?.items || []}
+          branchId={branchId}
+          ordersCache={history}
+          onClose={() => setPreOrder(null)}
+          onConfirm={async (config) => {
+            if (!preOrder) return;
+            if (tab === 'mass') {
+              await submitMass(preOrder.items, preOrder.catatan, config);
+            } else {
+              await submitOrder(preOrder.items, preOrder.catatan, config);
+            }
+          }}
+        />
+
+        <PrintFormModal
+          open={printOrder !== null}
+          title={`Preview Form Order — ${printOrder?.ORDER_ID || ''}`}
+          orderId={printOrder?.ORDER_ID || ''}
+          idCabang={String(printOrder?.ID_CABANG || '')}
+          tanggalCetak={parseAnyDate(printOrder?.TANGGAL_ORDER ?? '') ?? new Date()}
+          nomorOrder={String(printOrder?.NOMOR_ORDER || '') || getSequentialNumber(printOrder, history)}
+          statusOrder={String(printOrder?.STATUS || 'PENDING')}
+          items={printItems}
+          stokLookup={(kode) => {
+            const p = productByCode[String(kode).trim().toUpperCase()];
+            return p ? toInt(p.STOK) : undefined;
+          }}
+          showStatus
+          onClose={() => setPrintOrder(null)}
+        />
+
+        {dialog}
+      </div>
     </div>
   );
 }
@@ -2708,7 +2709,6 @@ function CatalogTabBody({
           )}
         </>
       )}
-    </div>
     </div>
   );
 }
