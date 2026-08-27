@@ -1219,7 +1219,7 @@ export default function Landing() {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(6,182,212,0.12),transparent_60%)]" />
         </div>
         <Reveal>
-          <ParticleTextEffect className="w-full max-w-5xl mx-auto" />
+          <ParticleTextEffect className="w-full max-w-5xl mx-auto" backgroundColor="transparent" />
         </Reveal>
         <Reveal delay="1">
           <p className="mx-auto mt-5 max-w-xl text-muted-foreground sm:text-lg">

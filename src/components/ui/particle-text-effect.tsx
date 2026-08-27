@@ -130,6 +130,7 @@ class Particle {
 interface ParticleTextEffectProps {
   words?: string[]
   className?: string
+  backgroundColor?: string
 }
 
 const DEFAULT_WORDS = [
@@ -142,6 +143,7 @@ const DEFAULT_WORDS = [
 export function ParticleTextEffect({
   words = DEFAULT_WORDS,
   className = "",
+  backgroundColor = "transparent",
 }: ParticleTextEffectProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animationRef = useRef<number>()
@@ -180,8 +182,17 @@ export function ParticleTextEffect({
     const offscreenCtx = offscreenCanvas.getContext("2d")!
 
     offscreenCtx.fillStyle = "white"
-    const fontSize = Math.max(48, Math.min(160, canvas.width / (word.length * 0.25)))
+    // Calculate font size to fit word with padding on all sides
+    const maxWidth = canvas.width * 0.85
+    const maxHeight = canvas.height * 0.7
+    let fontSize = 120
     offscreenCtx.font = `bold ${fontSize}px "Geist Variable", "Manrope", system-ui, sans-serif`
+    let metrics = offscreenCtx.measureText(word)
+    while ((metrics.width > maxWidth || fontSize > maxHeight) && fontSize > 20) {
+      fontSize -= 2
+      offscreenCtx.font = `bold ${fontSize}px "Geist Variable", "Manrope", system-ui, sans-serif`
+      metrics = offscreenCtx.measureText(word)
+    }
     offscreenCtx.textAlign = "center"
     offscreenCtx.textBaseline = "middle"
     offscreenCtx.fillText(word, canvas.width / 2, canvas.height / 2)
@@ -262,8 +273,8 @@ export function ParticleTextEffect({
     const ctx = canvas.getContext("2d")!
     const particles = particlesRef.current
 
-    ctx.fillStyle = "rgba(0, 0, 0, 0.15)"
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    // Clear with transparent or matching background - no motion blur box
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
 
     for (let i = particles.length - 1; i >= 0; i--) {
       const particle = particles[i]
@@ -300,7 +311,8 @@ export function ParticleTextEffect({
       if (!container) return
       const width = container.clientWidth
       canvas.width = Math.max(600, Math.min(1200, width))
-      canvas.height = Math.max(120, Math.min(300, width * 0.2))
+      // Taller canvas for longer text, aspect ratio ~5:1
+      canvas.height = Math.max(140, Math.min(280, width * 0.18))
     }
 
     resizeCanvas()
@@ -319,7 +331,7 @@ export function ParticleTextEffect({
   }, [words])
 
   return (
-    <div className={`relative ${className}`} style={{ minHeight: "180px" }}>
+    <div className={`relative ${className}`} style={{ minHeight: "160px" }}>
       <canvas
         ref={canvasRef}
         style={{
