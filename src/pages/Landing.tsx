@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { GradientShimmer } from '@/components/ui/gradient-shimmer';
 import { ImageStreamHero } from '@/components/ui/image-stream-hero';
 import { GlobeLive } from '@/components/ui/cobe-globe-live';
+import { ParticleTextEffect } from '@/components/ui/particle-text-effect';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -1218,14 +1219,7 @@ export default function Landing() {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(6,182,212,0.12),transparent_60%)]" />
         </div>
         <Reveal>
-          <h1 className="text-4xl font-black tracking-tight sm:text-6xl">
-            <GradientShimmer gradient="sunrise" className="block">
-              Pesanan Toko.
-            </GradientShimmer>
-            <GradientShimmer gradient="sunrise" className="block">
-              Lebih Cepat.
-            </GradientShimmer>
-          </h1>
+          <ParticleTextEffect className="w-full max-w-5xl mx-auto" />
         </Reveal>
         <Reveal delay="1">
           <p className="mx-auto mt-5 max-w-xl text-muted-foreground sm:text-lg">
