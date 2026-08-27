@@ -3,7 +3,7 @@
 import { useEffect, useRef, useCallback } from "react"
 import createGlobe from "cobe"
 
-interface LiveMarker {
+export interface LiveMarker {
   id: string
   nama: string
   alamat: string
@@ -17,8 +17,32 @@ interface GlobeLiveProps {
   speed?: number
 }
 
+/* ── Haversine distance (km) ── */
+function haversine(a: [number, number], b: [number, number]): number {
+  const R = 6371
+  const dLat = ((b[0] - a[0]) * Math.PI) / 180
+  const dLng = ((b[1] - a[1]) * Math.PI) / 180
+  const x =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((a[0] * Math.PI) / 180) *
+      Math.cos((b[0] * Math.PI) / 180) *
+      Math.sin(dLng / 2) ** 2
+  return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x))
+}
+
+/* ── Hub pusat di Kupang ── */
+const HUB: [number, number] = [-10.177, 123.597]
+
+/* ── Posisi label di sekitar globe (persen dari lebar/tinggi) ── */
+const LABEL_ANCHORS: Record<string, { top: string; left: string; align: string }> = {
+  CB001: { top: "12%", left: "8%",  align: "left" },
+  CB002: { top: "30%", left: "0%",  align: "left" },
+  CB003: { top: "52%", left: "2%",  align: "left" },
+  CB004: { top: "70%", left: "10%", align: "left" },
+}
+
 export function GlobeLive({
-  markers,
+  markers = [],
   className = "",
   speed = 0.003,
 }: GlobeLiveProps) {
@@ -70,10 +94,19 @@ export function GlobeLive({
     let animationId: number
     let phi = 0
 
-    const defaultM = (markers || []).map((m) => ({
-      location: m.location,
-      size: 0.06,
-      id: m.id,
+    /* ── markers: pusat + 4 toko ── */
+    const allMarkers = [
+      { location: HUB, size: 0.04, id: "hub" },
+      ...markers.map((m) => ({ location: m.location, size: 0.06, id: m.id })),
+    ]
+
+    /* ── arcs: hub → tiap toko ── */
+    const arcs = markers.map((m) => ({
+      startLat: HUB[0],
+      startLng: HUB[1],
+      endLat: m.location[0],
+      endLng: m.location[1],
+      color: [1, 0.42, 0],
     }))
 
     function init() {
@@ -90,15 +123,18 @@ export function GlobeLive({
         diffuse: 1.2,
         mapSamples: 16000,
         mapBrightness: 6,
-        baseColor: [0.12, 0.12, 0.15],
+        baseColor: [0.1, 0.1, 0.13],
         markerColor: [1, 0.42, 0],
-        glowColor: [0.15, 0.15, 0.2],
-        markers: defaultM.length > 0 ? defaultM : [{ location: [-10.17, 123.6], size: 0.06, id: "center" }],
-        arcs: [],
+        glowColor: [0.15, 0.12, 0.08],
+        markers: allMarkers,
+        arcs,
         arcColor: [1, 0.42, 0],
-        arcWidth: 0.5,
-        arcHeight: 0.25,
-        opacity: 0.8,
+        arcWidth: 0.4,
+        arcHeight: 0.2,
+        arcDashLength: 0.4,
+        arcDashGap: 0.2,
+        arcDashAnimateGap: 15,
+        opacity: 0.85,
       })
 
       function animate() {
@@ -133,6 +169,7 @@ export function GlobeLive({
 
   return (
     <div className={`relative select-none ${className}`}>
+      {/* ── Globe canvas ── */}
       <canvas
         ref={canvasRef}
         onPointerDown={handlePointerDown}
@@ -146,6 +183,76 @@ export function GlobeLive({
           touchAction: "none",
         }}
       />
+
+      {/* ── Floating labels di sekitar globe ── */}
+      {markers.map((m, i) => {
+        const anchor = LABEL_ANCHORS[m.id] || { top: "50%", left: "50%", align: "center" }
+        const dist = haversine(HUB, m.location)
+        return (
+          <div
+            key={m.id}
+            className="pointer-events-none absolute z-10"
+            style={{
+              top: anchor.top,
+              left: anchor.left,
+              animation: `fadeInLabel 0.8s ease ${0.4 + i * 0.15}s both`,
+            }}
+          >
+            <div className="flex items-center gap-1.5" style={{ flexDirection: anchor.align === "right" ? "row-reverse" : "row" }}>
+              {/* garis panah */}
+              <div
+                className="h-px flex-shrink-0"
+                style={{
+                  width: "28px",
+                  background: `linear-gradient(${anchor.align === "right" ? "270deg" : "90deg"}, ${m.color}, transparent)`,
+                }}
+              />
+              {/* panah segitiga */}
+              <svg
+                width="8" height="8" viewBox="0 0 8 8"
+                style={{ transform: anchor.align === "right" ? "scaleX(-1)" : "none", flexShrink: 0 }}
+              >
+                <polygon points="0,0 8,4 0,8" fill={m.color} opacity={0.8} />
+              </svg>
+              {/* label card */}
+              <div
+                className="rounded-md px-2 py-1 backdrop-blur-sm"
+                style={{
+                  background: "rgba(0,0,0,0.7)",
+                  border: `1px solid ${m.color}40`,
+                  boxShadow: `0 0 8px ${m.color}20`,
+                }}
+              >
+                <div className="flex items-center gap-1.5">
+                  <span
+                    className="inline-block h-1.5 w-1.5 rounded-full"
+                    style={{ backgroundColor: m.color, boxShadow: `0 0 6px ${m.color}` }}
+                  />
+                  <span className="text-[9px] font-bold tracking-wider text-white/90 uppercase">
+                    {m.id}
+                  </span>
+                </div>
+                <div className="mt-0.5 max-w-[120px] truncate text-[8px] leading-tight text-white/50">
+                  {m.nama}
+                </div>
+                {dist > 1 && (
+                  <div className="mt-0.5 text-[7px] text-orange-400/70">
+                    {Math.round(dist)} km dari pusat
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )
+      })}
+
+      {/* ── Style keyframes ── */}
+      <style>{`
+        @keyframes fadeInLabel {
+          from { opacity: 0; transform: translateY(4px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </div>
   )
 }

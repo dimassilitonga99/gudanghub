@@ -33,6 +33,13 @@ const STORE_MARKERS = [
   { id: 'CB004', nama: CABANG.CB004.nama, alamat: CABANG.CB004.alamat, pic: CABANG.CB004.pic, color: CABANG.CB004.color, location: [-9.4433, 124.4733] as [number, number] },
 ];
 
+const HUB_KUPANG: [number, number] = [-10.177, 123.597];
+function calcDist(a: [number, number], b: [number, number]): number {
+  const R = 6371; const dLat = ((b[0]-a[0])*Math.PI)/180; const dLng = ((b[1]-a[1])*Math.PI)/180;
+  const x = Math.sin(dLat/2)**2 + Math.cos((a[0]*Math.PI)/180)*Math.cos((b[0]*Math.PI)/180)*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(x), Math.sqrt(1-x));
+}
+
 const ABOUT_ITEMS = [
   {
     icon: 'file',
@@ -422,46 +429,82 @@ function StoreSection() {
 
           {/* Toko cards */}
           <div className="flex flex-col gap-3">
-            {STORE_MARKERS.map((toko, i) => (
-              <Reveal key={toko.id} delay={String(i)}>
-                <div
-                  className="group flex items-center gap-4 rounded-xl border border-border/60 bg-card/50 px-5 py-4 backdrop-blur-sm transition-all duration-300 hover:border-orange-500/40 hover:bg-orange-500/5 hover:shadow-lg hover:shadow-orange-500/5"
-                >
+            {STORE_MARKERS.map((toko, i) => {
+              const dist = calcDist(HUB_KUPANG, toko.location);
+              return (
+                <Reveal key={toko.id} delay={String(i)}>
                   <div
-                    className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg text-sm font-bold text-white"
-                    style={{ backgroundColor: toko.color }}
+                    className="group flex items-center gap-4 rounded-xl border border-border/60 bg-card/50 px-5 py-4 backdrop-blur-sm transition-all duration-300 hover:border-orange-500/40 hover:bg-orange-500/5 hover:shadow-lg hover:shadow-orange-500/5"
                   >
-                    {toko.id.slice(-2)}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="truncate text-sm font-semibold text-foreground">
-                        {toko.nama}
-                      </span>
-                      <span
-                        className="h-1.5 w-1.5 flex-shrink-0 rounded-full"
+                    <div className="relative flex flex-col items-center gap-1">
+                      <div
+                        className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg text-sm font-bold text-white"
                         style={{ backgroundColor: toko.color }}
-                      />
+                      >
+                        {toko.id.slice(-2)}
+                      </div>
+                      {/* garis koneksi ke globe */}
+                      {i < 3 ? (
+                        <div className="hidden h-3 w-px bg-gradient-to-b from-orange-500/60 to-transparent md:block" />
+                      ) : (
+                        <div className="hidden h-3 w-px bg-gradient-to-b from-orange-500/30 to-transparent md:block" />
+                      )}
                     </div>
-                    <div className="mt-0.5 flex items-center gap-3 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Icon name="pin" size={11} />
-                        {toko.alamat}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Icon name="user" size={11} />
-                        {toko.pic}
-                      </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="truncate text-sm font-semibold text-foreground">
+                          {toko.nama}
+                        </span>
+                        <span
+                          className="h-1.5 w-1.5 flex-shrink-0 rounded-full"
+                          style={{ backgroundColor: toko.color }}
+                        />
+                      </div>
+                      <div className="mt-0.5 flex items-center gap-3 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Icon name="pin" size={11} />
+                          {toko.alamat}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Icon name="user" size={11} />
+                          {toko.pic}
+                        </span>
+                      </div>
+                      <div className="mt-1 flex items-center gap-2 text-[10px] text-muted-foreground/60">
+                        <span className="font-mono">{toko.location[0].toFixed(2)}°S, {toko.location[1].toFixed(2)}°E</span>
+                        {dist > 1 && (
+                          <>
+                            <span className="text-orange-500/50">•</span>
+                            <span className="text-orange-400/70">{Math.round(dist)} km dari pusat</span>
+                          </>
+                        )}
+                        {dist <= 1 && (
+                          <>
+                            <span className="text-green-500/50">•</span>
+                            <span className="text-green-400/70">di Kupang</span>
+                          </>
+                        )}
+                      </div>
                     </div>
+                    <Icon
+                      name="arrow-right"
+                      size={14}
+                      className="flex-shrink-0 text-muted-foreground/40 transition-all duration-300 group-hover:translate-x-1 group-hover:text-orange-500"
+                    />
                   </div>
-                  <Icon
-                    name="arrow-right"
-                    size={14}
-                    className="flex-shrink-0 text-muted-foreground/40 transition-all duration-300 group-hover:translate-x-1 group-hover:text-orange-500"
-                  />
-                </div>
-              </Reveal>
-            ))}
+                </Reveal>
+              );
+            })}
+
+            {/* Garis penghubung semua toko */}
+            <div className="hidden items-center justify-center gap-2 py-2 text-[10px] text-muted-foreground/40 md:flex">
+              <div className="h-px flex-1 bg-gradient-to-r from-transparent via-orange-500/20 to-transparent" />
+              <span className="flex items-center gap-1">
+                <Icon name="warehouse-alt" size={10} />
+                Gudang Pusat Kupang
+              </span>
+              <div className="h-px flex-1 bg-gradient-to-r from-transparent via-orange-500/20 to-transparent" />
+            </div>
           </div>
         </div>
       </div>
