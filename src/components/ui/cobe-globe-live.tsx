@@ -103,15 +103,6 @@ export function GlobeLive({
       ...safeMarkers.map((m) => ({ location: m.location, size: 0.06, id: m.id })),
     ]
 
-    /* ── arcs: hub → tiap toko ── */
-    const arcs = safeMarkers.map((m) => ({
-      startLat: HUB[0],
-      startLng: HUB[1],
-      endLat: m.location[0],
-      endLng: m.location[1],
-      color: [1, 0.42, 0],
-    }))
-
     function init() {
       const width = canvas.offsetWidth
       if (width === 0 || globe) return
@@ -131,13 +122,10 @@ export function GlobeLive({
           markerColor: [1, 0.42, 0],
           glowColor: [0.15, 0.12, 0.08],
           markers: allMarkers,
-          arcs,
+          arcs: [],
           arcColor: [1, 0.42, 0],
           arcWidth: 0.4,
           arcHeight: 0.2,
-          arcDashLength: 0.4,
-          arcDashGap: 0.2,
-          arcDashAnimateGap: 15,
           opacity: 0.85,
         })
       } catch (e) {
