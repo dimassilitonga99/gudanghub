@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { CABANG_LIST, ROUTES } from '@/lib/config';
 import { useAuth } from '@/context/AuthContext';
 import { GradientShimmer } from '@/components/ui/gradient-shimmer';
+import { ImageStreamHero } from '@/components/ui/image-stream-hero';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -70,63 +71,6 @@ const NAV_LINKS = [
   { label: 'Katalog', href: '#katalog' },
   { label: 'Tentang', href: '#tentang' },
   { label: 'Cabang', href: '#cabang' },
-];
-
-const TIM_CARDS = [
-  {
-    img: './images/tim/ceo.png',
-    alt: 'CEO',
-    placeholder: 'CEO',
-    variant: 'tim-card-ceo' as const,
-    row: 'top' as const,
-    quote: 'Memimpin adalah menjadi contoh — bahkan saat tak ada yang melihat.',
-    author: '— IBU HRD',
-  },
-  {
-    img: './images/tim/manager-1.png',
-    alt: 'Manager 1',
-    placeholder: 'MGR',
-    variant: 'tim-card-mid' as const,
-    row: 'mid' as const,
-    quote: 'Kerja keras tidak pernah mengkhianati hasil.',
-    author: '— BAPAK ANAK SATU',
-  },
-  {
-    img: './images/tim/manager-2.png',
-    alt: 'Manager 2',
-    placeholder: 'MGR',
-    variant: 'tim-card-mid' as const,
-    row: 'mid' as const,
-    quote: 'Melayani dengan tulus, bekerja dengan jujur.',
-    author: '— Garda Terdepan',
-  },
-  {
-    img: './images/tim/staff-1.png',
-    alt: 'Staff 1',
-    placeholder: 'PIC',
-    variant: 'tim-card-front' as const,
-    row: 'front' as const,
-    quote: 'Setiap barang membawa harapan keluarga.',
-    author: '— HATI YANG TERLUKA',
-  },
-  {
-    img: './images/tim/staff-2.png',
-    alt: 'Staff 2',
-    placeholder: 'PIC',
-    variant: 'tim-card-front tim-card-center' as const,
-    row: 'front' as const,
-    quote: 'Senyum pelanggan adalah gaji terbaik.',
-    author: '— JIWA PELAYAN',
-  },
-  {
-    img: './images/tim/staff-3.png',
-    alt: 'Staff 3',
-    placeholder: 'PIC',
-    variant: 'tim-card-front' as const,
-    row: 'front' as const,
-    quote: 'Mengirim janji — tepat waktu, tepat hati.',
-    author: '— SALES BOKEP',
-  },
 ];
 
 function smoothScroll(href: string) {
@@ -209,131 +153,70 @@ function Reveal({
   );
 }
 
-function TimCard({
-  img,
-  alt,
-  placeholder,
-  variant,
-  quote,
-  author,
-}: {
-  img: string;
-  alt: string;
-  placeholder: string;
-  variant: string;
-  quote: string;
-  author: string;
-}) {
-  const [flipped, setFlipped] = useState(false);
-  const [failed, setFailed] = useState(false);
-  return (
-    <div
-      className={cn('tim-card', variant, flipped && 'flipped')}
-      onClick={() => setFlipped((f) => !f)}
-    >
-      <div className="tim-card-inner">
-        <div className="tim-card-front-side">
-          <div className="tim-card-frame">
-            {failed ? (
-              <div className="tim-card-placeholder">
-                <span>{placeholder}</span>
-              </div>
-            ) : (
-              <img src={img} alt={alt} loading="lazy" onError={() => setFailed(true)} />
-            )}
-          </div>
-        </div>
-        <div className="tim-card-back">
-          <div className="tim-card-quote">
-            <div className="tim-quote-mark">&quot;</div>
-            <p>{quote}</p>
-            <div className="tim-quote-author">{author}</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+const TIM_IMAGES = [
+  { src: './images/tim/ceo.png', alt: 'CEO' },
+  { src: './images/tim/manager-1.png', alt: 'Manager' },
+  { src: './images/tim/manager-2.png', alt: 'Manager' },
+  { src: './images/tim/staff-1.png', alt: 'Staff' },
+  { src: './images/tim/staff-2.png', alt: 'Staff' },
+  { src: './images/tim/staff-3.png', alt: 'Staff' },
+];
 
 function TeamSection() {
   return (
-    <section className="tim-section" id="tim" aria-labelledby="tim-title">
-      <div className="tim-bg-decor" aria-hidden="true">
-        <div className="tim-skyline tim-skyline-left" />
-        <div className="tim-skyline tim-skyline-right" />
-        <div className="tim-sparkle tim-sparkle-1" />
-        <div className="tim-sparkle tim-sparkle-2" />
-        <div className="tim-sparkle tim-sparkle-3" />
-        <div className="tim-gold-block tim-gold-1" />
-        <div className="tim-gold-block tim-gold-2" />
-        <div className="tim-gold-block tim-gold-3" />
-        <div className="tim-gold-block tim-gold-4" />
-      </div>
-      <div className="tim-ribbon" aria-hidden="true" />
-
-      <div className="mx-auto max-w-5xl px-4">
-        <Reveal>
-          <div className="tim-brand">
-            <div className="tim-brand-mark">
-              <Icon name="warehouse-alt" size={24} />
-            </div>
-            <div className="tim-brand-name">
-              GUDANG<span>HUB</span>
-            </div>
-          </div>
-        </Reveal>
-
-        <Reveal>
-          <div className="tim-cards">
-            {(['top', 'mid', 'front'] as const).map((row) => (
-              <div key={row} className={cn('tim-row', `tim-row-${row}`)}>
-                {TIM_CARDS.filter((c) => c.row === row).map((c) => (
-                  <TimCard
-                    key={c.alt}
-                    img={c.img}
-                    alt={c.alt}
-                    placeholder={c.placeholder}
-                    variant={c.variant}
-                    quote={c.quote}
-                    author={c.author}
-                  />
-                ))}
+    <section id="tim" aria-labelledby="tim-title" className="relative">
+      <ImageStreamHero
+        images={TIM_IMAGES}
+        cards={7}
+        speed={20}
+        axis={55}
+        className="min-h-[520px] md:min-h-[600px]"
+      >
+        <div className="relative z-10 flex min-h-[520px] md:min-h-[600px] flex-col items-center justify-center px-4 text-center">
+          <Reveal>
+            <div className="mb-4 flex items-center gap-2">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 backdrop-blur">
+                <Icon name="warehouse-alt" size={18} />
               </div>
-            ))}
-          </div>
-        </Reveal>
+              <span className="text-sm font-semibold tracking-[0.25em] text-white/80">
+                GUDANG<span className="text-white">HUB</span>
+              </span>
+            </div>
+          </Reveal>
 
-        <Reveal delay="1">
-          <div className="tim-title-block">
-            <h2 className="tim-title" id="tim-title">
-              <span className="tim-title-line1">TIM</span>
-              <span className="tim-title-line2">BALIK LAYAR</span>
+          <Reveal delay="1">
+            <h2
+              className="text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl"
+              id="tim-title"
+            >
+              TIM
+              <br />
+              <span className="text-white/60">BALIK LAYAR</span>
             </h2>
-            <p className="tim-subtitle">
+          </Reveal>
+
+          <Reveal delay="2">
+            <p className="mx-auto mt-5 max-w-lg text-sm leading-relaxed text-white/70 sm:text-base">
               Di balik setiap order yang lancar, ada manusia-manusia luar biasa
               yang bekerja tanpa henti — memastikan setiap detail sempurna.
             </p>
-            <p className="tim-quote">
-              &quot;Bukan sekadar sistem. Kami adalah keluarga yang membangun
-              kepercayaan satu order di satu waktu.&quot;
-            </p>
-          </div>
-        </Reveal>
+          </Reveal>
 
-        <Reveal delay="2">
-          <div className="tim-info-bar">
-            <div className="tim-info-item">
-              <span className="tim-info-label">Visi</span>
-              <span className="tim-info-value">Satu Gudang, Empat Cabang, Satu Tujuan</span>
+          <Reveal delay="3">
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-xs text-white/50">
+              <div className="flex flex-col items-center">
+                <span className="font-semibold text-white/80">Visi</span>
+                <span>Satu Gudang, Empat Cabang, Satu Tujuan</span>
+              </div>
+              <div className="h-6 w-px bg-white/20" />
+              <div className="flex flex-col items-center">
+                <span className="font-semibold text-white/80">Misi</span>
+                <span>Melayani NTT dengan Sepenuh Hati</span>
+              </div>
             </div>
-            <div className="tim-info-divider" />
-            <div className="tim-info-item">
-              <span className="tim-info-label">Misi</span>
-              <span className="tim-info-value">Melayani NTT dengan Sepenuh Hati</span>
-            </div>
-          </div>
-        </Reveal>
-      </div>
+          </Reveal>
+        </div>
+      </ImageStreamHero>
     </section>
   );
 }
