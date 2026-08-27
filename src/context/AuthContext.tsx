@@ -54,10 +54,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error(String(result.message || 'Login gagal.'));
       }
       const user = (result.user as { username?: string; nama?: string; role?: string; idCabang?: string | null }) || {};
-      const token = typeof result.access_token === 'string' ? result.access_token : 
-                    typeof result.token === 'string' ? result.token : null;
-      const refreshToken = typeof result.refresh_token === 'string' ? result.refresh_token : null;
-      const s = saveSession(user, token, refreshToken);
+      
+      // Support both formats:
+      // - New format: access_token + refresh_token (direct backend API)
+      // - Worker format: token (refresh_token only, worker handles access token)
+      const accessToken = typeof result.access_token === 'string' ? result.access_token : null;
+      const refreshToken = typeof result.refresh_token === 'string' ? result.refresh_token : 
+                          typeof result.token === 'string' ? result.token : null;
+      
+      const s = saveSession(user, accessToken, refreshToken);
       if (!s) throw new Error('Gagal menyimpan sesi.');
       setLastUsername(remember ? s.username : '');
       setSessionState(s);

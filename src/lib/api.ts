@@ -131,8 +131,9 @@ async function handleAuthRequired(): Promise<void> {
 function attachToken(action: string, payload: Record<string, unknown>): Record<string, unknown> {
   if (PUBLIC_ACTIONS.indexOf(action) !== -1) return payload;
   const s = getSession();
-  if (s && s.token) {
-    return { ...payload, token: s.token };
+  if (s && (s.refreshToken || s.token)) {
+    // Worker proxy expects refresh token as "token" for stateless session
+    return { ...payload, token: s.refreshToken || s.token };
   }
   return payload;
 }
