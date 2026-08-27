@@ -146,11 +146,13 @@ export function ParticlesBg({ className = "" }: ParticlesBgProps) {
       ref={containerRef}
       id="particles-js"
       className={`
-        absolute inset-0 w-full h-full pointer-events-none
+        fixed inset-0 w-screen h-screen pointer-events-none
         bg-gradient-to-tr from-[#e3f2fd] via-[#90caf9] to-[#64b5f6]
         dark:from-[#000814] dark:via-[#003566] dark:to-[#0077b6]
         ${className}
+        min-w-full min-h-full
       `}
+      style={{ zIndex: -1 }}
     />
   );
 }
