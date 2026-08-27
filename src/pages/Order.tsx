@@ -2330,7 +2330,7 @@ export default function Order() {
     <div className="relative min-h-screen">
       <ParticlesBg />
       <div className="space-y-6 pb-24 relative z-10">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-2xl font-bold">Order</h1>
           <p className="text-sm text-muted-foreground">
