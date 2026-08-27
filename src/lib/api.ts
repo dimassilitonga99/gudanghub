@@ -1,5 +1,5 @@
 import { API_URL, APPS_SCRIPT_URL, SETTINGS } from './config';
-import { getSession } from './session';
+import { getSession, setSession } from './session';
 
 export { API_URL };
 
@@ -39,10 +39,78 @@ export function setAuthRequiredHandler(fn: (() => void) | null): void {
   authRequiredHandler = fn;
 }
 
-function handleAuthRequired(): void {
+// ─────────────────────────────────────────────────────────────────────────
+// TOKEN REFRESH
+// ─────────────────────────────────────────────────────────────────────────
+
+let isRefreshing = false;
+let refreshPromise: Promise<boolean> | null = null;
+
+async function refreshAccessToken(): Promise<boolean> {
+  if (isRefreshing && refreshPromise) {
+    return refreshPromise;
+  }
+
+  isRefreshing = true;
+  refreshPromise = (async () => {
+    try {
+      const s = getSession();
+      if (!s || !s.refreshToken) {
+        console.warn('[API] No refresh token available');
+        return false;
+      }
+
+      const response = await fetch(API_URL + '/auth/refresh', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${s.refreshToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        console.warn('[API] Token refresh failed:', response.status);
+        return false;
+      }
+
+      const result = await response.json();
+      if (result.access_token) {
+        // Update session with new access token, keep refresh token
+        const updated = setSession(
+          { username: s.username, nama: s.nama, role: s.role, idCabang: s.idCabang },
+          result.access_token,
+          s.refreshToken
+        );
+        console.log('[API] Token refreshed successfully');
+        return !!updated;
+      }
+
+      return false;
+    } catch (error) {
+      console.warn('[API] Token refresh error:', (error as Error).message);
+      return false;
+    } finally {
+      isRefreshing = false;
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+}
+
+async function handleAuthRequired(): Promise<void> {
+  // Try to refresh token first
+  const refreshed = await refreshAccessToken();
+  if (refreshed) {
+    console.log('[API] Token refreshed, retrying request');
+    return; // Token refreshed, caller should retry
+  }
+
+  // Refresh failed, clear session and logout
   try {
     sessionStorage.removeItem('gudanghub_session');
     localStorage.removeItem('gudanghub_session');
+    localStorage.removeItem('gudanghub_session_refresh');
   } catch {
     /* ignore */
   }
@@ -302,9 +370,9 @@ export async function callApi(
   }
 
   const promise = executeWithRetry(action, payload, timeout, maxRetries)
-    .then((result) => {
+    .then(async (result) => {
       if (result && result.code === 'AUTH_REQUIRED' && PUBLIC_ACTIONS.indexOf(action) === -1) {
-        handleAuthRequired();
+        await handleAuthRequired();
       }
       // Write-through: data bersama (getOrders/getBarang/getCabang) selalu
       // disegarkan di cache lokal walau dipanggil dengan cache:false,
@@ -355,13 +423,13 @@ export async function callApiStale(
     // yang tidak pernah terkoreksi.
     setTimeout(() => {
       executeWithRetry(action, payload, timeout, 2)
-        .then((freshResult) => {
+        .then(async (freshResult) => {
           if (
             freshResult &&
             freshResult.code === 'AUTH_REQUIRED' &&
             PUBLIC_ACTIONS.indexOf(action) === -1
           ) {
-            handleAuthRequired();
+            await handleAuthRequired();
             return;
           }
           // Hasil KOSONG pun sah (mis. semua order direset): tetap tulis cache
@@ -388,7 +456,7 @@ export async function callApiStale(
   const result = await executeWithRetry(action, payload, timeout, 2);
 
   if (result && result.code === 'AUTH_REQUIRED' && PUBLIC_ACTIONS.indexOf(action) === -1) {
-    handleAuthRequired();
+    await handleAuthRequired();
     return result;
   }
 

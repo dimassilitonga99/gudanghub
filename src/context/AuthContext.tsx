@@ -18,7 +18,7 @@ import {
 } from '@/lib/session';
 import { auth } from '@/lib/api';
 import { setAuthRequiredHandler } from '@/lib/api';
-import { ROUTES } from '@/lib/config';
+import { ROUTES, API_URL } from '@/lib/config';
 
 interface AuthContextValue {
   session: SessionData | null;
@@ -32,7 +32,7 @@ interface AuthContextValue {
     nama?: string;
     role?: string;
     idCabang?: string | null;
-  }, token: string | null) => Promise<SessionData>;
+  }, token: string | null, refreshToken?: string | null) => Promise<SessionData>;
   logout: () => void;
   homeRoute: string;
 }
@@ -54,8 +54,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error(String(result.message || 'Login gagal.'));
       }
       const user = (result.user as { username?: string; nama?: string; role?: string; idCabang?: string | null }) || {};
-      const token = typeof result.token === 'string' ? result.token : null;
-      const s = saveSession(user, token);
+      const token = typeof result.access_token === 'string' ? result.access_token : 
+                    typeof result.token === 'string' ? result.token : null;
+      const refreshToken = typeof result.refresh_token === 'string' ? result.refresh_token : null;
+      const s = saveSession(user, token, refreshToken);
       if (!s) throw new Error('Gagal menyimpan sesi.');
       setLastUsername(remember ? s.username : '');
       setSessionState(s);
@@ -66,8 +68,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Login instan dari cache kredensial (vanilla: token 'cached-'+Date.now())
   const restoreSession = useCallback(
-    async (user: { username?: string; nama?: string; role?: string; idCabang?: string | null }, token: string | null): Promise<SessionData> => {
-      const s = saveSession(user, token);
+    async (user: { username?: string; nama?: string; role?: string; idCabang?: string | null }, token: string | null, refreshToken: string | null = null): Promise<SessionData> => {
+      const s = saveSession(user, token, refreshToken);
       if (!s) throw new Error('Gagal menyimpan sesi.');
       setSessionState(s);
       return s;
@@ -89,7 +91,55 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         window.location.href = ROUTES.login;
       }
     });
-    return () => setAuthRequiredHandler(null);
+
+    // Auto-refresh token sebelum expire (12 menit setelah login, karena token 15 menit)
+    const checkAndRefresh = async () => {
+      const s = getSession();
+      if (!s || !s.token || !s.refreshToken) return;
+
+      // Cek apakah token akan expire dalam 3 menit
+      const tokenExpiresAt = new Date(s.loginAt).getTime() + 15 * 60 * 1000; // 15 menit dari login
+      const timeUntilExpiry = tokenExpiresAt - Date.now();
+      
+      if (timeUntilExpiry < 3 * 60 * 1000 && timeUntilExpiry > 0) {
+        console.log('[Auth] Token expiring soon, refreshing...');
+        try {
+          const response = await fetch(API_URL + '/auth/refresh', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${s.refreshToken}`,
+            },
+          });
+
+          if (response.ok) {
+            const result = await response.json();
+            if (result.access_token) {
+              const updated = saveSession(
+                { username: s.username, nama: s.nama, role: s.role, idCabang: s.idCabang },
+                result.access_token,
+                s.refreshToken
+              );
+              if (updated) {
+                setSessionState(updated);
+                console.log('[Auth] Token auto-refreshed');
+              }
+            }
+          }
+        } catch (error) {
+          console.warn('[Auth] Auto-refresh failed:', (error as Error).message);
+        }
+      }
+    };
+
+    // Check every 2 minutes
+    const interval = setInterval(checkAndRefresh, 2 * 60 * 1000);
+    checkAndRefresh(); // Check immediately
+
+    return () => {
+      setAuthRequiredHandler(null);
+      clearInterval(interval);
+    };
   }, []);
 
   const value = useMemo<AuthContextValue>(

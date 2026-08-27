@@ -6,6 +6,7 @@ export interface SessionData {
   role: Role;
   idCabang: string | null;
   token: string | null;
+  refreshToken: string | null;
   loginAt: string;
   expires: string;
 }
@@ -13,7 +14,18 @@ export interface SessionData {
 export function getSession(): SessionData | null {
   try {
     const raw = sessionStorage.getItem(SESSION.key);
-    return raw ? (JSON.parse(raw) as SessionData) : null;
+    if (!raw) return null;
+    const session = JSON.parse(raw) as SessionData;
+    
+    // Load refresh token from localStorage if not in session
+    if (!session.refreshToken) {
+      const refreshToken = localStorage.getItem(SESSION.key + '_refresh');
+      if (refreshToken) {
+        session.refreshToken = refreshToken;
+      }
+    }
+    
+    return session;
   } catch {
     return null;
   }
@@ -22,6 +34,7 @@ export function getSession(): SessionData | null {
 export function setSession(
   user: { username?: string; nama?: string; role?: string; idCabang?: string | null },
   token: string | null = null,
+  refreshToken: string | null = null,
 ): SessionData | null {
   const now = new Date();
   const expires = new Date(now.getTime() + SESSION.durationHours * 60 * 60 * 1000);
@@ -32,12 +45,19 @@ export function setSession(
     role: String(user.role || '').toLowerCase() as Role,
     idCabang: user.idCabang ? String(user.idCabang).toUpperCase() : null,
     token: token || null,
+    refreshToken: refreshToken || null,
     loginAt: now.toISOString(),
     expires: expires.toISOString(),
   };
 
   try {
     sessionStorage.setItem(SESSION.key, JSON.stringify(sessionData));
+    
+    // Store refresh token in localStorage for persistence across sessions
+    if (refreshToken) {
+      localStorage.setItem(SESSION.key + '_refresh', refreshToken);
+    }
+    
     return sessionData;
   } catch {
     return null;
@@ -47,6 +67,7 @@ export function setSession(
 export function clearSession(): boolean {
   try {
     sessionStorage.removeItem(SESSION.key);
+    localStorage.removeItem(SESSION.key + '_refresh');
     return true;
   } catch {
     return false;
