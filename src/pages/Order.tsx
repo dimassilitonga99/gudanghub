@@ -38,6 +38,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ParticlesBg } from '@/components/ui/particles-bg';
 import PrintFormModal, { type PrintItem } from '@/components/print-form';
 
 const ITEMS_PER_PAGE = 40;
@@ -2326,7 +2327,9 @@ export default function Order() {
   );
 
   return (
-    <div className="space-y-6 pb-24">
+    <div className="relative min-h-screen">
+      <ParticlesBg />
+      <div className="space-y-6 pb-24 relative z-10">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-2xl font-bold">Order</h1>
@@ -2705,6 +2708,7 @@ function CatalogTabBody({
           )}
         </>
       )}
+    </div>
     </div>
   );
 }
