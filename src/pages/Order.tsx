@@ -263,7 +263,8 @@ function ProductCard({
         </select>
       </div>
 
-      <Button size="sm" variant={inCart ? 'secondary' : 'default'} onClick={onAdd} disabled={!inCart && stock <= 0}>
+      <Button size="sm" variant={inCart ? 'secondary' : 'default'} onClick={onAdd}>
+        {/* ponytail: stok 0 tetap boleh order (request user); upgrade path: warning konfirmasi jika mau pembatasan */}
         {inCart ? (
           <>
             <Icon name="check" size={16} /> Di Keranjang
