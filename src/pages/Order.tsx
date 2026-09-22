@@ -2591,6 +2591,8 @@ function CatalogTabBody({
 }) {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
+  const [sortBy, setSortBy] = useState<'none' | 'nama' | 'kode'>('none');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [qtyMap, setQtyMap] = useState<Record<string, number>>({});
@@ -2609,8 +2611,20 @@ function CatalogTabBody({
         String(b.KATEGORI || '').toLowerCase().includes(q)
       );
     });
+    if (sortBy !== 'none') {
+      const dir = sortDir === 'asc' ? 1 : -1;
+      const field = sortBy === 'nama' ? 'NAMA_BARANG' : 'KODE_BARANG';
+      list.sort(
+        (a, b) =>
+          dir *
+          String(a[field] || '').localeCompare(String(b[field] || ''), 'id', {
+            numeric: sortBy === 'kode',
+            sensitivity: 'base',
+          }),
+      );
+    }
     return list;
-  }, [katalogList, search, category, isManual]);
+  }, [katalogList, search, category, isManual, sortBy, sortDir]);
 
   const visible = filtered.slice(0, visibleCount);
   const remaining = filtered.length - visible.length;
@@ -2626,6 +2640,16 @@ function CatalogTabBody({
     if (category === '__MANUAL__') {
       setCategory('');
       setEditingKey(null);
+    }
+    setVisibleCount(ITEMS_PER_PAGE);
+  };
+
+  const toggleSort = (field: 'nama' | 'kode') => {
+    if (sortBy === field) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortBy(field);
+      setSortDir('asc');
     }
     setVisibleCount(ITEMS_PER_PAGE);
   };
@@ -2651,15 +2675,40 @@ function CatalogTabBody({
 
   return (
     <div className="space-y-4">
-      <div className="relative">
-        <Icon name="search" size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          value={search}
-          onChange={(e) => handleSearch(e.target.value)}
-          placeholder="Cari kode atau nama barang..."
-          type="search"
-          className="pl-9"
-        />
+      <div className="flex flex-wrap gap-2">
+        <div className="relative min-w-[12rem] flex-1">
+          <Icon name="search" size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => handleSearch(e.target.value)}
+            placeholder="Cari kode atau nama barang..."
+            type="search"
+            className="pl-9"
+          />
+        </div>
+        {(['nama', 'kode'] as const).map((field) => {
+          const active = sortBy === field;
+          const label = field === 'nama' ? 'Nama' : 'Kode';
+          return (
+            <button
+              key={field}
+              type="button"
+              title={`Urutkan ${label.toLowerCase()} barang A–Z / Z–A`}
+              onClick={() => toggleSort(field)}
+              className={cn(
+                'flex h-9 shrink-0 items-center gap-1 rounded-md border px-3 text-xs font-semibold transition-colors',
+                active ? 'border-brand bg-brand/10 text-brand' : 'border-border text-muted-foreground',
+              )}
+            >
+              <Icon
+                name="angle-small-down"
+                size={14}
+                className={cn(active && sortDir === 'desc' && 'rotate-180')}
+              />
+              {label} {active ? (sortDir === 'asc' ? 'A–Z' : 'Z–A') : ''}
+            </button>
+          );
+        })}
       </div>
 
       <div className="flex gap-1.5 overflow-x-auto pb-1">
