@@ -835,7 +835,8 @@ function EditModal({
             <h3 className="text-sm font-semibold">Kelola Item ({items.length})</h3>
           </div>
 
-          <div className="hidden grid-cols-[1fr_4.5rem_4rem_6rem_7rem] gap-2 px-1 text-[11px] font-semibold uppercase text-muted-foreground md:grid">
+          {/* border-transparent + p-3 = samakan box model dengan kartu item, supaya kolom sejajar */}
+          <div className="hidden grid-cols-[1fr_4.5rem_4rem_6rem_7rem] gap-2 rounded-lg border border-transparent p-3 text-[11px] font-semibold uppercase text-muted-foreground md:grid">
             <span>Barang</span>
             <span className="text-center">Order</span>
             <span className="text-center">Picker</span>
@@ -926,7 +927,7 @@ function EditModal({
                           onChange={(e) =>
                             updateItem(idx, { qty: Math.max(1, toInt(e.target.value)) })
                           }
-                          className="h-8 w-20 text-center"
+                          className="h-8 w-20 text-center md:w-full"
                         />
                       </div>
                       <div className="md:text-center">
