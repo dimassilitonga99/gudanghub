@@ -1,15 +1,7 @@
-import { API_URL, APPS_SCRIPT_URL, SETTINGS } from './config';
+import { API_URL, SETTINGS } from './config';
 import { getSession, setSession } from './session';
 
 export { API_URL };
-
-// Action baru yang belum dikenal worker proxy → panggil Apps Script langsung
-// (CORS Apps Script terbuka penuh; FormData POST = simple request tanpa preflight).
-const DIRECT_ACTIONS: string[] = []; // semua kini lewat worker adapter v5
-
-function apiBaseUrl(action: string): string {
-  return DIRECT_ACTIONS.indexOf(action) !== -1 ? APPS_SCRIPT_URL : API_URL;
-}
 
 export interface ApiResult<T = unknown> {
   status: 'ok' | 'error';
@@ -270,7 +262,7 @@ async function apiPostForm(action: string, payload: Record<string, unknown>, tim
   const body = JSON.stringify({ ...attachToken(action, payload), action });
   const formData = new FormData();
   formData.append('payload', body);
-  const response = await fetchWithTimeout(apiBaseUrl(action), { method: 'POST', body: formData }, timeout);
+  const response = await fetchWithTimeout(API_URL, { method: 'POST', body: formData }, timeout);
   const text = await response.text();
   return await parseResponse(text);
 }
@@ -278,7 +270,7 @@ async function apiPostForm(action: string, payload: Record<string, unknown>, tim
 async function apiGetQuery(action: string, payload: Record<string, unknown>, timeout: number): Promise<ApiResult> {
   const body = JSON.stringify({ ...attachToken(action, payload), action });
   const url =
-    apiBaseUrl(action) +
+    API_URL +
     '?action=' +
     encodeURIComponent(action) +
     '&payload=' +
