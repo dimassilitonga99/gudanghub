@@ -25,7 +25,7 @@ export interface ApiResult<T = unknown> {
 
 const pendingRequests = new Map<string, Promise<ApiResult>>();
 const memCache = new Map<string, { data: ApiResult; time: number }>();
-const LS_CACHE_PREFIX = 'gudanghub_cache_';
+const LS_CACHE_PREFIX = 'gudanghub_cache_v2_';
 
 export const PUBLIC_ACTIONS = ['login', 'forgotPassword', 'ping'];
 
