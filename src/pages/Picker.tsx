@@ -295,10 +295,11 @@ export default function Picker() {
   const submitPicked = async (order: Order) => {
     const orderId = String(order.ORDER_ID);
     const details = itemsOf(order);
-    const stokData = details.map((_item, idx) => {
+    const stokData = details.map((item, idx) => {
       const data = pickerDataRef.current[`${orderId}_${idx}`] || { value: '', locked: false, history: [] };
       return {
         index: idx,
+        kode: String(item.KODE_BARANG || '').toUpperCase(),
         stokPicker: data.value,
         editCount: data.history.length,
         lastEdit: data.history.length > 0 ? data.history[data.history.length - 1].time : '',

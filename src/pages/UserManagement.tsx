@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { toastError, toastSuccess } from '@/lib/toast';
 import { cabang as cabangApi, users as usersApi } from '@/lib/api';
 import { useDialog } from '@/lib/dialog';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,6 +18,7 @@ interface UserRow {
   nama: string;
   role: string;
   idCabang: string | null;
+  cabangAkses: string[];
   active: boolean;
 }
 
@@ -30,7 +32,10 @@ interface CabangRow {
 
 const ROLE_LABEL: Record<string, string> = { admin: 'Admin', cabang: 'Cabang', picker: 'Picker' };
 
-const USER_KOSONG = { id: 0, username: '', nama: '', role: 'cabang', idCabang: '', active: true, password: '' };
+const USER_KOSONG = {
+  id: 0, username: '', nama: '', role: 'cabang',
+  idCabang: '', cabangAkses: [] as string[], active: true, password: '',
+};
 const CABANG_KOSONG = { id: '', nama: '', pic: '', telepon: '', alamat: '' };
 
 export default function UserManagement() {
@@ -62,7 +67,11 @@ export default function UserManagement() {
       toastError('Username dan nama wajib diisi.');
       return;
     }
-    if (uForm.role !== 'admin' && !uForm.idCabang) {
+    if (uForm.role === 'picker' && uForm.cabangAkses.length === 0) {
+      toastError('Pilih minimal satu cabang untuk picker.');
+      return;
+    }
+    if (uForm.role === 'cabang' && !uForm.idCabang) {
       toastError('Pilih cabang untuk role ini.');
       return;
     }
@@ -73,6 +82,7 @@ export default function UserManagement() {
       nama: uForm.nama.trim(),
       role: uForm.role,
       idCabang: uForm.role === 'admin' ? '' : uForm.idCabang,
+      cabangAkses: uForm.role === 'picker' ? uForm.cabangAkses : [],
       active: uForm.active,
       password: uForm.password.trim() || undefined,
     };
@@ -216,7 +226,7 @@ export default function UserManagement() {
                       <Icon name="key" size={14} />
                       <span className="ml-1.5">Reset</span>
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => setUForm({ ...u, idCabang: u.idCabang || '', password: '' })}>
+                    <Button variant="outline" size="sm" onClick={() => setUForm({ ...u, idCabang: u.idCabang || '', cabangAkses: u.cabangAkses || [], password: '' })}>
                       <Icon name="pencil" size={14} />
                       <span className="ml-1.5">Edit</span>
                     </Button>
@@ -314,7 +324,39 @@ export default function UserManagement() {
                   </SelectContent>
                 </Select>
               </div>
-              {uForm.role !== 'admin' && (
+              {uForm.role === 'picker' ? (
+                <div className="space-y-1.5">
+                  <Label>Cabang yang bisa diakses</Label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {cabangs.map((c) => {
+                      const on = uForm.cabangAkses.includes(c.id);
+                      return (
+                        <button
+                          key={c.id}
+                          type="button"
+                          onClick={() =>
+                            setUForm({
+                              ...uForm,
+                              cabangAkses: on
+                                ? uForm.cabangAkses.filter((x) => x !== c.id)
+                                : [...uForm.cabangAkses, c.id],
+                            })
+                          }
+                          className={cn(
+                            'rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors',
+                            on ? 'border-brand bg-brand text-white' : 'border-border hover:border-brand/50',
+                          )}
+                        >
+                          {c.id}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Picker hanya melihat order dari cabang yang dipilih.
+                  </p>
+                </div>
+              ) : uForm.role === 'cabang' ? (
                 <div className="space-y-1.5">
                   <Label>Cabang</Label>
                   <Select value={uForm.idCabang} onValueChange={(v) => setUForm({ ...uForm, idCabang: v })}>
@@ -330,7 +372,7 @@ export default function UserManagement() {
                     </SelectContent>
                   </Select>
                 </div>
-              )}
+              ) : null}
               <div className="space-y-1.5">
                 <Label>{uForm.id ? 'Password baru (opsional)' : 'Password (opsional)'}</Label>
                 <Input

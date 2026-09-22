@@ -835,7 +835,7 @@ function EditModal({
             <h3 className="text-sm font-semibold">Kelola Item ({items.length})</h3>
           </div>
 
-          <div className="hidden grid-cols-[1fr_4rem_3rem_5rem_6rem_8rem] gap-2 px-1 text-[11px] font-semibold uppercase text-muted-foreground md:grid">
+          <div className="hidden grid-cols-[1fr_4.5rem_4rem_6rem_7rem] gap-2 px-1 text-[11px] font-semibold uppercase text-muted-foreground md:grid">
             <span>Barang</span>
             <span className="text-center">Order</span>
             <span className="text-center">Picker</span>
@@ -863,14 +863,14 @@ function EditModal({
                 <div
                   key={idx}
                   className={cn(
-                    'rounded-lg border p-3',
+                    'rounded-lg border p-3 md:grid md:grid-cols-[1fr_4.5rem_4rem_6rem_7rem] md:items-start md:gap-2',
                     deleted && 'border-danger/40 bg-danger/5 opacity-65',
                     rejected && 'border-warning/40 bg-warning/5 opacity-75',
                     edited && 'border-info/40 bg-info/5',
                     !rejected && !deleted && !edited && 'border-border',
                   )}
                 >
-                  <div className="flex flex-wrap items-start justify-between gap-2">
+                  <div className="flex flex-wrap items-start justify-between gap-2 md:contents">
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-1.5">
                         <span className="font-mono text-xs font-bold text-brand">{it.kode}</span>
@@ -915,9 +915,9 @@ function EditModal({
                       )}
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <div className="text-center">
-                        <div className="text-[11px] text-muted-foreground">Qty</div>
+                    <div className="flex items-center gap-2 md:contents">
+                      <div className="md:text-center">
+                        <div className="text-[11px] text-muted-foreground md:hidden">Order</div>
                         <Input
                           type="number"
                           min={1}
@@ -929,8 +929,8 @@ function EditModal({
                           className="h-8 w-20 text-center"
                         />
                       </div>
-                      <div className="text-center">
-                        <div className="text-[11px] text-muted-foreground">Picker</div>
+                      <div className="md:text-center">
+                        <div className="text-[11px] text-muted-foreground md:hidden">Picker</div>
                         <div
                           className={cn(
                             'flex h-8 min-w-14 items-center justify-center rounded-md border px-2 text-sm font-bold',
@@ -944,13 +944,13 @@ function EditModal({
                           {pickerVal === '' ? '—' : pickerVal}
                         </div>
                       </div>
-                      <div className="w-20 text-right">
-                        <div className="text-[11px] text-muted-foreground">Subtotal</div>
+                      <div className="w-20 text-right md:w-auto">
+                        <div className="text-[11px] text-muted-foreground md:hidden">Subtotal</div>
                         <div className="text-sm font-bold">
                           {disabled ? '-' : formatRupiah(it.qty * it.harga)}
                         </div>
                       </div>
-                      <div className="flex flex-col gap-1">
+                      <div className="flex flex-col gap-1 md:items-end">
                         {disabled ? (
                           <Button size="sm" variant="outline" onClick={() => rejectItem(idx)}>
                             <Icon name="refresh" size={14} />
@@ -983,7 +983,7 @@ function EditModal({
                         rejected || deleted ? 'Wajib isi alasan...' : 'Tulis keterangan (opsional)...'
                       }
                       rows={2}
-                      className={cn('mt-2 text-sm', rejected && it.reason.trim() === '' && 'border-danger')}
+                      className={cn('mt-2 text-sm md:col-span-5', rejected && it.reason.trim() === '' && 'border-danger')}
                     />
                   )}
                 </div>
@@ -1289,15 +1289,18 @@ export default function Dashboard() {
     return () => window.removeEventListener('keydown', onKey);
   }, [loadFresh]);
 
+  // Order yang masih butuh tindakan admin: PENDING (belum dipicker) dan
+  // PICKED (sudah diverifikasi picker, menunggu persetujuan admin).
+  const MENUNGGU = ['PENDING', 'PICKED'];
   const pendingCount = useMemo(
-    () => ordersList.filter((o) => String(o.STATUS || '').toUpperCase() === 'PENDING').length,
+    () => ordersList.filter((o) => MENUNGGU.includes(String(o.STATUS || '').toUpperCase())).length,
     [ordersList],
   );
 
   const pendingOrders = useMemo(
     () =>
       ordersList
-        .filter((o) => String(o.STATUS || '').toUpperCase() === 'PENDING')
+        .filter((o) => MENUNGGU.includes(String(o.STATUS || '').toUpperCase()))
         .slice(0, 5),
     [ordersList],
   );
@@ -1309,6 +1312,7 @@ export default function Dashboard() {
       total: ordersList.length,
       approved: count('APPROVED'),
       pending: count('PENDING'),
+      picked: count('PICKED'),
       rejected: count('REJECTED'),
     };
   }, [ordersList]);
@@ -1504,6 +1508,13 @@ export default function Dashboard() {
       value: donut.pending,
       icon: <Icon name="clock" size={20} className="text-warning" />,
       tone: 'bg-warning/15 text-warning',
+    },
+    {
+      label: 'Diverifikasi Picker',
+      sub: 'Menunggu persetujuan admin',
+      value: donut.picked,
+      icon: <Icon name="box-check" size={20} className="text-info" />,
+      tone: 'bg-info/15 text-info',
     },
     {
       label: 'Disetujui',
@@ -1714,6 +1725,7 @@ export default function Dashboard() {
                 <DonutChart
                   segments={[
                     { label: 'Disetujui', value: donut.approved, color: '#22c55e' },
+                    { label: 'Diverifikasi Picker', value: donut.picked, color: '#0ea5e9' },
                     { label: 'Tertunda', value: donut.pending, color: '#f59e0b' },
                     { label: 'Ditolak', value: donut.rejected, color: '#ef4444' },
                   ]}
@@ -1836,6 +1848,7 @@ export default function Dashboard() {
                 [
                   ['ALL', 'Semua'],
                   ['PENDING', 'Tertunda'],
+                  ['PICKED', 'Diverifikasi Picker'],
                   ['APPROVED', 'Disetujui'],
                   ['REJECTED', 'Ditolak'],
                 ] as const
@@ -1890,7 +1903,7 @@ export default function Dashboard() {
                         </td>
                         <td className="p-3">
                           <div className="flex justify-end gap-1">
-                            {st === 'PENDING' && (
+                            {(st === 'PENDING' || st === 'PICKED') && (
                               <>
                                 <Button size="icon" variant="outline" className="h-8 w-8 text-success" title="Setujui" onClick={() => void quickApprove(o)}>
                                   <Icon name="check" size={16} />
