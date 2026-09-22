@@ -433,7 +433,7 @@ export default function Picker() {
 
       {/* FILTER TANGGAL */}
       <div className="flex flex-wrap items-center gap-2">
-        <span className="flex items-center gap-1 text-xs font-semibold">
+        <span className="flex w-full items-center gap-1 text-xs font-semibold sm:w-auto">
           <Icon name="calendar" size={14} /> Tanggal:
         </span>
         <Input
@@ -443,7 +443,7 @@ export default function Picker() {
             setFilterDateFrom(e.target.value);
             setFilterQuick('');
           }}
-          className="h-8 w-36 text-xs dark:[color-scheme:dark]"
+          className="h-8 w-36 flex-1 text-xs dark:[color-scheme:dark] sm:flex-none"
           title="Dari"
         />
         <span className="text-xs text-muted-foreground">s/d</span>
@@ -454,7 +454,7 @@ export default function Picker() {
             setFilterDateTo(e.target.value);
             setFilterQuick('');
           }}
-          className="h-8 w-36 text-xs dark:[color-scheme:dark]"
+          className="h-8 w-36 flex-1 text-xs dark:[color-scheme:dark] sm:flex-none"
           title="Sampai"
         />
         <div className="flex flex-wrap gap-1">
@@ -609,8 +609,9 @@ export default function Picker() {
                     </Badge>
                   </div>
 
-                  <div className="grid grid-cols-[auto_1fr_auto_auto_auto] items-center gap-2 rounded-lg bg-muted/40 px-3 py-1.5 text-[10px] font-bold tracking-wide text-muted-foreground">
-                    <div>STATUS</div>
+                  {/* lebar kolom FIXED (bukan auto) supaya header dan baris selalu sejajar; di mobile header disembunyikan, label dipindah ke dalam baris */}
+                  <div className="hidden grid-cols-[1.25rem_1fr_2.5rem_7.5rem_3.5rem] items-center gap-2 rounded-lg border border-transparent bg-muted/40 px-3 py-1.5 text-[10px] font-bold tracking-wide text-muted-foreground md:grid">
+                    <div />
                     <div>BARANG</div>
                     <div className="text-center">ORDER</div>
                     <div className="text-center">DISIAPKAN</div>
@@ -626,12 +627,12 @@ export default function Picker() {
                         <div
                           key={`${String(item.KODE_BARANG)}-${idx}`}
                           className={cn(
-                            'grid grid-cols-[auto_1fr_auto_auto_auto] items-center gap-2 rounded-lg border border-border bg-card px-3 py-2',
+                            'grid grid-cols-[1.25rem_1fr_3.5rem] items-center gap-x-2 gap-y-2 rounded-lg border border-border bg-card px-3 py-2 md:grid-cols-[1.25rem_1fr_2.5rem_7.5rem_3.5rem] md:gap-y-0',
                             isLocked && 'border-success/30 bg-success/5',
                             isFilled && !isLocked && 'border-warning/30 bg-warning/5',
                           )}
                         >
-                          <div className="flex items-center">
+                          <div className="col-start-1 row-start-1 flex items-center md:col-start-1">
                             {isFilled && isLocked ? (
                               <span title="Terkunci">
                                 <Icon name="check-circle" size={16} className="text-success" />
@@ -647,102 +648,113 @@ export default function Picker() {
                             )}
                           </div>
 
-                          <div className="min-w-0">
-                            <div className="truncate text-xs font-semibold">
+                          <div className="col-start-2 row-start-1 min-w-0 md:col-start-2">
+                            <div className="line-clamp-2 text-sm font-semibold leading-snug">
                               {item.NAMA_BARANG || '-'}
                               {item.CATATAN_ITEM && (
-                                <span className="italic text-danger"> ({item.CATATAN_ITEM})</span>
+                                <span className="text-xs font-bold italic text-danger"> ({item.CATATAN_ITEM})</span>
                               )}
                             </div>
-                            <div className="text-[11px] text-muted-foreground">
-                              {item.KODE_BARANG || '-'} · {item.SATUAN || 'PCS'}
+                            <div className="mt-0.5 truncate font-mono text-[11px] font-bold tracking-wide text-brand">
+                              {item.KODE_BARANG || '-'}
+                              <span className="font-sans font-normal text-muted-foreground"> · {item.SATUAN || 'PCS'}</span>
                             </div>
                           </div>
 
-                          <div className={cn('w-10 text-center text-sm font-bold', row.qtyColor)}>{row.qtyOrder}</div>
+                          <div className="col-span-3 col-start-1 row-start-2 flex items-center justify-between gap-2 md:contents">
+                            <div className="flex items-center gap-1 md:col-start-3 md:w-10 md:justify-center md:gap-0">
+                              <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground md:hidden">
+                                Order
+                              </span>
+                              <span className={cn('text-sm font-bold', row.qtyColor)}>{row.qtyOrder}</span>
+                            </div>
 
-                          <div className="flex items-center gap-1">
-                            <Input
-                              type="number"
-                              min={0}
-                              placeholder="0"
-                              value={row.currentValue}
-                              readOnly={isLocked && canEdit}
-                              disabled={!canEdit}
-                              onChange={(e) => {
-                                const key = `${order.ORDER_ID}_${idx}`;
-                                const data = pickerDataRef.current[key];
-                                if (data) {
-                                  savePickerData({
-                                    ...pickerDataRef.current,
-                                    [key]: { ...data, value: e.target.value },
-                                  });
-                                }
-                              }}
-                              onBlur={(e) => {
-                                if (isLocked || !canEdit) return;
-                                const v = e.target.value.trim();
-                                if (v !== '') {
-                                  setItemValue(String(order.ORDER_ID), idx, v);
-                                  toastSuccess('Item dikunci ✓', { duration: 1000 });
-                                }
-                              }}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                  e.preventDefault();
-                                  (e.target as HTMLInputElement).blur();
-                                }
-                              }}
-                              className={cn('h-8 w-20 px-1 text-center text-sm font-bold', isFilled && 'text-success')}
-                            />
-                            {isLocked && canEdit && (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7"
-                                title="Edit kembali"
-                                onClick={() => {
-                                  void (async () => {
-                                    const key = `${order.ORDER_ID}_${idx}`;
-                                    const data = pickerDataRef.current[key];
-                                    const ok = await confirm({
-                                      icon: '🔓',
-                                      title: 'Edit Kembali?',
-                                      message: `Item ini sudah dikunci dengan nilai: ${data?.value ?? ''}\n\nRiwayat edit: ${data?.history.length ?? 0} kali\n\nApakah Anda yakin ingin mengedit kembali?`,
-                                      okText: 'Ya, Edit',
-                                    });
-                                    if (ok) {
-                                      unlockItem(String(order.ORDER_ID), idx);
-                                      toast.info('Input terbuka — silakan edit.', { duration: 2000 });
-                                    }
-                                  })();
-                                }}
-                              >
-                                <Icon name="lock" size={14} className="text-muted-foreground" />
-                              </Button>
-                            )}
-                            {!isLocked && canEdit && isFilled && (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7"
-                                title="Kunci"
-                                onClick={() => {
+                            <div className="flex items-center gap-1 md:col-start-4">
+                              <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground md:hidden">
+                                Disiapkan
+                              </span>
+                              <Input
+                                type="number"
+                                min={0}
+                                placeholder="0"
+                                value={row.currentValue}
+                                readOnly={isLocked && canEdit}
+                                disabled={!canEdit}
+                                onChange={(e) => {
                                   const key = `${order.ORDER_ID}_${idx}`;
                                   const data = pickerDataRef.current[key];
-                                  if (data?.locked) return;
-                                  if (data && data.value.trim() !== '') {
-                                    setItemValue(String(order.ORDER_ID), idx, data.value.trim());
+                                  if (data) {
+                                    savePickerData({
+                                      ...pickerDataRef.current,
+                                      [key]: { ...data, value: e.target.value },
+                                    });
+                                  }
+                                }}
+                                onBlur={(e) => {
+                                  if (isLocked || !canEdit) return;
+                                  const v = e.target.value.trim();
+                                  if (v !== '') {
+                                    setItemValue(String(order.ORDER_ID), idx, v);
                                     toastSuccess('Item dikunci ✓', { duration: 1000 });
                                   }
                                 }}
-                              >
-                                <Icon name="check" size={14} className="text-success" />
-                              </Button>
-                            )}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    (e.target as HTMLInputElement).blur();
+                                  }
+                                }}
+                                className={cn('h-8 w-20 px-1 text-center text-sm font-bold', isFilled && 'text-success')}
+                              />
+                              {isLocked && canEdit && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-7 w-7"
+                                  title="Edit kembali"
+                                  onClick={() => {
+                                    void (async () => {
+                                      const key = `${order.ORDER_ID}_${idx}`;
+                                      const data = pickerDataRef.current[key];
+                                      const ok = await confirm({
+                                        icon: '🔓',
+                                        title: 'Edit Kembali?',
+                                        message: `Item ini sudah dikunci dengan nilai: ${data?.value ?? ''}\n\nRiwayat edit: ${data?.history.length ?? 0} kali\n\nApakah Anda yakin ingin mengedit kembali?`,
+                                        okText: 'Ya, Edit',
+                                      });
+                                      if (ok) {
+                                        unlockItem(String(order.ORDER_ID), idx);
+                                        toast.info('Input terbuka — silakan edit.', { duration: 2000 });
+                                      }
+                                    })();
+                                  }}
+                                >
+                                  <Icon name="lock" size={14} className="text-muted-foreground" />
+                                </Button>
+                              )}
+                              {!isLocked && canEdit && isFilled && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-7 w-7"
+                                  title="Kunci"
+                                  onClick={() => {
+                                    const key = `${order.ORDER_ID}_${idx}`;
+                                    const data = pickerDataRef.current[key];
+                                    if (data?.locked) return;
+                                    if (data && data.value.trim() !== '') {
+                                      setItemValue(String(order.ORDER_ID), idx, data.value.trim());
+                                      toastSuccess('Item dikunci ✓', { duration: 1000 });
+                                    }
+                                  }}
+                                >
+                                  <Icon name="check" size={14} className="text-success" />
+                                </Button>
+                              )}
+                            </div>
                           </div>
 
-                          <div className="w-14 text-center">
+                          <div className="col-start-3 row-start-1 w-14 text-center md:col-start-5">
                             {row.editCount > 0 && row.lastEntry ? (
                               <div
                                 className="mx-auto inline-block rounded-lg bg-info/15 px-1.5 py-0.5 text-[10px] font-bold text-info"
