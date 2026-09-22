@@ -40,6 +40,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ParticlesBg } from '@/components/ui/particles-bg';
 import PrintFormModal, { type PrintItem } from '@/components/print-form';
+import { StoreTakeTab } from '@/components/store-take';
 
 const ITEMS_PER_PAGE = 40;
 const PRINT_ITEMS_PER_PAGE = 20;
@@ -1910,7 +1911,7 @@ function MassOrderTab({
    MAIN PAGE
    ═══════════════════════════════════════════════════════════════════ */
 
-type OrderTab = 'katalog' | 'mass' | 'history';
+type OrderTab = 'katalog' | 'mass' | 'take' | 'history';
 
 export default function Order() {
   const { session } = useAuth();
@@ -1921,7 +1922,7 @@ export default function Order() {
 
   const [tab, setTab] = useState<OrderTab>(() => {
     const h = window.location.hash.replace('#', '');
-    return h === 'history' || h === 'mass' ? h : 'katalog';
+    return h === 'history' || h === 'mass' || h === 'take' ? h : 'katalog';
   });
   const [katalogList, setKatalogList] = useState<Barang[]>([]);
   const [loading, setLoading] = useState(true);
@@ -2350,6 +2351,7 @@ export default function Order() {
           <TabsList className="w-full justify-start overflow-x-auto sm:w-auto">
             <TabsTrigger value="katalog">Katalog</TabsTrigger>
             <TabsTrigger value="mass">Order Massal</TabsTrigger>
+            <TabsTrigger value="take">Ambil Barang</TabsTrigger>
             <TabsTrigger value="history">Riwayat</TabsTrigger>
           </TabsList>
 
@@ -2392,6 +2394,10 @@ export default function Order() {
               resetKey={massResetKey}
               onOpenPreOrder={(items, catatan) => setPreOrder({ items, catatan })}
             />
+          </TabsContent>
+
+          <TabsContent value="take" className="space-y-4">
+            <StoreTakeTab katalogList={katalogList} branchId={branchId} branchPic={branchPic} />
           </TabsContent>
 
           <TabsContent value="history" className="space-y-4">

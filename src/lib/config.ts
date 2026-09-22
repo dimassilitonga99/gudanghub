@@ -294,3 +294,30 @@ export interface Order {
   DETAIL?: DetailItem[];
   [key: string]: unknown;
 }
+
+export interface StoreTakeItem {
+  KODE_BARANG: string;
+  NAMA_BARANG: string;
+  SATUAN?: string;
+  QTY: number | string;
+  STOK_TOKO?: number | string;
+}
+
+export interface StoreTake {
+  BATCH_ID: string;
+  ID_CABANG: string;
+  NAMA_CABANG?: string;
+  PIC?: string;
+  PENGAMBIL: string;
+  TUJUAN?: string;
+  DIBUAT_OLEH?: string;
+  TANGGAL?: string;
+  HARI?: string;
+  JAM?: string;
+  WAKTU?: string;
+  CREATED_AT?: string;
+  TOTAL_QTY?: number;
+  TOTAL_ITEM?: number;
+  ITEMS?: StoreTakeItem[];
+  [key: string]: unknown;
+}

@@ -655,6 +655,34 @@ export const orders = {
   },
 };
 
+export const storeTakes = {
+  getAll(options: CallOptions = {}): Promise<ApiResult> {
+    return callApi('getStoreTakes', {}, {
+      cache: options.cache !== false,
+      cacheTtl: 30 * 1000,
+      timeout: 45000,
+    });
+  },
+  getAllFast(onFresh?: (r: ApiResult) => void): Promise<ApiResult> {
+    return callApiStale('getStoreTakes', {}, {
+      ttl: 30 * 1000,
+      maxAge: 24 * 60 * 60 * 1000,
+      onFresh,
+      timeout: 45000,
+    });
+  },
+  submit(data: Record<string, unknown>): Promise<ApiResult> {
+    clearCache('getStoreTakes');
+    clearLSCache('getStoreTakes');
+    return callApi('submitStoreTake', data, { dedupe: false, timeout: 60000 });
+  },
+  refresh(): Promise<ApiResult> {
+    clearCache('getStoreTakes');
+    clearLSCache('getStoreTakes');
+    return storeTakes.getAll({ cache: false });
+  },
+};
+
 // ─────────────────────────────────────────────────────────────────────────
 // LOAD ALL (parallel)
 // ─────────────────────────────────────────────────────────────────────────

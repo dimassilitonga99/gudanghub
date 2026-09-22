@@ -3,9 +3,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { toastError, toastSuccess } from '@/lib/toast';
 
-import { katalog, orders } from '@/lib/api';
+import { katalog, orders, storeTakes } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
-import { APP, CABANG, SETTINGS, type Barang, type Order, type DetailItem } from '@/lib/config';
+import { APP, CABANG, SETTINGS, type Barang, type Order, type DetailItem, type StoreTake } from '@/lib/config';
 import {
   cn,
   formatRupiah,
@@ -24,6 +24,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import PrintFormModal, { type PrintItem } from '@/components/print-form';
 import { LeaderboardCard } from '@/components/ui/leaderboard-card';
+import { StoreTakeList } from '@/components/store-take';
 
 function toNum(v: unknown): number {
   const n = Number(v);
@@ -1108,7 +1109,7 @@ function EditModal({
    MAIN PAGE
    ───────────────────────────────────────────────────────────────────── */
 
-type DashboardTab = 'dashboard' | 'orders' | 'katalog' | 'cabang';
+type DashboardTab = 'dashboard' | 'orders' | 'katalog' | 'cabang' | 'takes';
 
 export default function Dashboard() {
   const { session } = useAuth();
@@ -1123,6 +1124,8 @@ export default function Dashboard() {
   const [katalogSearch, setKatalogSearch] = useState('');
   const [katalogCategory, setKatalogCategory] = useState('');
   const [editOrder, setEditOrder] = useState<Order | null>(null);
+  const [takes, setTakes] = useState<StoreTake[]>([]);
+  const [takesLoading, setTakesLoading] = useState(true);
   const [dataNotice, setDataNotice] = useState('');
   const lastLoadRef = useRef(0);
   // Versi data: naik tiap operasi tulis. Hasil fetch yang mulai SEBELUM
@@ -1205,6 +1208,22 @@ export default function Dashboard() {
     void loadFast();
   }, [loadFast]);
 
+  // Muat data ambil barang saat tab dibuka (jarang berubah, tidak ikut auto-refresh).
+  const loadTakes = useCallback(async (force = false) => {
+    setTakesLoading(true);
+    try {
+      const r = force ? await storeTakes.refresh() : await storeTakes.getAllFast((fresh) => setTakes((fresh.data as StoreTake[]) || []));
+      if (r.status === 'ok') setTakes((r.data as StoreTake[]) || []);
+    } finally {
+      setTakesLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (tab !== 'takes') return;
+    void loadTakes();
+  }, [tab, loadTakes]);
+
   // Auto refresh dengan visibility change
   useEffect(() => {
     let timer: ReturnType<typeof setInterval> | null = null;
@@ -1236,12 +1255,12 @@ export default function Dashboard() {
   // Hash routing antar tab + back/forward
   useEffect(() => {
     const h0 = window.location.hash.replace('#', '');
-    if (['dashboard', 'orders', 'katalog', 'cabang'].includes(h0)) {
+    if (['dashboard', 'orders', 'katalog', 'cabang', 'takes'].includes(h0)) {
       setTab(h0 as DashboardTab);
     }
     const onHash = () => {
       const h = window.location.hash.replace('#', '');
-      if (['dashboard', 'orders', 'katalog', 'cabang'].includes(h)) {
+      if (['dashboard', 'orders', 'katalog', 'cabang', 'takes'].includes(h)) {
         setTab(h as DashboardTab);
       }
     };
@@ -1550,6 +1569,7 @@ export default function Dashboard() {
             ['orders', 'Semua Pesanan', 'package'],
             ['katalog', 'Katalog Barang', 'boxes'],
             ['cabang', 'Status Cabang', 'store'],
+            ['takes', 'Ambil Barang', 'package'],
           ] as const
         ).map(([id, label]) => (
           <button
@@ -1566,6 +1586,24 @@ export default function Dashboard() {
           </button>
         ))}
       </div>
+
+      {/* TAB: AMBIL BARANG */}
+      {tab === 'takes' && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="font-display text-lg font-bold">Ambil Barang dari Gudang Toko</h2>
+              <p className="text-sm text-muted-foreground">
+                Catatan barang yang diambil tiap cabang dari gudang tokonya.
+              </p>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => void loadTakes(true)} disabled={takesLoading}>
+              <Icon name="refresh" size={16} className={takesLoading ? 'mr-2 animate-spin' : 'mr-2'} /> Muat Ulang
+            </Button>
+          </div>
+          <StoreTakeList items={takes} loading={takesLoading} showBranch />
+        </div>
+      )}
 
       {/* TAB: DASHBOARD */}
       {tab === 'dashboard' && (
