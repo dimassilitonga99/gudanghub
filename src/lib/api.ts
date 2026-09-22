@@ -596,6 +596,40 @@ export const cabang = {
       timeout: 45000,
     });
   },
+  create(data: Record<string, unknown>): Promise<ApiResult> {
+    clearCache('getCabang');
+    clearLSCache('getCabang');
+    return callApi('createCabang', data, { dedupe: false, cache: false, timeout: 30000 });
+  },
+  update(data: Record<string, unknown>): Promise<ApiResult> {
+    clearCache('getCabang');
+    clearLSCache('getCabang');
+    return callApi('updateCabang', data, { dedupe: false, cache: false, timeout: 30000 });
+  },
+  remove(id: string): Promise<ApiResult> {
+    clearCache('getCabang');
+    clearLSCache('getCabang');
+    return callApi('deleteCabang', { id }, { dedupe: false, cache: false, timeout: 30000 });
+  },
+};
+
+// Kelola user (khusus admin) — hasilnya tidak di-cache.
+export const users = {
+  getAll(): Promise<ApiResult> {
+    return callApi('getUsers', {}, { cache: false, timeout: 30000 });
+  },
+  create(data: Record<string, unknown>): Promise<ApiResult> {
+    return callApi('createUser', data, { dedupe: false, cache: false, timeout: 30000 });
+  },
+  update(data: Record<string, unknown>): Promise<ApiResult> {
+    return callApi('updateUser', data, { dedupe: false, cache: false, timeout: 30000 });
+  },
+  remove(id: number): Promise<ApiResult> {
+    return callApi('deleteUser', { id }, { dedupe: false, cache: false, timeout: 30000 });
+  },
+  resetPassword(id: number): Promise<ApiResult> {
+    return callApi('resetUserPassword', { id }, { dedupe: false, cache: false, timeout: 30000 });
+  },
 };
 
 export const cart = {

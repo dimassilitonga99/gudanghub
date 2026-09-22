@@ -211,6 +211,7 @@ export const ROUTES = {
   notifikasi: '/notifikasi',
   settings: '/settings',
   picker: '/picker',
+  users: '/users',
 } as const;
 
 export type Role = 'admin' | 'cabang' | 'picker';
