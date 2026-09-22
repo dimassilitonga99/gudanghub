@@ -185,32 +185,6 @@ function TeamSection() {
       aria-labelledby="tim-title"
       className="relative w-full overflow-hidden bg-white py-12 md:py-24 dark:bg-background"
     >
-      <div>
-        <svg
-          className="absolute right-0 bottom-0 text-neutral-200 dark:text-neutral-800"
-          fill="none"
-          height="154"
-          viewBox="0 0 460 154"
-          width="460"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <g clipPath="url(#clip0_494_1104)">
-            <path
-              d="M-87.463 458.432C-102.118 348.092 -77.3418 238.841 -15.0744 188.274C57.4129 129.408 180.708 150.071 351.748 341.128C278.246 -374.233 633.954 380.602 548.123 42.7707"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="40"
-            />
-          </g>
-          <defs>
-            <clipPath id="clip0_494_1104">
-              <rect fill="white" height="154" width="460" />
-            </clipPath>
-          </defs>
-        </svg>
-      </div>
-
       <div className="relative z-10 mx-auto max-w-7xl">
         <div className="mx-auto mb-16 flex max-w-5xl flex-col items-center px-6 text-center lg:px-0">
           <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600 text-white">
@@ -219,25 +193,9 @@ function TeamSection() {
 
           <h1
             id="tim-title"
-            className="relative mb-4 text-4xl font-medium tracking-tight text-neutral-900 sm:text-5xl dark:text-neutral-100"
+            className="mb-4 text-4xl font-medium tracking-tight text-neutral-900 sm:text-5xl dark:text-neutral-100"
           >
             Tim GudangHub
-            <svg
-              className="absolute -top-2 -right-8 -z-10 w-24 text-neutral-200 dark:text-neutral-700"
-              fill="currentColor"
-              height="86"
-              viewBox="0 0 108 86"
-              width="108"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M38.8484 16.236L15 43.5793L78.2688 15L18.1218 71L93 34.1172L70.2047 65.2739"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="28"
-              />
-            </svg>
           </h1>
           <p className="max-w-2xl text-neutral-600 dark:text-neutral-400">
             Satu gudang, empat cabang, satu tujuan — melayani NTT dengan sepenuh hati.
@@ -259,14 +217,14 @@ function TeamSection() {
                     loading="lazy"
                     src={member.foto}
                   />
-                  <div className="absolute bottom-0 w-full rounded-lg bg-neutral-100/85 p-2 dark:bg-neutral-800/80">
-                    <h3 className="font-semibold text-neutral-900 dark:text-neutral-100">
-                      {member.nama}
-                    </h3>
-                    <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                      {member.jabatan}
-                    </p>
-                  </div>
+                </div>
+                <div className="mt-3 px-1">
+                  <h3 className="font-semibold text-neutral-900 dark:text-neutral-100">
+                    {member.nama}
+                  </h3>
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                    {member.jabatan}
+                  </p>
                 </div>
               </div>
             ))}
