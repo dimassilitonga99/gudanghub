@@ -5,7 +5,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { CABANG, CABANG_LIST, ROUTES } from '@/lib/config';
 import { useAuth } from '@/context/AuthContext';
 import { GradientShimmer } from '@/components/ui/gradient-shimmer';
-import { ImageStreamHero } from '@/components/ui/image-stream-hero';
 import { GlobeLive } from '@/components/ui/cobe-globe-live';
 import { ParticleTextEffect } from '@/components/ui/particle-text-effect';
 import { Button } from '@/components/ui/button';
@@ -161,130 +160,140 @@ function Reveal({
   );
 }
 
-const TIM_QUOTES = [
-  { quote: 'Memimpin adalah menjadi contoh — bahkan saat tak ada yang melihat.', author: 'IBU HRD', color: '#D4AF37' },
-  { quote: 'Kerja keras tidak pernah mengkhianati hasil.', author: 'BAPAK ANAK SATU', color: '#5EED8C' },
-  { quote: 'Melayani dengan tulus, bekerja dengan jujur.', author: 'GARDA TERDEPAN', color: '#60C5F7' },
-  { quote: 'Setiap barang membawa harapan keluarga.', author: 'HATI YANG TERLUKA', color: '#F59E42' },
-  { quote: 'Senyum pelanggan adalah gaji terbaik.', author: 'JIWA PELAYAN', color: '#E879F9' },
-  { quote: 'Mengirim janji — tepat waktu, tepat hati.', author: 'SALES SANTUY', color: '#FB7185' },
-];
-
-function useTypewriter(items: { quote: string; author: string; color: string }[], typeSpeed = 40, deleteSpeed = 20, pause = 2000) {
-  const [index, setIndex] = useState(0);
-  const [text, setText] = useState('');
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  useEffect(() => {
-    const current = items[index];
-    const fullText = `"${current.quote}"`;
-
-    const timeout = setTimeout(() => {
-      if (!isDeleting) {
-        setText(fullText.slice(0, text.length + 1));
-        if (text.length + 1 === fullText.length) {
-          setTimeout(() => setIsDeleting(true), pause);
-        }
-      } else {
-        setText(fullText.slice(0, text.length - 1));
-        if (text.length - 1 === 0) {
-          setIsDeleting(false);
-          setIndex((i) => (i + 1) % items.length);
-        }
-      }
-    }, isDeleting ? deleteSpeed : typeSpeed);
-
-    return () => clearTimeout(timeout);
-  }, [text, isDeleting, index, items, typeSpeed, deleteSpeed, pause]);
-
-  return { text, author: items[index].author, color: items[index].color, isDeleting };
-}
-
-const TIM_IMAGES = [
-  { src: './images/tim/ceo.png', alt: 'CEO' },
-  { src: './images/tim/manager-1.png', alt: 'Manager' },
-  { src: './images/tim/manager-2.png', alt: 'Manager' },
-  { src: './images/tim/staff-1.png', alt: 'Staff' },
-  { src: './images/tim/staff-2.png', alt: 'Staff' },
-  { src: './images/tim/staff-3.png', alt: 'Staff' },
+const TIM_MEMBERS = [
+  { foto: './images/tim/ceo.png', nama: 'RISTI', jabatan: 'HRD', caption: 'Memimpin adalah menjadi contoh — bahkan saat tak ada yang melihat.' },
+  { foto: './images/tim/manager-1.png', nama: 'IRWAN', jabatan: 'ADMIN', caption: 'Kerja keras tidak pernah mengkhianati hasil.' },
+  { foto: './images/tim/manager-2.png', nama: 'DIMAS', jabatan: 'ADMIN', caption: 'Melayani dengan tulus, bekerja dengan jujur.' },
+  { foto: './images/tim/staff-1.png', nama: 'SAFIRA', jabatan: 'ADMIN', caption: 'Setiap barang membawa harapan keluarga.' },
+  { foto: './images/tim/staff-2.png', nama: 'NANDA', jabatan: 'ADMIN', caption: 'Senyum pelanggan adalah gaji terbaik.' },
+  { foto: './images/tim/staff-3.png', nama: 'TRI', jabatan: 'SPG', caption: 'Mengirim janji — tepat waktu, tepat hati.' },
 ];
 
 function TeamSection() {
-  const { text, author, color } = useTypewriter(TIM_QUOTES);
+  const [idx, setIdx] = useState(0);
+
+  useEffect(() => {
+    const t = setInterval(() => setIdx((i) => (i + 1) % TIM_MEMBERS.length), 5000);
+    return () => clearInterval(t);
+  }, []);
+
+  const lead = TIM_MEMBERS[idx];
 
   return (
-    <section id="tim" aria-labelledby="tim-title" className="relative">
-      <ImageStreamHero
-        images={TIM_IMAGES}
-        cards={7}
-        speed={20}
-        axis={62}
-        className="min-h-[520px] md:min-h-[600px]"
-      >
-        <div className="relative z-10 flex min-h-[520px] md:min-h-[600px] flex-col items-center px-4 pt-10 text-center md:pt-14">
-          <Reveal>
-            <div className="mb-2 flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 backdrop-blur">
-                <Icon name="warehouse-alt" size={16} />
-              </div>
-              <span className="text-xs font-semibold tracking-[0.25em] text-white/80">
-                GUDANG<span className="text-white">HUB</span>
-              </span>
-            </div>
-          </Reveal>
+    <section
+      id="tim"
+      aria-labelledby="tim-title"
+      className="relative w-full overflow-hidden bg-white py-12 md:py-24 dark:bg-background"
+    >
+      <div>
+        <svg
+          className="absolute right-0 bottom-0 text-neutral-200 dark:text-neutral-800"
+          fill="none"
+          height="154"
+          viewBox="0 0 460 154"
+          width="460"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <g clipPath="url(#clip0_494_1104)">
+            <path
+              d="M-87.463 458.432C-102.118 348.092 -77.3418 238.841 -15.0744 188.274C57.4129 129.408 180.708 150.071 351.748 341.128C278.246 -374.233 633.954 380.602 548.123 42.7707"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="40"
+            />
+          </g>
+          <defs>
+            <clipPath id="clip0_494_1104">
+              <rect fill="white" height="154" width="460" />
+            </clipPath>
+          </defs>
+        </svg>
+      </div>
 
-          <Reveal delay="1">
-            <h2
-              className="text-3xl font-bold tracking-tight text-white sm:text-4xl md:text-5xl"
-              id="tim-title"
+      <div className="relative z-10 mx-auto max-w-7xl">
+        <div className="mx-auto mb-16 flex max-w-5xl flex-col items-center px-6 text-center lg:px-0">
+          <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600 text-white">
+            <Icon name="users" size={24} />
+          </div>
+
+          <h1
+            id="tim-title"
+            className="relative mb-4 text-4xl font-medium tracking-tight text-neutral-900 sm:text-5xl dark:text-neutral-100"
+          >
+            Tim GudangHub
+            <svg
+              className="absolute -top-2 -right-8 -z-10 w-24 text-neutral-200 dark:text-neutral-700"
+              fill="currentColor"
+              height="86"
+              viewBox="0 0 108 86"
+              width="108"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              TIM
-              <br />
-              <span className="text-white/60">BALIK LAYAR</span>
-            </h2>
-          </Reveal>
-
-          <Reveal delay="2">
-            <div className="mt-3 flex flex-wrap items-center justify-center gap-4 text-[11px] text-white/50 sm:text-xs">
-              <div className="flex flex-col items-center gap-0.5">
-                <span className="font-semibold text-amber-400/80">Visi</span>
-                <span>Satu Gudang, Empat Cabang, Satu Tujuan</span>
-              </div>
-              <div className="h-5 w-px bg-white/20" />
-              <div className="flex flex-col items-center gap-0.5">
-                <span className="font-semibold text-amber-400/80">Misi</span>
-                <span>Melayani NTT dengan Sepenuh Hati</span>
-              </div>
-            </div>
-          </Reveal>
-
-          <Reveal delay="3">
-            <div className="mt-4 h-[72px] max-w-xl md:h-[64px]">
-              <p
-                className="mx-auto text-sm leading-relaxed sm:text-base md:text-lg"
-                style={{ color }}
-              >
-                {text}
-                <span
-                  className="ml-0.5 inline-block w-[2px] align-middle"
-                  style={{
-                    height: '1.1em',
-                    backgroundColor: color,
-                    opacity: 1,
-                    animation: 'blink 0.7s step-end infinite',
-                  }}
-                />
-              </p>
-              <p
-                className="mt-1.5 text-[11px] font-semibold tracking-widest uppercase sm:text-xs"
-                style={{ color, opacity: 0.7 }}
-              >
-                — {author}
-              </p>
-            </div>
-          </Reveal>
+              <path
+                d="M38.8484 16.236L15 43.5793L78.2688 15L18.1218 71L93 34.1172L70.2047 65.2739"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="28"
+              />
+            </svg>
+          </h1>
+          <p className="max-w-2xl text-neutral-600 dark:text-neutral-400">
+            Satu gudang, empat cabang, satu tujuan — melayani NTT dengan sepenuh hati.
+          </p>
         </div>
-      </ImageStreamHero>
+
+        <div className="relative w-full">
+          <div className="pointer-events-none absolute top-0 left-0 z-10 h-full w-32 bg-gradient-to-r from-white to-transparent dark:from-background" />
+          <div className="pointer-events-none absolute top-0 right-0 z-10 h-full w-32 bg-gradient-to-l from-white to-transparent dark:from-background" />
+
+          <div className="flex w-max animate-marquee hover:[animation-play-state:paused]">
+            {[...TIM_MEMBERS, ...TIM_MEMBERS].map((member, i) => (
+              <div className="group w-64 shrink-0 pr-6" key={`${member.nama}-${i}`}>
+                <div className="relative h-[23rem] w-full overflow-hidden rounded-2xl bg-neutral-100 dark:bg-neutral-800">
+                  <img
+                    alt={member.nama}
+                    className="h-full w-full object-cover grayscale transition-all duration-300 hover:grayscale-0"
+                    decoding="async"
+                    loading="lazy"
+                    src={member.foto}
+                  />
+                  <div className="absolute bottom-0 w-full rounded-lg bg-neutral-100/85 p-2 dark:bg-neutral-800/80">
+                    <h3 className="font-semibold text-neutral-900 dark:text-neutral-100">
+                      {member.nama}
+                    </h3>
+                    <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                      {member.jabatan}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="mx-auto mt-20 max-w-3xl px-6 text-center lg:px-0">
+          <p className="mb-8 text-lg font-medium leading-relaxed text-neutral-900 md:text-xl dark:text-neutral-100">
+            &ldquo;{lead.caption}&rdquo;
+          </p>
+          <div className="flex flex-col items-center gap-3">
+            <div className="relative h-14 w-14 overflow-hidden rounded-full">
+              <img
+                alt={lead.nama}
+                className="h-full w-full object-cover"
+                decoding="async"
+                loading="lazy"
+                src={lead.foto}
+              />
+            </div>
+            <div className="text-center">
+              <p className="font-semibold text-neutral-900 dark:text-neutral-100">{lead.nama}</p>
+              <p className="text-sm text-neutral-600 dark:text-neutral-400">{lead.jabatan}</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
   );
 }
