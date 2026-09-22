@@ -21,6 +21,9 @@ interface PickerItemData {
   value: string;
   locked: boolean;
   history: { value: string; time: string; action: string }[];
+  /** true = user pernah mengetik di input ini. Nilai kosong setelahnya berarti "sedang dikosongkan",
+   *  bukan "belum diisi" — jadi jangan disinkron ulang dari server dan jangan dikunci otomatis. */
+  touched?: boolean;
 }
 
 function loadPickerData(): Record<string, PickerItemData> {
@@ -102,6 +105,7 @@ export default function Picker() {
         [key]: {
           value,
           locked: true,
+          touched: true,
           history: [...data.history, { value, time: `${dateStr} ${timeStr}`, action }],
         },
       };
@@ -254,10 +258,11 @@ export default function Picker() {
       const qtyOrder = toIntNum(item.QTY);
       const serverPicker =
         item.STOK_PICKER !== undefined && item.STOK_PICKER !== '' ? String(item.STOK_PICKER) : '';
-      let currentValue = itemData.value !== '' ? itemData.value : serverPicker;
-      let isLocked = itemData.locked || (serverPicker !== '' && itemData.value === '');
+      const bolehSinkron = !itemData.touched;
+      let currentValue = itemData.value !== '' ? itemData.value : bolehSinkron ? serverPicker : '';
+      let isLocked = itemData.locked || (bolehSinkron && serverPicker !== '' && itemData.value === '');
 
-      if (itemData.value === '' && serverPicker !== '') {
+      if (bolehSinkron && itemData.value === '' && serverPicker !== '') {
         const key = `${orderId}_${idx}`;
         const history =
           itemData.history.length === 0
@@ -686,7 +691,7 @@ export default function Picker() {
                                   if (data) {
                                     savePickerData({
                                       ...pickerDataRef.current,
-                                      [key]: { ...data, value: e.target.value },
+                                      [key]: { ...data, value: e.target.value, touched: true },
                                     });
                                   }
                                 }}
