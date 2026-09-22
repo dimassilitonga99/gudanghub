@@ -115,6 +115,11 @@ export default function ItemManagement() {
   const [showModal, setShowModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [existingGambar, setExistingGambar] = useState('');
+  const [importOpen, setImportOpen] = useState(false);
+  const [importBusy, setImportBusy] = useState(false);
+  const [importRows, setImportRows] = useState<Record<string, unknown>[] | null>(null);
+  const [importName, setImportName] = useState('');
+  const [importSkipped, setImportSkipped] = useState<string[]>([]);
 
   const [form, setForm] = useState<ItemForm>({
     KODE_BARANG: '',
@@ -323,6 +328,109 @@ export default function ItemManagement() {
     }
   };
 
+  /* ── IMPORT EXCEL ───────────────────────────────────────────────────
+     Excel hanya mengubah KODE, NAMA, KATEGORI, SATUAN, HARGA, STOK.
+     Stok gudang, stok toko, deskripsi & gambar tetap dikelola fitur lain. */
+
+  const EXCEL_HEADERS = ['KODE', 'NAMA', 'KATEGORI', 'SATUAN', 'HARGA', 'STOK'];
+
+  const HEADER_MAP: Record<string, string> = {
+    KODE: 'kode', KODEBARANG: 'kode',
+    NAMA: 'nama', NAMABARANG: 'nama',
+    KATEGORI: 'kategori',
+    SATUAN: 'satuan',
+    HARGA: 'harga',
+    STOK: 'stok', STOKSISTEM: 'stok',
+  };
+
+  // Template = data katalog saat ini (biar tinggal diedit, bukan ketik ulang).
+  const downloadTemplate = async () => {
+    const XLSX = await import('xlsx');
+    const rows = items.length
+      ? items.map((it) => ({
+          KODE: it.KODE_BARANG,
+          NAMA: it.NAMA_BARANG,
+          KATEGORI: it.KATEGORI || '',
+          SATUAN: it.SATUAN || 'PCS',
+          HARGA: Number(it.HARGA) || 0,
+          STOK: Number(it.STOK) || 0,
+        }))
+      : [{ KODE: 'NN00001', NAMA: 'CONTOH NAMA BARANG', KATEGORI: 'PLASTIK', SATUAN: 'PCS', HARGA: 10000, STOK: 0 }];
+    const ws = XLSX.utils.json_to_sheet(rows, { header: EXCEL_HEADERS });
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'barang');
+    XLSX.writeFile(wb, `template-barang-${new Date().toISOString().slice(0, 10)}.xlsx`);
+    toastSuccess(`Template Excel diunduh (${rows.length} baris).`);
+  };
+
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setImportName(file.name);
+    setImportRows(null);
+    setImportSkipped([]);
+    try {
+      const XLSX = await import('xlsx');
+      const wb = XLSX.read(new Uint8Array(await file.arrayBuffer()), { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const raw = XLSX.utils.sheet_to_json<Record<string, unknown>>(ws, { defval: '' });
+      const rows: Record<string, unknown>[] = [];
+      const skipped: string[] = [];
+      raw.forEach((r, i) => {
+        const out: Record<string, unknown> = {};
+        for (const [k, v] of Object.entries(r)) {
+          const key = HEADER_MAP[String(k).toUpperCase().replace(/[^A-Z0-9]/g, '')];
+          if (key) out[key] = typeof v === 'string' ? v.trim() : v;
+        }
+        const kode = String(out.kode ?? '').trim().toUpperCase();
+        const nama = String(out.nama ?? '').trim();
+        if (!kode || !nama) {
+          skipped.push(`Baris ${i + 2}`);
+          return;
+        }
+        rows.push({
+          kode,
+          nama,
+          kategori: String(out.kategori ?? '').trim(),
+          satuan: String(out.satuan ?? '').trim() || 'PCS',
+          harga: Number(out.harga) || 0,
+          stok: parseInt(String(out.stok ?? '')) || 0,
+        });
+      });
+      if (!rows.length) {
+        toast.error('Tidak ada baris valid — pastikan kolom KODE dan NAMA terisi.');
+        return;
+      }
+      setImportRows(rows);
+      setImportSkipped(skipped);
+    } catch (err) {
+      toast.error('Gagal membaca file Excel: ' + (err as Error).message);
+    }
+  };
+
+  const runImport = async () => {
+    if (!importRows?.length) return;
+    setImportBusy(true);
+    try {
+      const res = await katalog.importRows(importRows);
+      if (res.status !== 'ok') {
+        toast.error(res.message || 'Gagal impor');
+        return;
+      }
+      toastSuccess(res.message || 'Impor selesai');
+      await katalog.refresh().catch(() => undefined);
+      await loadItems();
+      setImportOpen(false);
+      setImportRows(null);
+      setImportName('');
+    } catch (err) {
+      toast.error('Error impor: ' + (err as Error).message);
+    } finally {
+      setImportBusy(false);
+    }
+  };
+
   if (!session || session.role !== 'admin') {
     return (
       <div className="min-h-dvh flex items-center justify-center">
@@ -343,10 +451,28 @@ export default function ItemManagement() {
             <h1 className="text-3xl font-bold tracking-tight">Kelola Item</h1>
             <p className="text-muted-foreground mt-2">Manajemen item/barang, harga, stok, dan gambar</p>
           </div>
-          <Button onClick={() => { resetForm(); setShowModal(true); }}>
-            <Icon name="plus-circle" size={18} className="mr-2" />
-            Tambah Item Baru
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="outline" onClick={() => void downloadTemplate()}>
+              <Icon name="download" size={18} className="mr-2" />
+              Template Excel
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setImportRows(null);
+                setImportSkipped([]);
+                setImportName('');
+                setImportOpen(true);
+              }}
+            >
+              <Icon name="upload" size={18} className="mr-2" />
+              Import Excel
+            </Button>
+            <Button onClick={() => { resetForm(); setShowModal(true); }}>
+              <Icon name="plus-circle" size={18} className="mr-2" />
+              Tambah Item Baru
+            </Button>
+          </div>
         </div>
 
         <div className="mb-6 flex gap-3">
@@ -622,6 +748,81 @@ export default function ItemManagement() {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={importOpen} onOpenChange={(v) => !importBusy && setImportOpen(v)}>
+        <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Icon name="file-spreadsheet" size={18} />
+              Import Excel — Update Database Barang
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="flex items-start gap-2 rounded-lg border border-warning/30 bg-warning/10 p-3 text-xs text-warning">
+              <Icon name="triangle-warning" size={16} className="mt-0.5 shrink-0" />
+              <div>
+                Excel hanya mengubah <b>kode, nama, kategori, satuan, harga, dan stok sistem</b>.
+                Stok gudang, stok toko, deskripsi, dan gambar tidak ikut berubah. Kode yang sama
+                ditimpa, kode baru ditambahkan. Sel <b>STOK</b> yang dikosongkan dianggap <b>0</b>.
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" size="sm" onClick={() => void downloadTemplate()}>
+                <Icon name="download" size={16} className="mr-2" /> Download Template
+              </Button>
+              <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
+                <Icon name="upload" size={16} />
+                Pilih File Excel
+                <input
+                  type="file"
+                  accept=".xlsx,.xls,.csv"
+                  onChange={handleImportFile}
+                  className="hidden"
+                />
+              </label>
+            </div>
+
+            {importName && (
+              <div className="text-sm">
+                File: <b className="break-all">{importName}</b>
+              </div>
+            )}
+
+            {importRows && (
+              <div className="space-y-1 rounded-lg border border-border bg-muted/40 p-3 text-sm">
+                <div>
+                  <b>{importRows.length}</b> baris siap diimpor.
+                </div>
+                {importSkipped.length > 0 && (
+                  <div className="text-xs text-warning">
+                    {importSkipped.length} baris dilewati (kode/nama kosong):{' '}
+                    {importSkipped.slice(0, 5).join(', ')}
+                    {importSkipped.length > 5 ? '…' : ''}
+                  </div>
+                )}
+                <div className="text-xs text-muted-foreground">
+                  Contoh: {String(importRows[0].kode)} — {String(importRows[0].nama)}
+                </div>
+              </div>
+            )}
+
+            <Button
+              className="w-full"
+              disabled={!importRows?.length || importBusy}
+              onClick={() => void runImport()}
+            >
+              {importBusy ? (
+                <Icon name="loader" size={18} className="mr-2 animate-spin" />
+              ) : (
+                <Icon name="upload" size={16} className="mr-2" />
+              )}
+              {importBusy ? 'Mengimpor...' : `Import ${importRows?.length || 0} Baris`}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

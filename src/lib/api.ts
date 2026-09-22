@@ -585,6 +585,15 @@ export const katalog = {
   getGambar(kode: string): Promise<ApiResult> {
     return callApi('getGambar', { kode }, { dedupe: false, cache: false, timeout: 30000 });
   },
+  // Import XLSX: bulk upsert nama/kategori/satuan/harga (stok tidak disentuh).
+  importRows(rows: Record<string, unknown>[]): Promise<ApiResult> {
+    return callApi('importBarang', { rows }, {
+      dedupe: false,
+      cache: false,
+      timeout: 180000,
+      maxRetries: 0,
+    });
+  },
 };
 
 export const cabang = {
