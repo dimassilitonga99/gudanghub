@@ -120,6 +120,7 @@ export default function ItemManagement() {
   const [importRows, setImportRows] = useState<Record<string, unknown>[] | null>(null);
   const [importName, setImportName] = useState('');
   const [importSkipped, setImportSkipped] = useState<string[]>([]);
+  const [importDup, setImportDup] = useState(0);
 
   const [form, setForm] = useState<ItemForm>({
     KODE_BARANG: '',
@@ -402,8 +403,13 @@ export default function ItemManagement() {
         toast.error('Tidak ada baris valid — pastikan kolom KODE dan NAMA terisi.');
         return;
       }
-      setImportRows(rows);
+      // Kode duplikat: pakai baris terakhir (server menolak upsert ganda).
+      const byKode = new Map<string, Record<string, unknown>>();
+      for (const r of rows) byKode.set(String(r.kode), r);
+      const uniq = [...byKode.values()];
+      setImportRows(uniq);
       setImportSkipped(skipped);
+      setImportDup(rows.length - uniq.length);
     } catch (err) {
       toast.error('Gagal membaca file Excel: ' + (err as Error).message);
     }
@@ -424,6 +430,7 @@ export default function ItemManagement() {
       setImportOpen(false);
       setImportRows(null);
       setImportName('');
+      setImportDup(0);
     } catch (err) {
       toast.error('Error impor: ' + (err as Error).message);
     } finally {
@@ -461,6 +468,7 @@ export default function ItemManagement() {
               onClick={() => {
                 setImportRows(null);
                 setImportSkipped([]);
+                setImportDup(0);
                 setImportName('');
                 setImportOpen(true);
               }}
@@ -797,6 +805,11 @@ export default function ItemManagement() {
                 <div>
                   <b>{importRows.length}</b> baris siap diimpor.
                 </div>
+                {importDup > 0 && (
+                  <div className="text-xs text-warning">
+                    {importDup} baris kode duplikat — dipakai baris terakhir.
+                  </div>
+                )}
                 {importSkipped.length > 0 && (
                   <div className="text-xs text-warning">
                     {importSkipped.length} baris dilewati (kode/nama kosong):{' '}
