@@ -13,8 +13,8 @@ const call = (action, payload) => {
   });
 };
 
-const lgA = await call('login', { username: 'admin', password: 'gudang2025', token: '' });
-const lgC = await call('login', { username: 'cb001', password: 'gudang2025', token: '' });
+const lgA = await call('login', { username: 'admin', password: process.env.TEST_PASSWORD, token: '' });
+const lgC = await call('login', { username: 'cb001', password: process.env.TEST_PASSWORD, token: '' });
 console.log('login admin/cabang:', lgA.status, lgC.status);
 const T = lgC.token, TA = lgA.token;
 
@@ -32,7 +32,7 @@ const listEm = async () => {
 let refreshTok = null;
 const access = async () => {
   const r = await fetch(V5 + '/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username: 'admin', password: 'gudang2025' }) });
+    body: JSON.stringify({ username: 'admin', password: process.env.TEST_PASSWORD }) });
   return (await r.json()).access_token;
 };
 

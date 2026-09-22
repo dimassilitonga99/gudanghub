@@ -24,8 +24,8 @@ page.on('response', async (res) => {
 page.on('console', (m) => { if (m.type() === 'error') console.log('CONSOLE-ERR:', m.text().slice(0, 140)); });
 
 await page.goto(BASE + '/login', { waitUntil: 'networkidle' });
-await page.locator('input').first().fill('cb001');
-await page.locator('input[type=password]').fill('gudang2025');
+await page.locator('input').first().fill(process.env.TEST_USER || 'cb001');
+await page.locator('input[type=password]').fill(process.env.TEST_PASSWORD);
 await page.keyboard.press('Enter');
 await page.waitForTimeout(2500);
 console.log('URL setelah login:', page.url());

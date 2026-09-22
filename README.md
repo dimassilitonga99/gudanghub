@@ -1,175 +1,137 @@
-# 🏪 GudangHub v3.0
+# GudangHub
 
-Sistem operasional cerdas untuk order barang antar cabang **PT Central Perabot Utama** — NTT.
+Aplikasi operasional **PT Central Perabot Utama (Toko Nasional Kitchen — NTT)** untuk mengelola
+order barang antar cabang: katalog, keranjang, pengajuan order, persetujuan admin, pengambilan
+barang di gudang, sampai laporan.
 
----
-
-## ✨ Fitur
-
-- 📊 **Dashboard Admin** — Kelola order, edit item, approve/reject
-- 🛒 **Order Cabang** — Katalog + Cart + Order Massal
-- 📱 **PWA** — Bisa di-install di HP seperti aplikasi native
-- 📈 **Laporan** — Rekap per cabang, bisa print/export
-- 🔔 **Notifikasi** — Update real-time
-- 👤 **Profil** — Info user + activity log
-- ⚙️ **Settings** — Kelola user, cabang, master barang
+Dipakai oleh **1 admin pusat**, **4 cabang** (CB001–CB004), dan **picker gudang**.
 
 ---
 
-## 🚀 Cara Setup (Pertama Kali)
+## Peran & hak akses
 
-### 1. Install Node.js
-Download dari: <https://nodejs.org> (pilih **LTS**)
+| Peran | Bisa apa | Cakupan data |
+|---|---|---|
+| `admin` | Setujui/tolak order, edit item order, kelola master barang (tambah/edit/hapus/impor XLSX), lihat & requeue email, reset order | Semua cabang |
+| `cabang` | Lihat katalog, susun keranjang, kirim order, isi stok otomatis, catat ambil barang dari gudang, lihat riwayat & laporan | **Hanya cabangnya sendiri** |
+| `picker` | Verifikasi/tandai order sudah diambil | **Hanya cabangnya sendiri** |
 
-Cek instalasi:
-\`\`\`bash
-node --version
-npm --version
-\`\`\`
-
-### 2. Install Dependencies
-Buka terminal di folder project, lalu:
-\`\`\`bash
-npm install
-\`\`\`
-
-### 3. Jalankan Development Server
-\`\`\`bash
-npm run dev
-\`\`\`
-
-Buka browser: <http://localhost:5173>
-
-Anda juga bisa akses dari HP dengan IP komputer, misal:
-`http://192.168.1.10:5173`
-
-### 4. Build untuk Production
-\`\`\`bash
-npm run build
-\`\`\`
-
-File hasil build ada di folder `dist/`.
-
-### 5. Deploy ke GitHub Pages
-\`\`\`bash
-npm run deploy
-\`\`\`
-
-Otomatis push ke branch `gh-pages`. Setelah itu di GitHub repo:
-1. Buka **Settings > Pages**
-2. Source: **Deploy from a branch**
-3. Branch: **gh-pages** / root
-4. Save
+Reset order (menghapus order satu cabang) hanya bisa dilakukan dengan **password admin**, dan
+untuk peran `cabang` hanya menghapus order cabangnya sendiri.
 
 ---
 
-## 📂 Struktur Folder
+## Fitur
 
-\`\`\`
+- **Katalog barang** — ±5.000 item, pencarian & filter kategori, paginasi.
+- **Order cabang** — keranjang, isi stok otomatis dari stok sistem, order massal, cetak form order.
+- **Dashboard admin** — daftar order masuk, setujui/tolak, edit item (ubah qty/harga, hapus item).
+- **Picker gudang** — tandai order sudah diambil.
+- **Ambil barang dari gudang** (`store takes`) — catat pengambilan per batch, per cabang.
+- **Master barang** — CRUD + **impor massal dari XLSX** (upsert berdasarkan `kode`) + unduh template.
+- **Laporan** — rekap order per cabang, siap cetak.
+- **Notifikasi email** — order baru ke admin, perubahan status ke cabang.
+- **PWA** — bisa dipasang di HP, dengan dukungan offline untuk aset statis.
+
+---
+
+## Arsitektur
+
+```
+Browser (React PWA)
+   │  Cloudflare Pages  →  https://gudanghub.pages.dev
+   │
+   ├─► Cloudflare Worker (adapter)  →  gudanghub-api-proxy.silitongadimas.workers.dev
+   │        · menerjemahkan action lama → REST v5
+   │        · cache KV, gzip, simpan gambar ke R2 (/img/<key>)
+   │
+   └─► Vercel API (Hono)  →  gudanghub-api.vercel.app/api
+            · autentikasi JWT, otorisasi per peran, validasi
+            · Neon Postgres (barang, orders, order_items, users, cabang, store_takes, emails)
+```
+
+- **Frontend** (repo ini): React 19 + TypeScript + Vite + Tailwind, PWA.
+- **Backend**: Hono di Vercel Functions, Postgres (Neon), email lewat Resend.
+  Repo terpisah dan **privat**.
+- **Gambar barang**: Cloudflare R2, disajikan lewat worker.
+
+---
+
+## Struktur folder
+
+```
 gudanghub/
-├── index.html              # Landing page
-├── login.html
-├── dashboard.html          # Admin
-├── order.html              # Cabang
-├── ganti-password.html
-├── laporan.html            # Laporan (bisa print)
-├── profil.html             # Profil user
-├── notifikasi.html         # Notifikasi
-├── settings.html           # Settings admin
-├── manifest.json           # PWA manifest
-├── sw.js                   # Service Worker
-│
 ├── src/
-│   ├── styles/             # CSS modular
-│   │   ├── tokens.css      # Colors, fonts, spacing
-│   │   ├── base.css        # Reset + typography
-│   │   ├── components.css  # Reusable UI
-│   │   ├── utilities.css   # Utility classes
-│   │   └── main.css        # Entry CSS
-│   │
-│   └── js/
-│       ├── config.js       # API URL, constants
-│       ├── api.js          # API wrapper
-│       ├── session.js      # Session management
-│       ├── ui.js           # Toast, modal, confirm
-│       ├── utils.js        # Helpers
-│       ├── router.js       # Client router
-│       ├── pwa.js          # PWA install
-│       └── pages/          # Per-page logic
-│
-├── public/                 # Static assets
-│   ├── favicon.ico
-│   └── icons/              # PWA icons
-│
-└── AppScript.gs            # Backend (deploy ke Google)
-\`\`\`
+│   ├── pages/           # Halaman: Landing, Login, Order, Dashboard, ItemManagement, Picker, ...
+│   ├── components/      # Komponen UI + komponen bersama (print-form, store-take, ItemPhoto)
+│   │   └── ui/          # Primitif UI (button, dialog, sheet, table, ...)
+│   ├── lib/             # api.ts (klien API), session.ts, config.ts, dialog, toast, pwa
+│   ├── context/         # AuthContext
+│   ├── styles/          # tokens.css, base.css, components.css
+│   └── js/              # Kode aplikasi versi lama (v3, vanilla JS) — dipertahankan sebagai arsip
+├── public/              # Aset statis yang ikut ter-deploy (favicon, ikon PWA, gambar, demo)
+├── tools/               # Perkakas internal, TIDAK ikut ter-deploy
+├── test/                # Skrip uji manual (Playwright / fetch) — kredensial dari environment
+├── sw.js                # Service worker (disalin ke dist saat build)
+└── vite.config.ts
+```
+
+> Apa pun yang ada di `public/` akan **terbaca publik di internet**. Jangan pernah menaruh
+> catatan internal, dokumen, atau berkas sensitif di sana.
 
 ---
 
-## 🔧 Konfigurasi
+## Menjalankan lokal
 
-### Ganti API URL
-Edit `src/js/config.js`:
-\`\`\`javascript
-export const API_URL = 'https://script.google.com/macros/s/YOUR_ID/exec';
-\`\`\`
+```bash
+npm install
+npm run dev          # http://localhost:5173
+npm run build        # hasil di dist/
+npm run preview      # cek hasil build
+```
 
-### Ganti Base Path (Github Pages)
-Edit `vite.config.js`:
-\`\`\`javascript
-base: process.env.NODE_ENV === 'production' ? '/NAMA_REPO_ANDA/' : '/',
-\`\`\`
+Butuh Node.js LTS.
 
 ---
 
-## 👥 Default Login
+## Deploy
 
-| Username | Password    | Role   | Cabang |
-|----------|-------------|--------|--------|
-| admin    | gudang2025  | admin  | -      |
-| cb001    | arfa2025    | cabang | CB001  |
-| cb002    | akmal2025   | cabang | CB002  |
-| cb003    | shally2025  | cabang | CB003  |
-| cb004    | fajar2025   | cabang | CB004  |
+Frontend memakai **Cloudflare Pages** (bukan GitHub Pages):
 
-**⚠️ Ganti password default setelah login pertama!**
-
----
-
-## 📱 Install PWA di HP
-
-1. Buka website di **Chrome / Safari HP**
-2. Tap menu **⋮** (3 titik)
-3. Pilih **"Add to Home Screen"** / **"Install App"**
-4. Icon GudangHub muncul di home screen
-
----
-
-## 🛠️ Development Workflow
-
-\`\`\`bash
-# Development (live reload)
-npm run dev
-
-# Build production
+```bash
 npm run build
+npx wrangler pages deploy dist --project-name=gudanghub --commit-dirty=true
+```
 
-# Preview build hasilnya
-npm run preview
-
-# Deploy ke GitHub Pages
-npm run deploy
-\`\`\`
+`base` di `vite.config.ts` tetap `'/'` karena di-serve dari root domain.
 
 ---
 
-## 📞 Support
+## Uji otomatis
+
+Skrip di `test/` tidak menyimpan kredensial apa pun. Isi lewat environment variable:
+
+```powershell
+$env:TEST_USER = "admin"
+$env:TEST_PASSWORD = "<password akun uji>"
+node test/smoke-v5.mjs
+```
+
+---
+
+## Keamanan
+
+- Kredensial **tidak boleh** ditulis di dalam kode atau dokumen. `.env` sudah di-`.gitignore`.
+- Setiap kali password pernah bocor (mis. ter-commit), **wajib dirotasi** — mengganti isi file
+  saja tidak menghapusnya dari riwayat Git.
+- Password disimpan sebagai hash `scrypt` (bukan teks biasa), dan login dibatasi percobaannya.
+- Data cabang difilter di backend berdasarkan cabang milik token — bukan hanya disembunyikan di UI.
+
+---
+
+## Kontak
 
 - **Admin Gudang:** silitongadimas@gmail.com
-- **Repo:** [GitHub Repository]
-
----
-
-## 📄 License
+- **Repositori:** privat
 
 © 2025 PT Central Perabot Utama — NTT

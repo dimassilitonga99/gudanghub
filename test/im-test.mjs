@@ -23,8 +23,8 @@ try {
   await page.screenshot({ path: 'test/shots/01-login.png' });
 
   await step(2, 'Login admin');
-  await page.locator('input').first().fill('admin');
-  await page.locator('input[type=password]').fill('gudang2025');
+  await page.locator('input').first().fill(process.env.TEST_USER || 'admin');
+  await page.locator('input[type=password]').fill(process.env.TEST_PASSWORD);
   await page.locator('button[type=submit], button:has-text("Masuk")').first().click();
   await page.waitForURL('**/dashboard', { timeout: 60000 });
   await page.waitForLoadState('networkidle');

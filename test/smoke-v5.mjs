@@ -23,7 +23,7 @@ function call(action, payload) {
 
 (async () => {
   // 1. login
-  const login = await call('login', { username: 'admin', password: 'gudang2025', token: '' });
+  const login = await call('login', { username: 'admin', password: process.env.TEST_PASSWORD, token: '' });
   check('login', login.status === 'ok', login.user?.username);
   const T = login.token;
 

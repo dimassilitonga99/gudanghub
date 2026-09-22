@@ -7,10 +7,10 @@ const call = (action, payload) => {
   return fetch(W, { method: 'POST', body: fd }).then((r) => r.json());
 };
 
-const lgA = await call('login', { username: 'admin', password: 'gudang2025', token: '' });
-const lgC = await call('login', { username: 'cb001', password: 'gudang2025', token: '' });
+const lgA = await call('login', { username: 'admin', password: process.env.TEST_PASSWORD, token: '' });
+const lgC = await call('login', { username: 'cb001', password: process.env.TEST_PASSWORD, token: '' });
 const aTok = await fetch(V5 + '/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ username: 'admin', password: 'gudang2025' }) }).then((r) => r.json()).then((j) => j.access_token);
+  body: JSON.stringify({ username: 'admin', password: process.env.TEST_PASSWORD }) }).then((r) => r.json()).then((j) => j.access_token);
 
 const t0 = Date.now();
 const sub = await call('submitOrder', { token: lgC.token, idCabang: 'CB001', catatan: 'tes-latensi',
