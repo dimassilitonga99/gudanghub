@@ -544,6 +544,8 @@ function CartSheet({
   onSetNote,
   onSetStock,
   onDelete,
+  onClear,
+  onAutoFill,
   onSubmit,
   submitting,
 }: {
@@ -556,6 +558,8 @@ function CartSheet({
   onSetNote: (key: string, note: string) => void;
   onSetStock: (key: string, type: 'gudang' | 'toko', value: number | '') => void;
   onDelete: (key: string) => void;
+  onClear: () => void;
+  onAutoFill: () => void;
   onSubmit: (note: string) => void;
   submitting: boolean;
 }) {
@@ -605,6 +609,23 @@ function CartSheet({
             <Icon name="circle-xmark" size={16} />
           </Button>
         </header>
+
+        {items.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2 border-b border-border px-4 py-2">
+            <Button variant="outline" size="sm" className="h-8" onClick={onAutoFill}>
+              <Icon name="bolt" size={14} /> Isi Stok Otomatis
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 text-danger hover:text-danger"
+              onClick={onClear}
+            >
+              <Icon name="trash" size={14} /> Hapus Semua
+            </Button>
+            <span className="ml-auto text-[11px] text-muted-foreground">{items.length} barang</span>
+          </div>
+        )}
 
         <div className="min-h-0 flex-1 space-y-2 overflow-y-auto p-4">
           {items.length === 0 ? (
@@ -2111,6 +2132,48 @@ export default function Order() {
     toast.info('Dihapus dari keranjang.', { duration: 1500 });
   };
 
+  // Hapus/cancel SEMUA item di keranjang sekaligus (aksi destruktif → konfirmasi dulu).
+  const clearCart = async () => {
+    const ok = await confirm({
+      title: 'Hapus Semua Item?',
+      message: `Semua ${cartItems.length} barang di keranjang akan dihapus dan tidak bisa dikembalikan.`,
+      okText: 'Ya, Hapus Semua',
+      cancelText: 'Batal',
+      okVariant: 'destructive',
+    });
+    if (!ok) return;
+    persistCart({});
+    setCartOpen(false);
+    toast.info('Keranjang dikosongkan.', { duration: 2000 });
+  };
+
+  // Isi stok Gudang & Toko otomatis dari stok tersedia (STOK sistem katalog):
+  // Gudang = 0, Toko = stok sistem. Barang manual dilewati (stoknya diisi sendiri).
+  const autoFillCartStock = () => {
+    const next = { ...cartRef.current };
+    let filled = 0;
+    let skipped = 0;
+    for (const key of Object.keys(next)) {
+      const item = next[key];
+      const b = item.isManual ? undefined : productByCode[String(item.kode).trim().toUpperCase()];
+      if (!b) {
+        skipped++;
+        continue;
+      }
+      next[key] = { ...item, stokGudang: 0, stokToko: toInt(b.STOK) };
+      filled++;
+    }
+    if (filled === 0) {
+      toast.warning('Tidak ada barang katalog di keranjang yang bisa diisi otomatis.');
+      return;
+    }
+    persistCart(next);
+    toastSuccess(
+      `Stok otomatis terisi: ${filled} barang (Gudang 0, Toko = stok sistem).` +
+        (skipped ? ` ${skipped} barang manual dilewati.` : ''),
+    );
+  };
+
   const addManualToCart = (data: {
     nama: string;
     kode: string;
@@ -2440,6 +2503,8 @@ export default function Order() {
           onSetNote={setCartNote}
           onSetStock={setCartStock}
           onDelete={removeFromCart}
+          onClear={() => void clearCart()}
+          onAutoFill={autoFillCartStock}
           onSubmit={(note) => {
             const missing = cartItems.filter((i) => isEmpty(i.stokGudang) || isEmpty(i.stokToko)).length;
             if (missing > 0) {
