@@ -1,6 +1,7 @@
 import { Icon } from '../components/ui/icon';
 import { useGambar } from '@/components/ItemPhoto';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
 import { toastError, toastSuccess } from '@/lib/toast';
 
@@ -588,11 +589,11 @@ function CartSheet({
     setNoteOpen((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  return (
+  return createPortal(
     <>
-      <div className="fixed inset-0 z-50 bg-black/60" onClick={onClose} />
+      <div className="fixed inset-0 z-50 bg-black/60 md:left-60" onClick={onClose} />
       <section
-        className="fixed inset-x-0 bottom-0 z-50 flex max-h-[88dvh] flex-col rounded-t-2xl border-t border-border bg-background shadow-2xl"
+        className="fixed inset-x-0 bottom-0 z-50 flex max-h-[88dvh] flex-col rounded-t-2xl border-t border-border bg-background shadow-2xl md:left-60"
         aria-label="Keranjang order"
       >
         <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-muted" />
@@ -790,7 +791,8 @@ function CartSheet({
           </Button>
         </div>
       </section>
-    </>
+    </>,
+    document.body,
   );
 }
 
@@ -2412,8 +2414,8 @@ export default function Order() {
         </Tabs>
 
         {/* CART BAR */}
-        {cartItems.length > 0 && (
-          <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 p-3 backdrop-blur">
+        {cartItems.length > 0 && createPortal(
+          <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 p-3 backdrop-blur md:left-60">
             <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2">
               <Button onClick={() => setCartOpen(true)} className="flex-1 justify-between sm:flex-none">
                 <span className="flex items-center gap-2">
@@ -2424,7 +2426,8 @@ export default function Order() {
                 </span>
               </Button>
             </div>
-          </div>
+          </div>,
+          document.body,
         )}
 
         <CartSheet
