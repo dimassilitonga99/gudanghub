@@ -183,7 +183,7 @@ function TeamSection() {
     <section
       id="tim"
       aria-labelledby="tim-title"
-      className="relative w-full overflow-hidden bg-white py-12 md:py-24 dark:bg-background"
+      className="relative w-full overflow-hidden py-12 md:py-24"
     >
       <div className="relative z-10 mx-auto max-w-7xl">
         <div className="mx-auto mb-16 flex max-w-5xl flex-col items-center px-6 text-center lg:px-0">
@@ -209,10 +209,10 @@ function TeamSection() {
           <div className="flex w-max animate-marquee hover:[animation-play-state:paused]">
             {[...TIM_MEMBERS, ...TIM_MEMBERS].map((member, i) => (
               <div className="group w-64 shrink-0 pr-6" key={`${member.nama}-${i}`}>
-                <div className="relative h-[23rem] w-full overflow-hidden rounded-2xl bg-neutral-100 dark:bg-neutral-800">
+                <div className="relative h-[23rem] w-full overflow-hidden rounded-2xl">
                   <img
                     alt={member.nama}
-                    className="h-full w-full object-cover grayscale transition-all duration-300 hover:grayscale-0"
+                    className="h-full w-full object-cover"
                     decoding="async"
                     loading="lazy"
                     src={member.foto}
