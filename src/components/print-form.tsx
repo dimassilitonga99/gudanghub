@@ -13,8 +13,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-// Kertas 21×15,1 cm — 7 item/halaman agar form + tanda tangan tetap utuh
-export const PRINT_ITEMS_PER_PAGE = 7;
+// Kertas 21×15,1 cm — 5 item/halaman agar item panjang tidak merusak layout
+export const PRINT_ITEMS_PER_PAGE = 5;
 
 export interface PrintItem {
   kode: string;
@@ -131,7 +131,7 @@ function buildPage(
           boxSizing: 'border-box',
           padding: '4mm 5mm',
           margin: 0,
-          transform: 'translate(-50%, -50%) rotate(-90deg) scale(var(--fit, 1))',
+          transform: 'translate(-50%, -50%) rotate(-90deg)',
           transformOrigin: 'center center',
           background: '#fff',
           color: '#000',
@@ -306,23 +306,6 @@ export default function PrintFormModal({
     return () => window.removeEventListener('keydown', handler);
   }, [open]);
 
-  useEffect(() => {
-    if (!open) return;
-    const fitPages = () => {
-      pagesRef.current?.querySelectorAll<HTMLElement>('.print-page-admin').forEach((page) => {
-        const contentHeight = page.scrollHeight;
-        const scale = Math.min(570.7 / (page.offsetWidth || 570.7), 793.7 / Math.max(contentHeight, 793.7), 1);
-        page.style.setProperty('--fit', scale.toFixed(4));
-      });
-    };
-    const frame = window.requestAnimationFrame(fitPages);
-    const timer = window.setTimeout(fitPages, 200);
-    return () => {
-      window.cancelAnimationFrame(frame);
-      window.clearTimeout(timer);
-    };
-  }, [open, pages.length]);
-
   if (!open) return null;
 
   const doJpg = async () => {
@@ -404,12 +387,13 @@ export default function PrintFormModal({
     height: 21cm !important;
     max-width: none !important;
     min-height: 0 !important;
+    overflow: hidden !important;
     margin: 0 !important;
     padding: 4mm 5mm !important;
     box-sizing: border-box !important;
     box-shadow: none !important;
     background: #fff !important;
-    transform: translate(-50%, -50%) rotate(-90deg) scale(var(--fit, 1)) !important;
+    transform: translate(-50%, -50%) rotate(-90deg) !important;
     transform-origin: center center !important;
   }
   .print-kop-title {
@@ -490,15 +474,9 @@ export default function PrintFormModal({
 </style></head><body>${el.innerHTML}
 <script>
   window.addEventListener('load', function () {
-    var TARGET_W = 570.7; // 15.1cm in px
-    var TARGET_H = 793.7; // 21cm in px
+    // Ukuran form sudah ditetapkan 15.1×21 cm; tanpa transform scale agar struktur stabil.
     document.querySelectorAll('.print-page-admin').forEach(function (p) {
-      var w = p.offsetWidth || TARGET_W;
-      var h = p.scrollHeight || TARGET_H;
-      var s = Math.min(TARGET_W / w, TARGET_H / Math.max(h, TARGET_H), 1);
-      if (s < 0.999) {
-        p.style.setProperty('--fit', s.toFixed(4));
-      }
+      p.style.removeProperty('--fit');
     });
     setTimeout(function () {
       try { window.print(); } catch (e) {}
