@@ -61,6 +61,37 @@ interface CartItem {
   catatanItem?: string;
 }
 
+// Drag/swipe scroll horizontal: drag mouse di desktop (touch sudah native swipe).
+// Klik tetap jalan — hanya dibatalkan jika benar-benar di-drag (>8px).
+function useDragScrollX() {
+  const s = useRef({ down: false, moved: false, startX: 0, startScroll: 0 });
+  return {
+    onMouseDown: (e: React.MouseEvent<HTMLElement>) => {
+      if (e.button !== 0) return;
+      s.current = { down: true, moved: false, startX: e.clientX, startScroll: e.currentTarget.scrollLeft };
+    },
+    onMouseMove: (e: React.MouseEvent<HTMLElement>) => {
+      if (!s.current.down) return;
+      const dx = e.clientX - s.current.startX;
+      if (Math.abs(dx) > 8) s.current.moved = true;
+      e.currentTarget.scrollLeft = s.current.startScroll - dx;
+    },
+    onMouseUp: () => {
+      s.current.down = false;
+    },
+    onMouseLeave: () => {
+      s.current.down = false;
+    },
+    onClickCapture: (e: React.MouseEvent) => {
+      if (s.current.moved) {
+        e.preventDefault();
+        e.stopPropagation();
+        s.current.moved = false;
+      }
+    },
+  };
+}
+
 function cartStorageKey(username: string): string {
   const u = String(username || '').toLowerCase();
   return u ? `${CART_STORAGE_KEY}_${u}` : CART_STORAGE_KEY;
@@ -1939,6 +1970,7 @@ type OrderTab = 'katalog' | 'mass' | 'take' | 'history';
 export default function Order() {
   const { session } = useAuth();
   const { confirm, prompt, dialog } = useDialog();
+  const dragTabs = useDragScrollX();
   const username = session?.username || '';
   const branchId = String(session?.idCabang || '').trim().toUpperCase();
   const branchPic = session?.nama || (CABANG[branchId] ? CABANG[branchId].pic : '') || '-';
@@ -2413,7 +2445,7 @@ export default function Order() {
           setTab(v as OrderTab);
           window.location.hash = v;
         }}>
-          <TabsList className="w-full justify-start overflow-x-auto sm:w-auto">
+          <TabsList className="w-full justify-start overflow-x-auto sm:w-auto" {...dragTabs}>
             <TabsTrigger value="katalog">Katalog</TabsTrigger>
             <TabsTrigger value="mass">Order Massal</TabsTrigger>
             <TabsTrigger value="take">Ambil Barang</TabsTrigger>
@@ -2589,6 +2621,7 @@ function CatalogTabBody({
   onManualUpdate: (key: string, data: { nama: string; kategori: string; qty: number; satuan: string; stokGudang: number | ''; stokToko: number | '' }) => void;
   onManualDelete: (key: string) => void;
 }) {
+  const dragChips = useDragScrollX();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
   const [sortBy, setSortBy] = useState<'none' | 'nama' | 'kode'>('none');
@@ -2711,7 +2744,7 @@ function CatalogTabBody({
         })}
       </div>
 
-      <div className="flex gap-1.5 overflow-x-auto pb-1">
+      <div className="flex gap-1.5 overflow-x-auto pb-1" {...dragChips}>
         <button
           type="button"
           onClick={() => {
