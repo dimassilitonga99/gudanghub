@@ -325,18 +325,18 @@ export default function PrintFormModal({
 <style>
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   body { margin: 0; background: #fff; }
-  /* Kertas PORTRAIT 14,5×21 cm. Form TEGAK lurus (tanpa rotasi),
-     di-auto-fit proporsional (scale --fit) dan dicenter di lembar. */
+  /* Kertas PORTRAIT 14,5×21 cm, margin 0. Form TEGAK lurus (tanpa rotasi),
+     menempel penuh dari pojok kiri atas, auto-fit selebar kertas. */
   @page { size: 14.5cm 21cm; margin: 0; }
   .print-sheet {
     position: relative;
     width: 14.5cm;
-    height: 21cm;
-    overflow: hidden;
+    min-height: 21cm;
     background: #fff;
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: flex-start;
+    overflow: hidden;
     page-break-after: always;
     break-after: page;
   }
@@ -349,10 +349,10 @@ export default function PrintFormModal({
     min-height: 0 !important;
     max-width: none !important;
     margin: 0 !important;
-    padding: 4mm !important;
+    padding: 0 !important;
     box-shadow: none !important;
-    transform: scale(var(--fit, 0.69));
-    transform-origin: center center;
+    transform: scale(var(--fit, 0.6905));
+    transform-origin: top center;
   }
   @media print {
     .print-page-admin td, .print-page-admin th { padding: 3px 4px !important; }
@@ -363,13 +363,13 @@ export default function PrintFormModal({
   }
 </style></head><body>${el.innerHTML}
 <script>
-  // Auto-fit: form lebar 21cm (793.7px) diskalakan agar muat dalam
-  // lembar portrait 14,5×21 cm (548×793.7px), tetap lurus tanpa rotasi.
+  // Auto-fit: form lebar 21cm (793.7px) diskalakan persis selebar kertas
+  // 14,5cm (548px), menempel di atas, tanpa margin — tidak ada yang terpotong.
   window.addEventListener('load', function () {
     var W = 793.7, MAXW = 548, MAXH = 793.7;
     document.querySelectorAll('.print-page-admin').forEach(function (p) {
       var h = p.scrollHeight;
-      var s = Math.min(MAXW / W, MAXH / h, 1);
+      var s = Math.min(MAXW / W, MAXH / h);
       p.style.setProperty('--fit', s.toFixed(4));
     });
     setTimeout(function () {
