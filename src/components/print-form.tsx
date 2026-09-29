@@ -111,7 +111,7 @@ function buildPage(
       className="print-sheet"
       style={{
         width: '21cm',
-        height: '14cm',
+        height: '15.1cm',
         position: 'relative',
         overflow: 'hidden',
         background: '#fff',
@@ -126,7 +126,7 @@ function buildPage(
           position: 'absolute',
           top: '50%',
           left: '50%',
-          width: '14cm',
+          width: '15.1cm',
           height: '21cm',
           boxSizing: 'border-box',
           padding: '4mm 5mm',
@@ -346,24 +346,24 @@ export default function PrintFormModal({
     box-sizing: border-box !important;
   }
   @page {
-    size: 21cm 14cm;
+    size: 21cm 15.1cm;
     margin: 0;
   }
   html, body {
     margin: 0 !important;
     padding: 0 !important;
     width: 21cm !important;
-    height: 14cm !important;
+    height: 15.1cm !important;
     background: #fff !important;
     font-family: Arial, sans-serif !important;
   }
-  /* Lembar cetak tepat 21×14 cm, kertas tidak di-rotate */
+  /* Lembar cetak tepat 21×15.1 cm, kertas tidak di-rotate */
   .print-sheet {
     position: relative !important;
     width: 21cm !important;
-    height: 14cm !important;
-    min-height: 14cm !important;
-    max-height: 14cm !important;
+    height: 15.1cm !important;
+    min-height: 15.1cm !important;
+    max-height: 15.1cm !important;
     margin: 0 auto !important;
     padding: 0 !important;
     background: #fff !important;
@@ -378,12 +378,12 @@ export default function PrintFormModal({
     page-break-after: auto !important;
     break-after: auto !important;
   }
-  /* Hanya form order saja yang di-rotate 90 derajat ke kiri, auto-fit pas kertas */
+  /* Form order di-rotate 90 derajat ke kiri: lebar fisik 21cm, tinggi fisik 15.1cm */
   .print-page-admin {
     position: absolute !important;
     top: 50% !important;
     left: 50% !important;
-    width: 14cm !important;
+    width: 15.1cm !important;
     height: 21cm !important;
     max-width: none !important;
     min-height: 0 !important;
@@ -459,21 +459,21 @@ export default function PrintFormModal({
   @media print {
     html, body {
       width: 21cm !important;
-      height: 14cm !important;
+      height: 15.1cm !important;
       background: #fff !important;
       padding: 0 !important;
       margin: 0 !important;
     }
     .print-sheet {
       width: 21cm !important;
-      height: 14cm !important;
+      height: 15.1cm !important;
       box-shadow: none !important;
     }
   }
 </style></head><body>${el.innerHTML}
 <script>
   window.addEventListener('load', function () {
-    var TARGET_W = 529.1; // 14cm in px
+    var TARGET_W = 570.7; // 15.1cm in px
     var TARGET_H = 793.7; // 21cm in px
     document.querySelectorAll('.print-page-admin').forEach(function (p) {
       var w = p.scrollWidth || TARGET_W;
@@ -506,7 +506,7 @@ export default function PrintFormModal({
               {pages.length > 1 ? ` (${pages.length} halaman)` : ''}
             </DialogTitle>
             <p className="text-[11px] font-medium text-gray-500">
-              Kertas 21×14 cm · form di-rotate 90° ke kiri + auto-fit
+              Kertas 21×15,1 cm · form auto-fit (lebar fisik 21 cm, tinggi fisik 15,1 cm)
             </p>
           </div>
           <div className="flex gap-2">
