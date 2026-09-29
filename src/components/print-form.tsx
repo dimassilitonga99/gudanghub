@@ -325,50 +325,52 @@ export default function PrintFormModal({
 <style>
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   body { margin: 0; background: #fff; }
-  /* Preview di layar: form TEGAK (landscape 21×14,5), tanpa rotasi.
-     Rotasi 90° ke kiri hanya saat print. */
-  .print-sheet { width: 21cm; background: #fff; }
+  /* Kertas PORTRAIT 14,5×21 cm. Form TEGAK lurus (tanpa rotasi),
+     di-auto-fit proporsional (scale --fit) dan dicenter di lembar. */
+  @page { size: 14.5cm 21cm; margin: 0; }
+  .print-sheet {
+    position: relative;
+    width: 14.5cm;
+    height: 21cm;
+    overflow: hidden;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    page-break-after: always;
+    break-after: page;
+  }
+  .print-sheet:last-child { page-break-after: auto; break-after: auto; }
   .print-page-admin {
+    flex: 0 0 auto;
     box-sizing: border-box;
     width: 21cm !important;
-    min-height: 14.5cm !important;
     height: auto !important;
+    min-height: 0 !important;
     max-width: none !important;
     margin: 0 !important;
     padding: 4mm !important;
+    box-shadow: none !important;
+    transform: scale(var(--fit, 0.69));
+    transform-origin: center center;
   }
   @media print {
-    /* Lembar landscape 21×14,5 cm — form TEGAK lurus, tanpa rotasi.
-       Auto-fit: --fit mengecilkan form jika konten melebihi 14,5 cm. */
-    @page { size: 21cm 14.5cm; margin: 0; }
-    .print-sheet {
-      width: 21cm;
-      min-height: 14.5cm;
-      overflow: hidden;
-      page-break-after: always;
-      break-after: page;
-    }
-    .print-sheet:last-child { page-break-after: auto; break-after: auto; }
-    .print-page-admin {
-      box-shadow: none !important;
-      transform: scale(var(--fit, 1));
-      transform-origin: top center;
-    }
     .print-page-admin td, .print-page-admin th { padding: 3px 4px !important; }
   }
   @media screen {
     body { background: #52525b; padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
-    .print-sheet { box-shadow: 0 6px 24px rgba(0,0,0,.35); margin-bottom: 16px; }
+    .print-sheet { box-shadow: 0 6px 24px rgba(0,0,0,.35); }
   }
 </style></head><body>${el.innerHTML}
 <script>
-  // Auto-fit: kalau konten form lebih tinggi dari 14,5cm (548px @96dpi),
-  // simpan faktor skala ke --fit (dipakai hanya saat print, form tetap lurus).
+  // Auto-fit: form lebar 21cm (793.7px) diskalakan agar muat dalam
+  // lembar portrait 14,5×21 cm (548×793.7px), tetap lurus tanpa rotasi.
   window.addEventListener('load', function () {
-    var MAX = 548; // 14.5cm
+    var W = 793.7, MAXW = 548, MAXH = 793.7;
     document.querySelectorAll('.print-page-admin').forEach(function (p) {
       var h = p.scrollHeight;
-      if (h > MAX) p.style.setProperty('--fit', String(MAX / h));
+      var s = Math.min(MAXW / W, MAXH / h, 1);
+      p.style.setProperty('--fit', s.toFixed(4));
     });
     setTimeout(function () {
       try { window.print(); } catch (e) {}
@@ -393,7 +395,7 @@ export default function PrintFormModal({
               {pages.length > 1 ? ` (${pages.length} halaman)` : ''}
             </DialogTitle>
             <p className="text-[11px] font-medium text-gray-500">
-              Kertas 21×14,5 cm · form lurus + auto-fit
+              Kertas portrait 14,5×21 cm · form lurus + auto-fit
             </p>
           </div>
           <div className="flex gap-2">
