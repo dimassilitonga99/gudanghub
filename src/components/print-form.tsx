@@ -13,8 +13,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-// Maksimal 10 item per halaman.
-export const PRINT_ITEMS_PER_PAGE = 10;
+// Maksimal 8 item per halaman.
+export const PRINT_ITEMS_PER_PAGE = 8;
 
 export interface PrintItem {
   kode: string;
