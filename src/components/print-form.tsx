@@ -120,24 +120,36 @@ function buildPage(
         boxSizing: 'border-box',
       }}
     >
+      {/* Rotator: memutar form -90° dengan titik asal tetap (0 0) agar posisi deterministik.
+          Form 15.1×21 cm dipetakan tepat memenuhi kertas 21×15.1 cm. */}
+      <div
+        className="print-rotator"
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '15.1cm',
+          height: '21cm',
+          transformOrigin: '0 0',
+          transform: 'translate(0, 15.1cm) rotate(-90deg)',
+        }}
+      >
       <div
         className="print-page-admin"
         style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
           width: '15.1cm',
-          height: 'auto',
-          minHeight: '21cm',
+          height: '21cm',
           boxSizing: 'border-box',
           padding: '4mm 5mm',
           margin: 0,
-          transform: 'translate(-50%, -50%) rotate(-90deg)',
+          transform: 'scale(var(--fit, 1))',
           transformOrigin: 'center center',
           background: '#fff',
           color: '#000',
           fontFamily: 'Arial, sans-serif',
           fontSize: 12,
+          display: 'flex',
+          flexDirection: 'column',
         }}
       >
       {/* KOP */}
@@ -262,6 +274,7 @@ function buildPage(
           </tr>
         </tbody>
       </table>
+      </div>
       </div>
     </div>
   );
@@ -393,23 +406,35 @@ export default function PrintFormModal({
     page-break-after: auto !important;
     break-after: auto !important;
   }
-  /* Konten asli 15.1×21 cm; hanya form yang diputar untuk mengisi kertas 21×15.1 cm. */
-  .print-page-admin {
+  /* Rotator: titik asal (0 0), putar -90° lalu geser setinggi kertas. Deterministik. */
+  .print-rotator {
     position: absolute !important;
-    top: 50% !important;
-    left: 50% !important;
+    top: 0 !important;
+    left: 0 !important;
     width: 15.1cm !important;
-    height: auto !important;
+    height: 21cm !important;
+    transform-origin: 0 0 !important;
+    transform: translate(0, 15.1cm) rotate(-90deg) !important;
+  }
+  /* Form asli 15.1×21 cm; hanya form yang diputar untuk mengisi kertas 21×15.1 cm. */
+  .print-page-admin {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    width: 15.1cm !important;
+    height: 21cm !important;
     max-width: none !important;
-    min-height: 21cm !important;
+    min-height: 0 !important;
     overflow: visible !important;
     margin: 0 !important;
     padding: 4mm 5mm !important;
     box-sizing: border-box !important;
     box-shadow: none !important;
     background: #fff !important;
-    transform: translate(-50%, -50%) rotate(-90deg) scale(var(--fit, 1)) !important;
+    transform: scale(var(--fit, 1)) !important;
     transform-origin: center center !important;
+    display: flex !important;
+    flex-direction: column !important;
   }
   .print-kop-title {
     font-size: 26px !important;
@@ -492,15 +517,21 @@ export default function PrintFormModal({
     var TARGET_W = 570.7; // 15.1cm — lebar layout form sebelum rotasi
     var TARGET_H = 793.7; // 21cm — tinggi layout form sebelum rotasi
     document.querySelectorAll('.print-page-admin').forEach(function (p) {
-      // scrollWidth/scrollHeight = ukuran layout (tidak terpengaruh rotate).
+      // Ukur layout konten tanpa rotasi/min-height; item panjang bisa membungkus jadi beberapa baris.
+      p.style.setProperty('transform', 'none', 'important');
+      p.style.setProperty('height', 'auto', 'important');
+      p.style.setProperty('min-height', '0', 'important');
       var contentW = p.scrollWidth || TARGET_W;
       var contentH = p.scrollHeight || TARGET_H;
       var scale = Math.min(TARGET_W / Math.max(contentW, TARGET_W), TARGET_H / Math.max(contentH, TARGET_H), 1);
       p.style.setProperty('--fit', scale.toFixed(4));
+      p.style.removeProperty('transform');
+      p.style.removeProperty('height');
+      p.style.removeProperty('min-height');
     });
     setTimeout(function () {
       try { window.print(); } catch (e) {}
-    }, 300);
+    }, 400);
   });
 </script>
 </body></html>`;
