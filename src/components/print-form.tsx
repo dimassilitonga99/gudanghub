@@ -128,13 +128,14 @@ function buildPage(
         <tbody>
           <tr>
             <td style={{ verticalAlign: 'top', paddingBottom: 10, paddingTop: 2 }}>
-              <div style={{ fontFamily: 'Arial, sans-serif', fontSize: 38, fontWeight: 900, lineHeight: 1, letterSpacing: -1 }}>
+              <div className="print-kop-title" style={{ fontFamily: 'Arial, sans-serif', fontSize: 38, fontWeight: 900, lineHeight: 1, letterSpacing: -1 }}>
                 <span style={{ color: '#E67E22' }}>FORM</span>
                 <span style={{ color: '#1B4F94' }}> ORDER BARANG</span>
               </div>
             </td>
             <td style={{ verticalAlign: 'top', textAlign: 'right', width: 170, paddingBottom: 10 }}>
               <img
+                className="print-kop-logo"
                 src="./images/logo/logo-nk.png"
                 alt="Logo Nasional Kitchen"
                 style={{ width: 140, height: 'auto', display: 'block', marginLeft: 'auto' }}
@@ -150,15 +151,15 @@ function buildPage(
       <div style={{ borderTop: '1px solid #000', marginBottom: 8 }} />
 
       {/* INFO */}
-      <table width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse', marginBottom: 10, fontFamily: 'Arial, sans-serif', fontSize: 14, color: '#000' }}>
+      <table className="print-info-table" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse', marginBottom: 10, fontFamily: 'Arial, sans-serif', fontSize: 14, color: '#000' }}>
         <tbody>
           <tr>
-            <td style={{ padding: '2px 0', width: 150, fontWeight: 700, verticalAlign: 'top' }}>DIBUAT OLEH</td>
+            <td className="info-col-label" style={{ padding: '2px 0', width: 150, fontWeight: 700, verticalAlign: 'top' }}>DIBUAT OLEH</td>
             <td style={{ padding: '2px 0', verticalAlign: 'top', fontWeight: 600 }}>: {info.pic}</td>
             <td style={{ padding: '2px 0', verticalAlign: 'top' }} />
           </tr>
           <tr>
-            <td style={{ padding: '2px 0', fontWeight: 700, verticalAlign: 'top' }}>NOMOR ORDER</td>
+            <td className="info-col-label" style={{ padding: '2px 0', fontWeight: 700, verticalAlign: 'top' }}>NOMOR ORDER</td>
             <td style={{ padding: '2px 0', verticalAlign: 'top', fontWeight: 600 }}>
               : {info.nomor}
               {pageBadge}
@@ -169,7 +170,7 @@ function buildPage(
           </tr>
           {info.statusOrder && (
             <tr>
-              <td style={{ padding: '2px 0', fontWeight: 700, verticalAlign: 'top' }}>STATUS ORDER</td>
+              <td className="info-col-label" style={{ padding: '2px 0', fontWeight: 700, verticalAlign: 'top' }}>STATUS ORDER</td>
               <td colSpan={2} style={{ padding: '2px 0', verticalAlign: 'top' }}>
                 : {statusBadge}
               </td>
@@ -179,16 +180,16 @@ function buildPage(
       </table>
 
       {/* TABEL ITEM */}
-      <table width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse', border: '1px solid #000', marginBottom: 20 }}>
+      <table className="print-items-table" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse', border: '1px solid #000', marginBottom: 20 }}>
         <thead>
           <tr style={{ background: '#B4D6F0' }}>
-            <th style={headerCell(75)}>STOCK<br />SISTEM</th>
-            <th style={headerCell(75)}>STOCK<br />(Gudang)</th>
-            <th style={headerCell(70)}>STOCK<br />(Rak)</th>
-            <th style={headerCell(80)}>JMLH<br />ORDER</th>
-            <th style={headerCell(95)}>KODE ITEM</th>
+            <th style={headerCell(52)}>STOCK<br />SISTEM</th>
+            <th style={headerCell(52)}>STOCK<br />(Gudang)</th>
+            <th style={headerCell(46)}>STOCK<br />(Rak)</th>
+            <th style={headerCell(54)}>JMLH<br />ORDER</th>
+            <th style={headerCell(68)}>KODE ITEM</th>
             <th style={headerCell()}>NAMA ITEM</th>
-            <th style={headerCell(95)}>JENIS</th>
+            <th style={headerCell(68)}>JENIS</th>
           </tr>
         </thead>
         <tbody>
@@ -222,7 +223,7 @@ function buildPage(
       </table>
 
       {/* TANDA TANGAN — merged tengah, garis atas-bawah */}
-      <table width="100%" cellPadding={0} cellSpacing={0} style={{ border: '1px solid #000', borderCollapse: 'collapse' }}>
+      <table className="print-sign-table" width="100%" cellPadding={0} cellSpacing={0} style={{ border: '1px solid #000', borderCollapse: 'collapse' }}>
         <tbody>
           <tr>
             <td style={{ ...signBase, textAlign: 'center', padding: '12px 20px 3px', width: '33%', fontSize: 13 }}>pengantar,</td>
@@ -230,7 +231,7 @@ function buildPage(
             <td style={{ ...signBase, textAlign: 'center', padding: '12px 20px 3px', width: '33%', fontSize: 13 }}>Penerima,</td>
           </tr>
           <tr>
-            <td colSpan={3} style={{ padding: '25px 0' }}>&nbsp;</td>
+            <td className="print-sign-space" colSpan={3} style={{ padding: '25px 0' }}>&nbsp;</td>
           </tr>
           <tr>
             <td style={{ ...signBase, textAlign: 'center', padding: '0 20px 3px', fontSize: 13, fontWeight: 600 }}>(_______________)</td>
@@ -323,58 +324,139 @@ export default function PrintFormModal({
     const html = `<!doctype html><html><head><meta charset="utf-8"><title>Form Order ${orderId}</title>
 <base href="${location.href}">
 <style>
-  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  body { margin: 0; background: #fff; }
-  /* Kertas PORTRAIT 14,5×21 cm, margin 0. Form TEGAK lurus (tanpa rotasi),
-     menempel penuh dari pojok kiri atas, auto-fit selebar kertas. */
-  @page { size: 14.5cm 21cm; margin: 0; }
-  .print-sheet {
-    position: relative;
-    width: 14.5cm;
-    min-height: 21cm;
-    background: #fff;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    overflow: hidden;
-    page-break-after: always;
-    break-after: page;
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    box-sizing: border-box !important;
   }
-  .print-sheet:last-child { page-break-after: auto; break-after: auto; }
-  .print-page-admin {
-    flex: 0 0 auto;
-    box-sizing: border-box;
-    width: 21cm !important;
-    height: auto !important;
-    min-height: 0 !important;
-    max-width: none !important;
+  @page {
+    size: 14.5cm 21cm;
+    margin: 0;
+  }
+  html, body {
     margin: 0 !important;
     padding: 0 !important;
-    box-shadow: none !important;
-    transform: scale(var(--fit, 0.6905));
-    transform-origin: top center;
+    width: 100% !important;
+    background: #fff !important;
+    font-family: Arial, sans-serif !important;
   }
-  @media print {
-    .print-page-admin td, .print-page-admin th { padding: 3px 4px !important; }
+  /* Lembar cetak: tepat 14.5cm lebar (portrait), margin 0 */
+  .print-sheet {
+    width: 14.5cm !important;
+    max-width: 14.5cm !important;
+    margin: 0 auto;
+    padding: 0 !important;
+    background: #fff !important;
+    page-break-after: always;
+    break-after: page;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+  .print-sheet:last-child {
+    page-break-after: auto;
+    break-after: auto;
+  }
+  /* Form menempel di pojok kiri atas, lebar 100% kertas, margin 0, tanpa tepi/border */
+  .print-page-admin {
+    width: 14.5cm !important;
+    max-width: 14.5cm !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 2.5mm 3.5mm !important;
+    box-shadow: none !important;
+    background: #fff !important;
+    transform: none !important;
+    box-sizing: border-box !important;
+  }
+  .print-kop-title {
+    font-size: 22px !important;
+    line-height: 1.1 !important;
+    letter-spacing: -0.5px !important;
+  }
+  .print-kop-logo {
+    width: 105px !important;
+    max-width: 105px !important;
+  }
+  .print-info-table {
+    font-size: 10.5px !important;
+    margin-bottom: 5px !important;
+  }
+  .print-info-table td {
+    padding: 1px 0 !important;
+    font-size: 10.5px !important;
+  }
+  .print-info-table .info-col-label {
+    width: 95px !important;
+  }
+  .print-items-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin-bottom: 8px !important;
+  }
+  .print-items-table th {
+    font-size: 9.5px !important;
+    padding: 3px 2px !important;
+    line-height: 1.15 !important;
+  }
+  .print-items-table td {
+    font-size: 10.5px !important;
+    padding: 3px 2px !important;
+    line-height: 1.2 !important;
+  }
+  .print-sign-table {
+    width: 100% !important;
+    margin-top: 4px !important;
+  }
+  .print-sign-table td {
+    font-size: 10px !important;
+    padding: 0 4px !important;
+  }
+  .print-sign-space {
+    padding: 10px 0 !important;
   }
   @media screen {
-    body { background: #52525b; padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
-    .print-sheet { box-shadow: 0 6px 24px rgba(0,0,0,.35); }
+    body {
+      background: #52525b !important;
+      padding: 16px !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      gap: 16px !important;
+    }
+    .print-sheet {
+      box-shadow: 0 6px 24px rgba(0,0,0,0.35) !important;
+      min-height: 21cm !important;
+    }
+  }
+  @media print {
+    body {
+      background: #fff !important;
+      padding: 0 !important;
+    }
+    .print-sheet {
+      width: 100% !important;
+      max-width: 100% !important;
+      min-height: 100% !important;
+      box-shadow: none !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+    }
+    .print-page-admin {
+      width: 100% !important;
+      max-width: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
   }
 </style></head><body>${el.innerHTML}
 <script>
-  // Auto-fit: form lebar 21cm (793.7px) diskalakan persis selebar kertas
-  // 14,5cm (548px), menempel di atas, tanpa margin — tidak ada yang terpotong.
   window.addEventListener('load', function () {
-    var W = 793.7, MAXW = 548, MAXH = 793.7;
-    document.querySelectorAll('.print-page-admin').forEach(function (p) {
-      var h = p.scrollHeight;
-      var s = Math.min(MAXW / W, MAXH / h);
-      p.style.setProperty('--fit', s.toFixed(4));
-    });
     setTimeout(function () {
       try { window.print(); } catch (e) {}
-    }, 500);
+    }, 400);
   });
 </script>
 </body></html>`;
