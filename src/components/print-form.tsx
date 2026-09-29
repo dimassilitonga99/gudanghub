@@ -13,7 +13,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-// Kertas 21×15,1 cm — 5 item/halaman agar item panjang tidak merusak layout
+// Kertas 21×15,1 cm — form landscape agar tabel tidak menyempit/terbungkus vertikal
 export const PRINT_ITEMS_PER_PAGE = 5;
 
 export interface PrintItem {
@@ -126,12 +126,12 @@ function buildPage(
           position: 'absolute',
           top: '50%',
           left: '50%',
-          width: '15.1cm',
-          height: '21cm',
+          width: '21cm',
+          height: '15.1cm',
           boxSizing: 'border-box',
           padding: '4mm 5mm',
           margin: 0,
-          transform: 'translate(-50%, -50%) rotate(-90deg)',
+          transform: 'translate(-50%, -50%)',
           transformOrigin: 'center center',
           background: '#fff',
           color: '#000',
@@ -346,7 +346,7 @@ export default function PrintFormModal({
     box-sizing: border-box !important;
   }
   @page {
-    size: 21cm 15.1cm;
+    size: 21cm 15.1cm landscape;
     margin: 0;
   }
   html, body {
@@ -378,13 +378,13 @@ export default function PrintFormModal({
     page-break-after: auto !important;
     break-after: auto !important;
   }
-  /* Form order di-rotate 90 derajat ke kiri: lebar fisik 21cm, tinggi fisik 15.1cm */
+  /* Form tetap landscape; kertas dan konten memakai orientasi yang sama */
   .print-page-admin {
     position: absolute !important;
-    top: 50% !important;
-    left: 50% !important;
-    width: 15.1cm !important;
-    height: 21cm !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 21cm !important;
+    height: 15.1cm !important;
     max-width: none !important;
     min-height: 0 !important;
     overflow: hidden !important;
@@ -393,8 +393,8 @@ export default function PrintFormModal({
     box-sizing: border-box !important;
     box-shadow: none !important;
     background: #fff !important;
-    transform: translate(-50%, -50%) rotate(-90deg) !important;
-    transform-origin: center center !important;
+    transform: none !important;
+    transform-origin: top left !important;
   }
   .print-kop-title {
     font-size: 26px !important;
@@ -501,7 +501,7 @@ export default function PrintFormModal({
               {pages.length > 1 ? ` (${pages.length} halaman)` : ''}
             </DialogTitle>
             <p className="text-[11px] font-medium text-gray-500">
-              Kertas 21×15,1 cm · form auto-fit (lebar fisik 21 cm, tinggi fisik 15,1 cm)
+              Kertas landscape 21×15,1 cm · form order lurus, tabel tidak di-rotate
             </p>
           </div>
           <div className="flex gap-2">
