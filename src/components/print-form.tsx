@@ -13,8 +13,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-// Kertas 21×15,1 cm — form landscape agar tabel tidak menyempit/terbungkus vertikal
-export const PRINT_ITEMS_PER_PAGE = 5;
+// Maksimal 10 item per halaman.
+export const PRINT_ITEMS_PER_PAGE = 10;
 
 export interface PrintItem {
   kode: string;
@@ -126,12 +126,12 @@ function buildPage(
           position: 'absolute',
           top: '50%',
           left: '50%',
-          width: '21cm',
-          height: '15.1cm',
+          width: '15.1cm',
+          height: '21cm',
           boxSizing: 'border-box',
           padding: '4mm 5mm',
           margin: 0,
-          transform: 'translate(-50%, -50%)',
+          transform: 'translate(-50%, -50%) rotate(-90deg)',
           transformOrigin: 'center center',
           background: '#fff',
           color: '#000',
@@ -306,6 +306,20 @@ export default function PrintFormModal({
     return () => window.removeEventListener('keydown', handler);
   }, [open]);
 
+  useEffect(() => {
+    if (!open) return;
+    const fitPages = () => pagesRef.current?.querySelectorAll<HTMLElement>('.print-page-admin').forEach((page) => {
+      const scale = Math.min(793.7 / Math.max(page.scrollHeight, 793.7), 570.7 / (page.offsetWidth || 570.7), 1);
+      page.style.setProperty('--fit', scale.toFixed(4));
+    });
+    const frame = requestAnimationFrame(fitPages);
+    const timer = window.setTimeout(fitPages, 200);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.clearTimeout(timer);
+    };
+  }, [open, pages.length]);
+
   if (!open) return null;
 
   const doJpg = async () => {
@@ -346,7 +360,7 @@ export default function PrintFormModal({
     box-sizing: border-box !important;
   }
   @page {
-    size: 21cm 15.1cm landscape;
+    size: 21cm 15.1cm;
     margin: 0;
   }
   html, body {
@@ -378,23 +392,23 @@ export default function PrintFormModal({
     page-break-after: auto !important;
     break-after: auto !important;
   }
-  /* Form tetap landscape; kertas dan konten memakai orientasi yang sama */
+  /* Konten asli 15.1×21 cm; hanya form yang diputar untuk mengisi kertas 21×15.1 cm. */
   .print-page-admin {
     position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 21cm !important;
-    height: 15.1cm !important;
+    top: 50% !important;
+    left: 50% !important;
+    width: 15.1cm !important;
+    height: 21cm !important;
     max-width: none !important;
     min-height: 0 !important;
-    overflow: hidden !important;
+    overflow: visible !important;
     margin: 0 !important;
     padding: 4mm 5mm !important;
     box-sizing: border-box !important;
     box-shadow: none !important;
     background: #fff !important;
-    transform: none !important;
-    transform-origin: top left !important;
+    transform: translate(-50%, -50%) rotate(-90deg) scale(var(--fit, 1)) !important;
+    transform-origin: center center !important;
   }
   .print-kop-title {
     font-size: 26px !important;
@@ -474,9 +488,11 @@ export default function PrintFormModal({
 </style></head><body>${el.innerHTML}
 <script>
   window.addEventListener('load', function () {
-    // Ukuran form sudah ditetapkan 15.1×21 cm; tanpa transform scale agar struktur stabil.
+    var TARGET_W = 570.7; // 15.1cm in px
+    var TARGET_H = 793.7; // 21cm in px
     document.querySelectorAll('.print-page-admin').forEach(function (p) {
-      p.style.removeProperty('--fit');
+      var scale = Math.min(TARGET_H / Math.max(p.scrollHeight, TARGET_H), TARGET_W / (p.offsetWidth || TARGET_W), 1);
+      p.style.setProperty('--fit', scale.toFixed(4));
     });
     setTimeout(function () {
       try { window.print(); } catch (e) {}
@@ -501,7 +517,7 @@ export default function PrintFormModal({
               {pages.length > 1 ? ` (${pages.length} halaman)` : ''}
             </DialogTitle>
             <p className="text-[11px] font-medium text-gray-500">
-              Kertas landscape 21×15,1 cm · form order lurus, tabel tidak di-rotate
+              Kertas 21×15,1 cm · form order diputar 90° ke kiri, auto-fit batas kertas
             </p>
           </div>
           <div className="flex gap-2">
