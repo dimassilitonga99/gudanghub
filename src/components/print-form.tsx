@@ -140,7 +140,7 @@ function buildPage(
           width: '15.1cm',
           height: '21cm',
           boxSizing: 'border-box',
-          padding: '4mm 5mm',
+          padding: 0,
           margin: 0,
           transform: 'scale(var(--fit, 1))',
           transformOrigin: 'center center',
@@ -209,7 +209,7 @@ function buildPage(
       </table>
 
       {/* TABEL ITEM */}
-      <table className="print-items-table" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse', border: '1px solid #000', marginBottom: 10 }}>
+      <table className="print-items-table" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse', border: '1px solid #000', marginBottom: 10, flex: pageItems.length > 0 ? '1 1 auto' : '0 0 auto', minHeight: 0 }}>
         <thead>
           <tr style={{ background: '#B4D6F0' }}>
             <th style={headerCell(48)}>STOCK<br />SISTEM</th>
@@ -427,7 +427,7 @@ export default function PrintFormModal({
     min-height: 0 !important;
     overflow: visible !important;
     margin: 0 !important;
-    padding: 4mm 5mm !important;
+    padding: 0 !important;
     box-sizing: border-box !important;
     box-shadow: none !important;
     background: #fff !important;
