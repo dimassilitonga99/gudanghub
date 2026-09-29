@@ -282,9 +282,11 @@ export default function Login() {
         <div className="w-full max-w-md">
           {/* Brand header */}
           <div className="mb-8 text-center">
-            <span className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-xl shadow-orange-500/40">
-              <Icon name="shop" size={30} />
-            </span>
+            <img
+              src="/android-chrome-512x512.png"
+              alt="Logo GudangHub"
+              className="mx-auto mb-4 h-16 w-16 rounded-3xl object-contain"
+            />
             <GradientShimmer gradient="sunrise" className="font-display text-4xl font-bold text-white">
               GudangHub
             </GradientShimmer>
