@@ -13,8 +13,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-// Kertas cetak 21×14,5 cm landscape — muat ±10 baris/halaman
-export const PRINT_ITEMS_PER_PAGE = 10;
+// Kertas cetak 21×14,5 cm landscape — 7 baris/halaman agar kop+tabel+ttd muat utuh
+export const PRINT_ITEMS_PER_PAGE = 7;
 
 export interface PrintItem {
   kode: string;
@@ -325,38 +325,64 @@ export default function PrintFormModal({
 <style>
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   body { margin: 0; background: #fff; }
-  @page { size: 21cm 14.5cm; margin: 0; }
-  .print-sheet { width: 21cm; height: 14.5cm; overflow: hidden; page-break-after: always; break-after: page; }
+  /* Lembar portrait 14,5×21 cm (kertas 21×14,5 didirikan).
+     Form landscape 21×14,5 dirotasi 90° ke kiri, memenuhi lembar. */
+  @page { size: 14.5cm 21cm; margin: 0; }
+  .print-sheet {
+    position: relative;
+    width: 14.5cm;
+    height: 21cm;
+    overflow: hidden;
+    background: #fff;
+    page-break-after: always;
+    break-after: page;
+  }
   .print-sheet:last-child { page-break-after: auto; break-after: auto; }
   .print-page-admin {
+    position: absolute;
+    top: 50%;
+    left: 50%;
     box-sizing: border-box;
     width: 21cm !important;
-    height: 14.5cm !important;
-    min-height: 0 !important;
+    min-height: 14.5cm !important;
+    height: auto !important;
     max-width: none !important;
     margin: 0 !important;
-    padding: 5mm !important;
+    padding: 4mm !important;
     box-shadow: none !important;
-    overflow: hidden;
-    page-break-after: auto !important;
+    transform: translate(-50%, -50%) rotate(-90deg);
+    transform-origin: center center;
+  }
+  @media print {
+    .print-page-admin td, .print-page-admin th { padding: 3px 4px !important; }
   }
   @media screen {
-    body { background: #52525b; padding: 16px; }
-    .print-sheet { margin: 0 auto 16px; box-shadow: 0 6px 24px rgba(0,0,0,.35); }
+    body { background: #52525b; padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
   }
-</style></head><body>${el.innerHTML}</body></html>`;
+</style></head><body>${el.innerHTML}
+<script>
+  // Auto-fit: kalau konten form lebih tinggi dari 14,5cm (548px @96dpi),
+  // kecilkan proporsional agar pas di lembar (dihitung sebelum print).
+  window.addEventListener('load', function () {
+    var MAX = 548; // 14.5cm
+    document.querySelectorAll('.print-page-admin').forEach(function (p) {
+      var h = p.scrollHeight;
+      if (h > MAX) {
+        var s = MAX / h;
+        p.style.transform = 'translate(-50%, -50%) rotate(-90deg) scale(' + s + ')';
+      }
+    });
+    setTimeout(function () {
+      try { window.print(); } catch (e) {}
+    }, 500);
+  });
+</script>
+</body></html>`;
     w.document.open();
     w.document.write(html);
     w.document.close();
     w.focus();
-    // Tunggu render + logo termuat sebelum dialog print muncul (preview dulu di window baru)
-    setTimeout(() => {
-      try {
-        w.print();
-      } catch {
-        /* user bisa Ctrl+P manual di window baru */
-      }
-    }, 600);
+    // Print otomatis di-trigger script di window baru setelah auto-fit selesai
   };
 
   return (
@@ -369,7 +395,7 @@ export default function PrintFormModal({
               {pages.length > 1 ? ` (${pages.length} halaman)` : ''}
             </DialogTitle>
             <p className="text-[11px] font-medium text-gray-500">
-              Kertas 21×14,5 cm (landscape) · tanpa margin
+              Kertas 21×14,5 cm · form diputar 90° ke kiri + auto-fit
             </p>
           </div>
           <div className="flex gap-2">
