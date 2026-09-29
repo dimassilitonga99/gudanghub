@@ -9,11 +9,13 @@ import { useAuth } from '@/context/AuthContext';
 import { auth, katalog, orders, prewarmAppScript } from '@/lib/api';
 import { API_URL, ROUTES } from '@/lib/config';
 import {
+  clearSession,
   getLastUsername,
   getSession,
   homeRouteForSession,
   isSessionValid,
   setLastUsername,
+  setSession,
 } from '@/lib/session';
 import { simpleHash, sleep } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -74,8 +76,24 @@ async function verifyInBackground(username: string, password: string): Promise<v
     const result = await auth.login({ username, password });
     if (result.status === 'ok' && result.user) {
       setCachedLogin(username, password, result.user as CachedUser);
+      // Simpan token asli ke sesi live — tanpa ini sesi memakai token palsu
+      // 'cached-...' dan request API berikutnya ditolak (AUTH_REQUIRED → logout).
+      setSession(
+        result.user as CachedUser,
+        typeof result.access_token === 'string' ? result.access_token : null,
+        typeof result.refresh_token === 'string'
+          ? result.refresh_token
+          : typeof result.token === 'string'
+            ? result.token
+            : null,
+      );
     } else if (result.status === 'error') {
+      // Kredensial sudah tidak valid (mis. password diganti) → akhiri sesi cached.
       localStorage.removeItem(CRED_CACHE_KEY);
+      clearSession();
+      if (!window.location.pathname.includes('login')) {
+        window.location.href = ROUTES.login;
+      }
     }
   } catch {
     /* offline — cache tetap dipakai */

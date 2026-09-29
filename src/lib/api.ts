@@ -91,6 +91,13 @@ async function refreshAccessToken(): Promise<boolean> {
 }
 
 async function handleAuthRequired(): Promise<void> {
+  const s = getSession();
+  // Sesi login-cached belum punya token asli (verifyInBackground masih berjalan).
+  // Jangan logout — token asli akan tersimpan begitu verifikasi selesai,
+  // dan request berikutnya memakai token tersebut.
+  if (s && s.token && s.token.indexOf('cached-') === 0 && !s.refreshToken) {
+    return;
+  }
   // Try to refresh token first
   const refreshed = await refreshAccessToken();
   if (refreshed) {
