@@ -338,25 +338,21 @@ export default function PrintFormModal({
     padding: 4mm !important;
   }
   @media print {
-    /* Lembar portrait 14,5×21 cm (kertas 21×14,5 didirikan);
-       form landscape dirotasi 90° ke kiri memenuhi lembar. */
-    @page { size: 14.5cm 21cm; margin: 0; }
+    /* Lembar landscape 21×14,5 cm — form TEGAK lurus, tanpa rotasi.
+       Auto-fit: --fit mengecilkan form jika konten melebihi 14,5 cm. */
+    @page { size: 21cm 14.5cm; margin: 0; }
     .print-sheet {
-      position: relative;
-      width: 14.5cm;
-      height: 21cm;
+      width: 21cm;
+      min-height: 14.5cm;
       overflow: hidden;
       page-break-after: always;
       break-after: page;
     }
     .print-sheet:last-child { page-break-after: auto; break-after: auto; }
     .print-page-admin {
-      position: absolute;
-      top: 50%;
-      left: 50%;
       box-shadow: none !important;
-      transform: translate(-50%, -50%) rotate(-90deg) scale(var(--fit, 1));
-      transform-origin: center center;
+      transform: scale(var(--fit, 1));
+      transform-origin: top center;
     }
     .print-page-admin td, .print-page-admin th { padding: 3px 4px !important; }
   }
@@ -367,7 +363,7 @@ export default function PrintFormModal({
 </style></head><body>${el.innerHTML}
 <script>
   // Auto-fit: kalau konten form lebih tinggi dari 14,5cm (548px @96dpi),
-  // simpan faktor skala ke --fit (dipakai hanya saat print, preview tetap tegak).
+  // simpan faktor skala ke --fit (dipakai hanya saat print, form tetap lurus).
   window.addEventListener('load', function () {
     var MAX = 548; // 14.5cm
     document.querySelectorAll('.print-page-admin').forEach(function (p) {
@@ -397,7 +393,7 @@ export default function PrintFormModal({
               {pages.length > 1 ? ` (${pages.length} halaman)` : ''}
             </DialogTitle>
             <p className="text-[11px] font-medium text-gray-500">
-              Kertas 21×14,5 cm · form diputar 90° ke kiri + auto-fit
+              Kertas 21×14,5 cm · form lurus + auto-fit
             </p>
           </div>
           <div className="flex gap-2">
