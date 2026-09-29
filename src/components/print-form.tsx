@@ -13,7 +13,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-export const PRINT_ITEMS_PER_PAGE = 20;
+// Kertas cetak 21×14,5 cm (diputar 90° ke kiri saat cetak) — muat ±10 baris/halaman
+export const PRINT_ITEMS_PER_PAGE = 10;
 
 export interface PrintItem {
   kode: string;
@@ -106,6 +107,7 @@ function buildPage(
   ) : null;
 
   return (
+    <div className="print-rot-wrap">
     <div
       className="print-page-admin"
       style={{
@@ -243,6 +245,7 @@ function buildPage(
         </tbody>
       </table>
     </div>
+    </div>
   );
 }
 
@@ -310,10 +313,15 @@ export default function PrintFormModal({
     <Dialog open onOpenChange={(v) => !v && !busy && onClose()}>
       <DialogContent className="print-modal-root max-h-[90vh] max-w-4xl overflow-y-auto bg-white">
         <DialogHeader className="flex flex-row items-center justify-between">
-          <DialogTitle className="text-base text-black">
-            {title}
-            {pages.length > 1 ? ` (${pages.length} halaman)` : ''}
-          </DialogTitle>
+          <div>
+            <DialogTitle className="text-base text-black">
+              {title}
+              {pages.length > 1 ? ` (${pages.length} halaman)` : ''}
+            </DialogTitle>
+            <p className="text-[11px] font-medium text-gray-500">
+              Kertas 21×14,5 cm · portrait, diputar 90° ke kiri saat cetak
+            </p>
+          </div>
           <div className="flex gap-2">
             <button
               type="button"
@@ -394,15 +402,31 @@ export default function PrintFormModal({
               box-shadow: none !important;
               background: #fff !important;
             }
-            .print-page-admin {
-              position: static !important;
-              max-width: 100% !important;
-              box-shadow: none !important;
-              margin: 0 auto !important;
-              page-break-after: always !important;
+            /* Kertas 21×14,5 cm, orientasi portrait, form diputar 90° ke kiri.
+               @page = lembar portrait 14,5cm × 21cm; konten landscape 21×14,5
+               dirotasi -90° (counterclockwise) memenuhi lembar penuh. */
+            @page { size: 14.5cm 21cm; margin: 0; }
+            .print-rot-wrap {
+              width: 14.5cm !important;
+              height: 21cm !important;
+              overflow: hidden;
+              page-break-after: always;
+              break-after: page;
             }
-            .print-page-admin:last-child { page-break-after: auto !important; }
-            @page { size: A4; margin: 10mm; }
+            .print-rot-wrap:last-child { page-break-after: auto; break-after: auto; }
+            .print-page-admin {
+              width: 21cm !important;
+              height: 14.5cm !important;
+              min-height: 0 !important;
+              max-width: none !important;
+              margin: 0 !important;
+              padding: 5mm !important;
+              box-shadow: none !important;
+              page-break-after: auto !important;
+              overflow: hidden;
+              transform-origin: 0 0;
+              transform: translateY(21cm) rotate(-90deg);
+            }
             * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           }
         `}</style>
