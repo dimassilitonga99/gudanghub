@@ -13,7 +13,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-// Kertas cetak 21×14,5 cm (diputar 90° ke kiri saat cetak) — muat ±10 baris/halaman
+// Kertas cetak 21×14,5 cm landscape — muat ±10 baris/halaman
 export const PRINT_ITEMS_PER_PAGE = 10;
 
 export interface PrintItem {
@@ -107,7 +107,7 @@ function buildPage(
   ) : null;
 
   return (
-    <div className="print-rot-wrap">
+    <div className="print-sheet">
     <div
       className="print-page-admin"
       style={{
@@ -319,7 +319,7 @@ export default function PrintFormModal({
               {pages.length > 1 ? ` (${pages.length} halaman)` : ''}
             </DialogTitle>
             <p className="text-[11px] font-medium text-gray-500">
-              Kertas 21×14,5 cm · portrait, diputar 90° ke kiri saat cetak
+              Kertas 21×14,5 cm (landscape) · tanpa margin
             </p>
           </div>
           <div className="flex gap-2">
@@ -394,6 +394,9 @@ export default function PrintFormModal({
             .print-page-admin, .print-page-admin * { visibility: visible; }
             .print-modal-root {
               position: static !important;
+              transform: none !important;
+              left: auto !important;
+              top: auto !important;
               max-width: 100% !important;
               max-height: none !important;
               overflow: visible !important;
@@ -402,18 +405,17 @@ export default function PrintFormModal({
               box-shadow: none !important;
               background: #fff !important;
             }
-            /* Kertas 21×14,5 cm, orientasi portrait, form diputar 90° ke kiri.
-               @page = lembar portrait 14,5cm × 21cm; konten landscape 21×14,5
-               dirotasi -90° (counterclockwise) memenuhi lembar penuh. */
-            @page { size: 14.5cm 21cm; margin: 0; }
-            .print-rot-wrap {
-              width: 14.5cm !important;
-              height: 21cm !important;
+            /* Kertas 21×14,5 cm landscape, tanpa margin — form memenuhi lembar.
+               (Rotasi CSS saat print tidak andal: Chrome menskalanya salah.) */
+            @page { size: 21cm 14.5cm; margin: 0; }
+            .print-sheet {
+              width: 21cm !important;
+              height: 14.5cm !important;
               overflow: hidden;
               page-break-after: always;
               break-after: page;
             }
-            .print-rot-wrap:last-child { page-break-after: auto; break-after: auto; }
+            .print-sheet:last-child { page-break-after: auto; break-after: auto; }
             .print-page-admin {
               width: 21cm !important;
               height: 14.5cm !important;
@@ -424,8 +426,6 @@ export default function PrintFormModal({
               box-shadow: none !important;
               page-break-after: auto !important;
               overflow: hidden;
-              transform-origin: 0 0;
-              transform: translateY(21cm) rotate(-90deg);
             }
             * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           }
