@@ -76,7 +76,10 @@ export default function AppShell({ children }: { children: ReactNode }) {
   const items = NAV_ITEMS.filter((i) => i.roles.includes(role));
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div
+      className="min-h-screen bg-background text-foreground"
+      style={{ ['--sidebar-w' as string]: collapsed ? '4rem' : '15rem' }}
+    >
       {/* Sidebar (desktop) — bisa dikecilkan (mini) / dibesarkan lagi */}
       <aside
         className={cn(

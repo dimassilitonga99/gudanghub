@@ -595,9 +595,9 @@ function CartSheet({
 
   return createPortal(
     <>
-      <div className="fixed inset-0 z-50 bg-black/60 md:left-60" onClick={onClose} />
+      <div className="fixed inset-0 z-50 bg-black/60 md:left-[var(--sidebar-w)]" onClick={onClose} />
       <section
-        className="fixed inset-x-0 bottom-0 z-50 flex max-h-[88dvh] flex-col rounded-t-2xl border-t border-border bg-background shadow-2xl md:left-60"
+        className="fixed inset-x-0 bottom-0 z-50 flex max-h-[88dvh] flex-col rounded-t-2xl border-t border-border bg-background shadow-2xl transition-[left] duration-200 md:left-[var(--sidebar-w)]"
         aria-label="Keranjang order"
       >
         <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-muted" />
@@ -2478,7 +2478,7 @@ export default function Order() {
 
         {/* CART BAR */}
         {cartItems.length > 0 && createPortal(
-          <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 p-3 backdrop-blur md:left-60">
+          <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 p-3 backdrop-blur transition-[left] duration-200 md:left-[var(--sidebar-w)]">
             <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2">
               <Button onClick={() => setCartOpen(true)} className="flex-1 justify-between sm:flex-none">
                 <span className="flex items-center gap-2">
