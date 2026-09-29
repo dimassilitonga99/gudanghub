@@ -110,8 +110,8 @@ function buildPage(
     <div
       className="print-sheet"
       style={{
-        width: '14cm',
-        height: '21cm',
+        width: '21cm',
+        height: '14cm',
         position: 'relative',
         overflow: 'hidden',
         background: '#fff',
@@ -126,35 +126,35 @@ function buildPage(
           position: 'absolute',
           top: '50%',
           left: '50%',
-          width: '21cm',
-          height: '14cm',
+          width: '14cm',
+          height: '21cm',
           boxSizing: 'border-box',
-          padding: '4mm 6mm',
+          padding: '4mm 5mm',
           margin: 0,
           transform: 'translate(-50%, -50%) rotate(-90deg)',
           transformOrigin: 'center center',
           background: '#fff',
           color: '#000',
           fontFamily: 'Arial, sans-serif',
-          fontSize: 13,
+          fontSize: 12,
         }}
       >
       {/* KOP */}
       <table width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse', marginBottom: 0 }}>
         <tbody>
           <tr>
-            <td style={{ verticalAlign: 'top', paddingBottom: 8, paddingTop: 2 }}>
-              <div className="print-kop-title" style={{ fontFamily: 'Arial, sans-serif', fontSize: 28, fontWeight: 900, lineHeight: 1, letterSpacing: -1 }}>
+            <td style={{ verticalAlign: 'top', paddingBottom: 6, paddingTop: 2 }}>
+              <div className="print-kop-title" style={{ fontFamily: 'Arial, sans-serif', fontSize: 24, fontWeight: 900, lineHeight: 1, letterSpacing: -1 }}>
                 <span style={{ color: '#E67E22' }}>FORM</span>
                 <span style={{ color: '#1B4F94' }}> ORDER BARANG</span>
               </div>
             </td>
-            <td style={{ verticalAlign: 'top', textAlign: 'right', width: 140, paddingBottom: 8 }}>
+            <td style={{ verticalAlign: 'top', textAlign: 'right', width: 120, paddingBottom: 6 }}>
               <img
                 className="print-kop-logo"
                 src="./images/logo/logo-nk.png"
                 alt="Logo Nasional Kitchen"
-                style={{ width: 120, height: 'auto', display: 'block', marginLeft: 'auto' }}
+                style={{ width: 100, height: 'auto', display: 'block', marginLeft: 'auto' }}
                 crossOrigin="anonymous"
                 onError={(e) => {
                   (e.currentTarget as HTMLImageElement).style.display = 'none';
@@ -167,10 +167,10 @@ function buildPage(
       <div style={{ borderTop: '1px solid #000', marginBottom: 6 }} />
 
       {/* INFO */}
-      <table className="print-info-table" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse', marginBottom: 8, fontFamily: 'Arial, sans-serif', fontSize: 12, color: '#000' }}>
+      <table className="print-info-table" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse', marginBottom: 8, fontFamily: 'Arial, sans-serif', fontSize: 11, color: '#000' }}>
         <tbody>
           <tr>
-            <td className="info-col-label" style={{ padding: '2px 0', width: 120, fontWeight: 700, verticalAlign: 'top' }}>DIBUAT OLEH</td>
+            <td className="info-col-label" style={{ padding: '2px 0', width: 100, fontWeight: 700, verticalAlign: 'top' }}>DIBUAT OLEH</td>
             <td style={{ padding: '2px 0', verticalAlign: 'top', fontWeight: 600 }}>: {info.pic}</td>
             <td style={{ padding: '2px 0', verticalAlign: 'top' }} />
           </tr>
@@ -196,16 +196,16 @@ function buildPage(
       </table>
 
       {/* TABEL ITEM */}
-      <table className="print-items-table" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse', border: '1px solid #000', marginBottom: 12 }}>
+      <table className="print-items-table" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse', border: '1px solid #000', marginBottom: 10 }}>
         <thead>
           <tr style={{ background: '#B4D6F0' }}>
-            <th style={headerCell(68)}>STOCK<br />SISTEM</th>
-            <th style={headerCell(68)}>STOCK<br />(Gudang)</th>
-            <th style={headerCell(62)}>STOCK<br />(Rak)</th>
-            <th style={headerCell(72)}>JMLH<br />ORDER</th>
-            <th style={headerCell(85)}>KODE ITEM</th>
+            <th style={headerCell(48)}>STOCK<br />SISTEM</th>
+            <th style={headerCell(48)}>STOCK<br />(Gudang)</th>
+            <th style={headerCell(44)}>STOCK<br />(Rak)</th>
+            <th style={headerCell(52)}>JMLH<br />ORDER</th>
+            <th style={headerCell(65)}>KODE ITEM</th>
             <th style={headerCell()}>NAMA ITEM</th>
-            <th style={headerCell(85)}>JENIS</th>
+            <th style={headerCell(64)}>JENIS</th>
           </tr>
         </thead>
         <tbody>
@@ -346,24 +346,24 @@ export default function PrintFormModal({
     box-sizing: border-box !important;
   }
   @page {
-    size: 14cm 21cm;
+    size: 21cm 14cm;
     margin: 0;
   }
   html, body {
     margin: 0 !important;
     padding: 0 !important;
-    width: 14cm !important;
-    height: 21cm !important;
+    width: 21cm !important;
+    height: 14cm !important;
     background: #fff !important;
     font-family: Arial, sans-serif !important;
   }
-  /* Lembar portrait 14×21 cm (kertas 21×14 cm portrait) */
+  /* Lembar cetak tepat 21×14 cm, kertas tidak di-rotate */
   .print-sheet {
     position: relative !important;
-    width: 14cm !important;
-    height: 21cm !important;
-    min-height: 21cm !important;
-    max-height: 21cm !important;
+    width: 21cm !important;
+    height: 14cm !important;
+    min-height: 14cm !important;
+    max-height: 14cm !important;
     margin: 0 auto !important;
     padding: 0 !important;
     background: #fff !important;
@@ -378,17 +378,17 @@ export default function PrintFormModal({
     page-break-after: auto !important;
     break-after: auto !important;
   }
-  /* Form di-rotate 90 derajat ke kiri, auto-fit pas selebar dan setinggi kertas */
+  /* Hanya form order saja yang di-rotate 90 derajat ke kiri, auto-fit pas kertas */
   .print-page-admin {
     position: absolute !important;
     top: 50% !important;
     left: 50% !important;
-    width: 21cm !important;
-    height: 14cm !important;
+    width: 14cm !important;
+    height: 21cm !important;
     max-width: none !important;
     min-height: 0 !important;
     margin: 0 !important;
-    padding: 4mm 6mm !important;
+    padding: 4mm 5mm !important;
     box-sizing: border-box !important;
     box-shadow: none !important;
     background: #fff !important;
@@ -458,21 +458,23 @@ export default function PrintFormModal({
   }
   @media print {
     html, body {
-      width: 14cm !important;
-      height: 21cm !important;
+      width: 21cm !important;
+      height: 14cm !important;
       background: #fff !important;
       padding: 0 !important;
       margin: 0 !important;
     }
     .print-sheet {
+      width: 21cm !important;
+      height: 14cm !important;
       box-shadow: none !important;
     }
   }
 </style></head><body>${el.innerHTML}
 <script>
   window.addEventListener('load', function () {
-    var TARGET_W = 793.7; // 21cm in px
-    var TARGET_H = 529.1; // 14cm in px
+    var TARGET_W = 529.1; // 14cm in px
+    var TARGET_H = 793.7; // 21cm in px
     document.querySelectorAll('.print-page-admin').forEach(function (p) {
       var w = p.scrollWidth || TARGET_W;
       var h = p.scrollHeight || TARGET_H;
@@ -504,7 +506,7 @@ export default function PrintFormModal({
               {pages.length > 1 ? ` (${pages.length} halaman)` : ''}
             </DialogTitle>
             <p className="text-[11px] font-medium text-gray-500">
-              Kertas portrait 21×14 cm · rotate 90° ke kiri + auto-fit
+              Kertas 21×14 cm · form di-rotate 90° ke kiri + auto-fit
             </p>
           </div>
           <div className="flex gap-2">
