@@ -13,8 +13,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-// Kertas 21×15,1 cm — 10 item/halaman, form + tanda tangan tetap satu lembar
-export const PRINT_ITEMS_PER_PAGE = 10;
+// Kertas 21×15,1 cm — 7 item/halaman agar form + tanda tangan tetap utuh
+export const PRINT_ITEMS_PER_PAGE = 7;
 
 export interface PrintItem {
   kode: string;
@@ -127,8 +127,7 @@ function buildPage(
           top: '50%',
           left: '50%',
           width: '15.1cm',
-          height: 'auto',
-          minHeight: '21cm',
+          height: '21cm',
           boxSizing: 'border-box',
           padding: '4mm 5mm',
           margin: 0,
@@ -311,7 +310,8 @@ export default function PrintFormModal({
     if (!open) return;
     const fitPages = () => {
       pagesRef.current?.querySelectorAll<HTMLElement>('.print-page-admin').forEach((page) => {
-        const scale = Math.min(570.7 / (page.scrollWidth || 570.7), 793.7 / (page.scrollHeight || 793.7), 1);
+        const contentHeight = page.scrollHeight;
+        const scale = Math.min(570.7 / (page.offsetWidth || 570.7), 793.7 / Math.max(contentHeight, 793.7), 1);
         page.style.setProperty('--fit', scale.toFixed(4));
       });
     };
@@ -493,9 +493,9 @@ export default function PrintFormModal({
     var TARGET_W = 570.7; // 15.1cm in px
     var TARGET_H = 793.7; // 21cm in px
     document.querySelectorAll('.print-page-admin').forEach(function (p) {
-      var w = p.scrollWidth || TARGET_W;
+      var w = p.offsetWidth || TARGET_W;
       var h = p.scrollHeight || TARGET_H;
-      var s = Math.min(TARGET_W / w, TARGET_H / h, 1);
+      var s = Math.min(TARGET_W / w, TARGET_H / Math.max(h, TARGET_H), 1);
       if (s < 0.999) {
         p.style.setProperty('--fit', s.toFixed(4));
       }
