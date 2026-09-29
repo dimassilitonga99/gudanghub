@@ -5,7 +5,7 @@ import { toastError, toastSuccess } from '@/lib/toast';
 
 import { katalog, orders, storeTakes } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
-import { APP, CABANG, SETTINGS, type Barang, type Order, type DetailItem, type StoreTake } from '@/lib/config';
+import { APP, CABANG, CABANG_LIST, SETTINGS, type Barang, type Order, type DetailItem, type StoreTake } from '@/lib/config';
 import {
   cn,
   formatRupiah,
@@ -25,6 +25,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import PrintFormModal, { type PrintItem } from '@/components/print-form';
 import { LeaderboardCard } from '@/components/ui/leaderboard-card';
 import { StoreTakeList } from '@/components/store-take';
+import { PolarAngleAxis, PolarGrid, Radar, RadarChart } from 'recharts';
+import {
+  type ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from '@/components/ui/radar-chart';
 
 function toNum(v: unknown): number {
   const n = Number(v);
@@ -388,6 +395,108 @@ function LineChart({
         ))}
       </div>
     </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   RADAR CHART — order per cabang, 6 bulan terakhir (recharts)
+   ───────────────────────────────────────────────────────────────────── */
+
+const RADAR_MONTHS = 6;
+const MONTH_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+
+function RadarOrderCard({ orders, loading }: { orders: Order[]; loading: boolean }) {
+  const { data, growth } = useMemo(() => {
+    const now = new Date();
+    const wita = new Date(now.getTime() + APP.timezoneOffset * 3600 * 1000);
+    const months: { y: number; m: number; label: string }[] = [];
+    for (let i = RADAR_MONTHS - 1; i >= 0; i--) {
+      const d = new Date(Date.UTC(wita.getUTCFullYear(), wita.getUTCMonth() - i, 1));
+      months.push({ y: d.getUTCFullYear(), m: d.getUTCMonth(), label: MONTH_SHORT[d.getUTCMonth()] });
+    }
+    const buckets = months.map((mo) => {
+      const row: Record<string, number | string> = { month: mo.label };
+      for (const c of CABANG_LIST) row[c.id] = 0;
+      return row;
+    });
+    const monthIdx = new Map(months.map((mo, i) => [`${mo.y}-${mo.m}`, i]));
+    for (const o of orders) {
+      const d = parseAnyDate(o.TANGGAL_ORDER ?? '');
+      if (!d) continue;
+      const w = new Date(d.getTime() + APP.timezoneOffset * 3600 * 1000);
+      const idx = monthIdx.get(`${w.getUTCFullYear()}-${w.getUTCMonth()}`);
+      if (idx === undefined) continue;
+      const cb = String(o.ID_CABANG || '').toUpperCase();
+      if (typeof buckets[idx][cb] === 'number') buckets[idx][cb] = (buckets[idx][cb] as number) + 1;
+    }
+    const sum = (b: Record<string, number | string>) =>
+      CABANG_LIST.reduce((a, c) => a + (b[c.id] as number), 0);
+    const cur = sum(buckets[buckets.length - 1]);
+    const prev = sum(buckets[buckets.length - 2]);
+    const growth = prev > 0 ? ((cur - prev) / prev) * 100 : cur > 0 ? 100 : 0;
+    return { data: buckets, growth };
+  }, [orders]);
+
+  const chartConfig = useMemo(() => {
+    const cfg: ChartConfig = {};
+    for (const c of CABANG_LIST) cfg[c.id] = { label: c.pic, color: c.color };
+    return cfg;
+  }, []);
+
+  const growthUp = growth >= 0;
+
+  return (
+    <Card>
+      <CardContent className="p-4">
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          <h3 className="flex items-center gap-2 text-sm font-semibold">
+            <Icon name="chart-mixed" size={16} className="text-brand" />
+            Radar Order per Cabang
+          </h3>
+          <Badge
+            variant="outline"
+            className={cn(
+              'gap-1 border-none',
+              growthUp ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger',
+            )}
+          >
+            <Icon name={growthUp ? 'arrow-trend-up' : 'arrow-trend-down'} size={12} />
+            <span>{growth >= 0 ? '+' : ''}{growth.toFixed(1)}%</span>
+          </Badge>
+        </div>
+        <p className="mb-2 text-xs text-muted-foreground">
+          Jumlah order tiap cabang · 6 bulan terakhir
+        </p>
+        {loading ? (
+          <Skeleton className="h-56 w-full" />
+        ) : (
+          <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[250px]">
+            <RadarChart data={data}>
+              <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+              <PolarAngleAxis dataKey="month" />
+              <PolarGrid strokeDasharray="3 3" />
+              {CABANG_LIST.map((c) => (
+                <Radar
+                  key={c.id}
+                  name={c.pic}
+                  stroke={`var(--color-${c.id})`}
+                  dataKey={c.id}
+                  fill={`var(--color-${c.id})`}
+                  fillOpacity={0.1}
+                />
+              ))}
+            </RadarChart>
+          </ChartContainer>
+        )}
+        <div className="mt-2 flex flex-wrap items-center justify-center gap-3 text-xs text-muted-foreground">
+          {CABANG_LIST.map((c) => (
+            <span key={c.id} className="flex items-center gap-1.5">
+              <span className="h-0.5 w-4 rounded-full" style={{ backgroundColor: c.color }} /> {c.pic}
+            </span>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -1825,6 +1934,7 @@ export default function Dashboard() {
                 orders={ordersList}
                 loading={loading}
               />
+              <RadarOrderCard orders={ordersList} loading={loading} />
             </div>
           </div>
         </div>
