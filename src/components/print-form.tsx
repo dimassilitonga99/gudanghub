@@ -78,20 +78,20 @@ function buildPage(
   })();
 
   const cell: React.CSSProperties = {
-    padding: '5px 4px',
+    padding: '4px 3px',
     border: '1px solid #000',
     fontFamily: 'Arial, sans-serif',
-    fontSize: 15,
+    fontSize: 12,
     fontWeight: 700,
     verticalAlign: 'middle',
     textAlign: 'center',
     lineHeight: 1.2,
   };
   const headerCell = (w?: number): React.CSSProperties => ({
-    padding: '6px 4px',
+    padding: '5px 3px',
     border: '1px solid #000',
     fontFamily: 'Arial, sans-serif',
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: 800,
     textAlign: 'center',
     verticalAlign: 'middle',
@@ -107,38 +107,54 @@ function buildPage(
   ) : null;
 
   return (
-    <div className="print-sheet">
     <div
-      className="print-page-admin"
+      className="print-sheet"
       style={{
+        width: '14cm',
+        height: '21cm',
+        position: 'relative',
+        overflow: 'hidden',
         background: '#fff',
-        color: '#000',
-        padding: '28px 32px',
-        maxWidth: 850,
+        boxShadow: '0 8px 30px rgba(0,0,0,0.25)',
         margin: '0 auto 24px',
-        boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
-        fontFamily: 'Arial, sans-serif',
-        fontSize: 14,
-        minHeight: 500,
-        pageBreakAfter: 'always',
+        boxSizing: 'border-box',
       }}
     >
+      <div
+        className="print-page-admin"
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          width: '21cm',
+          height: '14cm',
+          boxSizing: 'border-box',
+          padding: '4mm 6mm',
+          margin: 0,
+          transform: 'translate(-50%, -50%) rotate(-90deg)',
+          transformOrigin: 'center center',
+          background: '#fff',
+          color: '#000',
+          fontFamily: 'Arial, sans-serif',
+          fontSize: 13,
+        }}
+      >
       {/* KOP */}
       <table width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse', marginBottom: 0 }}>
         <tbody>
           <tr>
-            <td style={{ verticalAlign: 'top', paddingBottom: 10, paddingTop: 2 }}>
-              <div className="print-kop-title" style={{ fontFamily: 'Arial, sans-serif', fontSize: 38, fontWeight: 900, lineHeight: 1, letterSpacing: -1 }}>
+            <td style={{ verticalAlign: 'top', paddingBottom: 8, paddingTop: 2 }}>
+              <div className="print-kop-title" style={{ fontFamily: 'Arial, sans-serif', fontSize: 28, fontWeight: 900, lineHeight: 1, letterSpacing: -1 }}>
                 <span style={{ color: '#E67E22' }}>FORM</span>
                 <span style={{ color: '#1B4F94' }}> ORDER BARANG</span>
               </div>
             </td>
-            <td style={{ verticalAlign: 'top', textAlign: 'right', width: 170, paddingBottom: 10 }}>
+            <td style={{ verticalAlign: 'top', textAlign: 'right', width: 140, paddingBottom: 8 }}>
               <img
                 className="print-kop-logo"
                 src="./images/logo/logo-nk.png"
                 alt="Logo Nasional Kitchen"
-                style={{ width: 140, height: 'auto', display: 'block', marginLeft: 'auto' }}
+                style={{ width: 120, height: 'auto', display: 'block', marginLeft: 'auto' }}
                 crossOrigin="anonymous"
                 onError={(e) => {
                   (e.currentTarget as HTMLImageElement).style.display = 'none';
@@ -148,13 +164,13 @@ function buildPage(
           </tr>
         </tbody>
       </table>
-      <div style={{ borderTop: '1px solid #000', marginBottom: 8 }} />
+      <div style={{ borderTop: '1px solid #000', marginBottom: 6 }} />
 
       {/* INFO */}
-      <table className="print-info-table" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse', marginBottom: 10, fontFamily: 'Arial, sans-serif', fontSize: 14, color: '#000' }}>
+      <table className="print-info-table" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse', marginBottom: 8, fontFamily: 'Arial, sans-serif', fontSize: 12, color: '#000' }}>
         <tbody>
           <tr>
-            <td className="info-col-label" style={{ padding: '2px 0', width: 150, fontWeight: 700, verticalAlign: 'top' }}>DIBUAT OLEH</td>
+            <td className="info-col-label" style={{ padding: '2px 0', width: 120, fontWeight: 700, verticalAlign: 'top' }}>DIBUAT OLEH</td>
             <td style={{ padding: '2px 0', verticalAlign: 'top', fontWeight: 600 }}>: {info.pic}</td>
             <td style={{ padding: '2px 0', verticalAlign: 'top' }} />
           </tr>
@@ -180,16 +196,16 @@ function buildPage(
       </table>
 
       {/* TABEL ITEM */}
-      <table className="print-items-table" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse', border: '1px solid #000', marginBottom: 20 }}>
+      <table className="print-items-table" width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse', border: '1px solid #000', marginBottom: 12 }}>
         <thead>
           <tr style={{ background: '#B4D6F0' }}>
-            <th style={headerCell(52)}>STOCK<br />SISTEM</th>
-            <th style={headerCell(52)}>STOCK<br />(Gudang)</th>
-            <th style={headerCell(46)}>STOCK<br />(Rak)</th>
-            <th style={headerCell(54)}>JMLH<br />ORDER</th>
-            <th style={headerCell(68)}>KODE ITEM</th>
+            <th style={headerCell(68)}>STOCK<br />SISTEM</th>
+            <th style={headerCell(68)}>STOCK<br />(Gudang)</th>
+            <th style={headerCell(62)}>STOCK<br />(Rak)</th>
+            <th style={headerCell(72)}>JMLH<br />ORDER</th>
+            <th style={headerCell(85)}>KODE ITEM</th>
             <th style={headerCell()}>NAMA ITEM</th>
-            <th style={headerCell(68)}>JENIS</th>
+            <th style={headerCell(85)}>JENIS</th>
           </tr>
         </thead>
         <tbody>
@@ -204,8 +220,8 @@ function buildPage(
                 <td style={{ ...cell, color: '#00B050', fontWeight: 800 }}>
                   {it.qty} {String(it.satuan || 'PCS').toUpperCase()}
                 </td>
-                <td style={{ ...cell, padding: '5px 8px', fontSize: 13 }}>{it.kode}</td>
-                <td style={{ ...cell, padding: '5px 8px', fontSize: 13, lineHeight: 1.3 }}>
+                <td style={{ ...cell, padding: '4px 6px', fontSize: 12 }}>{it.kode}</td>
+                <td style={{ ...cell, padding: '4px 6px', fontSize: 12, lineHeight: 1.25 }}>
                   {String(it.nama || '').toUpperCase()}
                   {it.catatanItem ? (
                     <span style={{ color: '#DC2626', fontWeight: 800, fontStyle: 'italic' }}>
@@ -213,7 +229,7 @@ function buildPage(
                     </span>
                   ) : null}
                 </td>
-                <td style={{ ...cell, padding: '5px 6px', fontSize: 13, fontWeight: 800 }}>
+                <td style={{ ...cell, padding: '4px 6px', fontSize: 12, fontWeight: 800 }}>
                   {String(it.kategori || 'ELEKTRONIK').toUpperCase()}
                 </td>
               </tr>
@@ -226,26 +242,26 @@ function buildPage(
       <table className="print-sign-table" width="100%" cellPadding={0} cellSpacing={0} style={{ border: '1px solid #000', borderCollapse: 'collapse' }}>
         <tbody>
           <tr>
-            <td style={{ ...signBase, textAlign: 'center', padding: '12px 20px 3px', width: '33%', fontSize: 13 }}>pengantar,</td>
-            <td style={{ ...signBase, textAlign: 'center', padding: '12px 20px 3px', width: '34%', fontSize: 13 }}>Persetujuan,</td>
-            <td style={{ ...signBase, textAlign: 'center', padding: '12px 20px 3px', width: '33%', fontSize: 13 }}>Penerima,</td>
+            <td style={{ ...signBase, textAlign: 'center', padding: '6px 12px 2px', width: '33%', fontSize: 12 }}>pengantar,</td>
+            <td style={{ ...signBase, textAlign: 'center', padding: '6px 12px 2px', width: '34%', fontSize: 12 }}>Persetujuan,</td>
+            <td style={{ ...signBase, textAlign: 'center', padding: '6px 12px 2px', width: '33%', fontSize: 12 }}>Penerima,</td>
           </tr>
           <tr>
-            <td className="print-sign-space" colSpan={3} style={{ padding: '25px 0' }}>&nbsp;</td>
+            <td className="print-sign-space" colSpan={3} style={{ padding: '16px 0' }}>&nbsp;</td>
           </tr>
           <tr>
-            <td style={{ ...signBase, textAlign: 'center', padding: '0 20px 3px', fontSize: 13, fontWeight: 600 }}>(_______________)</td>
-            <td style={{ ...signBase, textAlign: 'center', padding: '0 20px 3px', fontSize: 13, fontWeight: 600 }}>(_______________)</td>
-            <td style={{ ...signBase, textAlign: 'center', padding: '0 20px 3px', fontSize: 13, fontWeight: 600 }}>(_______________)</td>
+            <td style={{ ...signBase, textAlign: 'center', padding: '0 12px 2px', fontSize: 12, fontWeight: 600 }}>(_______________)</td>
+            <td style={{ ...signBase, textAlign: 'center', padding: '0 12px 2px', fontSize: 12, fontWeight: 600 }}>(_______________)</td>
+            <td style={{ ...signBase, textAlign: 'center', padding: '0 12px 2px', fontSize: 12, fontWeight: 600 }}>(_______________)</td>
           </tr>
           <tr>
-            <td style={{ ...signBase, textAlign: 'center', padding: '0 20px 12px', fontSize: 14, fontWeight: 900 }}>Driver</td>
-            <td style={{ ...signBase, textAlign: 'center', padding: '0 20px 12px', fontSize: 14, fontWeight: 900 }}>SPV Gudang</td>
-            <td style={{ ...signBase, textAlign: 'center', padding: '0 20px 12px', fontSize: 14, fontWeight: 900 }}>SPV Cabang</td>
+            <td style={{ ...signBase, textAlign: 'center', padding: '0 12px 6px', fontSize: 13, fontWeight: 900 }}>Driver</td>
+            <td style={{ ...signBase, textAlign: 'center', padding: '0 12px 6px', fontSize: 13, fontWeight: 900 }}>SPV Gudang</td>
+            <td style={{ ...signBase, textAlign: 'center', padding: '0 12px 6px', fontSize: 13, fontWeight: 900 }}>SPV Cabang</td>
           </tr>
         </tbody>
       </table>
-    </div>
+      </div>
     </div>
   );
 }
@@ -297,7 +313,7 @@ export default function PrintFormModal({
     try {
       const el = pagesRef.current;
       if (!el) return;
-      const pageEls = Array.from(el.querySelectorAll<HTMLElement>('.print-page-admin'));
+      const pageEls = Array.from(el.querySelectorAll<HTMLElement>('.print-sheet'));
       const { downloadJpgPages } = await import('@/lib/utils');
       await downloadJpgPages(pageEls, `Form-Order-${orderId}`, (done, total) => {
         toast.info(`Memproses halaman ${done}/${total}...`);
@@ -330,64 +346,74 @@ export default function PrintFormModal({
     box-sizing: border-box !important;
   }
   @page {
-    size: 14.5cm 21cm;
+    size: 14cm 21cm;
     margin: 0;
   }
   html, body {
     margin: 0 !important;
     padding: 0 !important;
-    width: 100% !important;
+    width: 14cm !important;
+    height: 21cm !important;
     background: #fff !important;
     font-family: Arial, sans-serif !important;
   }
-  /* Lembar cetak: tepat 14.5cm lebar (portrait), margin 0 */
+  /* Lembar portrait 14×21 cm (kertas 21×14 cm portrait) */
   .print-sheet {
-    width: 14.5cm !important;
-    max-width: 14.5cm !important;
-    margin: 0 auto;
+    position: relative !important;
+    width: 14cm !important;
+    height: 21cm !important;
+    min-height: 21cm !important;
+    max-height: 21cm !important;
+    margin: 0 auto !important;
     padding: 0 !important;
     background: #fff !important;
-    page-break-after: always;
-    break-after: page;
-    box-sizing: border-box !important;
     overflow: hidden !important;
+    page-break-after: always !important;
+    break-after: page !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    box-sizing: border-box !important;
   }
   .print-sheet:last-child {
-    page-break-after: auto;
-    break-after: auto;
+    page-break-after: auto !important;
+    break-after: auto !important;
   }
-  /* Form menempel di pojok kiri atas, lebar 100% kertas, margin 0, tanpa tepi/border */
+  /* Form di-rotate 90 derajat ke kiri, auto-fit pas selebar dan setinggi kertas */
   .print-page-admin {
-    width: 14.5cm !important;
-    max-width: 14.5cm !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    width: 21cm !important;
+    height: 14cm !important;
+    max-width: none !important;
     min-height: 0 !important;
-    height: auto !important;
     margin: 0 !important;
-    padding: 2.5mm 3.5mm !important;
+    padding: 4mm 6mm !important;
+    box-sizing: border-box !important;
     box-shadow: none !important;
     background: #fff !important;
-    transform: none !important;
-    box-sizing: border-box !important;
+    transform: translate(-50%, -50%) rotate(-90deg) scale(var(--fit, 1)) !important;
+    transform-origin: center center !important;
   }
   .print-kop-title {
-    font-size: 22px !important;
+    font-size: 26px !important;
     line-height: 1.1 !important;
     letter-spacing: -0.5px !important;
   }
   .print-kop-logo {
-    width: 105px !important;
-    max-width: 105px !important;
+    width: 120px !important;
+    max-width: 120px !important;
   }
   .print-info-table {
-    font-size: 10.5px !important;
-    margin-bottom: 5px !important;
+    font-size: 11.5px !important;
+    margin-bottom: 6px !important;
   }
   .print-info-table td {
     padding: 1px 0 !important;
-    font-size: 10.5px !important;
+    font-size: 11.5px !important;
   }
   .print-info-table .info-col-label {
-    width: 95px !important;
+    width: 110px !important;
   }
   .print-items-table {
     width: 100% !important;
@@ -395,13 +421,13 @@ export default function PrintFormModal({
     margin-bottom: 8px !important;
   }
   .print-items-table th {
-    font-size: 9.5px !important;
-    padding: 3px 2px !important;
+    font-size: 10.5px !important;
+    padding: 4px 3px !important;
     line-height: 1.15 !important;
   }
   .print-items-table td {
-    font-size: 10.5px !important;
-    padding: 3px 2px !important;
+    font-size: 11.5px !important;
+    padding: 4px 3px !important;
     line-height: 1.2 !important;
   }
   .print-sign-table {
@@ -409,51 +435,52 @@ export default function PrintFormModal({
     margin-top: 4px !important;
   }
   .print-sign-table td {
-    font-size: 10px !important;
+    font-size: 11px !important;
     padding: 0 4px !important;
   }
   .print-sign-space {
-    padding: 10px 0 !important;
+    padding: 14px 0 !important;
   }
   @media screen {
     body {
       background: #52525b !important;
-      padding: 16px !important;
+      padding: 20px 10px !important;
       display: flex !important;
       flex-direction: column !important;
       align-items: center !important;
-      gap: 16px !important;
+      gap: 20px !important;
+      min-height: 100vh !important;
+      height: auto !important;
     }
     .print-sheet {
-      box-shadow: 0 6px 24px rgba(0,0,0,0.35) !important;
-      min-height: 21cm !important;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4) !important;
     }
   }
   @media print {
-    body {
+    html, body {
+      width: 14cm !important;
+      height: 21cm !important;
       background: #fff !important;
       padding: 0 !important;
+      margin: 0 !important;
     }
     .print-sheet {
-      width: 100% !important;
-      max-width: 100% !important;
-      min-height: 100% !important;
       box-shadow: none !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      page-break-inside: avoid !important;
-      break-inside: avoid !important;
-    }
-    .print-page-admin {
-      width: 100% !important;
-      max-width: 100% !important;
-      margin: 0 !important;
-      padding: 0 !important;
     }
   }
 </style></head><body>${el.innerHTML}
 <script>
   window.addEventListener('load', function () {
+    var TARGET_W = 793.7; // 21cm in px
+    var TARGET_H = 529.1; // 14cm in px
+    document.querySelectorAll('.print-page-admin').forEach(function (p) {
+      var w = p.scrollWidth || TARGET_W;
+      var h = p.scrollHeight || TARGET_H;
+      var s = Math.min(TARGET_W / w, TARGET_H / h, 1);
+      if (s < 0.999) {
+        p.style.setProperty('--fit', s.toFixed(4));
+      }
+    });
     setTimeout(function () {
       try { window.print(); } catch (e) {}
     }, 400);
@@ -477,7 +504,7 @@ export default function PrintFormModal({
               {pages.length > 1 ? ` (${pages.length} halaman)` : ''}
             </DialogTitle>
             <p className="text-[11px] font-medium text-gray-500">
-              Kertas portrait 14,5×21 cm · form lurus + auto-fit
+              Kertas portrait 21×14 cm · rotate 90° ke kiri + auto-fit
             </p>
           </div>
           <div className="flex gap-2">
