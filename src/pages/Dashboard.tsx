@@ -399,20 +399,29 @@ function LineChart({
 }
 
 /* ─────────────────────────────────────────────────────────────────────
-   RADAR CHART — order per cabang, 6 bulan terakhir (recharts)
+   RADAR CHART — order per cabang, Januari s/d bulan berjalan (recharts)
+   Jika belum ada order di rentang, tampilkan data contoh supaya
+   bentuk radar terlihat (badge "Contoh data").
    ───────────────────────────────────────────────────────────────────── */
 
-const RADAR_MONTHS = 6;
 const MONTH_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
 
+// Data contoh per cabang (index = bulan mulai Januari)
+const RADAR_DUMMY: Record<string, number[]> = {
+  CB001: [14, 18, 12, 22, 17, 25, 20, 28, 16, 19, 24, 21],
+  CB002: [9, 12, 15, 11, 18, 14, 21, 17, 23, 13, 20, 16],
+  CB003: [16, 11, 20, 14, 12, 19, 15, 13, 24, 18, 10, 22],
+  CB004: [7, 14, 10, 16, 21, 12, 18, 22, 15, 11, 19, 13],
+};
+
 function RadarOrderCard({ orders, loading }: { orders: Order[]; loading: boolean }) {
-  const { data, growth } = useMemo(() => {
+  const { data, growth, isDummy, rangeLabel } = useMemo(() => {
     const now = new Date();
     const wita = new Date(now.getTime() + APP.timezoneOffset * 3600 * 1000);
+    // Januari s/d bulan berjalan (tahun berjalan)
     const months: { y: number; m: number; label: string }[] = [];
-    for (let i = RADAR_MONTHS - 1; i >= 0; i--) {
-      const d = new Date(Date.UTC(wita.getUTCFullYear(), wita.getUTCMonth() - i, 1));
-      months.push({ y: d.getUTCFullYear(), m: d.getUTCMonth(), label: MONTH_SHORT[d.getUTCMonth()] });
+    for (let m = 0; m <= wita.getUTCMonth(); m++) {
+      months.push({ y: wita.getUTCFullYear(), m, label: MONTH_SHORT[m] });
     }
     const buckets = months.map((mo) => {
       const row: Record<string, number | string> = { month: mo.label };
@@ -431,10 +440,23 @@ function RadarOrderCard({ orders, loading }: { orders: Order[]; loading: boolean
     }
     const sum = (b: Record<string, number | string>) =>
       CABANG_LIST.reduce((a, c) => a + (b[c.id] as number), 0);
+    const total = buckets.reduce((a, b) => a + sum(b), 0);
+    // Belum ada order sama sekali → pakai data contoh supaya bentuk radar terlihat
+    const isDummy = total === 0;
+    if (isDummy) {
+      buckets.forEach((row, i) => {
+        for (const c of CABANG_LIST) {
+          row[c.id] = (RADAR_DUMMY[c.id] || [])[i] ?? 0;
+        }
+      });
+    }
     const cur = sum(buckets[buckets.length - 1]);
-    const prev = sum(buckets[buckets.length - 2]);
+    const prev = buckets.length > 1 ? sum(buckets[buckets.length - 2]) : 0;
     const growth = prev > 0 ? ((cur - prev) / prev) * 100 : cur > 0 ? 100 : 0;
-    return { data: buckets, growth };
+    const rangeLabel = months.length > 1
+      ? `${months[0].label}–${months[months.length - 1].label} ${months[0].y}`
+      : `${months[0].label} ${months[0].y}`;
+    return { data: buckets, growth, isDummy, rangeLabel };
   }, [orders]);
 
   const chartConfig = useMemo(() => {
@@ -453,19 +475,25 @@ function RadarOrderCard({ orders, loading }: { orders: Order[]; loading: boolean
             <Icon name="chart-mixed" size={16} className="text-brand" />
             Radar Order per Cabang
           </h3>
-          <Badge
-            variant="outline"
-            className={cn(
-              'gap-1 border-none',
-              growthUp ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger',
-            )}
-          >
-            <Icon name={growthUp ? 'arrow-trend-up' : 'arrow-trend-down'} size={12} />
-            <span>{growth >= 0 ? '+' : ''}{growth.toFixed(1)}%</span>
-          </Badge>
+          {isDummy ? (
+            <Badge variant="outline" className="border-none bg-info/10 text-info">
+              Contoh data — belum ada order
+            </Badge>
+          ) : (
+            <Badge
+              variant="outline"
+              className={cn(
+                'gap-1 border-none',
+                growthUp ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger',
+              )}
+            >
+              <Icon name={growthUp ? 'arrow-trend-up' : 'arrow-trend-down'} size={12} />
+              <span>{growth >= 0 ? '+' : ''}{growth.toFixed(1)}%</span>
+            </Badge>
+          )}
         </div>
         <p className="mb-2 text-xs text-muted-foreground">
-          Jumlah order tiap cabang · 6 bulan terakhir
+          Jumlah order tiap cabang · {rangeLabel}
         </p>
         {loading ? (
           <Skeleton className="h-56 w-full" />
