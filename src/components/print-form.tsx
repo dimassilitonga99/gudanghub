@@ -13,8 +13,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-// Kertas cetak 21×14,5 cm landscape — 7 baris/halaman agar kop+tabel+ttd muat utuh
-export const PRINT_ITEMS_PER_PAGE = 7;
+// Kertas 21×15,1 cm — 10 item/halaman, form + tanda tangan tetap satu lembar
+export const PRINT_ITEMS_PER_PAGE = 10;
 
 export interface PrintItem {
   kode: string;
@@ -127,11 +127,12 @@ function buildPage(
           top: '50%',
           left: '50%',
           width: '15.1cm',
-          height: '21cm',
+          height: 'auto',
+          minHeight: '21cm',
           boxSizing: 'border-box',
           padding: '4mm 5mm',
           margin: 0,
-          transform: 'translate(-50%, -50%) rotate(-90deg)',
+          transform: 'translate(-50%, -50%) rotate(-90deg) scale(var(--fit, 1))',
           transformOrigin: 'center center',
           background: '#fff',
           color: '#000',
@@ -305,6 +306,22 @@ export default function PrintFormModal({
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const fitPages = () => {
+      pagesRef.current?.querySelectorAll<HTMLElement>('.print-page-admin').forEach((page) => {
+        const scale = Math.min(570.7 / (page.scrollWidth || 570.7), 793.7 / (page.scrollHeight || 793.7), 1);
+        page.style.setProperty('--fit', scale.toFixed(4));
+      });
+    };
+    const frame = window.requestAnimationFrame(fitPages);
+    const timer = window.setTimeout(fitPages, 200);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(timer);
+    };
+  }, [open, pages.length]);
 
   if (!open) return null;
 
