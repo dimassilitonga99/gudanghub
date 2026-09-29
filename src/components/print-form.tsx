@@ -325,23 +325,10 @@ export default function PrintFormModal({
 <style>
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   body { margin: 0; background: #fff; }
-  /* Lembar portrait 14,5×21 cm (kertas 21×14,5 didirikan).
-     Form landscape 21×14,5 dirotasi 90° ke kiri, memenuhi lembar. */
-  @page { size: 14.5cm 21cm; margin: 0; }
-  .print-sheet {
-    position: relative;
-    width: 14.5cm;
-    height: 21cm;
-    overflow: hidden;
-    background: #fff;
-    page-break-after: always;
-    break-after: page;
-  }
-  .print-sheet:last-child { page-break-after: auto; break-after: auto; }
+  /* Preview di layar: form TEGAK (landscape 21×14,5), tanpa rotasi.
+     Rotasi 90° ke kiri hanya saat print. */
+  .print-sheet { width: 21cm; background: #fff; }
   .print-page-admin {
-    position: absolute;
-    top: 50%;
-    left: 50%;
     box-sizing: border-box;
     width: 21cm !important;
     min-height: 14.5cm !important;
@@ -349,28 +336,43 @@ export default function PrintFormModal({
     max-width: none !important;
     margin: 0 !important;
     padding: 4mm !important;
-    box-shadow: none !important;
-    transform: translate(-50%, -50%) rotate(-90deg);
-    transform-origin: center center;
   }
   @media print {
+    /* Lembar portrait 14,5×21 cm (kertas 21×14,5 didirikan);
+       form landscape dirotasi 90° ke kiri memenuhi lembar. */
+    @page { size: 14.5cm 21cm; margin: 0; }
+    .print-sheet {
+      position: relative;
+      width: 14.5cm;
+      height: 21cm;
+      overflow: hidden;
+      page-break-after: always;
+      break-after: page;
+    }
+    .print-sheet:last-child { page-break-after: auto; break-after: auto; }
+    .print-page-admin {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      box-shadow: none !important;
+      transform: translate(-50%, -50%) rotate(-90deg) scale(var(--fit, 1));
+      transform-origin: center center;
+    }
     .print-page-admin td, .print-page-admin th { padding: 3px 4px !important; }
   }
   @media screen {
     body { background: #52525b; padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+    .print-sheet { box-shadow: 0 6px 24px rgba(0,0,0,.35); margin-bottom: 16px; }
   }
 </style></head><body>${el.innerHTML}
 <script>
   // Auto-fit: kalau konten form lebih tinggi dari 14,5cm (548px @96dpi),
-  // kecilkan proporsional agar pas di lembar (dihitung sebelum print).
+  // simpan faktor skala ke --fit (dipakai hanya saat print, preview tetap tegak).
   window.addEventListener('load', function () {
     var MAX = 548; // 14.5cm
     document.querySelectorAll('.print-page-admin').forEach(function (p) {
       var h = p.scrollHeight;
-      if (h > MAX) {
-        var s = MAX / h;
-        p.style.transform = 'translate(-50%, -50%) rotate(-90deg) scale(' + s + ')';
-      }
+      if (h > MAX) p.style.setProperty('--fit', String(MAX / h));
     });
     setTimeout(function () {
       try { window.print(); } catch (e) {}
