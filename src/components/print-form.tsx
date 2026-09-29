@@ -127,7 +127,8 @@ function buildPage(
           top: '50%',
           left: '50%',
           width: '15.1cm',
-          height: '21cm',
+          height: 'auto',
+          minHeight: '21cm',
           boxSizing: 'border-box',
           padding: '4mm 5mm',
           margin: 0,
@@ -398,9 +399,9 @@ export default function PrintFormModal({
     top: 50% !important;
     left: 50% !important;
     width: 15.1cm !important;
-    height: 21cm !important;
+    height: auto !important;
     max-width: none !important;
-    min-height: 0 !important;
+    min-height: 21cm !important;
     overflow: visible !important;
     margin: 0 !important;
     padding: 4mm 5mm !important;
@@ -488,15 +489,18 @@ export default function PrintFormModal({
 </style></head><body>${el.innerHTML}
 <script>
   window.addEventListener('load', function () {
-    var TARGET_W = 570.7; // 15.1cm in px
-    var TARGET_H = 793.7; // 21cm in px
+    var TARGET_W = 570.7; // 15.1cm — lebar layout form sebelum rotasi
+    var TARGET_H = 793.7; // 21cm — tinggi layout form sebelum rotasi
     document.querySelectorAll('.print-page-admin').forEach(function (p) {
-      var scale = Math.min(TARGET_H / Math.max(p.scrollHeight, TARGET_H), TARGET_W / (p.offsetWidth || TARGET_W), 1);
+      // scrollWidth/scrollHeight = ukuran layout (tidak terpengaruh rotate).
+      var contentW = p.scrollWidth || TARGET_W;
+      var contentH = p.scrollHeight || TARGET_H;
+      var scale = Math.min(TARGET_W / Math.max(contentW, TARGET_W), TARGET_H / Math.max(contentH, TARGET_H), 1);
       p.style.setProperty('--fit', scale.toFixed(4));
     });
     setTimeout(function () {
       try { window.print(); } catch (e) {}
-    }, 400);
+    }, 300);
   });
 </script>
 </body></html>`;
