@@ -282,7 +282,7 @@ export default function PrintFormModal({
     const handler = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p') {
         e.preventDefault();
-        window.print();
+        doPrint();
       }
     };
     window.addEventListener('keydown', handler);
@@ -307,6 +307,56 @@ export default function PrintFormModal({
     } finally {
       setBusy(false);
     }
+  };
+
+  // Cetak via window baru: hanya berisi form + CSS print bersih.
+  // Print langsung dari modal (window.print + visibility hack) tidak andal:
+  // transform dialog & scaling Chrome membuat hasil kacau.
+  const doPrint = () => {
+    const el = pagesRef.current;
+    if (!el) return;
+    const w = window.open('', '_blank', 'width=980,height=760');
+    if (!w) {
+      toastError('Popup diblokir browser. Izinkan popup untuk situs ini lalu coba lagi.');
+      return;
+    }
+    const html = `<!doctype html><html><head><meta charset="utf-8"><title>Form Order ${orderId}</title>
+<base href="${location.href}">
+<style>
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; background: #fff; }
+  @page { size: 21cm 14.5cm; margin: 0; }
+  .print-sheet { width: 21cm; height: 14.5cm; overflow: hidden; page-break-after: always; break-after: page; }
+  .print-sheet:last-child { page-break-after: auto; break-after: auto; }
+  .print-page-admin {
+    box-sizing: border-box;
+    width: 21cm !important;
+    height: 14.5cm !important;
+    min-height: 0 !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 5mm !important;
+    box-shadow: none !important;
+    overflow: hidden;
+    page-break-after: auto !important;
+  }
+  @media screen {
+    body { background: #52525b; padding: 16px; }
+    .print-sheet { margin: 0 auto 16px; box-shadow: 0 6px 24px rgba(0,0,0,.35); }
+  }
+</style></head><body>${el.innerHTML}</body></html>`;
+    w.document.open();
+    w.document.write(html);
+    w.document.close();
+    w.focus();
+    // Tunggu render + logo termuat sebelum dialog print muncul (preview dulu di window baru)
+    setTimeout(() => {
+      try {
+        w.print();
+      } catch {
+        /* user bisa Ctrl+P manual di window baru */
+      }
+    }, 600);
   };
 
   return (
@@ -348,7 +398,7 @@ export default function PrintFormModal({
             </button>
             <button
               type="button"
-              onClick={() => window.print()}
+              onClick={() => doPrint()}
               style={{
                 background: showStatus
                   ? 'linear-gradient(135deg, #6366f1, #4f46e5)'
@@ -388,48 +438,7 @@ export default function PrintFormModal({
           )}
         </div>
 
-        <style>{`
-          @media print {
-            body * { visibility: hidden; }
-            .print-page-admin, .print-page-admin * { visibility: visible; }
-            .print-modal-root {
-              position: static !important;
-              transform: none !important;
-              left: auto !important;
-              top: auto !important;
-              max-width: 100% !important;
-              max-height: none !important;
-              overflow: visible !important;
-              padding: 0 !important;
-              margin: 0 !important;
-              box-shadow: none !important;
-              background: #fff !important;
-            }
-            /* Kertas 21×14,5 cm landscape, tanpa margin — form memenuhi lembar.
-               (Rotasi CSS saat print tidak andal: Chrome menskalanya salah.) */
-            @page { size: 21cm 14.5cm; margin: 0; }
-            .print-sheet {
-              width: 21cm !important;
-              height: 14.5cm !important;
-              overflow: hidden;
-              page-break-after: always;
-              break-after: page;
-            }
-            .print-sheet:last-child { page-break-after: auto; break-after: auto; }
-            .print-page-admin {
-              width: 21cm !important;
-              height: 14.5cm !important;
-              min-height: 0 !important;
-              max-width: none !important;
-              margin: 0 !important;
-              padding: 5mm !important;
-              box-shadow: none !important;
-              page-break-after: auto !important;
-              overflow: hidden;
-            }
-            * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-          }
-        `}</style>
+        {/* CSS print berada di window cetak (doPrint) — print dari modal tidak andal */}
       </DialogContent>
     </Dialog>
   );
