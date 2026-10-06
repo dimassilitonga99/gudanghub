@@ -1,4 +1,5 @@
-import { API_URL, SETTINGS } from './config';
+import { API_URL, IPOS, SETTINGS } from './config';
+import type { Barang } from './config';
 import { getSession, setSession } from './session';
 
 export { API_URL };
@@ -550,27 +551,93 @@ export const auth = {
   },
 };
 
+// ─────────────────────────────────────────────────────────────────────────
+// KATALOG — sumber: iPos API NK (realtime, baca-saja)
+// ─────────────────────────────────────────────────────────────────────────
+
+interface IposItem {
+  kode?: string;
+  nama?: string;
+  satuan?: string;
+  kategori?: string;
+  hpp?: number;
+  stok?: number;
+  stok_kantor?: Record<string, number>;
+}
+
+function mapIposItem(x: IposItem): Barang {
+  const stokToko = x.stok_kantor ? Number(Object.values(x.stok_kantor)[0] ?? 0) : 0;
+  return {
+    KODE_BARANG: String(x.kode || ''),
+    NAMA_BARANG: String(x.nama || ''),
+    KATEGORI: x.kategori,
+    SATUAN: x.satuan,
+    HARGA: x.hpp, // harga = HPP iPos (pengganti harga jual)
+    STOK: x.stok,
+    STOK_GUDANG: x.stok,
+    STOK_TOKO: stokToko,
+  };
+}
+
+const IPOS_TTL = 5 * 60 * 1000;
+const IPOS_CACHE_KEY = 'getBarang::{}';
+let iposPending: Promise<ApiResult> | null = null;
+
+function loadIpos(): Promise<ApiResult> {
+  if (iposPending) return iposPending;
+  iposPending = (async () => {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 30000);
+    try {
+      const r = await fetch(`${IPOS.url}/api/items?key=${encodeURIComponent(IPOS.key)}`, {
+        signal: ctrl.signal,
+        cache: 'no-store',
+      });
+      if (!r.ok) return { status: 'error', message: 'iPos API: HTTP ' + r.status };
+      const j = await r.json();
+      const data = (Array.isArray(j?.data) ? (j.data as IposItem[]) : []).map(mapIposItem);
+      const result: ApiResult = { status: 'ok', data };
+      memCache.set(IPOS_CACHE_KEY, { data: result, time: Date.now() });
+      setLSCache('getBarang', result);
+      return result;
+    } catch (e) {
+      return { status: 'error', message: (e as Error)?.message || 'iPos API gagal' };
+    } finally {
+      clearTimeout(t);
+    }
+  })();
+  void iposPending.finally(() => {
+    iposPending = null;
+  });
+  return iposPending;
+}
+
 export const katalog = {
   getAll(options: CallOptions = {}): Promise<ApiResult> {
-    return callApi('getBarang', {}, {
-      cache: options.cache !== false,
-      cacheTtl: 5 * 60 * 1000,
-      timeout: 45000,
-      maxRetries: options.maxRetries ?? 2,
-    });
+    const cached = memCache.get(IPOS_CACHE_KEY);
+    if (options.cache !== false && cached && Date.now() - cached.time < IPOS_TTL) {
+      return Promise.resolve(cached.data);
+    }
+    return loadIpos();
   },
   getAllFast(onFresh?: (r: ApiResult) => void): Promise<ApiResult> {
-    return callApiStale('getBarang', {}, {
-      ttl: 5 * 60 * 1000,
-      maxAge: 24 * 60 * 60 * 1000,
-      onFresh,
-      timeout: 45000,
-    });
+    const cached = getLSCache('getBarang');
+    // Selalu segarkan di background: katalog harus realtime tiap halaman dibuka.
+    setTimeout(() => {
+      loadIpos()
+        .then((r) => {
+          if (r.status === 'ok' && onFresh) onFresh(r);
+        })
+        .catch(() => undefined);
+    }, 100);
+    return cached
+      ? Promise.resolve({ ...cached.data, _fromCache: true, _cacheAge: cached.age, _stale: true })
+      : loadIpos();
   },
   async refresh(): Promise<ApiResult> {
     clearCache('getBarang');
     clearLSCache('getBarang');
-    return katalog.getAll({ cache: false });
+    return loadIpos();
   },
   create(data: Record<string, unknown>): Promise<ApiResult> {
     return callApi('createBarang', data, { dedupe: false, timeout: 90000, maxRetries: 3 });
