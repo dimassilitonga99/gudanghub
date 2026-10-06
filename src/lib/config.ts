@@ -1,13 +1,5 @@
 export const API_URL = 'https://gudanghub-api-proxy.silitongadimas.workers.dev';
 
-// iPos API NK (Toko Nasional Kitchen, kantor INPR) — sumber katalog realtime.
-// Di-relay ipos-api lokal (route /nk) via Tailscale Serve; browser HTTPS tidak
-// boleh fetch http:// langsung (mixed content).
-export const IPOS = {
-  url: 'https://admin-dimas.tail07efa8.ts.net:8443/ipos/nk',
-  key: 'ipos_7f3c1a9e4b6d2f8a5c0e9d1b3a6f4c2e',
-};
-
 export const APP = {
   name: 'GudangHub',
   version: '3.0.0',
