@@ -276,37 +276,50 @@ export function playTestSound(): void {
   }
 }
 
+async function inlineImages(root: HTMLElement): Promise<void> {
+  const imgs = Array.from(root.querySelectorAll('img'));
+  await Promise.all(
+    imgs.map(async (img) => {
+      try {
+        const res = await fetch(img.src);
+        const blob = await res.blob();
+        const dataUrl = await new Promise<string>((resolve, reject) => {
+          const fr = new FileReader();
+          fr.onload = () => resolve(String(fr.result));
+          fr.onerror = () => reject(new Error('read error'));
+          fr.readAsDataURL(blob);
+        });
+        img.removeAttribute('crossorigin');
+        img.src = dataUrl;
+      } catch {
+        img.remove();
+      }
+    }),
+  );
+}
+
+function loadSvgImage(svg: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error('Gagal merender halaman gambar.'));
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  });
+}
+
 export async function downloadJpgPages(
   pages: HTMLElement[],
   filePrefix: string,
   onProgress?: (done: number, total: number) => void,
 ): Promise<void> {
-  let html2canvas: ((el: HTMLElement, opts?: Record<string, unknown>) => Promise<HTMLCanvasElement>) | null =
-    null;
-  try {
-    const mod = await import('html2canvas');
-    html2canvas = mod.default as unknown as typeof html2canvas;
-  } catch {
-    /* fallback CDN */
-  }
-  if (!html2canvas) {
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
-    await new Promise<void>((resolve, reject) => {
-      script.onload = () => resolve();
-      script.onerror = () => reject(new Error('Gagal memuat library.'));
-      document.head.appendChild(script);
-    });
-    html2canvas = (window as unknown as { html2canvas: typeof html2canvas }).html2canvas;
-  }
-
   const total = pages.length;
   for (let i = 0; i < total; i++) {
     onProgress?.(i + 1, total);
     await new Promise((r) => setTimeout(r, 60));
-    // Capture K L O N form yang bebas-transform, lalu putar -90° lewat canvas.
-    // Alasan: html2canvas salah posisi teks (tak center, mepet border) bila ada leluhur
-    // ber-transform scale — mis. animasi zoom dialog modal. Preview = rotator CSS, hasil = canvas.
+    // Capture K L O N form yang bebas-transform lewat SVG foreignObject, lalu putar -90° di canvas.
+    // Alasan: html2canvas menggambar teks pakai baseline hasil ukur sendiri (+2px) → teks sel
+    // tabel meleset turun mepet border. foreignObject me-render XHTML persis seperti DOM.
+    // Preview = rotator CSS, hasil = canvas.
     const sheet = pages[i];
     const form = sheet.querySelector<HTMLElement>('.print-page-admin') ?? sheet;
     const fit = parseFloat(getComputedStyle(form).getPropertyValue('--fit')) || 1;
@@ -318,14 +331,13 @@ export async function downloadJpgPages(
     document.body.appendChild(holder);
     let canvas: HTMLCanvasElement;
     try {
-      const src = await html2canvas!(clone, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#fff',
-        width: clone.scrollWidth,
-        height: clone.scrollHeight,
-      });
+      await inlineImages(clone);
+      const w = clone.scrollWidth;
+      const h = clone.scrollHeight;
+      const xml = new XMLSerializer().serializeToString(clone);
+      // viewBox 1:1 dengan layout, ukuran intrinsik 2x → hasil tajam seperti scale:2
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w * 2}" height="${h * 2}" viewBox="0 0 ${w} ${h}"><foreignObject x="0" y="0" width="${w}" height="${h}">${xml}</foreignObject></svg>`;
+      const src = await loadSvgImage(svg);
       canvas = document.createElement('canvas');
       canvas.width = src.height;
       canvas.height = src.width;
