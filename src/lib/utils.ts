@@ -304,14 +304,41 @@ export async function downloadJpgPages(
   for (let i = 0; i < total; i++) {
     onProgress?.(i + 1, total);
     await new Promise((r) => setTimeout(r, 60));
-    const canvas = await html2canvas!(pages[i], {
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: '#fff',
-      width: pages[i].scrollWidth,
-      height: pages[i].scrollHeight,
-    });
+    // Capture K L O N form yang bebas-transform, lalu putar -90° lewat canvas.
+    // Alasan: html2canvas salah posisi teks (tak center, mepet border) bila ada leluhur
+    // ber-transform scale — mis. animasi zoom dialog modal. Preview = rotator CSS, hasil = canvas.
+    const sheet = pages[i];
+    const form = sheet.querySelector<HTMLElement>('.print-page-admin') ?? sheet;
+    const fit = parseFloat(getComputedStyle(form).getPropertyValue('--fit')) || 1;
+    const holder = document.createElement('div');
+    holder.style.cssText = 'position:fixed;left:-10000px;top:0;background:#fff';
+    const clone = form.cloneNode(true) as HTMLElement;
+    clone.style.setProperty('transform', 'none', 'important');
+    holder.appendChild(clone);
+    document.body.appendChild(holder);
+    let canvas: HTMLCanvasElement;
+    try {
+      const src = await html2canvas!(clone, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#fff',
+        width: clone.scrollWidth,
+        height: clone.scrollHeight,
+      });
+      canvas = document.createElement('canvas');
+      canvas.width = src.height;
+      canvas.height = src.width;
+      const ctx = canvas.getContext('2d')!;
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.rotate(-Math.PI / 2);
+      ctx.scale(fit, fit);
+      ctx.drawImage(src, -src.width / 2, -src.height / 2);
+    } finally {
+      holder.remove();
+    }
     const link = document.createElement('a');
     link.download = total > 1 ? `${filePrefix}-Hal-${i + 1}.jpg` : `${filePrefix}.jpg`;
     link.href = canvas.toDataURL('image/jpeg', 0.92);
