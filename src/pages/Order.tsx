@@ -223,12 +223,6 @@ function ProductCard({
   const unit = String(product.SATUAN || 'PCS').toUpperCase();
   const harga = Number(product.HARGA) || 0;
   const stock = toInt(product.STOK);
-  const [qtyInput, setQtyInput] = useState(inCart ? cartQty : 1);
-
-  useEffect(() => {
-    setQtyInput(inCart ? cartQty : 1);
-  }, [inCart, cartQty, kode]);
-
   const stockCls = stock === 0 ? 'bg-danger/15 text-danger' : stock <= 5 ? 'bg-warning/15 text-warning' : 'bg-success/15 text-success';
   const stockText = stock === 0 ? 'Habis' : stock <= 5 ? `Sisa ${stock}` : `Stok: ${stock}`;
 
@@ -268,12 +262,8 @@ function ProductCard({
         <Input
           type="number"
           min={1}
-          value={qtyInput}
-          onChange={(e) => {
-            const v = Math.max(1, toInt(e.target.value) || 1);
-            setQtyInput(v);
-            onSetQty(v);
-          }}
+          value={cartQty}
+          onChange={(e) => onSetQty(Math.max(1, toInt(e.target.value) || 1))}
           className="h-7 w-12 px-1 text-center text-sm"
         />
         <Button variant="outline" size="icon" className="h-7 w-7" onClick={onIncrease} aria-label="Tambah qty">
@@ -2460,17 +2450,6 @@ export default function Order() {
               cart={cart}
               productByCode={productByCode}
               onAdd={(b, qty, satuan) => addToCart(b, qty, satuan)}
-              onIncrease={(b) => {
-                const kode = String(b.KODE_BARANG);
-                if (cartRef.current[kode]) {
-                  const item = cartRef.current[kode];
-                  setCartQty(kode, item.qty + 1);
-                }
-              }}
-              onDecrease={(b) => {
-                const kode = String(b.KODE_BARANG);
-                if (cartRef.current[kode]) setCartQty(kode, cartRef.current[kode].qty - 1);
-              }}
               onSetQty={(b, qty) => {
                 const kode = String(b.KODE_BARANG);
                 if (cartRef.current[kode]) setCartQty(kode, qty);
@@ -2599,8 +2578,6 @@ function CatalogTabBody({
   cart,
   productByCode,
   onAdd,
-  onIncrease,
-  onDecrease,
   onSetQty,
   onSetSatuan,
   onManualAdd,
@@ -2613,8 +2590,6 @@ function CatalogTabBody({
   cart: Record<string, CartItem>;
   productByCode: Record<string, Barang>;
   onAdd: (b: Barang, qty: number, satuan: string) => void;
-  onIncrease: (b: Barang) => void;
-  onDecrease: (b: Barang) => void;
   onSetQty: (b: Barang, qty: number) => void;
   onSetSatuan: (b: Barang, satuan: string) => void;
   onManualAdd: (data: { nama: string; kode: string; kategori: string; qty: number; satuan: string; stokGudang: number | ''; stokToko: number | '' }) => void;
@@ -2629,6 +2604,7 @@ function CatalogTabBody({
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [qtyMap, setQtyMap] = useState<Record<string, number>>({});
+  const [satuanMap, setSatuanMap] = useState<Record<string, string>>({});
 
   const isManual = category === '__MANUAL__';
 
@@ -2701,9 +2677,14 @@ function CatalogTabBody({
 
   const getSatuan = (b: Barang) => {
     const kode = String(b.KODE_BARANG);
-    const item = cart[kode];
-    if (item) return item.satuan;
-    return String(b.SATUAN || 'PCS').toUpperCase();
+    return cart[kode]?.satuan || satuanMap[kode] || String(b.SATUAN || 'PCS').toUpperCase();
+  };
+
+  // Draft satuan pra-keranjang: pilihan tetap tersimpan sebelum item ditambahkan
+  const setSatuanLocal = (b: Barang, satuan: string) => {
+    const kode = String(b.KODE_BARANG);
+    setSatuanMap((prev) => ({ ...prev, [kode]: satuan }));
+    if (cart[kode]) onSetSatuan(b, satuan);
   };
 
   return (
@@ -2838,19 +2819,13 @@ function CatalogTabBody({
                     key={kode}
                     product={b}
                     inCart={inCart}
-                    cartQty={cart[kode]?.qty || 1}
+                    cartQty={getQty(kode)}
                     cartSatuan={getSatuan(b)}
                     onAdd={() => onAdd(b, getQty(kode), getSatuan(b))}
-                    onIncrease={() => {
-                      setQtyLocal(kode, getQty(kode) + 1);
-                      onIncrease(b);
-                    }}
-                    onDecrease={() => {
-                      setQtyLocal(kode, Math.max(1, getQty(kode) - 1));
-                      onDecrease(b);
-                    }}
+                    onIncrease={() => setQtyLocal(kode, getQty(kode) + 1)}
+                    onDecrease={() => setQtyLocal(kode, Math.max(1, getQty(kode) - 1))}
                     onSetQty={(qty) => setQtyLocal(kode, qty)}
-                    onSetSatuan={(satuan) => onSetSatuan(b, satuan)}
+                    onSetSatuan={(satuan) => setSatuanLocal(b, satuan)}
                   />
                 );
               })}
