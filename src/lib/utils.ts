@@ -316,13 +316,15 @@ export async function downloadJpgPages(
   for (let i = 0; i < total; i++) {
     onProgress?.(i + 1, total);
     await new Promise((r) => setTimeout(r, 60));
-    // Capture K L O N form yang bebas-transform lewat SVG foreignObject, lalu putar -90° di canvas.
+    // Capture K L O N form yang bebas-transform lewat SVG foreignObject.
     // Alasan: html2canvas menggambar teks pakai baseline hasil ukur sendiri (+2px) → teks sel
     // tabel meleset turun mepet border. foreignObject me-render XHTML persis seperti DOM.
-    // Preview = rotator CSS, hasil = canvas.
+    // JPG = form TEGAK 15,1×21 cm (rotasi hanya untuk orientasi kertas print).
+    // Ukuran TETAP (tanpa scrollWidth/scrollHeight yang bisa salah ukur → pita putih/crop).
+    const W = 570.7; // 15,1 cm
+    const H = 793.7; // 21 cm
     const sheet = pages[i];
     const form = sheet.querySelector<HTMLElement>('.print-page-admin') ?? sheet;
-    const fit = parseFloat(getComputedStyle(form).getPropertyValue('--fit')) || 1;
     const holder = document.createElement('div');
     holder.style.cssText = 'position:fixed;left:-10000px;top:0;background:#fff';
     const clone = form.cloneNode(true) as HTMLElement;
@@ -332,22 +334,16 @@ export async function downloadJpgPages(
     let canvas: HTMLCanvasElement;
     try {
       await inlineImages(clone);
-      const w = clone.scrollWidth;
-      const h = clone.scrollHeight;
       const xml = new XMLSerializer().serializeToString(clone);
-      // viewBox 1:1 dengan layout, ukuran intrinsik 2x → hasil tajam seperti scale:2
-      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w * 2}" height="${h * 2}" viewBox="0 0 ${w} ${h}"><foreignObject x="0" y="0" width="${w}" height="${h}">${xml}</foreignObject></svg>`;
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W * 2}" height="${H * 2}" viewBox="0 0 ${W} ${H}"><foreignObject x="0" y="0" width="${W}" height="${H}">${xml}</foreignObject></svg>`;
       const src = await loadSvgImage(svg);
       canvas = document.createElement('canvas');
-      canvas.width = src.height;
-      canvas.height = src.width;
+      canvas.width = Math.round(W * 2);
+      canvas.height = Math.round(H * 2);
       const ctx = canvas.getContext('2d')!;
       ctx.fillStyle = '#fff';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.translate(canvas.width / 2, canvas.height / 2);
-      ctx.rotate(-Math.PI / 2);
-      ctx.scale(fit, fit);
-      ctx.drawImage(src, -src.width / 2, -src.height / 2);
+      ctx.drawImage(src, 0, 0, canvas.width, canvas.height);
     } finally {
       holder.remove();
     }
