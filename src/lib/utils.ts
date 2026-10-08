@@ -335,24 +335,27 @@ export async function downloadJpgPages(
   filePrefix: string,
   onProgress?: (done: number, total: number) => void,
 ): Promise<void> {
-  // WYSIWYG: JPG = clone .print-sheet persis tampilan preview (rotator, skala --fit,
-  // logo, semua transform & layout ikut). SVG foreignObject me-render XHTML seperti
-  // browser me-render layar → hasil identik preview, nol komposisi ulang.
-  const W = 793.7; // 21 cm — lebar kertas, sama dengan .print-sheet
-  const H = 570.7; // 15,1 cm
+  // WYSIWYG: JPG = clone elemen preview persis tampilannya. Ukuran diambil dari kotak asli
+  // elemen (kertas 21×15,1 cm ATAU preview lain seperti .preorder-page 850px auto-tinggi),
+  // jadi komposisi apa pun = apa yang tampil di layar, tanpa crop.
   const total = pages.length;
   for (let i = 0; i < total; i++) {
     onProgress?.(i + 1, total);
     await new Promise((r) => setTimeout(r, 60));
+    const src = pages[i];
+    const W = src.offsetWidth || 793.7;
+    const H = src.offsetHeight || 570.7;
     const holder = document.createElement('div');
     holder.style.cssText = 'position:fixed;left:-10000px;top:0';
-    const clone = pages[i].cloneNode(true) as HTMLElement;
+    const clone = src.cloneNode(true) as HTMLElement;
     clone.style.setProperty('margin', '0', 'important');
     clone.style.setProperty('box-shadow', 'none', 'important');
     // Paritas dengan layar: foreignObject TIDAK membawa stylesheet app, hanya inline style.
-    // Tailwind preflight memberi html{line-height:1.5} + *{box-sizing:border-box} di preview —
-    // tanpa ini tinggi baris td tanpa lineHeight inline beda → komposisi bergeser.
+    // Tailwind preflight memberi html{line-height:1.5} di preview — tanpa ini tinggi baris beda.
     clone.style.setProperty('line-height', '1.5', 'important');
+    // Bekukan ukuran asli elemen agar layout di foreignObject sama persis dengan di layar.
+    if (src.offsetWidth) clone.style.setProperty('width', W + 'px', 'important');
+    if (src.offsetHeight) clone.style.setProperty('height', H + 'px', 'important');
     holder.appendChild(clone);
     document.body.appendChild(holder);
     let canvas: HTMLCanvasElement;
