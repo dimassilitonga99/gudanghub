@@ -1044,8 +1044,8 @@ function PreOrderDialog({
               return (
                 <div
                   key={pageNumber}
-                  className="preorder-page mx-auto max-w-[850px] bg-white p-7 text-black shadow-xl"
-                  style={{ fontFamily: 'Arial, sans-serif', fontSize: 14 }}
+                  className="preorder-page mx-auto max-w-[850px] bg-white text-black shadow-xl"
+                  style={{ fontFamily: 'Arial, sans-serif', fontSize: 14, padding: '0.4cm' }}
                 >
                   <table width="100%" cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse', marginBottom: 0 }}>
                     <tbody>

@@ -142,7 +142,7 @@ function buildPage(
           width: '15.1cm',
           height: '21cm',
           boxSizing: 'border-box',
-          padding: 0,
+          padding: '0.4cm',
           margin: 0,
           transform: 'scale(var(--fit, 1))',
           transformOrigin: 'center center',
@@ -435,7 +435,7 @@ export default function PrintFormModal({
     min-height: 0 !important;
     overflow: visible !important;
     margin: 0 !important;
-    padding: 0 !important;
+    padding: 0.4cm !important;
     box-sizing: border-box !important;
     box-shadow: none !important;
     background: #fff !important;

@@ -353,6 +353,12 @@ export async function downloadJpgPages(
     // Paritas dengan layar: foreignObject TIDAK membawa stylesheet app, hanya inline style.
     // Tailwind preflight memberi html{line-height:1.5} di preview — tanpa ini tinggi baris beda.
     clone.style.setProperty('line-height', '1.5', 'important');
+    // foreignObject hanya bawa inline style — stylesheet app (Tailwind preflight) tidak ikut.
+    // `*{box-sizing:border-box}` wajib: tanpa ini elemen ber-padding mendadak content-box
+    // → lebar meluber & terpotong. Berlaku untuk preview apa pun (.print-sheet, .preorder-page).
+    const parity = document.createElement('style');
+    parity.textContent = '*,*::before,*::after{box-sizing:border-box}';
+    clone.insertBefore(parity, clone.firstChild);
     // Bekukan ukuran asli elemen agar layout di foreignObject sama persis dengan di layar.
     if (src.offsetWidth) clone.style.setProperty('width', W + 'px', 'important');
     if (src.offsetHeight) clone.style.setProperty('height', H + 'px', 'important');
