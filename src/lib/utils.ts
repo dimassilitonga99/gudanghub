@@ -292,7 +292,18 @@ async function inlineImages(root: HTMLElement): Promise<void> {
         img.removeAttribute('crossorigin');
         img.src = dataUrl;
       } catch {
-        img.remove();
+        // Fallback: gambar sudah tampil di preview (crossOrigin=anonymous → canvas tak tainted).
+        // Logo TIDAK PERNAH dibuang hanya karena fetch gagal — gambar langsung dari elemen hidup.
+        try {
+          const c = document.createElement('canvas');
+          c.width = img.naturalWidth || 100;
+          c.height = img.naturalHeight || 32;
+          c.getContext('2d')!.drawImage(img, 0, 0);
+          img.removeAttribute('crossorigin');
+          img.src = c.toDataURL('image/png');
+        } catch {
+          img.remove();
+        }
       }
     }),
   );

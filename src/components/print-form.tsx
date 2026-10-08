@@ -325,7 +325,9 @@ export default function PrintFormModal({
   useEffect(() => {
     if (!open) return;
     const fitPages = () => pagesRef.current?.querySelectorAll<HTMLElement>('.print-page-admin').forEach((page) => {
-      const scale = Math.min(793.7 / Math.max(page.scrollHeight, 793.7), 570.7 / (page.offsetWidth || 570.7), 1);
+      // scrollWidth ikut dihitung: nama item panjang tanpa spasi bisa melebihi 15,1 cm →
+      // setelah rotasi meluber ke luar sheet dan terpotong. Shrink, jangan crop.
+      const scale = Math.min(793.7 / Math.max(page.scrollHeight, 793.7), 570.7 / Math.max(page.scrollWidth, 570.7), 1);
       page.style.setProperty('--fit', scale.toFixed(4));
     });
     const frame = requestAnimationFrame(fitPages);
