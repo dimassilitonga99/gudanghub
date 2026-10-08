@@ -307,6 +307,18 @@ function loadSvgImage(svg: string): Promise<HTMLImageElement> {
   });
 }
 
+// Set densitas JFIF (dpi) pada data URL JPEG — canvas default 72 dpi membuat JPG
+// dicetak "Actual size" menjadi 55 cm; 192 dpi (2× dari render 96 dpi) = tepat 21×15,1 cm.
+function setJpegDpi(dataUrl: string, dpi: number): string {
+  const bin = atob(dataUrl.slice(dataUrl.indexOf(',') + 1));
+  if (bin.length < 16 || bin.charCodeAt(2) !== 0xff || bin.charCodeAt(3) !== 0xe0 || bin.charCodeAt(6) !== 0x4a) {
+    return dataUrl; // bukan JFIF standar — biarkan apa adanya
+  }
+  const px = String.fromCharCode((dpi >> 8) & 0xff, dpi & 0xff);
+  const out = bin.slice(0, 11) + '\x01' + px + px + bin.slice(15);
+  return 'data:image/jpeg;base64,' + btoa(out);
+}
+
 export async function downloadJpgPages(
   pages: HTMLElement[],
   filePrefix: string,
@@ -326,6 +338,10 @@ export async function downloadJpgPages(
     const clone = pages[i].cloneNode(true) as HTMLElement;
     clone.style.setProperty('margin', '0', 'important');
     clone.style.setProperty('box-shadow', 'none', 'important');
+    // Paritas dengan layar: foreignObject TIDAK membawa stylesheet app, hanya inline style.
+    // Tailwind preflight memberi html{line-height:1.5} + *{box-sizing:border-box} di preview —
+    // tanpa ini tinggi baris td tanpa lineHeight inline beda → komposisi bergeser.
+    clone.style.setProperty('line-height', '1.5', 'important');
     holder.appendChild(clone);
     document.body.appendChild(holder);
     let canvas: HTMLCanvasElement;
@@ -346,7 +362,7 @@ export async function downloadJpgPages(
     }
     const link = document.createElement('a');
     link.download = total > 1 ? `${filePrefix}-Hal-${i + 1}.jpg` : `${filePrefix}.jpg`;
-    link.href = canvas.toDataURL('image/jpeg', 0.92);
+    link.href = setJpegDpi(canvas.toDataURL('image/jpeg', 0.92), 192);
     link.click();
     if (i < total - 1) await new Promise((r) => setTimeout(r, 600));
   }

@@ -80,6 +80,7 @@ function buildPage(
   const cell: React.CSSProperties = {
     padding: '4px 3px',
     border: '1px solid #000',
+    boxSizing: 'border-box',
     fontFamily: 'Arial, sans-serif',
     fontSize: 12,
     fontWeight: 700,
@@ -90,6 +91,7 @@ function buildPage(
   const headerCell = (w?: number): React.CSSProperties => ({
     padding: '5px 3px',
     border: '1px solid #000',
+    boxSizing: 'border-box',
     fontFamily: 'Arial, sans-serif',
     fontSize: 11,
     fontWeight: 800,
@@ -98,7 +100,7 @@ function buildPage(
     lineHeight: 1.2,
     ...(w ? { width: w } : {}),
   });
-  const signBase: React.CSSProperties = { fontFamily: 'Arial, sans-serif', verticalAlign: 'top' };
+  const signBase: React.CSSProperties = { fontFamily: 'Arial, sans-serif', verticalAlign: 'top', boxSizing: 'border-box' };
 
   const pageBadge = info.pageLabel ? (
     <span style={{ display: 'inline-block', padding: '3px 10px', background: '#ff6b00', color: '#fff', borderRadius: 4, fontSize: 12, fontWeight: 700, letterSpacing: 0.5, marginLeft: 8 }}>
@@ -328,6 +330,10 @@ export default function PrintFormModal({
     });
     const frame = requestAnimationFrame(fitPages);
     const timer = window.setTimeout(fitPages, 200);
+    // Logo bisa load lambat → tinggi kop berubah setelah fit dihitung → kepotong. Refit sekali saat gambar selesai.
+    pagesRef.current?.querySelectorAll('img').forEach((img) => {
+      if (!img.complete) img.addEventListener('load', fitPages, { once: true });
+    });
     return () => {
       cancelAnimationFrame(frame);
       window.clearTimeout(timer);
