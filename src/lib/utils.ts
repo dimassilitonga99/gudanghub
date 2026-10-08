@@ -312,23 +312,20 @@ export async function downloadJpgPages(
   filePrefix: string,
   onProgress?: (done: number, total: number) => void,
 ): Promise<void> {
+  // WYSIWYG: JPG = clone .print-sheet persis tampilan preview (rotator, skala --fit,
+  // logo, semua transform & layout ikut). SVG foreignObject me-render XHTML seperti
+  // browser me-render layar → hasil identik preview, nol komposisi ulang.
+  const W = 793.7; // 21 cm — lebar kertas, sama dengan .print-sheet
+  const H = 570.7; // 15,1 cm
   const total = pages.length;
   for (let i = 0; i < total; i++) {
     onProgress?.(i + 1, total);
     await new Promise((r) => setTimeout(r, 60));
-    // Capture K L O N form yang bebas-transform lewat SVG foreignObject.
-    // Alasan: html2canvas menggambar teks pakai baseline hasil ukur sendiri (+2px) → teks sel
-    // tabel meleset turun mepet border. foreignObject me-render XHTML persis seperti DOM.
-    // JPG = form TEGAK 15,1×21 cm (rotasi hanya untuk orientasi kertas print).
-    // Ukuran TETAP (tanpa scrollWidth/scrollHeight yang bisa salah ukur → pita putih/crop).
-    const W = 570.7; // 15,1 cm
-    const H = 793.7; // 21 cm
-    const sheet = pages[i];
-    const form = sheet.querySelector<HTMLElement>('.print-page-admin') ?? sheet;
     const holder = document.createElement('div');
-    holder.style.cssText = 'position:fixed;left:-10000px;top:0;background:#fff';
-    const clone = form.cloneNode(true) as HTMLElement;
-    clone.style.setProperty('transform', 'none', 'important');
+    holder.style.cssText = 'position:fixed;left:-10000px;top:0';
+    const clone = pages[i].cloneNode(true) as HTMLElement;
+    clone.style.setProperty('margin', '0', 'important');
+    clone.style.setProperty('box-shadow', 'none', 'important');
     holder.appendChild(clone);
     document.body.appendChild(holder);
     let canvas: HTMLCanvasElement;
