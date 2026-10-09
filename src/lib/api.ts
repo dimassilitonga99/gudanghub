@@ -697,6 +697,18 @@ export const orders = {
   },
 };
 
+// Scan foto form order → baris item (OCR via Worker + Workers AI).
+export const scan = {
+  orderForm(gambar: string): Promise<ApiResult> {
+    return callApi('scanOrderItems', { gambar }, {
+      dedupe: false,
+      cache: false,
+      timeout: 180000,
+      maxRetries: 0,
+    });
+  },
+};
+
 export const storeTakes = {
   getAll(options: CallOptions = {}): Promise<ApiResult> {
     return callApi('getStoreTakes', {}, {

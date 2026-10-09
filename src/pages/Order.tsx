@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
 import { toastError, toastSuccess } from '@/lib/toast';
 
-import { katalog as katalogApi, orders as ordersApi, cart as cartApi, callApi } from '@/lib/api';
+import { katalog as katalogApi, orders as ordersApi, cart as cartApi, scan as scanApi, callApi } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import {
   APP,
@@ -37,6 +37,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ParticlesBg } from '@/components/ui/particles-bg';
@@ -59,6 +60,37 @@ interface CartItem {
   stokToko: number | '';
   isManual?: boolean;
   catatanItem?: string;
+}
+
+// Kompres foto (maks sisi maxSide, JPEG) agar ringan dikirim ke OCR.
+function fileToJpegDataUrl(file: File, maxSide = 1600, quality = 0.85): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+      const w = Math.max(1, Math.round(img.width * scale));
+      const h = Math.max(1, Math.round(img.height * scale));
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        reject(new Error('Canvas tidak didukung.'));
+        return;
+      }
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, w, h);
+      ctx.drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('Gagal membaca gambar.'));
+    };
+    img.src = url;
+  });
 }
 
 // Drag/swipe scroll horizontal: drag mouse di desktop (touch sudah native swipe).
@@ -317,7 +349,7 @@ function ManualForm({
 }: {
   editingKey: string | null;
   cart: Record<string, CartItem>;
-  onAdd: (data: { nama: string; kode: string; kategori: string; qty: number; satuan: string; stokGudang: number | ''; stokToko: number | '' }) => void;
+  onAdd: (data: { nama: string; kode: string; kategori: string; qty: number; satuan: string; stokGudang: number | ''; stokToko: number | '' }, opts?: { silent?: boolean }) => void;
   onUpdate: (key: string, data: { nama: string; kategori: string; qty: number; satuan: string; stokGudang: number | ''; stokToko: number | '' }) => void;
   onDelete: (key: string) => void;
   onStartEdit: (key: string) => void;
@@ -333,6 +365,58 @@ function ManualForm({
   const [satuan, setSatuan] = useState(editItem?.satuan || 'PCS');
   const [stokGudang, setStokGudang] = useState<string>(editItem ? fmtStock(editItem.stokGudang) : '');
   const [stokToko, setStokToko] = useState<string>(editItem ? fmtStock(editItem.stokToko) : '');
+
+  // Scan foto form order (OCR) → daftar item untuk dipilih.
+  const [scanning, setScanning] = useState(false);
+  const [scanItems, setScanItems] = useState<{ id: number; nama: string; checked: boolean }[]>([]);
+  const scanFileRef = useRef<HTMLInputElement | null>(null);
+  const scanSeq = useRef(0);
+
+  const handleScanFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setScanning(true);
+    try {
+      const gambar = await fileToJpegDataUrl(file);
+      const res = await scanApi.orderForm(gambar);
+      if (res.status !== 'ok' || !Array.isArray(res.data)) {
+        throw new Error(String(res.message || 'Gagal membaca foto.'));
+      }
+      const rows = (res.data as { nama?: string; keterangan?: string }[])
+        .map((r) => {
+          const gabung = [String(r.nama || '').trim(), String(r.keterangan || '').trim()].filter(Boolean).join(' ');
+          return { id: ++scanSeq.current, nama: gabung, checked: true };
+        })
+        .filter((r) => r.nama);
+      if (!rows.length) throw new Error('Tidak ada item terbaca. Coba foto lebih jelas.');
+      setScanItems(rows);
+      toastSuccess(`${rows.length} item terbaca. Pilih lalu tambahkan ke keranjang.`, { duration: 3000 });
+    } catch (err) {
+      toastError(err instanceof Error ? err.message : 'Gagal membaca foto.');
+    } finally {
+      setScanning(false);
+    }
+  };
+
+  const toggleAllScanned = (checked: boolean) =>
+    setScanItems((prev) => prev.map((it) => ({ ...it, checked })));
+
+  const addScanned = () => {
+    const picked = scanItems.filter((it) => it.checked && it.nama.trim());
+    if (!picked.length) {
+      toastError('Pilih minimal satu item.');
+      return;
+    }
+    picked.forEach((it) =>
+      onAdd(
+        { nama: it.nama.trim(), kode: '', kategori: KATEGORI_MANUAL[0], qty: 1, satuan: 'PCS', stokGudang: 0, stokToko: 0 },
+        { silent: true },
+      ),
+    );
+    toastSuccess(`${picked.length} barang manual ditambahkan ke keranjang.`, { duration: 2500 });
+    setScanItems([]);
+  };
 
   useEffect(() => {
     setNama(editItem?.nama || '');
@@ -379,6 +463,77 @@ function ManualForm({
 
   return (
     <div className="space-y-4">
+      <Card>
+        <CardContent className="space-y-3 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="text-sm font-bold">📷 Scan Foto Form Order</div>
+            <input
+              ref={scanFileRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={handleScanFile}
+            />
+            <Button variant="outline" size="sm" disabled={scanning} onClick={() => scanFileRef.current?.click()}>
+              <Icon name={scanning ? 'refresh' : 'upload'} size={16} className={scanning ? 'animate-spin' : undefined} />
+              {scanning ? 'Membaca…' : 'Upload / Ambil Foto'}
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Unggah foto form &quot;Daftar Penerimaan Barang&quot;. Nama item + keterangan dibaca otomatis, lalu pilih yang mau
+            dimasukkan ke keranjang.
+          </p>
+
+          {scanItems.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                <button
+                  type="button"
+                  className="font-semibold text-brand"
+                  onClick={() => toggleAllScanned(!scanItems.every((it) => it.checked))}
+                >
+                  {scanItems.every((it) => it.checked) ? 'Batal pilih semua' : 'Pilih semua'}
+                </button>
+                <span className="text-muted-foreground">
+                  {scanItems.filter((it) => it.checked).length} / {scanItems.length} dipilih
+                </span>
+              </div>
+              <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
+                {scanItems.map((it) => (
+                  <div key={it.id} className="flex items-center gap-2">
+                    <Checkbox
+                      checked={it.checked}
+                      onCheckedChange={(v) =>
+                        setScanItems((prev) => prev.map((x) => (x.id === it.id ? { ...x, checked: v === true } : x)))
+                      }
+                    />
+                    <Input
+                      value={it.nama}
+                      onChange={(e) =>
+                        setScanItems((prev) => prev.map((x) => (x.id === it.id ? { ...x, nama: e.target.value } : x)))
+                      }
+                      className="h-8 text-sm"
+                    />
+                    <button
+                      type="button"
+                      title="Hapus baris"
+                      className="shrink-0 p-1 text-danger"
+                      onClick={() => setScanItems((prev) => prev.filter((x) => x.id !== it.id))}
+                    >
+                      <Icon name="trash" size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <Button className="w-full" onClick={addScanned} disabled={!scanItems.some((it) => it.checked)}>
+                <Icon name="plus" size={16} /> Tambah {scanItems.filter((it) => it.checked).length} ke Keranjang
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       <div className="flex items-start gap-2 rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm text-warning">
         <Icon name="triangle-warning" size={16} className="mt-0.5 shrink-0" />
         <div>
@@ -1996,6 +2151,9 @@ export default function Order() {
 
   const persistCart = useCallback(
     (next: Record<string, CartItem>) => {
+      // Update ref sinkron: pemanggilan beruntun (mis. tambah banyak item
+      // hasil scan) tidak saling menimpa sebelum re-render.
+      cartRef.current = next;
       setCart(next);
       saveCartLocal(username, next);
       if (syncTimer.current) clearTimeout(syncTimer.current);
@@ -2196,15 +2354,18 @@ export default function Order() {
     );
   };
 
-  const addManualToCart = (data: {
-    nama: string;
-    kode: string;
-    kategori: string;
-    qty: number;
-    satuan: string;
-    stokGudang: number | '';
-    stokToko: number | '';
-  }) => {
+  const addManualToCart = (
+    data: {
+      nama: string;
+      kode: string;
+      kategori: string;
+      qty: number;
+      satuan: string;
+      stokGudang: number | '';
+      stokToko: number | '';
+    },
+    opts?: { silent?: boolean },
+  ) => {
     const displayKode = data.kode || '-';
     let cartKey = data.kode;
     if (!cartKey || cartKey === '-' || cartKey === '0') {
@@ -2230,7 +2391,7 @@ export default function Order() {
         catatanItem: '',
       },
     });
-    toastSuccess(`"${data.nama}" ditambahkan ke keranjang.`, { duration: 2000 });
+    if (!opts?.silent) toastSuccess(`"${data.nama}" ditambahkan ke keranjang.`, { duration: 2000 });
   };
 
   const updateManualItem = (
@@ -2592,7 +2753,7 @@ function CatalogTabBody({
   onAdd: (b: Barang, qty: number, satuan: string) => void;
   onSetQty: (b: Barang, qty: number) => void;
   onSetSatuan: (b: Barang, satuan: string) => void;
-  onManualAdd: (data: { nama: string; kode: string; kategori: string; qty: number; satuan: string; stokGudang: number | ''; stokToko: number | '' }) => void;
+  onManualAdd: (data: { nama: string; kode: string; kategori: string; qty: number; satuan: string; stokGudang: number | ''; stokToko: number | '' }, opts?: { silent?: boolean }) => void;
   onManualUpdate: (key: string, data: { nama: string; kategori: string; qty: number; satuan: string; stokGudang: number | ''; stokToko: number | '' }) => void;
   onManualDelete: (key: string) => void;
 }) {
