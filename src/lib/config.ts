@@ -72,6 +72,7 @@ export const CABANG_IDS = Object.keys(CABANG);
 export const SATUAN_OPTIONS = ['PCS', 'DUS', 'KRG', 'SET', 'PACK', 'IKAT', 'GROSS'];
 
 export const KATEGORI_MANUAL = [
+  '-',
   'PLASTIK',
   'ELEKTRONIK',
   'ALUMUNIUM',

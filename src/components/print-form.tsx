@@ -245,7 +245,7 @@ function buildPage(
                   ) : null}
                 </td>
                 <td style={{ ...cell, padding: '4px 6px', fontSize: 12, fontWeight: 800 }}>
-                  {String(it.kategori || 'ELEKTRONIK').toUpperCase()}
+                  {String(it.kategori || '-').toUpperCase()}
                 </td>
               </tr>
             );

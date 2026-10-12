@@ -1289,7 +1289,7 @@ function PreOrderDialog({
                         const stokS = item.stokSistem === '' ? '0' : String(item.stokSistem);
                         const stokG = item.stokGudang === '' ? '0' : String(item.stokGudang);
                         const stokR = item.stokToko === '' ? '0' : String(item.stokToko);
-                        const jenis = String(item.kategori || 'ELEKTRONIK').toUpperCase();
+                        const jenis = String(item.kategori || '-').toUpperCase();
                         const cell = {
                           padding: '5px 4px',
                           textAlign: 'center',
