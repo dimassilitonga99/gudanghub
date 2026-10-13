@@ -11,6 +11,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 // Item Management = tampilan read-only katalog iPos NK (kode & nama selalu
 // sinkron dari Neon). Karena sinkron iPos tiap 60 detik menimpa kolom lain,
@@ -86,11 +92,21 @@ async function fileToCompressedDataUrl(file: File): Promise<string> {
   return out;
 }
 
+type SortKey = 'nama-asc' | 'nama-desc' | 'kode-asc' | 'kode-desc';
+
+const SORT_OPTIONS: { key: SortKey; label: string }[] = [
+  { key: 'nama-asc', label: 'Nama A–Z' },
+  { key: 'nama-desc', label: 'Nama Z–A' },
+  { key: 'kode-asc', label: 'Kode A–Z' },
+  { key: 'kode-desc', label: 'Kode Z–A' },
+];
+
 export default function ItemManagement() {
   const { session } = useAuth();
   const [items, setItems] = useState<Barang[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [sort, setSort] = useState<SortKey>('nama-asc');
   const [uploadingKode, setUploadingKode] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
   const pendingKode = useRef('');
@@ -114,13 +130,18 @@ export default function ItemManagement() {
 
   const filteredItems = useMemo(() => {
     const searchLower = search.toLowerCase();
-    return items.filter(
+    const list = items.filter(
       (item) =>
         (item.NAMA_BARANG && item.NAMA_BARANG.toLowerCase().includes(searchLower)) ||
         (item.KODE_BARANG && item.KODE_BARANG.toLowerCase().includes(searchLower)) ||
         (item.KATEGORI && item.KATEGORI.toLowerCase().includes(searchLower))
     );
-  }, [items, search]);
+    const dir = sort.endsWith('desc') ? -1 : 1;
+    const key = sort.startsWith('kode') ? 'KODE_BARANG' : 'NAMA_BARANG';
+    return list.sort(
+      (a, b) => dir * String(a[key] || '').localeCompare(String(b[key] || ''), 'id'),
+    );
+  }, [items, search, sort]);
 
   // Render bertahap — ribuan kartu sekaligus membuat browser macet
   const PAGE_SIZE = 24;
@@ -128,7 +149,7 @@ export default function ItemManagement() {
 
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
-  }, [search]);
+  }, [search, sort]);
 
   const visibleItems = useMemo(
     () => filteredItems.slice(0, visibleCount),
@@ -202,13 +223,28 @@ export default function ItemManagement() {
           </div>
         </div>
 
-        <div className="mb-6 flex gap-3">
+        <div className="mb-6 flex flex-wrap items-center gap-3">
           <Input
             placeholder="Cari berdasarkan nama, kode, atau kategori..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="max-w-md"
           />
+          <div className="flex items-center gap-1">
+            <span className="mr-1 hidden items-center gap-1 text-xs text-muted-foreground sm:flex">
+              <Icon name="sort" size={14} /> Urutkan:
+            </span>
+            {SORT_OPTIONS.map((o) => (
+              <Button
+                key={o.key}
+                size="sm"
+                variant={sort === o.key ? 'default' : 'outline'}
+                onClick={() => setSort(o.key)}
+              >
+                {o.label}
+              </Button>
+            ))}
+          </div>
         </div>
 
         <input
@@ -261,20 +297,28 @@ export default function ItemManagement() {
                       </div>
                     </div>
 
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="mt-4 w-full"
-                      disabled={uploadingKode === item.KODE_BARANG}
-                      onClick={() => pickPhoto(item.KODE_BARANG)}
-                    >
-                      <Icon name="upload" size={16} className="mr-2" />
-                      {uploadingKode === item.KODE_BARANG
-                        ? 'Mengunggah…'
-                        : hasPhoto
-                          ? 'Ganti Foto'
-                          : 'Upload Foto'}
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button size="sm" variant="outline" className="mt-4 w-full">
+                          <Icon name="menu-dots" size={16} className="mr-2" />
+                          Aksi
+                          <Icon name="angle-small-down" size={14} className="ml-2" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          disabled={uploadingKode === item.KODE_BARANG}
+                          onClick={() => pickPhoto(item.KODE_BARANG)}
+                        >
+                          <Icon name="upload" size={14} className="mr-2" />
+                          {uploadingKode === item.KODE_BARANG
+                            ? 'Mengunggah…'
+                            : hasPhoto
+                              ? 'Ganti Foto'
+                              : 'Upload Foto'}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </CardContent>
                 </Card>
               );
