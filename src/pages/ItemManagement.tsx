@@ -309,7 +309,7 @@ export default function ItemManagement() {
                     <BarangImage kode={item.KODE_BARANG} />
                   </div>
                   <CardContent className="p-6">
-                    <h3 className="font-semibold truncate text-lg">{item.NAMA_BARANG}</h3>
+                    <h3 className="font-semibold text-lg break-words">{item.NAMA_BARANG}</h3>
                     <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1">
                       <Icon name="tag" size={12} />
                       {item.KODE_BARANG}
