@@ -739,7 +739,10 @@ function CartSheet({
   onSubmit: (note: string) => void;
   submitting: boolean;
 }) {
-  const items = useMemo(() => Object.values(cart), [cart]);
+  const items = useMemo(
+    () => Object.entries(cart).map(([key, item]) => ({ ...item, key })),
+    [cart],
+  );
   const [cartNote, setCartNote] = useState('');
   const [noteOpen, setNoteOpen] = useState<Record<string, boolean>>({});
 
@@ -812,7 +815,7 @@ function CartSheet({
             </div>
           ) : (
             items.map((item) => {
-              const key = item.kode;
+              const key = item.key;
               const noteVisible = noteOpen[key] || Boolean(item.catatanItem);
               const stokSistem = item.stokSistem;
               const stokSistemCls =
