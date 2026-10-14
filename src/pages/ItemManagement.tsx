@@ -5,6 +5,7 @@ import { toastSuccess } from '@/lib/toast';
 import { katalog } from '@/lib/api';
 import { BarangImage, setGambarCache } from '@/components/ItemPhoto';
 import { useAuth } from '@/context/AuthContext';
+import { useDialog } from '@/lib/dialog';
 import { APP, type Barang } from '@/lib/config';
 import { formatRupiah } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -108,6 +109,7 @@ export default function ItemManagement() {
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<SortKey>('nama-asc');
   const [uploadingKode, setUploadingKode] = useState<string | null>(null);
+  const { confirm, dialog } = useDialog();
   const fileRef = useRef<HTMLInputElement | null>(null);
   const pendingKode = useRef('');
 
@@ -198,6 +200,35 @@ export default function ItemManagement() {
     }
   };
 
+  const handleDeletePhoto = async (kode: string) => {
+    const ok = await confirm({
+      icon: '🗑️',
+      title: 'Hapus Foto Item?',
+      message: 'Foto item ini akan dihapus permanen. Data item (kode/nama/harga) tetap utuh.',
+      okText: 'Ya, Hapus Foto',
+      okVariant: 'destructive',
+    });
+    if (!ok) return;
+    setUploadingKode(kode);
+    try {
+      // gambar: '' → server set gambar_key = null + hapus file R2 lama.
+      const res = await katalog.update({ kode, gambar: '' });
+      if (res?.status === 'ok') {
+        setGambarCache(kode);
+        setItems((prev) =>
+          prev.map((it) => (it.KODE_BARANG === kode ? { ...it, GAMBAR: '' } : it)),
+        );
+        toastSuccess('Foto item berhasil dihapus');
+      } else {
+        toast.error(res?.message || 'Gagal menghapus foto');
+      }
+    } catch {
+      toast.error('Gagal menghapus foto');
+    } finally {
+      setUploadingKode(null);
+    }
+  };
+
   if (!session || session.role !== 'admin') {
     return (
       <div className="min-h-dvh flex items-center justify-center">
@@ -218,7 +249,7 @@ export default function ItemManagement() {
             <h1 className="text-3xl font-bold tracking-tight">Kelola Item</h1>
             <p className="text-muted-foreground mt-2">
               Katalog iPos NK · {APP.location} — data kode & nama selalu sinkron. Bisa diubah
-              hanya foto item yang belum ada.
+              hanya foto item (upload/ganti/hapus).
             </p>
           </div>
         </div>
@@ -317,6 +348,16 @@ export default function ItemManagement() {
                               ? 'Ganti Foto'
                               : 'Upload Foto'}
                         </DropdownMenuItem>
+                        {hasPhoto && (
+                          <DropdownMenuItem
+                            disabled={uploadingKode === item.KODE_BARANG}
+                            onClick={() => void handleDeletePhoto(item.KODE_BARANG)}
+                            className="text-danger focus:text-danger"
+                          >
+                            <Icon name="trash" size={14} className="mr-2" />
+                            Hapus Foto
+                          </DropdownMenuItem>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </CardContent>
@@ -345,6 +386,7 @@ export default function ItemManagement() {
           </div>
         )}
       </div>
+      {dialog}
     </div>
   );
 }
