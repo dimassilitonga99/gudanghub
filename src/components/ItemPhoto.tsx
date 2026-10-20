@@ -23,7 +23,7 @@ export function setGambarCache(kode: string, dataUrl?: string) {
  */
 export function useGambar(kode: string): {
   src: string;
-  ref: RefObject<HTMLDivElement>;
+  ref: RefObject<HTMLDivElement | null>;
   done: boolean;
 } {
   const ref = useRef<HTMLDivElement | null>(null);

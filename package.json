@@ -10,6 +10,7 @@
     "deploy": "npm run build && npx wrangler pages deploy dist --project-name=gudanghub --commit-dirty=true"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^26.2.0",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
@@ -17,14 +18,13 @@
     "autoprefixer": "^10.5.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "gh-pages": "^6.2.0",
     "playwright-core": "^1.62.1",
     "postcss": "^8.5.26",
     "tailwind-merge": "^3.6.0",
-    "tailwindcss": "^3.4.19",
+    "tailwindcss": "^4.3.3",
     "terser": "^5.49.0",
     "typescript": "^5.9.3",
-    "vite": "^5.4.10",
+    "vite": "^6.4.4",
     "vite-tsconfig-paths": "^6.1.1"
   },
   "author": "PT Central Perabut Utama",
@@ -55,7 +55,10 @@
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.2",
     "recharts": "^3.10.1",
-    "sonner": "^2.0.8",
-    "xlsx": "^0.18.5"
+    "sonner": "^2.0.8"
+  },
+  "overrides": {
+    "braces": "^3.0.3",
+    "postcss-selector-parser": "^7.1.6"
   }
 }

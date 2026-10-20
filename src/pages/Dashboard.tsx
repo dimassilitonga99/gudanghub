@@ -582,48 +582,6 @@ function LineChartCard({
   );
 }
 
-function StackedBarChart({
-  data,
-  max,
-}: {
-  data: { pic: string; pending: number; approved: number; rejected: number }[];
-  max: number;
-}) {
-  return (
-    <div className="flex h-44 items-end justify-around gap-3">
-      {data.map((c) => {
-        const total = c.pending + c.approved + c.rejected;
-        const pct = (v: number) => (v / max) * 100;
-        const layers = [
-          { key: 'approved' as const, value: c.approved, cls: 'bg-success' },
-          { key: 'pending' as const, value: c.pending, cls: 'bg-warning' },
-          { key: 'rejected' as const, value: c.rejected, cls: 'bg-danger' },
-        ];
-        return (
-          <div key={c.pic} className="flex h-full flex-1 flex-col items-center gap-1">
-            <span className="text-xs font-bold">{total}</span>
-            <div
-              className="flex h-full w-full flex-col-reverse overflow-hidden rounded-t-md bg-muted/20"
-              title={`${c.pic}: ${total} order`}
-            >
-              {layers.map((l) =>
-                l.value > 0 ? (
-                  <div key={l.key} style={{ height: `${pct(l.value)}%` }} className={cn('flex w-full items-center justify-center', l.cls)}>
-                    {pct(l.value) >= 9 && (
-                      <span className="text-[9px] font-bold leading-none text-white">{l.value}</span>
-                    )}
-                  </div>
-                ) : null,
-              )}
-            </div>
-            <span className="text-[11px] text-muted-foreground">{c.pic}</span>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
 /* ─────────────────────────────────────────────────────────────────────
    EDIT MODAL (lengkap: kelola item, tambah item, total, catatan, 4 tombol)
    ───────────────────────────────────────────────────────────────────── */
@@ -1485,11 +1443,6 @@ export default function Dashboard() {
       }),
     [ordersList],
   );
-  const maxCabangStacked = Math.max(
-    1,
-    ...perCabangStacked.map((c) => c.pending + c.approved + c.rejected),
-  );
-
   // Leaderboard "Pesanan per Cabang" — data sama dengan perCabangStacked, gaya podium + ranking
   const cabangLeaderboard = useMemo(() => {
     const ranked = [...perCabangStacked]

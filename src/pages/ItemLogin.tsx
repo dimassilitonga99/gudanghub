@@ -4,39 +4,42 @@ import { Link, useNavigate } from 'react-router-dom';
 
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
-import { auth, katalog, prewarmAppScript } from '@/lib/api';
+import { prewarmAppScript } from '@/lib/api';
 import { API_URL, ROUTES } from '@/lib/config';
 import { getLastUsername, isSessionValid } from '@/lib/session';
-import { simpleHash, sleep } from '@/lib/utils';
+import { sleep } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { GradientShimmer } from '@/components/ui/gradient-shimmer';
 
 export default function ItemLogin() {
-  const { login, restoreSession } = useAuth();
+  const { login, session } = useAuth();
+  const sessionValid = isSessionValid(session);
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [loadingText, setLoadingText] = useState('Memverifikasi...');
+  const loadingText = 'Memverifikasi...';
   const [shaking, setShaking] = useState(false);
   const usernameRef = useRef<HTMLInputElement>(null);
-  const lastPrewarm = useRef(0);
+  const errorTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => { if (errorTimer.current) clearTimeout(errorTimer.current); }, []);
 
   const showError = (msg: string) => {
     setError(msg);
     setShaking(true);
     setTimeout(() => setShaking(false), 500);
     if (errorTimer.current) clearTimeout(errorTimer.current);
-    const errorTimer = setTimeout(() => setError(''), 5000);
+    errorTimer.current = setTimeout(() => setError(''), 5000);
   };
 
   useEffect(() => {
-    const s = useAuth().getSession();
-    if (isSessionValid(s) && s.role === 'admin') {
+    const s = session;
+    if (sessionValid && s?.role === 'admin') {
       navigate(ROUTES.itemManagement, { replace: true });
       return;
     }
@@ -46,7 +49,7 @@ export default function ItemLogin() {
       setUsername(lastUser);
     }
     setTimeout(() => usernameRef.current?.focus(), 300);
-  }, [navigate]);
+  }, [navigate, session, sessionValid]);
 
   const prewarm = () => {
     prewarmAppScript();

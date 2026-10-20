@@ -143,10 +143,10 @@ const DEFAULT_WORDS = [
 export function ParticleTextEffect({
   words = DEFAULT_WORDS,
   className = "",
-  backgroundColor = "transparent",
+  backgroundColor: _backgroundColor = "transparent",
 }: ParticleTextEffectProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const animationRef = useRef<number>()
+  const animationRef = useRef<number | undefined>(undefined)
   const particlesRef = useRef<Particle[]>([])
   const frameCountRef = useRef(0)
   const wordIndexRef = useRef(0)
