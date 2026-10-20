@@ -2,7 +2,7 @@ import { Icon } from '../components/ui/icon';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { toastSuccess } from '@/lib/toast';
-import { katalog } from '@/lib/api';
+import { katalog, subscribeCatalog } from '@/lib/api';
 import { BarangImage, setGambarCache } from '@/components/ItemPhoto';
 import { useAuth } from '@/context/AuthContext';
 import { useDialog } from '@/lib/dialog';
@@ -115,13 +115,29 @@ export default function ItemManagement() {
 
   useEffect(() => {
     loadItems();
-  }, []);
+    return subscribeCatalog((changes, snapshot) => {
+      if (snapshot) {
+        setItems(changes as Barang[]);
+        return;
+      }
+      setItems((current) => {
+        const byCode = new Map(current.map((item) => [item.KODE_BARANG, item]));
+        for (const change of changes as (Record<string, unknown> & { deleted?: boolean })[]) {
+          const kode = String(change.KODE_BARANG || change.kode || '');
+          if (!kode) continue;
+          if (change.deleted) byCode.delete(kode);
+          else byCode.set(kode, { ...byCode.get(kode), ...change, KODE_BARANG: kode, NAMA_BARANG: String(change.NAMA_BARANG || change.nama || '') } as Barang);
+        }
+        return [...byCode.values()];
+      });
+    }, session?.refreshToken || session?.token);
+  }, [session?.refreshToken, session?.token]);
 
   async function loadItems() {
     try {
       const res = await katalog.getAll();
-      if (res.status === 'ok' && res.data) {
-        setItems(res.data);
+      if (res.status === 'ok' && Array.isArray(res.data)) {
+        setItems(res.data as Barang[]);
       }
     } catch (e) {
       console.error('Failed to load items:', e);

@@ -1,3 +1,4 @@
+import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { API_URL, SETTINGS } from './config';
 import { getSession, setSession } from './session';
 
@@ -18,6 +19,10 @@ export interface ApiResult<T = unknown> {
 const pendingRequests = new Map<string, Promise<ApiResult>>();
 const memCache = new Map<string, { data: ApiResult; time: number }>();
 const LS_CACHE_PREFIX = 'gudanghub_cache_v2_';
+const catalogListeners = new Set<(items: Record<string, unknown>[], snapshot: boolean) => void>();
+let catalogStreamController: AbortController | null = null;
+let catalogStreamToken: string | null = null;
+let catalogStreamRun = 0;
 
 export const PUBLIC_ACTIONS = ['login', 'forgotPassword', 'ping'];
 
@@ -169,6 +174,78 @@ function setLSCache(action: string, data: ApiResult): void {
   } catch (e) {
     console.warn('[API] LS cache write failed:', (e as Error).message);
   }
+}
+
+export function subscribeCatalog(onItems: (items: Record<string, unknown>[], snapshot: boolean) => void, tokenOverride?: string | null): () => void {
+  catalogListeners.add(onItems);
+  const token = tokenOverride || getSession()?.refreshToken || getSession()?.token;
+  const stop = () => {
+    catalogStreamRun++;
+    catalogStreamController?.abort();
+    catalogStreamController = null;
+    catalogStreamToken = null;
+  };
+  const start = () => {
+    if (!token || !catalogListeners.size || catalogStreamController || typeof fetchEventSource !== 'function') return;
+    const controller = new AbortController();
+    catalogStreamController = controller;
+    catalogStreamToken = token;
+    const run = ++catalogStreamRun;
+    void katalog.refresh().then((r) => {
+      if (run === catalogStreamRun && r.status === 'ok' && Array.isArray(r.data)) catalogListeners.forEach((listener) => listener(r.data as Record<string, unknown>[], true));
+    }).catch(() => {});
+    const formData = new FormData();
+    formData.append('payload', JSON.stringify({ action: 'catalogEventsAuth', token }));
+    void fetchEventSource(API_URL, {
+      method: 'POST',
+      body: formData,
+      signal: controller.signal,
+      onmessage(message) {
+        if (run !== catalogStreamRun || message.event !== 'items') return;
+        try {
+          const data = JSON.parse(message.data);
+          if (!Array.isArray(data)) return;
+          const items = data.map((item) => {
+            const row = item as Record<string, unknown>;
+            return { ...row, KODE_BARANG: row.KODE_BARANG || row.kode, NAMA_BARANG: row.NAMA_BARANG || row.nama, KATEGORI: row.KATEGORI || row.kategori, SATUAN: row.SATUAN || row.satuan, HARGA: row.HARGA ?? row.harga, STOK: row.STOK ?? row.stok, STOK_GUDANG: row.STOK_GUDANG ?? row.stok_gudang, STOK_TOKO: row.STOK_TOKO ?? row.stok_toko, DESKRIPSI: row.DESKRIPSI || row.deskripsi, GAMBAR: row.GAMBAR || row.gambar };
+          });
+          for (const item of items) {
+            const row = item as Record<string, unknown>;
+            const kode = String(row.KODE_BARANG || '').toUpperCase();
+            if (kode) row.KODE_BARANG = kode;
+          }
+          const result: ApiResult = { status: 'ok', data: items };
+          memCache.set('getBarang::{}', { data: result, time: Date.now() });
+          setLSCache('getBarang', result);
+          catalogListeners.forEach((listener) => listener(items, false));
+        } catch { /* ignore malformed stream messages */ }
+      },
+      onclose() { throw new Error('Catalog stream closed'); },
+      onerror(error) {
+        if (run !== catalogStreamRun) throw error;
+        void katalog.refresh().then((r) => {
+          if (run === catalogStreamRun && r.status === 'ok' && Array.isArray(r.data)) catalogListeners.forEach((listener) => listener(r.data as Record<string, unknown>[], true));
+        }).catch(() => {});
+        return 5000;
+      },
+    }).catch(() => {
+      if (run !== catalogStreamRun || controller.signal.aborted) return;
+      catalogStreamController = null;
+      catalogStreamToken = null;
+      void katalog.refresh().then((r) => {
+        if (run !== catalogStreamRun || r.status !== 'ok' || !Array.isArray(r.data)) return;
+        catalogListeners.forEach((listener) => listener(r.data as Record<string, unknown>[], true));
+      }).catch(() => {}).finally(() => {
+        if (run === catalogStreamRun) setTimeout(start, 5000);
+      });
+    });
+  };
+  if (catalogStreamToken && catalogStreamToken !== token) stop();
+  start();
+  return () => {
+    catalogListeners.delete(onItems);
+    if (!catalogListeners.size) stop();
+  };
 }
 
 export function clearLSCache(action?: string): void {
@@ -554,7 +631,7 @@ export const katalog = {
   getAll(options: CallOptions = {}): Promise<ApiResult> {
     return callApi('getBarang', {}, {
       cache: options.cache !== false,
-      cacheTtl: 5 * 60 * 1000,
+      cacheTtl: 1000,
       timeout: 45000,
       maxRetries: options.maxRetries ?? 2,
     });

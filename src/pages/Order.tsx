@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
 import { toastError, toastSuccess } from '@/lib/toast';
 
-import { katalog as katalogApi, orders as ordersApi, cart as cartApi, scan as scanApi, callApi } from '@/lib/api';
+import { katalog as katalogApi, orders as ordersApi, cart as cartApi, scan as scanApi, callApi, subscribeCatalog } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import {
   APP,
@@ -2205,7 +2205,23 @@ export default function Order() {
   useEffect(() => {
     void loadData();
     void loadHistory();
-  }, [loadData, loadHistory]);
+    return subscribeCatalog((changes, snapshot) => {
+      if (snapshot) {
+        setKatalogList(changes as Barang[]);
+        return;
+      }
+      setKatalogList((current) => {
+        const byCode = new Map(current.map((item) => [String(item.KODE_BARANG).toUpperCase(), item]));
+        for (const change of changes as (Record<string, unknown> & { deleted?: boolean })[]) {
+          const kode = String(change.KODE_BARANG || change.kode || '').toUpperCase();
+          if (!kode) continue;
+          if (change.deleted) byCode.delete(kode);
+          else byCode.set(kode, { ...byCode.get(kode), ...change, KODE_BARANG: kode, NAMA_BARANG: String(change.NAMA_BARANG || change.nama || '') } as Barang);
+        }
+        return [...byCode.values()];
+      });
+    }, session?.refreshToken || session?.token);
+  }, [loadData, loadHistory, session?.refreshToken, session?.token]);
 
   useEffect(() => {
     void cartApi

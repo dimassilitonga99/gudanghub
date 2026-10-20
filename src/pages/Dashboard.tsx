@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { toastError, toastSuccess } from '@/lib/toast';
 
-import { katalog, orders, storeTakes } from '@/lib/api';
+import { katalog, orders, storeTakes, subscribeCatalog } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { APP, CABANG, CABANG_LIST, SETTINGS, type Barang, type Order, type DetailItem, type StoreTake } from '@/lib/config';
 import {
@@ -1344,7 +1344,23 @@ export default function Dashboard() {
 
   useEffect(() => {
     void loadFast();
-  }, [loadFast]);
+    return subscribeCatalog((changes, snapshot) => {
+      if (snapshot) {
+        setKatalogList(changes as Barang[]);
+        return;
+      }
+      setKatalogList((current) => {
+        const byCode = new Map(current.map((item) => [String(item.KODE_BARANG).toUpperCase(), item]));
+        for (const change of changes as (Barang & { kode?: string; deleted?: boolean })[]) {
+          const kode = String(change.KODE_BARANG || change.kode || '').toUpperCase();
+          if (!kode) continue;
+          if (change.deleted) byCode.delete(kode);
+          else byCode.set(kode, { ...byCode.get(kode), ...change, KODE_BARANG: kode } as Barang);
+        }
+        return [...byCode.values()];
+      });
+    }, session?.refreshToken || session?.token);
+  }, [loadFast, session?.refreshToken, session?.token]);
 
   // Muat data ambil barang saat tab dibuka (jarang berubah, tidak ikut auto-refresh).
   const loadTakes = useCallback(async (force = false) => {
