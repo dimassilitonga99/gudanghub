@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import { ROUTES } from '@/lib/config';
 import { FeedbackLogout } from '@/components/feedback-logout';
+import { AsciiArt } from '@/components/ui/vignette-bloom';
 
 interface NavItem {
   to: string;
@@ -87,10 +88,14 @@ export default function AppShell({ children }: { children: ReactNode }) {
           collapsed ? 'w-16' : 'w-60',
         )}
       >
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+          <AsciiArt className="absolute inset-0 h-full w-full object-cover" />
+          <div className="absolute inset-0 bg-slate-950/75" />
+        </div>
         <Link
           to="/"
           className={cn(
-            'flex items-center gap-2 border-b border-border py-4',
+            'relative z-10 flex items-center gap-2 border-b border-border py-4',
             collapsed ? 'justify-center px-2' : 'px-5',
           )}
           title="GudangHub"
@@ -109,7 +114,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
         {!collapsed && (
           <button
             onClick={toggleCollapsed}
-            className="mx-3 mt-2 flex items-center justify-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground"
+            className="relative z-10 mx-3 mt-2 flex items-center justify-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground"
             title="Kecilkan sidebar"
           >
             <Icon name="angle-left" size={12} />
@@ -119,14 +124,14 @@ export default function AppShell({ children }: { children: ReactNode }) {
         {collapsed && (
           <button
             onClick={toggleCollapsed}
-            className="mx-auto mt-2 flex items-center justify-center rounded-lg p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+            className="relative z-10 mx-auto mt-2 flex items-center justify-center rounded-lg p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
             title="Besarkan sidebar"
           >
             <Icon name="angle-right" size={14} />
           </button>
         )}
 
-        <nav className={cn('flex-1 space-y-1 overflow-y-auto p-3', collapsed && 'px-2')}>
+        <nav className={cn('relative z-10 flex-1 space-y-1 overflow-y-auto p-3', collapsed && 'px-2')}>
           {items.map((item) => (
             <NavLink
               key={item.to}
@@ -148,7 +153,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
           ))}
         </nav>
 
-        <div className="border-t border-border p-3">
+        <div className="relative z-10 border-t border-border p-3">
           <div
             className={cn(
               'mb-2 flex items-center gap-2 px-1',
