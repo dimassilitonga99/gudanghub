@@ -21,4 +21,15 @@ assert.match(styles, /prefers-reduced-motion: reduce/);
 assert.match(styles, /vignette-bloom__video/);
 assert.match(styles, /vignette-bloom__poster/);
 
+const order = fs.readFileSync('src/pages/Order.tsx', 'utf8');
+assert.match(order, /const displayKode = data\.kode \|\| '-';/);
+assert.match(order, /stokGudang: data\.stokGudang === '' \? 0 : data\.stokGudang/);
+assert.match(order, /stokToko: data\.stokToko === '' \? 0 : data\.stokToko/);
+assert.match(order, /items\.filter\(\(i\) => !i\.isManual && isEmpty\(i\.stokGudang\)\)/);
+assert.match(order, /items\.filter\(\(i\) => !i\.isManual && isEmpty\(i\.stokToko\)\)/);
+assert.match(order, /Nama Barang <span className="text-danger">\*<\/span>/);
+assert.match(order, /Jumlah <span className="text-danger">\*<\/span>/);
+assert.match(order, /Satuan <span className="text-danger">\*<\/span>/);
+assert.match(order, /Kode Barang \(opsional\)/);
+
 console.log('ASCII sidebar source checks passed');

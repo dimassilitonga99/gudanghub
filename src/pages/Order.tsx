@@ -443,12 +443,8 @@ function ManualForm({
       toastError('Nama barang wajib diisi.');
       return;
     }
-    if (stokGudang.trim() === '' || stokToko.trim() === '') {
-      toastError('Stok gudang dan stok toko wajib diisi.');
-      return;
-    }
-    const sg = Math.max(0, toInt(stokGudang));
-    const st = Math.max(0, toInt(stokToko));
+    const sg = stokGudang.trim() === '' ? 0 : Math.max(0, toInt(stokGudang));
+    const st = stokToko.trim() === '' ? 0 : Math.max(0, toInt(stokToko));
     if (isEditing && editingKey) {
       onUpdate(editingKey, { nama: n, kategori, qty: Math.max(1, toInt(qty) || 1), satuan, stokGudang: sg, stokToko: st });
     } else {
@@ -556,7 +552,7 @@ function ManualForm({
             <label className="mb-1 block text-xs font-medium">
               Nama Barang <span className="text-danger">*</span>
             </label>
-            <Input value={nama} onChange={(e) => setNama(e.target.value)} placeholder="Contoh: Wajan Anti Lengket 30cm" />
+            <Input required value={nama} onChange={(e) => setNama(e.target.value)} placeholder="Contoh: Wajan Anti Lengket 30cm" />
           </div>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -590,11 +586,14 @@ function ManualForm({
               <label className="mb-1 block text-xs font-medium">
                 Jumlah <span className="text-danger">*</span>
               </label>
-              <Input type="number" min={1} value={qty} onChange={(e) => setQty(Math.max(1, toInt(e.target.value) || 1))} />
+              <Input required type="number" min={1} value={qty} onChange={(e) => setQty(Math.max(1, toInt(e.target.value) || 1))} />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium">Satuan</label>
+              <label className="mb-1 block text-xs font-medium">
+                Satuan <span className="text-danger">*</span>
+              </label>
               <select
+                required
                 value={satuan}
                 onChange={(e) => setSatuan(e.target.value)}
                 className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
@@ -750,8 +749,8 @@ function CartSheet({
     if (items.length === 0) setCartNote('');
   }, [items.length]);
 
-  const gudangMissing = items.filter((i) => isEmpty(i.stokGudang)).length;
-  const tokoMissing = items.filter((i) => isEmpty(i.stokToko)).length;
+  const gudangMissing = items.filter((i) => !i.isManual && isEmpty(i.stokGudang)).length;
+  const tokoMissing = items.filter((i) => !i.isManual && isEmpty(i.stokToko)).length;
   const valid = items.length > 0 && gudangMissing === 0 && tokoMissing === 0;
 
   const total = items.reduce((s, i) => s + i.qty * i.harga, 0);
@@ -967,7 +966,7 @@ function CartSheet({
             <div className="flex items-start gap-2 rounded-lg border border-warning/30 bg-warning/10 p-2 text-xs text-warning">
               <Icon name="triangle-warning" size={14} className="mt-0.5 shrink-0" />
               <span>
-                Wajib isi stok gudang ({gudangMissing} kosong) dan stok toko ({tokoMissing} kosong).
+                Wajib isi stok gudang ({gudangMissing} kosong) dan stok toko ({tokoMissing} kosong) untuk barang katalog.
               </span>
             </div>
           )}
@@ -2404,8 +2403,8 @@ export default function Order() {
         satuan: data.satuan,
         harga: 0,
         stokSistem: '',
-        stokGudang: data.stokGudang,
-        stokToko: data.stokToko,
+        stokGudang: data.stokGudang === '' ? 0 : data.stokGudang,
+        stokToko: data.stokToko === '' ? 0 : data.stokToko,
         isManual: true,
         catatanItem: '',
       },
@@ -2447,8 +2446,8 @@ export default function Order() {
           qty: i.qty,
           satuan: i.satuan,
           harga: i.harga,
-          stokGudang: i.stokGudang === '' ? '' : Number(i.stokGudang),
-          stokToko: i.stokToko === '' ? '' : Number(i.stokToko),
+          stokGudang: i.isManual && i.stokGudang === '' ? 0 : i.stokGudang === '' ? '' : Number(i.stokGudang),
+          stokToko: i.isManual && i.stokToko === '' ? 0 : i.stokToko === '' ? '' : Number(i.stokToko),
           stokSistem: i.stokSistem === '' ? 0 : Number(i.stokSistem),
           isManual: Boolean(i.isManual),
           catatanItem: i.catatanItem || '',
