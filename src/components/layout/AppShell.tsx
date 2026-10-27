@@ -100,9 +100,11 @@ export default function AppShell({ children }: { children: ReactNode }) {
           )}
           title="GudangHub"
         >
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand text-white">
-            <Icon name="boxes" size={20} />
-          </span>
+          <img
+            src="/android-chrome-512x512.png"
+            alt="Logo GudangHub"
+            className="h-9 w-9 shrink-0 rounded-xl object-contain"
+          />
           {!collapsed && (
             <div className="leading-tight">
               <div className="font-display text-base font-bold text-foreground">GudangHub</div>

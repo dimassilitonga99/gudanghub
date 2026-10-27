@@ -14,6 +14,7 @@ assert.match(component, /playsInline/);
 assert.match(component, /Vignette Bloom — animated ASCII art/);
 assert.match(shell, /pointer-events-none/);
 assert.match(shell, /relative z-10/);
+assert.match(shell, /src="\/android-chrome-512x512\.png"[\s\S]*?alt="Logo GudangHub"/);
 assert.match(shell, /Dashboard/);
 assert.match(shell, /Keluar/);
 assert.match(styles, /prefers-reduced-motion: reduce/);
