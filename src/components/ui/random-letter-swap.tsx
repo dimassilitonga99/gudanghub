@@ -48,10 +48,10 @@ export function RandomLetterSwap({
       onBlur={() => setHovered(false)}
     >
       {label.split('').map((ch, i) => (
-        <span key={i} className="inline-block overflow-hidden" aria-hidden="true">
+        <span key={i} className="inline-block h-[1lh] overflow-hidden" aria-hidden="true">
           <motion.span
             className="flex flex-col leading-none"
-            animate={{ y: hovered ? '-100%' : '0%' }}
+            animate={{ y: hovered ? '-50%' : '0%' }}
             transition={{ ...transition, delay: order.indexOf(i) * staggerDuration }}
           >
             <span>{ch === ' ' ? '\u00A0' : ch}</span>

@@ -13,4 +13,9 @@ assert.match(src, /useReducedMotion|prefers-reduced-motion/, 'must respect reduc
 assert.match(src, /aria-label/, 'must expose accessible label');
 assert.match(src, /onHoverStart|whileHover|onMouseEnter/, 'must react to hover');
 assert.match(src, /motion/, 'must use motion for animation');
+// Mask per-huruf harus setinggi 1 baris + geser setengah (1 baris):
+// tanpa tinggi tetap kedua baris tampil ganda; y -100% dari inner 2-baris = hilang total.
+assert.match(src, /1lh/, 'letter mask must be 1 line high');
+assert.match(src, /'-50%'/, 'hover must shift exactly one line');
+assert.doesNotMatch(src, /'-100%'/, 'must not shift full inner height');
 console.log('random-letter-swap checks passed');
