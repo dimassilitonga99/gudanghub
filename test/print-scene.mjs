@@ -13,4 +13,10 @@ assert.match(src, /cabangText/, 'must accept cabangText prop');
 assert.match(src, /onDone/, 'must accept onDone callback');
 assert.match(src, /useReducedMotion|prefers-reduced-motion/, 'must respect reduced motion');
 assert.match(src, /role="dialog"|aria-label/, 'must expose accessible label');
+assert.match(src, /createPortal/, 'must portal overlay to document.body (outside dialog stacking)');
+assert.match(src, /document\.body/, 'must portal overlay to document.body (outside dialog stacking)');
+// Manual close: tombol X panggil onDone, tidak ada auto-onDone setelah animasi.
+assert.doesNotMatch(src, /onAnimationComplete/, 'must not auto-close after animation (manual close only)');
+assert.match(src, /aria-label="Tutup"|onClick=\{[^}]*onDone/, 'must have close button calling onDone');
+assert.match(src, /Escape/, 'must close on Escape key');
 console.log('print-scene checks passed');

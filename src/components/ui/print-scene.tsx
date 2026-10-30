@@ -30,6 +30,15 @@ export function PrintScene({ items, nomorOrder, tanggalText, cabangText, onDone 
     }
   }, [reduceMotion, onDone]);
 
+  // Escape tutup scene (fokus keyboard) — klik X juga tutup via onDone.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onDone();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [onDone]);
+
   if (reduceMotion) return null;
 
   const shown = items.slice(0, 20);
@@ -45,7 +54,17 @@ export function PrintScene({ items, nomorOrder, tanggalText, cabangText, onDone 
     >
       <div className="flex w-full max-w-xs flex-col items-center">
         {/* Printer */}
-        <div className="w-full rounded-t-xl border border-border bg-card p-3 shadow-2xl">
+        <div className="relative w-full rounded-t-xl border border-border bg-card p-3 shadow-2xl">
+          <button
+            type="button"
+            onClick={onDone}
+            aria-label="Tutup"
+            className="absolute right-2 top-2 rounded-lg p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
+          </button>
           <div className="mx-auto h-1.5 w-16 rounded-full bg-muted" />
           <div className="mt-2 text-center text-xs font-semibold text-muted-foreground">
             Mencetak Form Order No. {nomorOrder}…
@@ -56,10 +75,7 @@ export function PrintScene({ items, nomorOrder, tanggalText, cabangText, onDone 
           className={cn('w-[92%] origin-top overflow-hidden bg-white text-black shadow-xl')}
           initial={{ height: 0 }}
           animate={{ height: 'auto' }}
-          transition={{ duration: Math.min(0.25 + shown.length * 0.12, 2.2), ease: 'linear' }}
-          onAnimationComplete={() => {
-            setTimeout(onDone, 450);
-          }}
+          transition={{ duration: Math.min(0.5 + shown.length * 0.2, 5), ease: 'linear' }}
         >
           <div className="p-3 font-mono text-[10px] leading-snug">
             <div className="text-center font-bold">FORM ORDER BARANG</div>
