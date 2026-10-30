@@ -1,12 +1,13 @@
 import { Icon } from '../components/ui/icon';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { CABANG, CABANG_LIST, ROUTES } from '@/lib/config';
+import { CABANG, ROUTES } from '@/lib/config';
 import { useAuth } from '@/context/AuthContext';
 import { GradientShimmer } from '@/components/ui/gradient-shimmer';
 import { GlobeLive } from '@/components/ui/cobe-globe-live';
 import { ParticleTextEffect } from '@/components/ui/particle-text-effect';
+import { BranchReel } from '@/components/landing/branch-reel';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -640,99 +641,6 @@ function FooterSection() {
   );
 }
 
-function BentoCard({ index, isSelected, onClick }: { index: number; isSelected?: boolean; onClick?: () => void }) {
-  const cabang = CABANG_LIST[index];
-  const cardRef = useRef<HTMLAnchorElement>(null);
-
-  const onMouseMove = useCallback((e: React.MouseEvent) => {
-    if (isSelected) return;
-    const card = cardRef.current;
-    if (!card) return;
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const rotateX = ((y - rect.height / 2) / (rect.height / 2)) * -5;
-    const rotateY = ((x - rect.width / 2) / (rect.width / 2)) * 5;
-    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
-    card.style.setProperty('--mx', `${x}px`);
-    card.style.setProperty('--my', `${y}px`);
-  }, [isSelected]);
-
-  const onMouseLeave = useCallback(() => {
-    const card = cardRef.current;
-    if (card && !isSelected) card.style.transform = '';
-  }, [isSelected]);
-
-  return (
-    <Link
-      ref={cardRef}
-      to={`/login?branch=${cabang.id}`}
-      onMouseMove={onMouseMove}
-      onMouseLeave={onMouseLeave}
-      onClick={onClick}
-      className={cn('bento-card group', isSelected && 'selected')}
-      style={{ '--card-color': cabang.color || '#ff6b00' } as React.CSSProperties}
-    >
-      <div className="relative aspect-[16/10] overflow-hidden">
-        <img
-          src={`./images/cabang/${cabang.id.toLowerCase()}.jpg`}
-          alt={cabang.nama}
-          loading="lazy"
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-          onError={(e) => {
-            (e.currentTarget as HTMLImageElement).style.display = 'none';
-          }}
-        />
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-muted/40 text-muted-foreground">
-          <Icon name="shop" size={56} />
-          <span className="font-mono text-xs font-medium">{cabang.id}</span>
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10" />
-        <div className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-black/45 px-2 py-1 backdrop-blur">
-          <span className="bento-signal-dot" />
-          <span className="font-mono text-[10px] font-medium uppercase tracking-wider text-emerald-300">
-            Aktif
-          </span>
-        </div>
-      </div>
-
-      <div className="relative p-4">
-        <div className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-          <span
-            className="h-1.5 w-1.5 rounded-full"
-            style={{ backgroundColor: cabang.color }}
-          />
-          Cabang {cabang.id}
-        </div>
-           <h3 className="mt-2 truncate text-lg font-semibold tracking-tight text-foreground">
-             {cabang.nama}
-           </h3>
-           <div className="mt-4 flex items-center justify-between border-t border-border/60 pt-3">
-             <div className="flex min-w-0 items-center gap-2">
-               <span
-                 className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold text-white"
-                 style={{ backgroundColor: cabang.color }}
-               >
-                 {cabang.pic.charAt(0)}
-               </span>
-               <div className="min-w-0">
-                 <div className="font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground">
-                   PIC
-                 </div>
-                 <div className="truncate text-xs font-medium text-foreground/90">{cabang.pic}</div>
-               </div>
-             </div>
-             <span className="inline-flex items-center gap-1 font-mono text-[10px] font-medium uppercase tracking-wider text-primary opacity-0 transition-opacity group-hover:opacity-100">
-               Select Store
-               <Icon name="arrow-up-right" size={12} />
-             </span>
-           </div>
-      </div>
-
-      <div className="bento-glow" />
-    </Link>
-  );
-}
 
 function ParticlesCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -877,17 +785,8 @@ export default function Landing() {
   const [scrolled, setScrolled] = useState(false);
   const [progress, setProgress] = useState(0);
   const [heroY, setHeroY] = useState(0);
-  const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
   const glowRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const branchParam = urlParams.get('branch');
-    if (branchParam && CABANG_LIST.find(c => c.id === branchParam)) {
-      setSelectedBranch(branchParam);
-    }
-  }, []);
 
   const reduceMotion = useMemo(
     () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
@@ -1291,37 +1190,7 @@ export default function Landing() {
         </Reveal>
 
         <Reveal scale className="mt-10">
-          <div className="relative">
-            {/* SVG connection lines */}
-            <svg
-              className="pointer-events-none absolute inset-0 h-full w-full"
-              viewBox="0 0 1200 700"
-              preserveAspectRatio="none"
-              aria-hidden="true"
-            >
-              <defs>
-                <linearGradient id="bentoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#ff6b00" stopOpacity="0" />
-                  <stop offset="50%" stopColor="#ff8c38" stopOpacity="0.5" />
-                  <stop offset="100%" stopColor="#ff6b00" stopOpacity="0" />
-                </linearGradient>
-              </defs>
-              <path className="bento-line" d="M 250 180 Q 600 80 950 180" stroke="url(#bentoGrad)" strokeWidth="1.5" fill="none" />
-              <path className="bento-line" d="M 950 180 Q 1050 350 950 520" stroke="url(#bentoGrad)" strokeWidth="1.5" fill="none" />
-              <path className="bento-line" d="M 950 520 Q 600 620 250 520" stroke="url(#bentoGrad)" strokeWidth="1.5" fill="none" />
-              <path className="bento-line" d="M 250 520 Q 150 350 250 180" stroke="url(#bentoGrad)" strokeWidth="1.5" fill="none" />
-              <path className="bento-line" d="M 250 180 Q 600 350 950 520" stroke="url(#bentoGrad)" strokeWidth="1" fill="none" opacity="0.5" />
-              <path className="bento-line" d="M 950 180 Q 600 350 250 520" stroke="url(#bentoGrad)" strokeWidth="1" fill="none" opacity="0.5" />
-            </svg>
-
-            <div className="relative grid grid-cols-1 gap-4 sm:grid-cols-12">
-              {CABANG_LIST.map((cabang, i) => (
-                <div key={cabang.id} className={cn('sm:col-span-7', i === 1 || i === 2 ? 'sm:col-span-5' : '')} style={{ animationDelay: `${i * 0.15}s` }}>
-                  <BentoCard index={i} isSelected={selectedBranch === cabang.id} onClick={() => setSelectedBranch(cabang.id)} />
-                </div>
-              ))}
-            </div>
-          </div>
+          <BranchReel />
         </Reveal>
       </section>
 
