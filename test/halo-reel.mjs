@@ -15,4 +15,9 @@ assert.match(src, /centerLabel/, 'must support centerLabel prop');
 assert.match(src, /from ["']framer-motion["']/, 'must use framer-motion');
 assert.match(src, /useReducedMotion/, 'must respect reduced motion');
 assert.match(src, /role="region"/, 'must expose carousel region role');
+assert.match(src, /onFrontIndexChange/, 'must report front index to parent');
+// Highlight must match the settled front card: report on animation settle
+// (onComplete), not per-frame mid-spin, and scan all rendered slots.
+assert.match(src, /onComplete/, 'must report front index on animation settle, not mid-spin');
+assert.doesNotMatch(src, /rotation\.on\('change'/, 'must not report front index per animation frame');
 console.log('halo-reel checks passed');

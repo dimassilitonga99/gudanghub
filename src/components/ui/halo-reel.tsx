@@ -119,6 +119,8 @@ export function HaloReel({
   const rotation = useMotionValue(0);
   const draggingRef = React.useRef(false);
   const hoverRef = React.useRef(false);
+  // Latest settle reporter for animation onComplete callbacks below.
+  const reportFrontIndexRef = React.useRef<(() => void) | null>(null);
 
   const [size, setSize] = React.useState({ w: 0, h: 0 });
   React.useEffect(() => {
@@ -153,6 +155,34 @@ export function HaloReel({
   );
   const step = slots ? TAU / slots : 0;
 
+  // Which item is nearest the front (cos(slot*step + rotation) max, mapped
+  // via slot % count). Reported on settle points — initial mount and every
+  // animation completion — so the parent highlight matches the card at rest,
+  // never a card the ring is passing mid-spin.
+  const reportSettled = React.useCallback(() => {
+    if (!onFrontIndexChange) return;
+    const r = rotation.get();
+    let best = 0;
+    let bestCos = -Infinity;
+    for (let i = 0; i < slots; i++) {
+      const c = Math.cos(i * step + r);
+      if (c > bestCos) {
+        bestCos = c;
+        best = i;
+      }
+    }
+    onFrontIndexChange(((best % count) + count) % count);
+  }, [count, onFrontIndexChange, rotation, slots, step]);
+
+  React.useEffect(() => {
+    reportFrontIndexRef.current = reportSettled;
+  }, [reportSettled]);
+
+  React.useEffect(() => {
+    if (!onFrontIndexChange || reduceMotion) return;
+    reportSettled();
+  }, [onFrontIndexChange, reduceMotion, reportSettled]);
+
   // Cards shrink continuously to fit whatever box they are given, instead of
   // stepping at a breakpoint — a ring that jumps at 768px reads as broken on
   // every width either side of it.
@@ -186,7 +216,10 @@ export function HaloReel({
         controls = animate(rotation, rotation.get() - step, {
           duration: stepDuration / 1000,
           ease: [0.4, 0, 0.2, 1],
-          onComplete: tick,
+          onComplete: () => {
+            reportFrontIndexRef.current?.();
+            tick();
+          },
         });
       }, holdDuration);
     };
@@ -253,7 +286,11 @@ export function HaloReel({
       rotation.set(snapped);
       return;
     }
-    animate(rotation, snapped, { duration: 0.5, ease: [0.16, 1, 0.3, 1] });
+    animate(rotation, snapped, {
+      duration: 0.5,
+      ease: [0.16, 1, 0.3, 1],
+      onComplete: () => reportFrontIndexRef.current?.(),
+    });
   };
 
   const spinBy = (direction: number) => {
@@ -265,6 +302,7 @@ export function HaloReel({
     animate(rotation, target, {
       duration: stepDuration / 1000,
       ease: [0.4, 0, 0.2, 1],
+      onComplete: () => reportFrontIndexRef.current?.(),
     });
   };
 
@@ -276,30 +314,6 @@ export function HaloReel({
   };
 
   if (!count) return null;
-
-  // Report which item is nearest the front (cos(index*step + rotation) max),
-  // so a parent can highlight the matching label. Runs on animation frames.
-  React.useEffect(() => {
-    if (!onFrontIndexChange || reduceMotion) return;
-    let last = -1;
-    const unsub = rotation.on('change', (r) => {
-      let best = 0;
-      let bestCos = -Infinity;
-      for (let i = 0; i < count; i++) {
-        const c = Math.cos(i * step + r);
-        if (c > bestCos) {
-          bestCos = c;
-          best = i;
-        }
-      }
-      const itemIndex = best % count;
-      if (itemIndex !== last) {
-        last = itemIndex;
-        onFrontIndexChange(itemIndex);
-      }
-    });
-    return unsub;
-  }, [count, onFrontIndexChange, reduceMotion, rotation, step]);
 
   return (
     <div
