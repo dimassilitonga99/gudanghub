@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, useReducedMotion } from 'motion/react';
 import { cn } from '@/lib/utils';
 
@@ -34,7 +35,9 @@ export function PrintScene({ items, nomorOrder, tanggalText, cabangText, onDone 
   const shown = items.slice(0, 20);
   const extra = items.length - shown.length;
 
-  return (
+  // Portal ke document.body: overlay dirender di dalam <Dialog> tapi di luar
+  // <DialogContent>/<DialogPortal>, sehingga tanpa portal ia tertutup preview.
+  return createPortal(
     <div
       role="dialog"
       aria-label="Mencetak form order"
@@ -82,6 +85,7 @@ export function PrintScene({ items, nomorOrder, tanggalText, cabangText, onDone 
           </div>
         </motion.div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
