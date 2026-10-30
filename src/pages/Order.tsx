@@ -41,6 +41,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ParticlesBg } from '@/components/ui/particles-bg';
+import { PrintScene } from '@/components/ui/print-scene';
 import { RandomLetterSwap } from '@/components/ui/random-letter-swap';
 import PrintFormModal, { type PrintItem } from '@/components/print-form';
 import { StoreTakeTab } from '@/components/store-take';
@@ -1027,9 +1028,12 @@ function PreOrderDialog({
   const [sending, setSending] = useState(false);
   const [jpgBusy, setJpgBusy] = useState(false);
   const [jpgProgress, setJpgProgress] = useState('');
+  const [printScene, setPrintScene] = useState(false);
   const previewRef = useRef<HTMLDivElement | null>(null);
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
+  const printSceneRef = useRef(printScene);
+  printSceneRef.current = printScene;
 
   const pages = useMemo(() => {
     const chunks = chunkArray(items, PRINT_ITEMS_PER_PAGE);
@@ -1043,7 +1047,7 @@ function PreOrderDialog({
     setTanggalMode('today');
     setTanggalCustom('');
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onCloseRef.current();
+      if (e.key === 'Escape' && !printSceneRef.current) onCloseRef.current();
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
@@ -1073,6 +1077,12 @@ function PreOrderDialog({
 
   const downloadJpg = async () => {
     if (!previewRef.current) return;
+    setPrintScene(true);
+  };
+
+  const executeDownloadJpg = async () => {
+    if (!previewRef.current) return;
+    setPrintScene(false);
     setJpgBusy(true);
     try {
       const pageEls = Array.from(previewRef.current.querySelectorAll<HTMLElement>('.preorder-page'));
@@ -1111,14 +1121,14 @@ function PreOrderDialog({
   const tgl = formatTanggalCetak(tanggalOrder);
 
   return (
-    <Dialog open={open} onOpenChange={(v) => !v && !sending && onClose()}>
+    <Dialog open={open} onOpenChange={(v) => !v && !sending && !printScene && onClose()}>
       <DialogContent className="max-h-[90dvh] max-w-[950px] overflow-y-auto bg-muted/40 p-0">
         <DialogHeader className="sticky top-0 z-10 flex flex-row items-center justify-between gap-2 rounded-t-lg border-b border-border bg-background px-4 py-3">
           <DialogTitle className="flex items-center gap-2 text-base">
             <Icon name="file" size={16} className="text-brand" /> Preview Form Order
           </DialogTitle>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="bg-success text-white hover:bg-success/90" onClick={() => void downloadJpg()} disabled={jpgBusy}>
+            <Button variant="outline" size="sm" className="bg-success text-white hover:bg-success/90" onClick={() => void downloadJpg()} disabled={jpgBusy || printScene}>
               <Icon name="download" size={16} />
               {jpgProgress || (pages.length > 1 ? `Download ${pages.length} JPG` : 'Download JPG')}
             </Button>
@@ -1363,6 +1373,15 @@ function PreOrderDialog({
           </div>
         </div>
       </DialogContent>
+      {printScene && (
+        <PrintScene
+          items={items}
+          nomorOrder={nomorOrder}
+          tanggalText={tgl}
+          cabangText={`${branchId} · ${pic}`}
+          onDone={() => void executeDownloadJpg()}
+        />
+      )}
     </Dialog>
   );
 }
