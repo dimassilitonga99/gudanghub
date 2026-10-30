@@ -41,6 +41,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ParticlesBg } from '@/components/ui/particles-bg';
+import { RandomLetterSwap } from '@/components/ui/random-letter-swap';
 import PrintFormModal, { type PrintItem } from '@/components/print-form';
 import { StoreTakeTab } from '@/components/store-take';
 
@@ -2615,10 +2616,18 @@ export default function Order() {
           window.location.hash = v;
         }}>
           <TabsList className="w-full justify-start overflow-x-auto sm:w-auto" {...dragTabs}>
-            <TabsTrigger value="katalog">Katalog</TabsTrigger>
-            <TabsTrigger value="mass">Order Massal</TabsTrigger>
-            <TabsTrigger value="take">Ambil Barang</TabsTrigger>
-            <TabsTrigger value="history">Riwayat</TabsTrigger>
+            <TabsTrigger value="katalog">
+              <RandomLetterSwap label="Katalog" className="text-inherit" staggerDuration={0.025} transition={{ duration: 0.6, type: 'spring' }} />
+            </TabsTrigger>
+            <TabsTrigger value="mass">
+              <RandomLetterSwap label="Order Massal" className="text-inherit" staggerDuration={0.025} transition={{ duration: 0.6, type: 'spring' }} />
+            </TabsTrigger>
+            <TabsTrigger value="take">
+              <RandomLetterSwap label="Ambil Barang" className="text-inherit" staggerDuration={0.025} transition={{ duration: 0.6, type: 'spring' }} />
+            </TabsTrigger>
+            <TabsTrigger value="history">
+              <RandomLetterSwap label="Riwayat" className="text-inherit" staggerDuration={0.025} transition={{ duration: 0.6, type: 'spring' }} />
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="katalog" className="space-y-4">
