@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useReducedMotion } from 'framer-motion';
 import { HaloReel } from '@/components/ui/halo-reel';
@@ -14,15 +14,6 @@ const STEP_MS = 700;
 export function BranchReel() {
   const reduceMotion = useReducedMotion();
   const [frontIndex, setFrontIndex] = useState(0);
-
-  // Highlight label bergilir mengikuti ritme autoplay HaloReel.
-  useEffect(() => {
-    if (reduceMotion) return;
-    const t = window.setInterval(() => {
-      setFrontIndex((i) => (i + 1) % CABANG_LIST.length);
-    }, HOLD_MS + STEP_MS);
-    return () => window.clearInterval(t);
-  }, [reduceMotion]);
 
   if (reduceMotion) {
     return (
@@ -71,6 +62,7 @@ export function BranchReel() {
         centerXRatio={0.1}
         holdDuration={HOLD_MS}
         stepDuration={STEP_MS}
+        onFrontIndexChange={setFrontIndex}
         centerLabel={null}
         showCenterLabel={false}
       />

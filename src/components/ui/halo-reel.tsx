@@ -79,6 +79,8 @@ export interface HaloReelProps
   centerLabel?: React.ReactNode;
   /** @default true */
   showCenterLabel?: boolean;
+  /** Fires with the index of the card nearest the front (cos θ max). */
+  onFrontIndexChange?: (index: number) => void;
 }
 
 const TAU = Math.PI * 2;
@@ -104,6 +106,7 @@ export function HaloReel({
   dragSensitivity = 1,
   centerLabel,
   showCenterLabel = true,
+  onFrontIndexChange,
   className,
   style,
   ...props
@@ -273,6 +276,30 @@ export function HaloReel({
   };
 
   if (!count) return null;
+
+  // Report which item is nearest the front (cos(index*step + rotation) max),
+  // so a parent can highlight the matching label. Runs on animation frames.
+  React.useEffect(() => {
+    if (!onFrontIndexChange || reduceMotion) return;
+    let last = -1;
+    const unsub = rotation.on('change', (r) => {
+      let best = 0;
+      let bestCos = -Infinity;
+      for (let i = 0; i < count; i++) {
+        const c = Math.cos(i * step + r);
+        if (c > bestCos) {
+          bestCos = c;
+          best = i;
+        }
+      }
+      const itemIndex = best % count;
+      if (itemIndex !== last) {
+        last = itemIndex;
+        onFrontIndexChange(itemIndex);
+      }
+    });
+    return unsub;
+  }, [count, onFrontIndexChange, reduceMotion, rotation, step]);
 
   return (
     <div
