@@ -50,7 +50,7 @@ export function RandomLetterSwap({
       {label.split('').map((ch, i) => (
         <span key={i} className="inline-block h-[1lh] overflow-hidden" aria-hidden="true">
           <motion.span
-            className="flex flex-col leading-none"
+            className="flex flex-col"
             animate={{ y: hovered ? '-50%' : '0%' }}
             transition={{ ...transition, delay: order.indexOf(i) * staggerDuration }}
           >

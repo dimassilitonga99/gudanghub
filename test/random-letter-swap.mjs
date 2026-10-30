@@ -18,4 +18,7 @@ assert.match(src, /motion/, 'must use motion for animation');
 assert.match(src, /1lh/, 'letter mask must be 1 line high');
 assert.match(src, /'-50%'/, 'hover must shift exactly one line');
 assert.doesNotMatch(src, /'-100%'/, 'must not shift full inner height');
+// Baris inner harus setinggi line-height warisan (1lh), bukan leading-none:
+// leading-none bikin baris 1em < mask 1lh → sisa baris kedua bocor/nyempil.
+assert.doesNotMatch(src, /leading-none/, 'inner rows must not use leading-none');
 console.log('random-letter-swap checks passed');
