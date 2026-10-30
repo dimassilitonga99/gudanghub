@@ -44,22 +44,26 @@ export function PrintScene({ items, nomorOrder, tanggalText, cabangText, onDone 
   const shown = items.slice(0, 20);
   const extra = items.length - shown.length;
 
-  // Portal ke document.body: overlay dirender di dalam <Dialog> tapi di luar
-  // <DialogContent>/<DialogPortal>, sehingga tanpa portal ia tertutup preview.
+  // Portal ke document.body + dirender sebagai sibling <Dialog> (lihat Order.tsx):
+  // panel non-modal di kanan di atas area kosong, tidak menutupi preview dan
+  // klik di dalamnya bukan outside-dismiss Radix sehingga tombol X bisa diklik.
   return createPortal(
     <div
       role="dialog"
       aria-label="Mencetak form order"
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4"
+      className="pointer-events-none fixed inset-0 z-[60] hidden justify-end p-4 md:flex"
     >
-      <div className="flex w-full max-w-xs flex-col items-center">
+      <div className="pointer-events-auto flex w-full max-w-xs flex-col items-center self-start">
         {/* Printer */}
         <div className="relative w-full rounded-t-xl border border-border bg-card p-3 shadow-2xl">
           <button
             type="button"
-            onClick={onDone}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDone();
+            }}
             aria-label="Tutup"
-            className="absolute right-2 top-2 rounded-lg p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+            className="absolute right-2 top-2 cursor-pointer rounded-lg p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
               <path d="M18 6 6 18M6 6l12 12" />

@@ -19,4 +19,8 @@ assert.match(src, /document\.body/, 'must portal overlay to document.body (outsi
 assert.doesNotMatch(src, /onAnimationComplete/, 'must not auto-close after animation (manual close only)');
 assert.match(src, /aria-label="Tutup"|onClick=\{[^}]*onDone/, 'must have close button calling onDone');
 assert.match(src, /Escape/, 'must close on Escape key');
+// Side panel: di kanan di atas area kosong, bukan backdrop full menutupi form.
+assert.match(src, /justify-end/, 'must dock as side panel on the right');
+assert.doesNotMatch(src, /items-center justify-center/, 'must not center over the preview form');
+assert.match(src, /pointer-events-auto/, 'panel must receive pointer events');
 console.log('print-scene checks passed');

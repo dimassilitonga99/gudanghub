@@ -1121,6 +1121,7 @@ function PreOrderDialog({
   const tgl = formatTanggalCetak(tanggalOrder);
 
   return (
+    <>
     <Dialog open={open} onOpenChange={(v) => !v && !sending && !printScene && onClose()}>
       <DialogContent className="max-h-[90dvh] max-w-[950px] overflow-y-auto bg-muted/40 p-0">
         <DialogHeader className="sticky top-0 z-10 flex flex-row items-center justify-between gap-2 rounded-t-lg border-b border-border bg-background px-4 py-3">
@@ -1373,6 +1374,9 @@ function PreOrderDialog({
           </div>
         </div>
       </DialogContent>
+    </Dialog>
+      {/* Sibling Dialog (di luar Radix): klik di sini bukan outside-dismiss
+          sehingga tombol X panel bisa diklik. */}
       {printScene && (
         <PrintScene
           items={items}
@@ -1382,7 +1386,7 @@ function PreOrderDialog({
           onDone={() => void executeDownloadJpg()}
         />
       )}
-    </Dialog>
+    </>
   );
 }
 
