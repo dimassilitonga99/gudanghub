@@ -406,7 +406,10 @@ async function executeWithRetry(
 
   return {
     status: 'error',
-    message: lastError ? lastError.message : 'Gagal terhubung ke server.',
+    code: 'NETWORK_ERROR',
+    message: lastError
+      ? lastError.message
+      : 'Gagal terhubung ke server. Periksa koneksi internet Anda.',
   };
 }
 
