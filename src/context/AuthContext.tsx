@@ -18,7 +18,7 @@ import {
 } from '@/lib/session';
 import { auth } from '@/lib/api';
 import { setAuthRequiredHandler } from '@/lib/api';
-import { ROUTES, API_URL } from '@/lib/config';
+import { ROUTES } from '@/lib/config';
 
 interface AuthContextValue {
   session: SessionData | null;
@@ -97,53 +97,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
-    // Auto-refresh token sebelum expire (12 menit setelah login, karena token 15 menit)
-    const checkAndRefresh = async () => {
-      const s = getSession();
-      if (!s || !s.token || !s.refreshToken) return;
-
-      // Cek apakah token akan expire dalam 3 menit
-      const tokenExpiresAt = new Date(s.loginAt).getTime() + 15 * 60 * 1000; // 15 menit dari login
-      const timeUntilExpiry = tokenExpiresAt - Date.now();
-      
-      if (timeUntilExpiry < 3 * 60 * 1000 && timeUntilExpiry > 0) {
-        console.log('[Auth] Token expiring soon, refreshing...');
-        try {
-          const response = await fetch(API_URL + '/auth/refresh', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${s.refreshToken}`,
-            },
-          });
-
-          if (response.ok) {
-            const result = await response.json();
-            if (result.access_token) {
-              const updated = saveSession(
-                { username: s.username, nama: s.nama, role: s.role, idCabang: s.idCabang },
-                result.access_token,
-                s.refreshToken
-              );
-              if (updated) {
-                setSessionState(updated);
-                console.log('[Auth] Token auto-refreshed');
-              }
-            }
-          }
-        } catch (error) {
-          console.warn('[Auth] Auto-refresh failed:', (error as Error).message);
-        }
-      }
-    };
-
-    // Check every 2 minutes
-    const interval = setInterval(checkAndRefresh, 2 * 60 * 1000);
-    checkAndRefresh(); // Check immediately
+    // Catatan: refresh token TIDAK dilakukan di klien. Sesi yang disimpan adalah
+    // refresh-JWT dari Worker, dan Worker menukarnya jadi access token di server
+    // (ensureAccess). Dulu ada fetch ke API_URL + '/auth/refresh' di sini yang
+    // selalu gagal karena Worker tidak punya route itu (hanya ?action=), sehingga
+    // memicu request sia-sia tiap 2 menit.
 
     return () => {
       setAuthRequiredHandler(null);
-      clearInterval(interval);
     };
   }, []);
 
