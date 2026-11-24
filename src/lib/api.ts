@@ -1,6 +1,6 @@
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { API_URL, SETTINGS } from './config';
-import { getSession, setSession } from './session';
+import { getSession } from './session';
 
 export { API_URL };
 
@@ -48,49 +48,22 @@ async function refreshAccessToken(): Promise<boolean> {
     return refreshPromise;
   }
 
+  // PENTING: refresh token TIDAK dilakukan di klien.
+  //
+  // Worker hanya punya endpoint `?action=...`; tidak ada route `/auth/refresh`.
+  // Dulu fungsi ini menembak `API_URL + '/auth/refresh'` yang selalu 404,
+  // sehingga setiap 401 memicu satu request sia-sia (menambah latensi sebelum
+  // logout) dan menulis warning palsu di konsol.
+  //
+  // Desain sebenarnya: token yang disimpan klien adalah refresh-JWT (7 hari),
+  // dan Worker menukarnya menjadi access token di sisi server lewat
+  // `ensureAccess()`. Jadi tidak ada yang perlu di-refresh di sini.
+  // Bila Worker menjawab AUTH_REQUIRED, sesi memang sudah tidak sah.
   isRefreshing = true;
-  refreshPromise = (async () => {
-    try {
-      const s = getSession();
-      if (!s || !s.refreshToken) {
-        console.warn('[API] No refresh token available');
-        return false;
-      }
-
-      const response = await fetch(API_URL + '/auth/refresh', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${s.refreshToken}`,
-        },
-      });
-
-      if (!response.ok) {
-        console.warn('[API] Token refresh failed:', response.status);
-        return false;
-      }
-
-      const result = await response.json();
-      if (result.access_token) {
-        // Update session with new access token, keep refresh token
-        const updated = setSession(
-          { username: s.username, nama: s.nama, role: s.role, idCabang: s.idCabang },
-          result.access_token,
-          s.refreshToken
-        );
-        console.log('[API] Token refreshed successfully');
-        return !!updated;
-      }
-
-      return false;
-    } catch (error) {
-      console.warn('[API] Token refresh error:', (error as Error).message);
-      return false;
-    } finally {
-      isRefreshing = false;
-      refreshPromise = null;
-    }
-  })();
+  refreshPromise = Promise.resolve(false).finally(() => {
+    isRefreshing = false;
+    refreshPromise = null;
+  });
 
   return refreshPromise;
 }
